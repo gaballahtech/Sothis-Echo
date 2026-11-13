@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Button, ButtonGroup, Callout, Icon, Tag } from '@blueprintjs/core';
+import { Button, ButtonGroup, Callout } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -130,24 +130,21 @@ export default function Sonification() {
       <div className="section-inner">
         <SectionHead kicker={t('sound.kicker')} title={t('sound.title')} subtitle={t('sound.subtitle')} id="sound-title" />
 
-        <div className="row-between" style={{ marginBottom: 12 }}>
-          <div className="row">
-            <span className="micro">{t('sound.sitePicker')}</span>
-            <ButtonGroup>
-              {sites.map((item) => (
-                <Button
-                  key={item.id}
-                  small
-                  active={item.id === site.id}
-                  variant={item.id === site.id ? 'solid' : 'outlined'}
-                  text={localized(item.name, language)}
-                  onClick={() => setSiteId(item.id)}
-                  aria-pressed={item.id === site.id}
-                />
-              ))}
-            </ButtonGroup>
-          </div>
-          <Tag minimal intent="primary" icon="volume-up">{t('sound.credits')}</Tag>
+        <div className="row" style={{ marginBottom: 12 }}>
+          <span className="micro">{t('sound.sitePicker')}</span>
+          <ButtonGroup>
+            {sites.map((item) => (
+              <Button
+                key={item.id}
+                small
+                active={item.id === site.id}
+                variant={item.id === site.id ? 'solid' : 'outlined'}
+                text={localized(item.name, language)}
+                onClick={() => setSiteId(item.id)}
+                aria-pressed={item.id === site.id}
+              />
+            ))}
+          </ButtonGroup>
         </div>
 
         <div className="grid-2">
@@ -208,11 +205,6 @@ export default function Sonification() {
             {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : t('sound.hint')}
           </p>
         </Panel>
-
-        <div className="row" style={{ marginTop: 12 }}>
-          <Icon icon="volume-up" size={13} aria-hidden="true" />
-          <span className="micro">NO AUDIO FILES · WEB AUDIO API</span>
-        </div>
 
         <p className="bp6-text-muted" aria-live="polite" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
           {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : ''}

@@ -1,4 +1,4 @@
-import { Icon, Tag } from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { RadarMark } from './ui';
 
@@ -40,13 +40,6 @@ export default function Footer() {
     },
   ];
 
-  const badges = [
-    { icon: 'satellite', label: t('footer.badges.nisar') },
-    { icon: 'layers', label: t('footer.badges.modes') },
-    { icon: 'code', label: t('footer.badges.open') },
-    { icon: 'database', label: t('footer.badges.demo') },
-  ];
-
   return (
     <footer className="app-footer" role="contentinfo">
       <div className="footer-grid">
@@ -67,12 +60,7 @@ export default function Footer() {
               <span className="brand-sub">NISAR · NASA / ISRO</span>
             </span>
           </a>
-          <p className="body-copy-muted" style={{ maxWidth: 330, marginBottom: 10 }}>{t('footer.tagline')}</p>
-          <div className="row">
-            {badges.map((badge) => (
-              <Tag key={badge.label} minimal icon={badge.icon}>{badge.label}</Tag>
-            ))}
-          </div>
+          <p className="body-copy-muted" style={{ maxWidth: 330, margin: 0 }}>{t('footer.tagline')}</p>
         </div>
 
         {columns.map((column) => (
@@ -114,12 +102,7 @@ export default function Footer() {
         </div>
 
         <div className="micro" style={{ maxWidth: 660, textAlign: 'end' }}>
-          <p style={{ marginBottom: 3 }}>{t('footer.disclosure')}</p>
-          <p style={{ margin: 0 }}>
-            {t('footer.copyright', { year })} ·{' '}
-            <Icon icon="heart" size={11} style={{ color: 'var(--bp-intent-danger-rest)' }} aria-hidden="true" />{' '}
-            {t('footer.badges.open')}
-          </p>
+          <p style={{ margin: 0 }}>{t('footer.disclosure')} · {t('footer.copyright', { year })}</p>
         </div>
       </div>
     </footer>

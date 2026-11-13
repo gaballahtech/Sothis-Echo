@@ -1,4 +1,3 @@
-import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -38,7 +37,6 @@ export default function SeeThrough() {
           <Panel
             title={`${siteName} · ${state.date} · ${stateLabel}`}
             icon="layers"
-            status={<Tag minimal intent="warning">{t('seeThrough.simulated')}</Tag>}
             bodyClassName="card-pad"
           >
             <CompareSlider
@@ -62,19 +60,12 @@ export default function SeeThrough() {
               </div>
             </div>
 
-            <div className="row-between" style={{ marginTop: 10 }}>
-              <Tag minimal intent="primary" icon="satellite">L-BAND · 24 CM</Tag>
-              <span className="micro">DAY / NIGHT · ALL-WEATHER</span>
-            </div>
           </Panel>
 
           <div className="stack">
             <Panel title={t('seeThrough.calloutTitle')} icon="info-sign" bodyClassName="card-pad">
               <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.calloutBody')}</p>
-            </Panel>
-
-            <Panel title={t('seeThrough.legendTitle')} icon="list" bodyClassName="card-pad">
-              <div className="stack" style={{ gap: 8 }}>
+              <div className="stack" style={{ gap: 8, marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
                 {LEGEND.map((item) => (
                   <div key={item.key} className="row" style={{ flexWrap: 'nowrap' }}>
                     <span
@@ -91,17 +82,10 @@ export default function SeeThrough() {
                     <span className="small">{t(`seeThrough.${item.key}`)}</span>
                   </div>
                 ))}
-                <div className="callout-row" style={{ marginTop: 4 }}>
-                  <Icon icon="layers" size={14} style={{ color: 'var(--bp-intent-primary-rest)' }} aria-hidden="true" />
-                  <span className="micro">{t('seeThrough.legendNote')}</span>
-                </div>
               </div>
             </Panel>
 
-            <div className="callout-row">
-              <Icon icon="warning-sign" size={14} style={{ color: 'var(--bp-intent-warning-rest)', flex: '0 0 auto' }} aria-hidden="true" />
-              <p className="micro" style={{ margin: 0 }}>{t('seeThrough.note')}</p>
-            </div>
+            <p className="micro" style={{ margin: 0 }}>{t('seeThrough.note')}</p>
           </div>
         </div>
       </div>

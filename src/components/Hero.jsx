@@ -1,4 +1,4 @@
-import { Button, Icon, Tag } from '@blueprintjs/core';
+import { Button, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
 export default function Hero() {
@@ -34,9 +34,6 @@ export default function Hero() {
             <Tag minimal intent="primary" icon="satellite">
               {t('hero.badge')}
             </Tag>
-            <Tag minimal intent="warning">
-              {t('common.demo')}
-            </Tag>
           </div>
 
           <h1 id="home-title" className="hero-title">
@@ -49,7 +46,7 @@ export default function Hero() {
             <Button variant="outlined" icon="volume-up" text={t('hero.ctaListen')} onClick={() => go('sound')} />
           </div>
 
-          <div className="hero-inline-stats" aria-label={t('hero.panel.title')}>
+          <div className="hero-inline-stats" aria-label={t('hero.factsLabel')}>
             {facts.map((fact) => (
               <div className="hero-stat" key={fact.key}>
                 <span className="hero-stat-label">{t(`hero.panel.${fact.key}`)}</span>
@@ -57,18 +54,6 @@ export default function Hero() {
               </div>
             ))}
           </div>
-
-          <a
-            className="hero-scroll"
-            href="#mission"
-            onClick={(event) => {
-              event.preventDefault();
-              go('mission');
-            }}
-          >
-            <span>{t('hero.scroll')}</span>
-            <Icon icon="chevron-down" size={14} aria-hidden="true" />
-          </a>
         </div>
       </div>
 
