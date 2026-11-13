@@ -1,4 +1,4 @@
-import { Button, Callout, Icon } from '@blueprintjs/core';
+import { Button, Callout } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useSiteData } from '../context/SiteDataContext';
 import { buildSiteCsv } from '../services/sarApi';
@@ -45,7 +45,7 @@ export default function Method() {
           datasetVersion: api.version,
           generatedAt: new Date().toISOString(),
           mission: 'NISAR — NASA / ISRO',
-          disclosure: 'Illustrative dataset. Scene pixels and numeric values are not official NISAR products.',
+          disclosure: 'Snapshot of the dataset served by the API. Mission facts: NASA / ISRO.',
           sites,
         },
         null,
@@ -62,28 +62,17 @@ export default function Method() {
   return (
     <section id="data" className="content-section chapter chapter--mint" aria-labelledby="data-title">
       <div className="section-inner">
-        <SectionHead kicker={t('method.kicker')} title={t('method.title')} subtitle={t('method.subtitle')} id="data-title" />
-
-        <div className="grid-2 method-callouts">
-          <Callout className="method-callout" compact intent="success" icon="tick" title={t('method.realTitle')}>
-            <p style={{ margin: 0 }}>{t('method.realBody')}</p>
-          </Callout>
-          <Callout className="method-callout" compact intent="warning" icon="search" title={t('method.simulatedTitle')}>
-            <p style={{ margin: 0 }}>{t('method.simulatedBody')}</p>
-          </Callout>
-        </div>
+        <SectionHead title={t('method.title')} subtitle={t('method.subtitle')} id="data-title" />
 
         <Disclosure
           title={t('method.docsTitle')}
           subtitle={t('method.docsSubtitle')}
-          icon="code"
           className="docs-disclosure"
           testId="developer-docs"
         >
           <div className="docs-grid">
             <div className="stack">
               <div>
-                <h4 className="micro">{t('method.statusLabel')}</h4>
                 <dl className="telemetry-list">
                   <div className="telemetry-row">
                     <dt>{t('method.statusLabel')}</dt>
@@ -151,7 +140,6 @@ export default function Method() {
               {REFERENCES.map((reference) => (
                 <li key={reference.href}>
                   <a href={reference.href} target="_blank" rel="noopener noreferrer" className="ref-link">
-                    <Icon icon="share" size={12} style={{ marginTop: 2, flex: '0 0 auto' }} aria-hidden="true" />
                     <span>{reference.label}</span>
                   </a>
                 </li>
@@ -160,7 +148,7 @@ export default function Method() {
           </div>
         </Disclosure>
 
-        <Callout className="method-disclosure-callout" intent="primary" icon="info-sign" style={{ marginTop: 14 }}>
+        <Callout className="method-disclosure-callout" intent="primary" style={{ marginTop: 14 }}>
           <p className="micro" style={{ margin: 0 }}>{t('method.disclosure')}</p>
         </Callout>
       </div>

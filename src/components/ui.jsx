@@ -12,7 +12,6 @@ export function RadarMark({ size = 24, className = '' }) {
 export function Panel({
   title,
   status,
-  icon,
   tone = 'default',
   children,
   className = '',
@@ -23,10 +22,7 @@ export function Panel({
     <Card className={`app-panel ${className}`} elevation={1}>
       {title ? (
         <div className="panel-head">
-          <span className="panel-title">
-            {icon ? <Icon icon={icon} size={14} aria-hidden="true" /> : null}
-            {title}
-          </span>
+          <span className="panel-title">{title}</span>
           {status ? (
             typeof status === 'string' ? (
               <Tag minimal intent={statusIntent} className="panel-status">
@@ -47,7 +43,6 @@ export function Panel({
 export function Disclosure({
   title,
   subtitle,
-  icon = 'properties',
   children,
   className = '',
   testId,
@@ -59,7 +54,6 @@ export function Disclosure({
       collapsible
       collapseProps={{ defaultIsOpen: defaultOpen, transitionDuration: 800 }}
       elevation={1}
-      icon={icon}
       title={title}
       subtitle={subtitle}
       data-testid={testId}
@@ -78,7 +72,6 @@ export function SourceBadge({ source, error, className = '' }) {
       className={className}
       minimal
       intent={live ? 'success' : error ? 'warning' : 'none'}
-      icon={live ? 'tick' : error ? 'warning-sign' : 'database'}
       title={error || undefined}
     >
       {live ? 'LIVE' : 'LOCAL'}
@@ -100,24 +93,9 @@ export function Meter({ value = 0, intent = 'primary', className = '', label }) 
   );
 }
 
-export function SectionHead({ kicker, title, subtitle, id }) {
-  const [chapter, ...label] = kicker ? kicker.split('·') : [];
-  const hasChapter = /^\d{2}$/.test(chapter?.trim() ?? '');
-
+export function SectionHead({ title, subtitle, id }) {
   return (
     <header className="section-head">
-      {kicker ? (
-        <p className="kicker">
-          {hasChapter ? (
-            <>
-              <span className="kicker-number">{chapter.trim()}</span>
-              <span>{label.join('·').trim()}</span>
-            </>
-          ) : (
-            <span>{kicker}</span>
-          )}
-        </p>
-      ) : null}
       <h2 id={id} className="section-title">
         {title}
       </h2>

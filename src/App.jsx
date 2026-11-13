@@ -2,7 +2,6 @@ import { useEffect } from 'react';
 import { OverlaysProvider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
-import { ModeProvider } from './context/ModeContext';
 import { SiteDataProvider } from './context/SiteDataContext';
 import { TourProvider } from './context/TourContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -55,17 +54,15 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <ModeProvider>
-        <TourProvider>
-          <SiteDataProvider>
-            <OverlaysProvider>
-              <ErrorBoundary>
-                <AppContent />
-              </ErrorBoundary>
-            </OverlaysProvider>
-          </SiteDataProvider>
-        </TourProvider>
-      </ModeProvider>
+      <TourProvider>
+        <SiteDataProvider>
+          <OverlaysProvider>
+            <ErrorBoundary>
+              <AppContent />
+            </ErrorBoundary>
+          </OverlaysProvider>
+        </SiteDataProvider>
+      </TourProvider>
     </LanguageProvider>
   );
 }

@@ -48,9 +48,10 @@ export default function ObservationTable() {
   const isRtl = language === 'ar';
   const align = isRtl ? 'right' : 'left';
 
-  // Blueprint's Table follows the container direction, so the same column
-  // descriptors flow from the right in Arabic and from the left in English.
-  const displayColumns = COLUMNS;
+  // Blueprint's Table only lays rows out on an LTR grid; running it in RTL made
+  // rows collide. Keep the grid LTR and reverse the column order in Arabic so
+  // the study-area column still sits on the reading start side.
+  const displayColumns = isRtl ? [...COLUMNS].reverse() : COLUMNS;
   const columnWidths = displayColumns.map((column) => widths[column.key]);
 
   const handleWidth = (displayIndex, width) => {
@@ -170,9 +171,6 @@ export default function ObservationTable() {
       <div className="table-toolbar" dir={isRtl ? 'rtl' : 'ltr'}>
         <div className="row">
           <span className="micro">{t('sites.observations.title')}</span>
-          <Tag minimal intent="primary" icon="database">
-            {t('sites.illustrativeValues')}
-          </Tag>
         </div>
         <div className="table-legend">
           {['baseline', 'stable', 'recovery', 'change'].map((status) => (
@@ -189,20 +187,22 @@ export default function ObservationTable() {
         dir={isRtl ? 'rtl' : 'ltr'}
         data-direction={isRtl ? 'rtl' : 'ltr'}
       >
-        <Table
-          className={`observations-table${isRtl ? ' observations-table--rtl' : ''}`}
-          numRows={rows.length}
-          columnWidths={columnWidths}
-          onColumnWidthChanged={handleWidth}
-          enableColumnResizing
-          enableFocusedCell
-          enableRowHeader={false}
-          numFrozenColumns={isRtl ? 0 : 1}
-          selectionModes={SelectionModes.CELLS}
-          aria-label={t('sites.observations.title')}
-        >
-          {displayColumns.map(renderColumn)}
-        </Table>
+        <div className="table-ltr" dir="ltr">
+          <Table
+            className={`observations-table${isRtl ? ' observations-table--rtl' : ''}`}
+            numRows={rows.length}
+            columnWidths={columnWidths}
+            onColumnWidthChanged={handleWidth}
+            enableColumnResizing
+            enableFocusedCell
+            enableRowHeader={false}
+            numFrozenColumns={0}
+            selectionModes={SelectionModes.CELLS}
+            aria-label={t('sites.observations.title')}
+          >
+            {displayColumns.map(renderColumn)}
+          </Table>
+        </div>
       </div>
 
       <p className="table-footnote">{t('sites.observations.note')}</p>

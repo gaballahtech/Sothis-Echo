@@ -6,29 +6,19 @@ import {
   Drawer,
   Icon,
   Navbar as BpNavbar,
-  NavbarDivider,
   NavbarGroup,
   NavbarHeading,
   Position,
-  Tag,
-  Tooltip,
 } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
-import { useMode } from '../context/ModeContext';
-import { useSiteData } from '../context/SiteDataContext';
-import { useTour } from '../context/TourContext';
 import { useActiveSection } from '../utils/useActiveSection';
 import { NAV_ITEMS } from '../data/navigation';
 import { NavigationMenu } from './NavigationMenu';
-import { SourceBadge } from './ui';
 
 export default function Navbar() {
   const { t } = useTranslation();
   const { language, setLanguage } = useLanguage();
-  const { mode, toggleMode, isResearcher } = useMode();
-  const { source, error } = useSiteData();
-  const { startTour } = useTour();
   const [menuOpen, setMenuOpen] = useState(false);
   const active = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
@@ -59,36 +49,9 @@ export default function Navbar() {
               <span className="brand-sub">NISAR · NASA / ISRO</span>
             </NavbarHeading>
           </a>
-          <NavbarDivider />
-          <Tag minimal icon="satellite" className="desktop-only">
-            NISAR · NASA / ISRO
-          </Tag>
-          <SourceBadge source={source} error={error} className="desktop-only" />
         </NavbarGroup>
 
         <NavbarGroup align={Alignment.END} className="navbar-end">
-          <Button
-            className="desktop-only"
-            variant="minimal"
-            icon="search"
-            text={t('navbar.data')}
-            onClick={() => document.getElementById('data')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-          />
-          <Tooltip
-            content={isResearcher ? t('navbar.switchToPublic') : t('navbar.switchToResearcher')}
-            placement="bottom"
-          >
-            <Button
-              variant="outlined"
-              icon={isResearcher ? 'eye-open' : 'eye-off'}
-              text={isResearcher ? t('navbar.researcher') : t('navbar.public')}
-              onClick={toggleMode}
-              aria-pressed={isResearcher}
-              data-testid="mode-toggle"
-              aria-label={isResearcher ? t('navbar.switchToPublic') : t('navbar.switchToResearcher')}
-              title={isResearcher ? t('navbar.switchToPublic') : t('navbar.switchToResearcher')}
-            />
-          </Tooltip>
           <ButtonGroup className="language-group">
             <Button
               small
@@ -109,14 +72,6 @@ export default function Navbar() {
               text="AR"
             />
           </ButtonGroup>
-          <Button
-            className="desktop-only"
-            variant="minimal"
-            icon="help"
-            aria-label={t('tour.help')}
-            title={t('tour.help')}
-            onClick={startTour}
-          />
         </NavbarGroup>
       </BpNavbar>
 
@@ -124,7 +79,6 @@ export default function Navbar() {
         isOpen={menuOpen}
         onClose={() => setMenuOpen(false)}
         title={t('navbar.brand')}
-        icon="menu"
         position={language === 'ar' ? Position.RIGHT : Position.LEFT}
         size={300}
         className="app-drawer"

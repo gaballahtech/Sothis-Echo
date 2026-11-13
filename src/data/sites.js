@@ -93,7 +93,6 @@ export const studyAreas = [
       crossPol: { before: -6.9, after: -14.8 },
       dateBefore: '2024-05-10',
       dateAfter: '2024-05-30',
-      source: 'illustrative',
     },
     series: [
       { date: '2024-04-06', vv: -13.1, vh: -20.0, water: 0.31, change: 0.08 },
@@ -164,10 +163,6 @@ export const studyAreas = [
         },
       ],
       methods: [
-        {
-          en: 'Scenes are procedurally rendered illustrations, not satellite rasters. Values are anchored to published Sentinel-1 flood behaviour in mangroves.',
-          ar: 'المشاهد رسوم توضيحية مولّدة إجرائيًا وليست صورًا فضائية حقيقية. القيم مستندة إلى سلوك الفيضان المنشور لـSentinel-1 في بيئات المانغروف.',
-        },
         {
           en: 'Recovery is a normalized radar-structure index relative to the pre-surge baseline, with a logistic fit for the projection.',
           ar: 'التعافي مؤشر بنيوي راداري مُعيَّر نسبةً إلى خط الأساس قبل العاصفة، مع ملاءمة لوجستية للإسقاط.',
@@ -261,7 +256,6 @@ export const studyAreas = [
       crossPol: { before: -6.5, after: -8.2 },
       dateBefore: '2021-07-18',
       dateAfter: '2021-09-12',
-      source: 'illustrative',
     },
     series: [
       { date: '2021-06-20', vv: -8.8, vh: -15.2, burn: 0.02, change: 0.09 },
@@ -340,10 +334,6 @@ export const studyAreas = [
         },
       ],
       methods: [
-        {
-          en: 'Scenes are procedurally rendered illustrations. Backscatter values are literature-informed, not official NISAR products.',
-          ar: 'المشاهد رسوم توضيحية مولّدة إجرائيًا. قيم الارتداد مستندة إلى الأدبيات وليست منتجات نيسار رسمية.',
-        },
         {
           en: 'Recovery points are normalized to the pre-fire VH baseline; the dashed segment is a logistic projection (K = 91%, r = 0.045/month).',
           ar: 'نقاط التعافي مُعيَّرة إلى خط أساس VH قبل الحريق؛ والجزء المتقطع إسقاط لوجستي (K = 91%، r = 0.045/شهر).',

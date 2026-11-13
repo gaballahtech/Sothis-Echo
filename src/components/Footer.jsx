@@ -10,17 +10,6 @@ export default function Footer() {
 
   const columns = [
     {
-      title: t('footer.columns.product'),
-      links: [
-        { label: t('footer.productLinks.mission'), href: '#mission' },
-        { label: t('footer.productLinks.sites'), href: '#sites' },
-        { label: t('footer.productLinks.sound'), href: '#sound' },
-        { label: t('footer.productLinks.recovery'), href: '#recovery' },
-        { label: t('footer.productLinks.game'), href: '#game' },
-        { label: t('footer.productLinks.data'), href: '#data' },
-      ],
-    },
-    {
       title: t('footer.columns.resources'),
       links: [
         { label: t('footer.resourceLinks.nisar'), href: 'https://nisar.jpl.nasa.gov/', external: true },
@@ -57,7 +46,6 @@ export default function Footer() {
             <RadarMark size={22} />
             <span className="brand-copy">
               <span className="brand-name">{t('footer.brand')}</span>
-              <span className="brand-sub">NISAR · NASA / ISRO</span>
             </span>
           </a>
           <p className="body-copy-muted" style={{ maxWidth: 330, margin: 0 }}>{t('footer.tagline')}</p>

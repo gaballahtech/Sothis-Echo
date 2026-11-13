@@ -3,8 +3,7 @@ import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { paintScene } from '../services/sceneRenderer';
 
-export function SceneCanvas({ site, params, channel = 'radar', alt, className = '', showSim = true }) {
-  const { t } = useTranslation();
+export function SceneCanvas({ site, params, channel = 'radar', alt, className = '' }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
 
@@ -32,16 +31,11 @@ export function SceneCanvas({ site, params, channel = 'radar', alt, className = 
   return (
     <div className={`scene-wrap ${className}`}>
       <canvas ref={ref} role="img" aria-label={alt} />
-      {showSim ? (
-        <Tag minimal intent="warning" className="scene-chip" icon="warning-sign">
-          {t('common.simulated')}
-        </Tag>
-      ) : null}
     </div>
   );
 }
 
-export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel, radarLabel, simulatedLabel }) {
+export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel, radarLabel }) {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
@@ -138,9 +132,6 @@ export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel
           <Tag minimal intent="primary">{radarLabel}</Tag>
         </div>
 
-        <span className="compare-note">
-          <Tag minimal>{simulatedLabel || t('common.simulated')}</Tag>
-        </span>
       </div>
 
       <div className="compare-help">
