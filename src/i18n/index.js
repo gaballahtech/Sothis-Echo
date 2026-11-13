@@ -27,31 +27,18 @@ const en = {
     badge: 'NISAR · NASA / ISRO · FREE & OPEN DATA',
     title: 'Earth is always dancing.',
     subtitle:
-      'Floods, fires, sinking ground. Radar sees the moves a camera misses. Meet NISAR — a radar eye on Earth — and learn to read its signals in two very different places.',
+      'Radar sees through cloud, smoke and darkness. Meet NISAR and learn to read what it finds.',
     ctaSee: 'See what the camera misses',
     ctaListen: 'Hear the surface',
     panel: {
-      title: 'NISAR RECEIVER',
       orbit: 'Orbit',
       orbitValue: '747 km · sun-synchronous',
       repeat: 'Repeat cycle',
       repeatValue: '12 days · ~6 day revisit',
-      bands: 'Bands',
-      bandsValue: 'L 24 cm + S 9.4 cm',
-      swath: 'Swath',
-      swathValue: '> 240 km',
       resolution: 'Resolution',
       resolutionValue: '3–10 m',
-      access: 'Data access',
-      accessValue: 'FREE & OPEN',
-      status: 'Feed',
-      statusLocal: 'LOCAL DEMO SET',
-      statusApi: 'BACKEND LIVE',
-      signal: 'Surface signal · passes',
-      labelling: 'Scene labelling',
-      foot: 'SIMULATED SCENES · READY FOR NISAR PRODUCTS',
     },
-    scroll: 'SCROLL TO DECODE',
+    factsLabel: 'Mission facts',
     credit: 'Earth from orbit · background footage',
   },
   mission: {
@@ -61,27 +48,27 @@ const en = {
     detailsTitle: 'Mission Details',
     detailsSubtitle: 'Launch, orbit, products and the mission timeline',
     lead:
-      'NISAR — the NASA–ISRO Synthetic Aperture Radar — launched on 30 July 2025 from Sriharikota, India. Every 12 days it maps nearly all of Earth’s land and ice, day or night, through clouds and smoke. The data is free and open.',
+      'NISAR — the NASA–ISRO radar satellite — launched on 30 July 2025. Every 12 days it maps nearly all of Earth’s land and ice, day or night, and the data is free.',
     cards: {
       radar: {
         title: 'Radar, not a camera',
         body:
-          'A camera records sunlight bouncing off colour. Radar sends its own microwave pulse and times the echo. It records shape, roughness and moisture — not colour. That is why it can work at midnight, under cloud.',
+          'A camera records sunlight. Radar sends its own pulse and times the echo, so it records shape and roughness — not colour — and works at night through cloud.',
       },
       bands: {
         title: 'Two bands, two jobs',
         body:
-          'NASA’s L-band (24 cm) reaches through leaves to trunks and soil. ISRO’s S-band (9.4 cm) catches finer canopy and surface detail. Together they separate what one sensor would blur.',
+          'NASA’s L-band (24 cm) reaches trunks and soil. ISRO’s S-band (9.4 cm) sees finer canopy detail. Together they separate what one sensor would blur.',
       },
       heartbeat: {
         title: 'A 12-day heartbeat',
         body:
-          'The orbit repeats almost exactly, so the same patch is imaged from the same angle every 12 days — about every 6 days when ascending and descending passes are combined. Differences between passes are the signal.',
+          'The orbit repeats almost exactly, so the same patch is imaged from the same angle every 12 days. The difference between passes is the signal.',
       },
       open: {
         title: 'Free and open',
         body:
-          'L-band products are distributed through NASA’s Alaska Satellite Facility; S-band products through ISRO’s Bhoonidhi. Anyone can download, analyse and build on them.',
+          'L-band data is distributed by NASA’s Alaska Satellite Facility, S-band data by ISRO’s Bhoonidhi. Anyone can download and use them.',
       },
     },
     facts: {
@@ -132,21 +119,20 @@ const en = {
     radarCaption: 'The same scene in radar. Smooth water is dark; trunks standing in water return a bright double bounce.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
-      'Radar brightness is not colour. It is the amount of energy that comes back. Smooth water sends the pulse away and looks black. Rough canopy scatters it back and looks textured. A vertical trunk standing in water acts like a corner reflector and can glow.',
+      'Brightness is returned energy, not colour. Open water scatters the pulse away and looks black; rough canopy looks textured; a trunk standing in water can act like a corner reflector and glow.',
     legendTitle: 'Read the grayscale',
     legendWater: 'Open water — dark',
     legendCanopy: 'Canopy — textured mid-tone',
     legendTrunk: 'Flooded trunks — bright',
-    legendNote: 'Illustrative values, real physics.',
     note:
-      'Both panels are procedurally simulated from the same geometry, using published radar behaviour. They are not official NISAR images. The backend slot for real GeoTIFFs is documented in “The data”.',
+      'Both panels are simulated from the same geometry using published radar behaviour — not official NISAR imagery.',
     simulated: 'SIMULATED ILLUSTRATION',
   },
   sites: {
     kicker: '03 · TWO PLACES',
     title: 'One change, two rhythms',
     subtitle:
-      'Terrain, vegetation and moisture rewrite the same event. Pick a site, read the before/after pair, then open the explanation beside each image.',
+      'The same event looks different in a mangrove and a conifer forest. Pick a site, compare before and after, then read why.',
     before: 'BEFORE',
     after: 'AFTER',
     coordinates: 'Coordinates',
@@ -160,7 +146,7 @@ const en = {
     measurements: 'Signal measurements',
     observations: {
       title: 'Radar observation ledger',
-      subtitle: 'Every pass in the bundled series, flattened into one auditable view. Column widths are resizable.',
+      subtitle: 'Every pass in the bundled series, in one auditable table.',
       columnSite: 'Study area',
       columnDate: 'Pass date',
       columnVv: 'VV (dB)',
@@ -212,7 +198,7 @@ const en = {
     kicker: '04 · SONIFICATION',
     title: 'Hear the surface dance',
     subtitle:
-      'Every satellite pass becomes one pulse. A quiet surface keeps a steady beat. A flood or a fire changes the pitch, the rhythm and the texture. Listen to the difference.',
+      'Each satellite pass becomes one pulse. A quiet surface keeps a steady beat; a flood or fire changes pitch and rhythm. Listen for the difference.',
     stableTitle: 'A stable surface',
     stableSub: 'A reference series with almost no change. Same low pitch, slow steady pulse.',
     changeTitle: 'A changing surface',
@@ -234,13 +220,12 @@ const en = {
     sitePicker: 'Choose a site',
     visualTitle: 'The same series, as bars',
     eventMarker: 'Change event',
-    credits: 'Scale: minor pentatonic · root D3 · 12-day repeat.',
   },
   recovery: {
     kicker: '05 · RECOVERY CLOCK',
     title: 'When does it come back?',
     subtitle:
-      'Estimate how long the radar signal takes to return to a chosen share of its pre-event baseline. Move the target and watch the clock move.',
+      'How long does the radar signal take to return to its pre-event level? Move the target and watch the estimate change.',
     target: 'Target recovery',
     targetHint: 'Share of the pre-event radar signal',
     estimateLabel: 'Estimated time to target',
@@ -297,16 +282,13 @@ const en = {
     kicker: '07 · TRANSPARENCY',
     title: 'Data we can defend',
     subtitle:
-      'A radar story is only useful if you know what is measured and what is assumed. This is the line between them.',
+      'Know what is measured and what is assumed.',
     realTitle: 'What is real here',
     realBody:
-      'Mission facts, event records and published scattering physics are real. Both study areas are real places with documented events.',
+      'Mission facts, event records and scattering physics are real. Both study areas are real places with documented events.',
     simulatedTitle: 'What is simulated',
     simulatedBody:
       'Scene pixels, backscatter, sound and recovery curves are illustrative — labelled, not official NISAR products.',
-    backendTitle: 'What the backend adds',
-    backendBody:
-      'The interface can speak to a documented API and fall back to local data. Connect calibrated NISAR products to make it live.',
     docsTitle: 'Developer & Data Documentation',
     docsSubtitle: 'API contract, limits, sources and downloads',
     statusLabel: 'Data source',
@@ -468,31 +450,18 @@ const ar = {
     badge: 'نيسار · ناسا / إيسرو · بيانات مجانية ومفتوحة',
     title: 'الأرض ترقص دائمًا.',
     subtitle:
-      'فيضانات وحرائق وأرض تهبط ببطء. الرادار يرى حركات تعجز عنها الكاميرا. تعرّف على نيسار — عين رادارية على الأرض — وتعلّم قراءة إشاراته في مكانين مختلفين تمامًا.',
+      'الرادار يرى عبر الغيوم والدخان والظلام. تعرّف على نيسار وتعلّم قراءة ما يجده.',
     ctaSee: 'شاهد ما تفوته الكاميرا',
     ctaListen: 'اسمع سطح الأرض',
     panel: {
-      title: 'مستقبل نيسار',
       orbit: 'المدار',
       orbitValue: '747 كم · متزامن مع الشمس',
       repeat: 'دورة التكرار',
       repeatValue: '12 يومًا · زيارة كل 6 أيام تقريبًا',
-      bands: 'النطاقات',
-      bandsValue: 'L 24 سم + S 9.4 سم',
-      swath: 'عرض التصوير',
-      swathValue: 'أكثر من 240 كم',
       resolution: 'الدقة',
       resolutionValue: '3–10 م',
-      access: 'الوصول للبيانات',
-      accessValue: 'مجاني ومفتوح',
-      status: 'التغذية',
-      statusLocal: 'مجموعة تجريبية محلية',
-      statusApi: 'خلفية متصلة',
-      signal: 'إشارة السطح · المرورات',
-      labelling: 'وسم المشاهد',
-      foot: 'مشاهد محاكاة · جاهزة لمنتجات نيسار',
     },
-    scroll: 'مرّر للفك',
+    factsLabel: 'أرقام المهمة',
     credit: 'الأرض من المدار · لقطات خلفية',
   },
   mission: {
@@ -502,27 +471,27 @@ const ar = {
     detailsTitle: 'تفاصيل المهمة',
     detailsSubtitle: 'الإطلاق والمدار والمنتجات والجدول الزمني',
     lead:
-      'نيسار — رادار الفتحة التركيبية المشترك بين ناسا وإيسرو — انطلق في 30 يوليو 2025 من سريهاريكوتا في الهند. كل 12 يومًا يرسم خرائط لمعظم يابسة الأرض وجليدها، ليلًا ونهارًا، عبر الغيوم والدخان. وبياناته مجانية ومفتوحة.',
+      'نيسار — قمر الرادار المشترك بين ناسا وإيسرو — انطلق في 30 يوليو 2025. كل 12 يومًا يرسم خرائط لمعظم يابسة الأرض وجليدها، ليلًا ونهارًا، وبياناته مجانية.',
     cards: {
       radar: {
         title: 'رادار، لا كاميرا',
         body:
-          'الكاميرا تسجّل ضوء الشمس المنعكس عن الألوان. أما الرادار فيرسل نبضته الميكروية ويرصد صدىها. يسجّل الشكل والخشونة والرطوبة، لا اللون. لذلك يعمل في منتصف الليل وتحت الغيوم.',
+          'الكاميرا تسجّل ضوء الشمس، والرادار يرسل نبضته ويقيس الصدى، فيسجّل الشكل والخشونة لا اللون، ويعمل ليلًا وعبر الغيوم.',
       },
       bands: {
         title: 'نطاقان، مهمتان',
         body:
-          'نطاق L (24 سم) من ناسا ينفذ بين الأوراق إلى الجذوع والتربة. ونطاق S (9.4 سم) من إيسرو يلتقط تفاصيل أدق للمظلة والسطح. معًا يفصلان ما كان سيختلط في مستشعر واحد.',
+          'نطاق L من ناسا (24 سم) يصل إلى الجذوع والتربة، ونطاق S من إيسرو (9.4 سم) يرى تفاصيل أدق في المظلة. معًا يفصلان ما يختلط في مستشعر واحد.',
       },
       heartbeat: {
         title: 'نبض كل 12 يومًا',
         body:
-          'يتكرر المدار بدقة شبه تامة، فتُصوَّر البقعة نفسها من الزاوية نفسها كل 12 يومًا — وكل 6 أيام تقريبًا عند جمع المسارين الصاعد والهابط. الفرق بين المرورين هو الإشارة.',
+          'يتكرر المدار بدقة شبه تامة، فتُصوَّر البقعة نفسها من الزاوية نفسها كل 12 يومًا. الفرق بين المرورات هو الإشارة.',
       },
       open: {
         title: 'مجاني ومفتوح',
         body:
-          'تُوزَّع منتجات نطاق L عبر مرفق ألاسكا للأقمار الصناعية التابع لناسا، ومنتجات نطاق S عبر بوابة «بهونيدهي» التابعة لإيسرو. يمكن لأي شخص تنزيلها وتحليلها والبناء عليها.',
+          'تُوزَّع بيانات نطاق L عبر مرفق ألاسكا التابع لناسا، ونطاق S عبر «بهونيدهي» التابعة لإيسرو. يمكن لأي شخص تنزيلها واستخدامها.',
       },
     },
     facts: {
@@ -572,21 +541,20 @@ const ar = {
     radarCaption: 'المشهد نفسه بالرادار. الماء الأملس داكن، والجذوع الواقفة في الماء تعيد ارتدادًا مزدوجًا لامعًا.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:
-      'سطوع الرادار ليس لونًا، بل كمية الطاقة العائدة. الماء الأملس يصرف النبضة بعيدًا فيبدو أسود. المظلة الخشنة تشتتها فتبدو ذات نسيج. الجذع العمودي الواقف في الماء يعمل كعاكس زاوي وقد يلمع.',
+      'السطوع طاقة عائدة لا لون. الماء المكشوف يصرف النبضة فيبدو أسود، والمظلة الخشنة تبدو ذات نسيج، والجذع الواقف في الماء قد يعمل كعاكس زاوي فيلمع.',
     legendTitle: 'اقرأ التدرج الرمادي',
     legendWater: 'ماء مكشوف — داكن',
     legendCanopy: 'مظلة — نسيج متوسط',
     legendTrunk: 'جذوع مغمورة — لامعة',
-    legendNote: 'قيم توضيحية، وفيزياء حقيقية.',
     note:
-      'اللوحتان محاكاة إجرائية للهندسة نفسها اعتمادًا على سلوك راداري منشور. ليستا صور نيسار رسمية. وموضع الخلفية لصور GeoTIFF الحقيقية موثّق في «البيانات».',
+      'اللوحتان محاكاة للهندسة نفسها بسلوك راداري منشور، وليستا صور نيسار رسمية.',
     simulated: 'رسم توضيحي محاكى',
   },
   sites: {
     kicker: '03 · مكانان',
     title: 'تغيّر واحد، إيقاعان',
     subtitle:
-      'التضاريس والنبات والرطوبة تعيد كتابة الحدث نفسه. اختر موقعًا، واقرأ زوج قبل/بعد، ثم افتح الشرح بجانب كل صورة.',
+      'الحدث نفسه يبدو مختلفًا في المانغروف وغابة الصنوبر. اختر موقعًا، قارن قبل وبعد، ثم اقرأ السبب.',
     before: 'قبل',
     after: 'بعد',
     coordinates: 'الإحداثيات',
@@ -600,7 +568,7 @@ const ar = {
     measurements: 'قياسات الإشارة',
     observations: {
       title: 'سجل ملاحظات الرادار',
-      subtitle: 'كل مرور في السلسلة المرفقة، في عرض واحد قابل للتدقيق. يمكن تغيير عرض الأعمدة.',
+      subtitle: 'كل مرور في السلسلة المرفقة في جدول واحد قابل للتدقيق.',
       columnSite: 'منطقة الدراسة',
       columnDate: 'تاريخ المرور',
       columnVv: 'VV (ديسيبل)',
@@ -652,7 +620,7 @@ const ar = {
     kicker: '04 · التحويل الصوتي',
     title: 'اسمع رقصة السطح',
     subtitle:
-      'كل مرور قمر يصبح نبضة. السطح الهادئ يحافظ على إيقاع ثابت. الفيضان أو الحريق يغيّر النغمة والإيقاع والنسيج. اسمع الفرق.',
+      'كل مرور قمر يصبح نبضة. السطح الهادئ يحافظ على إيقاع ثابت، والفيضان أو الحريق يغيّر النغمة والإيقاع. استمع للفرق.',
     stableTitle: 'سطح مستقر',
     stableSub: 'سلسلة مرجعية بلا تغيّر تقريبًا. النغمة المنخفضة نفسها والنبض البطيء الثابت.',
     changeTitle: 'سطح متغيّر',
@@ -674,13 +642,12 @@ const ar = {
     sitePicker: 'اختر موقعًا',
     visualTitle: 'السلسلة نفسها على شكل أعمدة',
     eventMarker: 'لحظة التغير',
-    credits: 'السلّم: خماسي صغير · الأساس D3 · تكرار 12 يومًا.',
   },
   recovery: {
     kicker: '05 · ساعة التعافي',
     title: 'متى يعود؟',
     subtitle:
-      'قدّر الوقت الذي تستغرقه إشارة الرادار للعودة إلى نسبة مختارة من خط أساسها قبل الحدث. حرّك الهدف وراقب تحرك الساعة.',
+      'كم تستغرق إشارة الرادار لتعود إلى مستواها قبل الحدث؟ حرّك الهدف وراقب تغيّر التقدير.',
     target: 'هدف التعافي',
     targetHint: 'نسبة من إشارة الرادار قبل الحدث',
     estimateLabel: 'الزمن المقدر للوصول إلى الهدف',
@@ -735,16 +702,13 @@ const ar = {
   method: {
     kicker: '07 · الشفافية',
     title: 'بيانات قابلة للدفاع',
-    subtitle: 'حكاية الرادار لا تنفع إن لم تعرف ما هو مقاس وما هو مفترض. هذا هو الخط بينهما.',
+    subtitle: 'اعرف ما هو مقاس وما هو مفترض.',
     realTitle: 'ما هو حقيقي هنا',
     realBody:
-      'حقائق المهمة وسجلات الأحداث وفيزياء التشتت المنشورة حقيقية. ومنطقتا الدراسة مكانان حقيقيان بأحداث موثقة.',
+      'حقائق المهمة وسجلات الأحداث وفيزياء التشتت حقيقية، ومنطقتا الدراسة مكانان حقيقيان بأحداث موثقة.',
     simulatedTitle: 'ما هو محاكى',
     simulatedBody:
       'بكسلات المشاهد والارتداد والصوت ومنحنيات التعافي توضيحية — ومعلّمة، وليست منتجات نيسار رسمية.',
-    backendTitle: 'ما تضيفه الخلفية',
-    backendBody:
-      'تستطيع الواجهة التحدث إلى واجهة برمجة موثقة والعودة إلى البيانات المحلية. اربطها بمنتجات نيسار المعايرة لتصبح حية.',
     docsTitle: 'توثيق المطورين والبيانات',
     docsSubtitle: 'عقد الواجهة والحدود والمصادر والتنزيلات',
     statusLabel: 'مصدر البيانات',

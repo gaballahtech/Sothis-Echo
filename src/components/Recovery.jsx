@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, ButtonGroup, Icon, Popover, Slider, Tag } from '@blueprintjs/core';
+import { Button, ButtonGroup, Popover, Slider, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -208,20 +208,8 @@ export default function Recovery() {
             }
             bodyClassName="card-pad-lg"
           >
-            <div className="row-between" style={{ marginBottom: 10 }}>
-              <Icon icon="history" size={22} style={{ color: 'var(--bp-intent-primary-rest)' }} aria-hidden="true" />
-              <Tag minimal intent="primary">{threshold}%</Tag>
-            </div>
-
             <p className={`recovery-value ${estimateClass}`} aria-live="polite" data-testid="recovery-estimate" dir="auto">
               {estimate.months == null ? t('recovery.notReached') : formatMonths(estimate.months, language)}
-            </p>
-            <p className="body-copy-muted" style={{ marginBottom: 16 }}>
-              {estimate.months == null
-                ? t('recovery.notReached')
-                : estimate.projected
-                  ? t('recovery.projected')
-                  : t('recovery.reached')}
             </p>
 
             <div style={{ paddingTop: 12, borderTop: '1px solid var(--bp-surface-border-color-default)', marginBottom: 16 }}>

@@ -120,13 +120,6 @@ export default function StudyAreas() {
                   {t('sites.event')}: <span style={{ color: 'var(--bp-typography-color-default-rest)' }}>{formatDate(site.eventDate, language)}</span>
                 </span>
               </div>
-              <div className="row">
-                {site.tags.map((tag) => (
-                  <Tag key={tag.key} minimal>
-                    {t(`sites.tags.${tag.key}`)}: {L(tag.value)}
-                  </Tag>
-                ))}
-              </div>
             </div>
 
             <Panel
@@ -151,11 +144,7 @@ export default function StudyAreas() {
               const state = site.states[stateKey];
               return (
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
-                  <Panel
-                    title={`${L(state.label)} · ${state.date}`}
-                    icon="camera"
-                    status={<Tag minimal intent="warning">{t('sites.sceneSimulated')}</Tag>}
-                  >
+                  <Panel title={`${L(state.label)} · ${state.date}`} icon="camera">
                     <SceneCanvas
                       site={site}
                       params={state.params}
@@ -180,12 +169,9 @@ export default function StudyAreas() {
             })}
           </div>
 
-          <Panel
-            title={t('sites.measurements')}
-            icon="database"
-            status={<Tag minimal intent="primary">{t('sites.illustrativeValues')}</Tag>}
-            bodyClassName="card-pad"
-          >
+          <p className="micro" style={{ margin: 0 }}>{t('sites.sceneSimulated')}</p>
+
+          <Panel title={t('sites.measurements')} icon="database" bodyClassName="card-pad">
             <div data-testid="deep-dive-tabs">
               <Tabs id="site-data" defaultSelectedTabId="reading" renderActiveTabPanelOnly>
                 <Tab

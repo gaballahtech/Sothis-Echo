@@ -1,8 +1,8 @@
-import { Button, Callout, Icon, Tag } from '@blueprintjs/core';
+import { Button, Callout, Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useSiteData } from '../context/SiteDataContext';
 import { buildSiteCsv } from '../services/sarApi';
-import { Disclosure, Meter, SectionHead, SourceBadge } from './ui';
+import { Disclosure, SectionHead, SourceBadge } from './ui';
 
 const ENDPOINTS = [
   'GET  /study-areas',
@@ -64,15 +64,12 @@ export default function Method() {
       <div className="section-inner">
         <SectionHead kicker={t('method.kicker')} title={t('method.title')} subtitle={t('method.subtitle')} id="data-title" />
 
-        <div className="grid-3 method-callouts">
+        <div className="grid-2 method-callouts">
           <Callout className="method-callout" compact intent="success" icon="tick" title={t('method.realTitle')}>
             <p style={{ margin: 0 }}>{t('method.realBody')}</p>
           </Callout>
           <Callout className="method-callout" compact intent="warning" icon="search" title={t('method.simulatedTitle')}>
             <p style={{ margin: 0 }}>{t('method.simulatedBody')}</p>
-          </Callout>
-          <Callout className="method-callout" compact intent="primary" icon="database" title={t('method.backendTitle')}>
-            <p style={{ margin: 0 }}>{t('method.backendBody')}</p>
           </Callout>
         </div>
 
@@ -107,16 +104,9 @@ export default function Method() {
                 </dl>
               </div>
 
-              <div>
-                <div className="row-between" style={{ marginBottom: 4 }}>
-                  <span className="micro">SCENE LABELLING</span>
-                  <span className="micro" style={{ color: 'var(--bp-intent-success-rest)' }}>100%</span>
-                </div>
-                <Meter value={1} intent="success" label="Scene labelling" />
-                <p className="micro" style={{ marginTop: 9, marginBottom: 0 }}>
-                  {api.configured ? t('method.liveNote') : t('method.noBackend')}
-                </p>
-              </div>
+              <p className="micro" style={{ margin: 0 }}>
+                {api.configured ? t('method.liveNote') : t('method.noBackend')}
+              </p>
 
               {api.configured && error ? (
                 <Button
@@ -171,10 +161,7 @@ export default function Method() {
         </Disclosure>
 
         <Callout className="method-disclosure-callout" intent="primary" icon="info-sign" style={{ marginTop: 14 }}>
-          <div className="row-between">
-            <p className="micro" style={{ margin: 0, maxWidth: 820 }}>{t('method.disclosure')}</p>
-            <Tag minimal intent="primary" icon="download">OPEN SOURCE · EDUCATIONAL</Tag>
-          </div>
+          <p className="micro" style={{ margin: 0 }}>{t('method.disclosure')}</p>
         </Callout>
       </div>
     </section>

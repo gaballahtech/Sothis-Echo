@@ -1,6 +1,6 @@
-import { Icon, Tag } from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { Disclosure, Meter, Panel, SectionHead } from './ui';
+import { Disclosure, Panel, SectionHead } from './ui';
 
 const CARDS = [
   { key: 'radar', icon: 'cloud' },
@@ -10,15 +10,6 @@ const CARDS = [
 ];
 
 const FACT_KEYS = ['launch', 'orbit', 'repeat', 'bands', 'swath', 'resolution', 'baseline'];
-
-const MEASURES = [
-  { key: 'canopy', icon: 'tree' },
-  { key: 'moisture', icon: 'waves' },
-  { key: 'flood', icon: 'cloud' },
-  { key: 'fire', icon: 'flame' },
-  { key: 'motion', icon: 'changes' },
-  { key: 'ice', icon: 'temperature' },
-];
 
 const TIMELINE = ['launch', 'commission', 'ops', 'mission'];
 
@@ -42,20 +33,6 @@ export default function Mission() {
                 <p className="body-copy-muted" style={{ margin: 0 }}>{t(`mission.cards.${card.key}.body`)}</p>
               </Panel>
             ))}
-          </div>
-
-          <div>
-            <div className="row" style={{ marginBottom: 8 }}>
-              <Icon icon="satellite" size={14} style={{ color: 'var(--bp-intent-primary-rest)' }} aria-hidden="true" />
-              <span className="micro">{t('mission.measures.title')}</span>
-            </div>
-            <div className="row">
-              {MEASURES.map((measure) => (
-                <Tag key={measure.key} minimal icon={measure.icon}>
-                  {t(`mission.measures.${measure.key}`)}
-                </Tag>
-              ))}
-            </div>
           </div>
         </div>
 
@@ -89,14 +66,6 @@ export default function Mission() {
                   </div>
                 ))}
               </dl>
-
-              <div style={{ marginTop: 12 }}>
-                <div className="row-between" style={{ marginBottom: 4 }}>
-                  <span className="micro">L-BAND COVERAGE</span>
-                  <span className="micro" style={{ color: 'var(--bp-intent-success-rest)' }}>GLOBAL</span>
-                </div>
-                <Meter value={0.97} label="L-band coverage" />
-              </div>
             </div>
 
             <div>
