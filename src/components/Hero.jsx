@@ -1,0 +1,71 @@
+import { Button, Icon, Tag } from '@blueprintjs/core';
+import { useTranslation } from 'react-i18next';
+
+export default function Hero() {
+  const { t } = useTranslation();
+
+  const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const facts = [
+    { key: 'orbit', value: t('hero.panel.orbitValue') },
+    { key: 'repeat', value: t('hero.panel.repeatValue') },
+    { key: 'resolution', value: t('hero.panel.resolutionValue') },
+  ];
+
+  return (
+    <section id="home" className="content-section hero-section" aria-labelledby="home-title">
+      <div className="section-inner hero-grid">
+        <div>
+          <div className="row" style={{ marginBottom: 14 }}>
+            <Tag minimal intent="primary" icon="satellite">
+              {t('hero.badge')}
+            </Tag>
+            <Tag minimal intent="warning">
+              {t('common.demo')}
+            </Tag>
+          </div>
+
+          <h1 id="home-title" className="hero-title">
+            {t('hero.title')}
+          </h1>
+          <p className="hero-copy">{t('hero.subtitle')}</p>
+
+          <div className="hero-actions">
+            <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />
+            <Button variant="outlined" icon="volume-up" text={t('hero.ctaListen')} onClick={() => go('sound')} />
+          </div>
+
+          <div className="hero-inline-stats" aria-label={t('hero.panel.title')}>
+            {facts.map((fact) => (
+              <div className="hero-stat" key={fact.key}>
+                <span className="hero-stat-label">{t(`hero.panel.${fact.key}`)}</span>
+                <span className="hero-stat-value">{fact.value}</span>
+              </div>
+            ))}
+          </div>
+
+          <a
+            className="hero-scroll"
+            href="#mission"
+            onClick={(event) => {
+              event.preventDefault();
+              go('mission');
+            }}
+          >
+            <span>{t('hero.scroll')}</span>
+            <Icon icon="chevron-down" size={14} aria-hidden="true" />
+          </a>
+        </div>
+      </div>
+
+      <a
+        className="hero-credit"
+        href="https://commons.wikimedia.org/wiki/File:ISS-20_Thunderstorms_on_the_Brazilian_Horizon.jpg"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {t('hero.credit')}
+      </a>
+    </section>
+  );
+}

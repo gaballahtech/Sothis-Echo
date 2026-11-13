@@ -1,0 +1,28 @@
+{
+  "name": "aura-sar-frontend",
+  "version": "2.0.0",
+  "description": "Dancing with SAR: an interactive NISAR story about Earth's surface change — public and researcher views, optical/radar comparison, sonification, recovery estimates, and a radar detective game.",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test:e2e": "playwright test",
+    "api:mock": "node server/mock-api.mjs"
+  },
+  "dependencies": {
+    "@blueprintjs/core": "^6.22.0",
+    "@blueprintjs/datetime": "^6.3.1",
+    "@blueprintjs/icons": "^6.15.0",
+    "@blueprintjs/table": "^6.3.1",
+    "i18next": "^26.4.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "react-i18next": "^17.0.13"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0",
+    "@vitejs/plugin-react": "^6.1.1",
+    "vite": "^8.2.2"
+  }
+}
