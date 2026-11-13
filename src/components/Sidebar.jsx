@@ -9,12 +9,7 @@ export default function Sidebar() {
 
   return (
     <aside className="app-rail" aria-label={t('navbar.menu')}>
-      <div className="rail-kicker">{t('common.site')} / NISAR</div>
       <NavigationMenu activeId={active} compact />
-      <div className="rail-foot">
-        <span className="rail-foot-label">{t('footer.brand')}</span>
-        <span className="rail-foot-meta">{t('footer.copyright', { year: new Date().getFullYear() })}</span>
-      </div>
     </aside>
   );
 }

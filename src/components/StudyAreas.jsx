@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Button, ButtonGroup, Icon, Tab, Tabs, Tag, HTMLTable } from '@blueprintjs/core';
+import { Button, ButtonGroup, Tab, Tabs, Tag, HTMLTable } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
-import { useMode } from '../context/ModeContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { contrastRows } from '../data/sites';
@@ -12,10 +11,6 @@ import { Disclosure, Panel, SectionHead, SourceBadge } from './ui';
 import ObservationTable from './ObservationTable';
 
 const STATE_KEYS = ['before', 'after'];
-const INFO_KEYS = [
-  { key: 'happened', label: 'sites.whatHappened' },
-  { key: 'why', label: 'sites.whyRadar' },
-];
 
 function formatDate(value, language) {
   if (!value) return '—';
@@ -41,7 +36,6 @@ function Coordinates({ site }) {
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { isResearcher } = useMode();
   const { sites, source, error } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
 
@@ -68,7 +62,7 @@ export default function StudyAreas() {
   return (
     <section id="sites" className="content-section chapter chapter--mint" aria-labelledby="sites-title">
       <div className="section-inner">
-        <SectionHead kicker={t('sites.kicker')} title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
+        <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
 
         <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
           {sites.map((item, index) => {
@@ -86,7 +80,7 @@ export default function StudyAreas() {
               >
                 <span className="site-tab-content">
                   <span className="micro" style={{ color: selected ? 'inherit' : undefined }}>
-                    {String(index + 1).padStart(2, '0')} · {t('sites.siteOf', { current: index + 1, total: sites.length })}
+                    {String(index + 1).padStart(2, '0')} / {String(sites.length).padStart(2, '0')}
                   </span>
                   <span style={{ fontWeight: 600 }}>{L(item.name)}</span>
                   <span className="small" style={{ opacity: 0.78 }}>{L(item.region)}</span>
@@ -97,46 +91,34 @@ export default function StudyAreas() {
         </ButtonGroup>
 
         <div role="tabpanel" aria-label={L(site.name)} className="stack" style={{ marginTop: 14 }}>
-          <div className="split-main">
-            <div className="stack">
-              <div className="row">
-                <Tag minimal intent="primary" icon="map">
-                  {t('common.site')} {String(sites.findIndex((item) => item.id === site.id) + 1).padStart(2, '0')}
-                </Tag>
-                <Tag minimal>{L(site.tags[0]?.value)}</Tag>
-                <Tag minimal>{L(site.tags[3]?.value)}</Tag>
-                <SourceBadge source={source} error={error} />
-              </div>
-              <h3 style={{ margin: 0, fontSize: 22, fontWeight: 600, lineHeight: 1.25 }} dir="auto">
-                {L(site.headline)}
-              </h3>
-              <div className="row small muted">
-                <span className="row" style={{ gap: 4 }}>
-                  <Icon icon="map" size={13} aria-hidden="true" />
-                  <Coordinates site={site} />
-                </span>
-                <span className="row" style={{ gap: 4 }}>
-                  <Icon icon="calendar" size={13} aria-hidden="true" />
-                  {t('sites.event')}: <span style={{ color: 'var(--bp-typography-color-default-rest)' }}>{formatDate(site.eventDate, language)}</span>
-                </span>
-              </div>
+          <div className="stack" style={{ gap: 10 }}>
+            <div className="row">
+              <Tag minimal intent="primary">
+                {t('common.site')} {String(sites.findIndex((item) => item.id === site.id) + 1).padStart(2, '0')}
+              </Tag>
+              <Tag minimal>{L(site.tags[0]?.value)}</Tag>
+              <Tag minimal>{L(site.tags[3]?.value)}</Tag>
+              <SourceBadge source={source} error={error} />
             </div>
-
-            <Panel
-              title={t('sites.story')}
-              icon="document"
-              status={L(site.states.after.label)}
-              bodyClassName="card-pad"
-            >
-              <div className="stack" style={{ gap: 9 }}>
-                {site.story.map((paragraph, index) => (
-                  <p key={index} className="body-copy-muted" style={{ margin: 0 }}>{L(paragraph)}</p>
-                ))}
-                <div>
-                  <Button variant="outlined" small icon="download" text={t('sites.downloadCsv')} onClick={downloadCsv} />
-                </div>
-              </div>
-            </Panel>
+            <h3 style={{ margin: 0, fontSize: 22, fontWeight: 600, lineHeight: 1.25 }} dir="auto">
+              {L(site.headline)}
+            </h3>
+            <div className="row small muted">
+              <span>
+                <Coordinates site={site} />
+              </span>
+              <span>
+                {t('sites.event')}: <span style={{ color: 'var(--bp-typography-color-default-rest)' }}>{formatDate(site.eventDate, language)}</span>
+              </span>
+            </div>
+            <div className="stack site-story" style={{ gap: 8 }}>
+              {site.story.map((paragraph, index) => (
+                <p key={index} className="body-copy-muted" style={{ margin: 0 }}>{L(paragraph)}</p>
+              ))}
+            </div>
+            <div>
+              <Button variant="outlined" small icon="download" text={t('sites.downloadCsv')} onClick={downloadCsv} />
+            </div>
           </div>
 
           <div className="scene-grid">
@@ -144,7 +126,7 @@ export default function StudyAreas() {
               const state = site.states[stateKey];
               return (
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
-                  <Panel title={`${L(state.label)} · ${state.date}`} icon="camera">
+                  <Panel title={`${L(state.label)} · ${state.date}`}>
                     <SceneCanvas
                       site={site}
                       params={state.params}
@@ -156,22 +138,15 @@ export default function StudyAreas() {
                     </div>
                   </Panel>
 
-                  <div className="app-panel info-list" style={{ borderTop: 0, borderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-                    {INFO_KEYS.map((info) => (
-                      <div key={info.key} className="info-block">
-                        <h4>{t(info.label)}</h4>
-                        <p className="body-copy-muted" style={{ margin: 0 }}>{L(state[info.key])}</p>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
+                    {L(state.happened)} {L(state.why)}
+                  </p>
                 </div>
               );
             })}
           </div>
 
-          <p className="micro" style={{ margin: 0 }}>{t('sites.sceneSimulated')}</p>
-
-          <Panel title={t('sites.measurements')} icon="database" bodyClassName="card-pad">
+          <Panel title={t('sites.measurements')} bodyClassName="card-pad">
             <div data-testid="deep-dive-tabs">
               <Tabs id="site-data" defaultSelectedTabId="reading" renderActiveTabPanelOnly>
                 <Tab
@@ -179,7 +154,7 @@ export default function StudyAreas() {
                   title={t('sites.signalTab')}
                   panel={
                     <div className="split-even">
-                      <Panel title={t('sites.readPol')} icon="layers" bodyClassName="card-pad">
+                      <Panel title={t('sites.readPol')} bodyClassName="card-pad">
                         <p className="body-copy-muted" style={{ margin: 0 }}>{L(site.states.after.polarization)}</p>
                         <div className="grid-2" style={{ marginTop: 12 }}>
                           <div className="stat">
@@ -201,7 +176,7 @@ export default function StudyAreas() {
                         </div>
                       </Panel>
 
-                      <Panel title={t('sites.contrastTitle')} icon="comparison" bodyClassName="card-pad">
+                      <Panel title={t('sites.contrastTitle')} bodyClassName="card-pad">
                         <p className="body-copy-muted" style={{ marginBottom: 8 }}>{t('sites.contrastSubtitle')}</p>
                         <HTMLTable bordered striped compact className="is-full-width">
                           <thead>
@@ -240,13 +215,10 @@ export default function StudyAreas() {
           </Panel>
 
           <Disclosure
-            key={isResearcher ? 'research-open' : 'public-closed'}
             title={t('sites.forResearchers')}
             subtitle={L(site.name)}
-            icon="properties"
             className="researcher-disclosure"
             testId="for-researchers"
-            defaultOpen={isResearcher}
           >
               <div className="grid-2">
                 <div className="stack">

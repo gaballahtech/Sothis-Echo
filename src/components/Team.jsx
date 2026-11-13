@@ -1,4 +1,4 @@
-import { AnchorButton, Icon, Tag } from '@blueprintjs/core';
+import { AnchorButton } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { Panel, SectionHead } from './ui';
 
@@ -49,47 +49,25 @@ export default function Team() {
   return (
     <section id="team" className="content-section chapter chapter--gold" aria-labelledby="team-title">
       <div className="section-inner" style={{ maxWidth: 980 }}>
-        <SectionHead kicker={t('team.kicker')} title={t('team.title')} subtitle={t('team.subtitle')} id="team-title" />
+        <SectionHead title={t('team.title')} subtitle={t('team.subtitle')} id="team-title" />
 
         <div className="grid-2">
           {teamMembers.map((member) => (
             <Panel
               key={member.handle}
               title={t(`team.roles.${member.roleKey}`)}
-              icon={member.icon}
-              status={<Tag minimal>{member.handle}</Tag>}
               className="team-card"
               bodyClassName="card-pad"
             >
-              <div className="row" style={{ flexWrap: 'nowrap', gap: 10, marginBottom: 12 }}>
-                <span
-                  aria-hidden="true"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: 34,
-                    height: 34,
-                    color: 'var(--bp-typography-color-primary-rest)',
-                    border: '1px solid var(--bp-surface-border-color-default)',
-                    borderRadius: 'var(--bp-surface-border-radius)',
-                  }}
-                >
-                  <Icon icon={member.icon} size={17} />
-                </span>
-                <div style={{ minWidth: 0 }}>
-                  <div className="team-name">{member.name}</div>
-                  <div className="team-handle" dir="ltr">@{member.handle}</div>
-                </div>
-              </div>
+              <div className="team-name">{member.name}</div>
+              <div className="team-handle" dir="ltr">@{member.handle}</div>
 
-              <div className="row">
+              <div className="row" style={{ marginTop: 12 }}>
                 {member.links.map((link) => (
                   <AnchorButton
                     key={link.href}
                     variant="outlined"
                     small
-                    icon={link.icon}
                     text={t(`team.links.${link.labelKey}`)}
                     href={link.href}
                     target="_blank"

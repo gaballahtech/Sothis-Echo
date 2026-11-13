@@ -1,4 +1,4 @@
-import { Menu, MenuDivider, MenuItem, Tag } from '@blueprintjs/core';
+import { Menu, MenuDivider, MenuItem } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useTour } from '../context/TourContext';
 import { NAV_ITEMS } from '../data/navigation';
@@ -30,19 +30,12 @@ export function NavigationMenu({ activeId, onNavigate, compact = false }) {
       <MenuItem
         icon="help"
         text={t('tour.help')}
+        data-testid="tour-help"
         onClick={() => {
           onNavigate?.();
           startTour();
         }}
       />
-      <div className="rail-meta">
-        <Tag minimal icon="satellite">
-          NISAR · NASA / ISRO
-        </Tag>
-        <Tag minimal icon="tick">
-          {t('hero.panel.statusLocal')}
-        </Tag>
-      </div>
     </Menu>
   );
 }

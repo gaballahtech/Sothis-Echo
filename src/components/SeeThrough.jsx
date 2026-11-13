@@ -26,17 +26,11 @@ export default function SeeThrough() {
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
       <div className="section-inner">
-        <SectionHead
-          kicker={t('seeThrough.kicker')}
-          title={t('seeThrough.title')}
-          subtitle={t('seeThrough.subtitle')}
-          id="see-through-title"
-        />
+        <SectionHead title={t('seeThrough.title')} subtitle={t('seeThrough.subtitle')} id="see-through-title" />
 
         <div className="split-main">
           <Panel
             title={`${siteName} · ${state.date} · ${stateLabel}`}
-            icon="layers"
             bodyClassName="card-pad"
           >
             <CompareSlider
@@ -46,7 +40,6 @@ export default function SeeThrough() {
               radarAlt={`${siteName} — ${t('seeThrough.radar')}`}
               opticalLabel={t('seeThrough.optical')}
               radarLabel={t('seeThrough.radar')}
-              simulatedLabel={t('seeThrough.simulated')}
             />
 
             <div className="info-list" style={{ marginTop: 12, border: '1px solid var(--bp-surface-border-color-default)', borderRadius: 'var(--bp-surface-border-radius)' }}>
@@ -63,7 +56,7 @@ export default function SeeThrough() {
           </Panel>
 
           <div className="stack">
-            <Panel title={t('seeThrough.calloutTitle')} icon="info-sign" bodyClassName="card-pad">
+            <Panel title={t('seeThrough.calloutTitle')} bodyClassName="card-pad">
               <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.calloutBody')}</p>
               <div className="stack" style={{ gap: 8, marginTop: 12, paddingTop: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
                 {LEGEND.map((item) => (
@@ -84,8 +77,6 @@ export default function SeeThrough() {
                 ))}
               </div>
             </Panel>
-
-            <p className="micro" style={{ margin: 0 }}>{t('seeThrough.note')}</p>
           </div>
         </div>
       </div>

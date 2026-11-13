@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, ButtonGroup, Popover, Slider, Tag } from '@blueprintjs/core';
+import { Button, ButtonGroup, Popover } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -9,7 +9,7 @@ import { Meter, Panel, SectionHead } from './ui';
 
 const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 40 };
 
-function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel }) {
+function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel, rtl }) {
   const maxMonth = Math.max(...points.map((p) => p.month));
   const measured = points.filter((p) => !p.projected);
   const projectedPoints = points.filter((p) => p.projected);
@@ -18,7 +18,11 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
 
   const innerW = CHART.width - CHART.left - CHART.right;
   const innerH = CHART.height - CHART.top - CHART.bottom;
-  const x = (month) => CHART.left + (month / Math.max(1, maxMonth)) * innerW;
+  // Arabic reads right to left, so the time axis runs the other way too.
+  const x = (month) => {
+    const offset = (month / Math.max(1, maxMonth)) * innerW;
+    return rtl ? CHART.left + innerW - offset : CHART.left + offset;
+  };
   const y = (pct) => CHART.top + ((100 - pct) / 100) * innerH;
   const polyline = (list) => list.map((p) => `${x(p.month)},${y(p.pct)}`).join(' ');
 
@@ -58,7 +62,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
             strokeWidth="1"
             strokeDasharray={value === 0 ? '' : '2 4'}
           />
-          <text x={CHART.left - 8} y={y(value) + 3} textAnchor="end" fontSize="9" fill="var(--bp-typography-color-muted)">
+          <text
+            x={rtl ? CHART.width - CHART.right + 8 : CHART.left - 8}
+            y={y(value) + 3}
+            textAnchor={rtl ? 'start' : 'end'}
+            fontSize="9"
+            fill="var(--bp-typography-color-muted)"
+          >
             {value}
           </text>
         </g>
@@ -82,7 +92,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
         strokeWidth="1"
         strokeDasharray="5 4"
       />
-      <text x={CHART.width - CHART.right} y={y(threshold) - 5} textAnchor="end" fontSize="9" fill="var(--bp-intent-warning-rest)">
+      <text
+        x={rtl ? CHART.left : CHART.width - CHART.right}
+        y={y(threshold) - 5}
+        textAnchor={rtl ? 'start' : 'end'}
+        fontSize="9"
+        fill="var(--bp-intent-warning-rest)"
+      >
         {String(targetLabel).toUpperCase()} {threshold}%
       </text>
       <line
@@ -134,7 +150,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
             strokeOpacity="0.7"
           />
           <rect x={crossingX - 3} y={crossingY - 3} width="6" height="6" fill="var(--bp-surface-background-color-default-rest)" stroke="var(--bp-intent-warning-rest)" strokeWidth="1.5" />
-          <text x={crossingX + 5} y={crossingY - 7} fontSize="9" fill="var(--bp-intent-warning-rest)">
+          <text
+            x={crossingX + (rtl ? -5 : 5)}
+            y={crossingY - 7}
+            textAnchor={rtl ? 'end' : 'start'}
+            fontSize="9"
+            fill="var(--bp-intent-warning-rest)"
+          >
             {formatMonths(estimate.months, language)}
           </text>
         </g>
@@ -143,7 +165,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
       <text x={CHART.width / 2} y={CHART.height - 5} textAnchor="middle" fontSize="9" fill="var(--bp-typography-color-muted)">
         {xLabel}
       </text>
-      <text x={CHART.left} y={12} fontSize="9" fill="var(--bp-typography-color-muted)">
+      <text
+        x={rtl ? CHART.width - CHART.right : CHART.left}
+        y={12}
+        textAnchor={rtl ? 'end' : 'start'}
+        fontSize="9"
+        fill="var(--bp-typography-color-muted)"
+      >
         {yLabel}
       </text>
     </svg>
@@ -175,15 +203,14 @@ export default function Recovery() {
   return (
     <section id="recovery" className="content-section chapter chapter--sky" aria-labelledby="recovery-title">
       <div className="section-inner">
-        <SectionHead kicker={t('recovery.kicker')} title={t('recovery.title')} subtitle={t('recovery.subtitle')} id="recovery-title" />
+        <SectionHead title={t('recovery.title')} subtitle={t('recovery.subtitle')} id="recovery-title" />
 
-        <div className="row" style={{ marginBottom: 12 }}>
-          <span className="micro">{t('sound.sitePicker')}</span>
-          <ButtonGroup>
+        <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
+          <span className="site-choice-label">{t('common.sitePicker')}</span>
+          <ButtonGroup className="site-choice">
             {sites.map((item) => (
               <Button
                 key={item.id}
-                small
                 active={item.id === site.id}
                 variant={item.id === site.id ? 'solid' : 'outlined'}
                 text={L(item.name)}
@@ -197,17 +224,8 @@ export default function Recovery() {
           </ButtonGroup>
         </div>
 
-        <div className="split-main">
-          <Panel
-            title={`${t('recovery.estimateLabel')} · ${siteName}`}
-            icon="history"
-            status={
-              <Tag minimal intent={estimate.months == null ? 'danger' : estimate.projected ? 'warning' : 'success'}>
-                {estimate.months == null ? t('recovery.notReached') : estimate.projected ? t('recovery.projected') : t('recovery.measured')}
-              </Tag>
-            }
-            bodyClassName="card-pad-lg"
-          >
+        <div className="recovery-grid">
+          <Panel title={`${t('recovery.estimateLabel')} · ${siteName}`} bodyClassName="card-pad-lg">
             <p className={`recovery-value ${estimateClass}`} aria-live="polite" data-testid="recovery-estimate" dir="auto">
               {estimate.months == null ? t('recovery.notReached') : formatMonths(estimate.months, language)}
             </p>
@@ -225,33 +243,27 @@ export default function Recovery() {
               <span className="threshold-value">{threshold}%</span>
             </div>
             <div className="slider-wrap">
-              <Slider
+              <input
+                className="threshold-slider"
+                type="range"
                 min={50}
                 max={95}
-                stepSize={5}
-                labelStepSize={10}
+                step={5}
                 value={threshold}
-                onChange={setThreshold}
-                labelRenderer={(value) => `${value}%`}
+                onChange={(event) => setThreshold(Number(event.target.value))}
                 aria-label={t('recovery.target')}
-                showTrackFill
+                aria-valuetext={`${threshold}%`}
               />
+              <div className="slider-scale" aria-hidden="true">
+                <span>50%</span>
+                <span>95%</span>
+              </div>
             </div>
             <p className="micro" style={{ marginTop: 4, marginBottom: 0 }}>{t('recovery.targetHint')}</p>
           </Panel>
 
-          <Panel
-            title={t('recovery.chartTitle')}
-            icon="chart"
-            status={estimate.months == null ? '—' : estimate.projected ? t('recovery.projectedLegend') : t('recovery.measured')}
-            bodyClassName="card-pad"
-          >
-            <div className="row-between">
-              <div className="chart-legend">
-                <span><span className="legend-line primary" />{t('recovery.measured')}</span>
-                <span><span className="legend-line warning" />{t('recovery.projectedLegend')}</span>
-                <span><span className="legend-line warning" />{t('recovery.target')} {threshold}%</span>
-              </div>
+          <Panel title={t('recovery.chartTitle')} bodyClassName="card-pad">
+            <div className="row" style={{ justifyContent: 'flex-end' }}>
               <Popover
                 placement="bottom-end"
                 content={
@@ -284,9 +296,9 @@ export default function Recovery() {
                 yLabel={t('recovery.chartY')}
                 xLabel={t('recovery.chartX')}
                 targetLabel={t('recovery.target')}
+                rtl={language === 'ar'}
               />
             </div>
-            <p className="micro" style={{ marginTop: 6, marginBottom: 0 }}>{t('recovery.source')}</p>
           </Panel>
         </div>
 

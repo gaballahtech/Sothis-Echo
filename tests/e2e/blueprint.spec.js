@@ -40,16 +40,14 @@ test('Blueprint ledger renders virtualized and resizable inside Deep Dive Data',
   expect(errors).toEqual([]);
 });
 
-test('Tech Editorial tokens, typography, 40px grid, and 4-column guides are applied', async ({ page }) => {
+test('Tech Editorial tokens and typography are applied', async ({ page }) => {
   await openApp(page);
 
   const base = await page.evaluate(() => {
     const body = getComputedStyle(document.body);
-    const grid = getComputedStyle(document.body, '::before');
     const heroTitle = getComputedStyle(document.querySelector('.hero-title'));
     const button = getComputedStyle(document.querySelector('.bp6-button'));
     const card = getComputedStyle(document.querySelector('.app-panel'));
-    const guide = getComputedStyle(document.querySelector('.chapter .section-inner'), '::before');
     return {
       bodyBackground: body.backgroundColor,
       bodyFont: body.fontFamily,
@@ -59,10 +57,6 @@ test('Tech Editorial tokens, typography, 40px grid, and 4-column guides are appl
       buttonFont: button.fontFamily,
       cardRadius: card.borderRadius,
       cardShadow: card.boxShadow,
-      gridPosition: grid.position,
-      gridSize: grid.backgroundSize,
-      gridMask: grid.maskImage || grid.webkitMaskImage,
-      guideSize: guide.backgroundSize,
     };
   });
 
@@ -74,10 +68,6 @@ test('Tech Editorial tokens, typography, 40px grid, and 4-column guides are appl
   expect(base.buttonFont).toContain('Space Mono');
   expect(base.cardRadius).toBe('0px');
   expect(base.cardShadow).toBe('none');
-  expect(base.gridPosition).toBe('fixed');
-  expect(base.gridSize).toContain('40px');
-  expect(base.gridMask).not.toBe('none');
-  expect(base.guideSize).toContain('25%');
 
   await page.locator('#sites').scrollIntoViewIfNeeded();
   await page.getByRole('tab', { name: 'Deep Dive Data' }).click();
@@ -90,7 +80,7 @@ test('Tech Editorial tokens, typography, 40px grid, and 4-column guides are appl
   expect(tableType.headerFont).toContain('Space Mono');
 });
 
-test('light theme reaches Dialog and Tooltip, and text contrast is AA', async ({ page }) => {
+test('light theme reaches Dialog and text contrast is AA', async ({ page }) => {
   await openApp(page);
   await page.locator('#sites').scrollIntoViewIfNeeded();
   await page.getByRole('tab', { name: 'Deep Dive Data' }).click();
@@ -138,21 +128,6 @@ test('light theme reaches Dialog and Tooltip, and text contrast is AA', async ({
   expect(dialogColors.background).toBe('rgb(247, 246, 242)');
 
   await page.keyboard.press('Escape');
-
-  // Tooltip is portaled as well; without a dark ancestor it uses the light scope.
-  await page.getByTestId('mode-toggle').hover();
-  const tooltip = page.locator('.bp6-tooltip').first();
-  await expect(tooltip).toBeVisible();
-  const tooltipColors = await tooltip.evaluate((node) => {
-    const content = node.querySelector('.bp6-popover-content') || node;
-    return {
-      background: getComputedStyle(content).backgroundColor,
-      color: getComputedStyle(content).color,
-      classes: node.className,
-      hasDarkAncestor: Boolean(node.closest('.bp6-dark')),
-    };
-  });
-  expect(tooltipColors.hasDarkAncestor).toBe(false);
 
   // Report the measured pairs; fail only where normal body copy falls below 4.5:1.
   const parse = (value) => {
@@ -219,17 +194,15 @@ test('light theme reaches Dialog and Tooltip, and text contrast is AA', async ({
     warningTag: ratio(palette.warningTag.fg, palette.warningTag.bg, palette.panel.bg),
     dangerTag: ratio(palette.dangerTag.fg, palette.dangerTag.bg, palette.panel.bg),
     dialog: ratio(dialogColors.bodyColor, dialogColors.background),
-    tooltip: ratio(tooltipColors.color, tooltipColors.background),
   };
   console.log('MEASURED_CONTRAST', JSON.stringify(measured, null, 2));
-  console.log('MEASURED_COLORS', JSON.stringify({ palette, dialogColors, tooltipColors }, null, 2));
+  console.log('MEASURED_COLORS', JSON.stringify({ palette, dialogColors }, null, 2));
   expect(measured.body).toBeGreaterThanOrEqual(4.5);
   expect(measured.muted).toBeGreaterThanOrEqual(4.5);
   expect(measured.primaryButton).toBeGreaterThanOrEqual(4.5);
   expect(measured.warningTag).toBeGreaterThanOrEqual(4.5);
   expect(measured.dangerTag).toBeGreaterThanOrEqual(4.5);
   expect(measured.dialog).toBeGreaterThanOrEqual(4.5);
-  expect(measured.tooltip).toBeGreaterThanOrEqual(4.5);
 });
 
 test('Arabic flips the ledger columns and right-aligns headers and cells', async ({ page }) => {

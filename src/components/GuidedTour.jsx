@@ -1,15 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import {
-  Button,
-  Card,
-  Dialog,
-  DialogBody,
-  DialogFooter,
-  Icon,
-  Tag,
-} from '@blueprintjs/core';
+import { Button, Card, Dialog, DialogBody, DialogFooter, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { useMode } from '../context/ModeContext';
 import { useTour } from '../context/TourContext';
 import { Meter } from './ui';
 
@@ -41,7 +32,6 @@ function markSeen() {
 
 export default function GuidedTour() {
   const { t } = useTranslation();
-  const { mode } = useMode();
   const { request } = useTour();
   const [active, setActive] = useState(false);
   const [prompt, setPrompt] = useState(false);
@@ -73,25 +63,19 @@ export default function GuidedTour() {
   const back = useCallback(() => setStep((current) => Math.max(0, current - 1)), []);
 
   useEffect(() => {
-    if (active || readSeen() || mode !== 'public') {
+    if (active || readSeen()) {
       setPrompt(false);
       return undefined;
     }
     const timer = setTimeout(() => setPrompt(true), 1600);
     return () => clearTimeout(timer);
-  }, [mode, active]);
+  }, [active]);
 
   useEffect(() => {
     if (request === firstRequest.current) return;
     firstRequest.current = request;
     start();
   }, [request, start]);
-
-  useEffect(() => {
-    if (mode === 'public') return;
-    setActive(false);
-    setPrompt(false);
-  }, [mode]);
 
   useEffect(() => {
     if (!active) return;
@@ -128,7 +112,7 @@ export default function GuidedTour() {
       {prompt && !active ? (
         <Card className="tour-prompt" elevation={3} data-testid="tour-prompt">
           <div className="row" style={{ marginBottom: 8 }}>
-            <Tag minimal intent="primary" icon="help">{t('tour.badge')}</Tag>
+            <Tag minimal intent="primary">{t('tour.badge')}</Tag>
           </div>
           <p style={{ marginBottom: 3, fontSize: 14, fontWeight: 600 }}>{t('tour.promptTitle')}</p>
           <p className="body-copy-muted" style={{ marginBottom: 10 }}>{t('tour.promptBody')}</p>
@@ -139,22 +123,10 @@ export default function GuidedTour() {
         </Card>
       ) : null}
 
-      {!active ? (
-        <Button
-          className="tour-help"
-          icon="help"
-          aria-label={t('tour.help')}
-          title={t('tour.help')}
-          onClick={start}
-          data-testid="tour-help"
-        />
-      ) : null}
-
       <Dialog
         isOpen={active}
         onClose={close}
         title={t('tour.stepLabel', { current: step + 1, total: STEPS.length })}
-        icon="help"
         className="tour-dialog"
         canEscapeKeyClose
         canOutsideClickClose
@@ -167,10 +139,6 @@ export default function GuidedTour() {
             <h2 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 600 }}>{t(`tour.steps.${current.key}.title`)}</h2>
             <p className="body-copy-muted" style={{ marginBottom: 8 }}>{t(`tour.steps.${current.key}.body`)}</p>
             <Meter value={(step + 1) / STEPS.length} className="tour-progress" label={t('tour.stepOf', { current: step + 1, total: STEPS.length })} />
-            <div className="row">
-              <Icon icon="info-sign" size={12} aria-hidden="true" className="muted" />
-              <span className="micro">{t('tour.help')}</span>
-            </div>
           </div>
         </DialogBody>
         <DialogFooter

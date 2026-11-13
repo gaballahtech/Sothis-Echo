@@ -1,4 +1,4 @@
-import { Button, Tag } from '@blueprintjs/core';
+import { Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
 export default function Hero() {
@@ -30,12 +30,6 @@ export default function Hero() {
 
       <div className="section-inner hero-grid">
         <div>
-          <div className="row" style={{ marginBottom: 14 }}>
-            <Tag minimal intent="primary" icon="satellite">
-              {t('hero.badge')}
-            </Tag>
-          </div>
-
           <h1 id="home-title" className="hero-title">
             {t('hero.title')}
           </h1>

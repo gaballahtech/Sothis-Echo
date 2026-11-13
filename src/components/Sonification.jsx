@@ -7,9 +7,9 @@ import { localized } from '../data/localized';
 import { createSonifier, isAudioSupported } from '../services/sonifier';
 import { Panel, SectionHead } from './ui';
 
-function PulseStrip({ values, active = -1, tall = false, change = false }) {
+function PulseStrip({ values, active = -1, change = false }) {
   return (
-    <div className={`pulse-strip ${tall ? 'tall' : ''}`} aria-hidden="true">
+    <div className="pulse-strip" aria-hidden="true">
       {values.map((value, index) => {
         const height = 6 + Math.max(0, Math.min(1, value)) * 94;
         const isActive = index === active;
@@ -27,14 +27,7 @@ function PulseStrip({ values, active = -1, tall = false, change = false }) {
 
 function TrackCard({ title, subtitle, values, playing, supported, onToggle, playLabel, stopLabel, change, testKey }) {
   return (
-    <Panel
-      title={title}
-      icon={change ? 'changes' : 'history'}
-      status={playing ? 'PLAYING' : 'IDLE'}
-      tone={playing ? 'primary' : 'default'}
-      className="track-card"
-      bodyClassName="card-pad"
-    >
+    <Panel title={title} tone={playing ? 'primary' : 'default'} className="track-card" bodyClassName="card-pad">
       <p className="body-copy-muted" style={{ marginBottom: 8 }}>{subtitle}</p>
       <PulseStrip values={values} change={change} />
       <div className="sound-actions">
@@ -123,20 +116,18 @@ export default function Sonification() {
   };
 
   const visualValues = track === 'stable' ? site.stablePulse : site.pulse;
-  const eventIndex = site.pulse.reduce((best, value, index) => (value > site.pulse[best] ? index : best), 0);
 
   return (
     <section id="sound" className="content-section chapter chapter--gold" aria-labelledby="sound-title">
       <div className="section-inner">
-        <SectionHead kicker={t('sound.kicker')} title={t('sound.title')} subtitle={t('sound.subtitle')} id="sound-title" />
+        <SectionHead title={t('sound.title')} subtitle={t('sound.subtitle')} id="sound-title" />
 
-        <div className="row" style={{ marginBottom: 12 }}>
-          <span className="micro">{t('sound.sitePicker')}</span>
-          <ButtonGroup>
+        <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
+          <span className="site-choice-label">{t('common.sitePicker')}</span>
+          <ButtonGroup className="site-choice">
             {sites.map((item) => (
               <Button
                 key={item.id}
-                small
                 active={item.id === site.id}
                 variant={item.id === site.id ? 'solid' : 'outlined'}
                 text={localized(item.name, language)}
@@ -173,6 +164,10 @@ export default function Sonification() {
           />
         </div>
 
+        <p className="sound-status" data-testid="sound-status" aria-live="polite">
+          {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : t('sound.hint')}
+        </p>
+
         <div className="sound-map-strip" aria-label={t('sound.mappingTitle')}>
           {mapping.map((line, index) => (
             <div key={line} className="sound-map-item">
@@ -188,27 +183,6 @@ export default function Sonification() {
           </Callout>
         ) : null}
 
-        <Panel
-          title={`${t('sound.visualTitle')} · ${siteName}`}
-          icon="chart"
-          status={track ? t('sound.passOf', { current: step + 1, total: visualValues.length }) : 'IDLE'}
-          bodyClassName="card-pad"
-          className="sound-visual"
-        >
-          <PulseStrip values={visualValues} active={step} tall change={track === 'change'} />
-          <div className="row-between" style={{ marginTop: 2 }}>
-            <span className="micro">01</span>
-            <span className="micro" style={{ color: 'var(--bp-intent-warning-rest)' }}>{t('sound.eventMarker')}</span>
-            <span className="micro">16</span>
-          </div>
-          <p className="sound-status" data-testid="sound-status" aria-live="polite">
-            {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : t('sound.hint')}
-          </p>
-        </Panel>
-
-        <p className="bp6-text-muted" aria-live="polite" style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' }}>
-          {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : ''}
-        </p>
       </div>
     </section>
   );

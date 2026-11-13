@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, Callout, Icon, Tag } from '@blueprintjs/core';
+import { Button, Callout, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -60,18 +60,16 @@ export default function Detective() {
   return (
     <section id="game" className="content-section chapter chapter--teal" aria-labelledby="game-title">
       <div className="section-inner" style={{ maxWidth: 980 }}>
-        <SectionHead kicker={t('game.kicker')} title={t('game.title')} subtitle={t('game.subtitle')} id="game-title" />
+        <SectionHead title={t('game.title')} subtitle={t('game.subtitle')} id="game-title" />
 
         <Panel
           title={finished ? `${t('game.finishedTitle')} · ${L(site.name)}` : `${t('game.round', { current: roundIndex + 1, total })} · ${L(round.title)}`}
-          icon="search"
           status={finished ? `${score}/${total}` : t('game.score', { score })}
           bodyClassName={finished ? '' : 'card-pad'}
         >
           {finished ? (
             <div className="game-result" data-testid="detective-result">
-              <Icon icon="search" size={24} style={{ color: 'var(--bp-intent-primary-rest)' }} aria-hidden="true" />
-              <h3 style={{ margin: '8px 0 0', fontSize: 20, fontWeight: 600 }}>{t('game.finishedTitle')}</h3>
+              <h3 style={{ margin: '0', fontSize: 20, fontWeight: 600 }}>{t('game.finishedTitle')}</h3>
               <p className="game-score" dir="ltr">{score} / {total}</p>
               <p className="body-copy-muted">{t('game.scoreLine', { score, total })}</p>
               <div style={{ maxWidth: 260, margin: '0 auto 12px' }}>
@@ -111,12 +109,7 @@ export default function Detective() {
                 })}
               </div>
 
-              <p className="micro" style={{ marginBottom: 8, textAlign: 'center' }}>{t('game.simulated')}</p>
-
-              <h3 className="row" style={{ marginBottom: 8, fontSize: 14, fontWeight: 600, gap: 6 }}>
-                <Icon icon="help" size={14} style={{ color: 'var(--bp-intent-primary-rest)' }} aria-hidden="true" />
-                {t('game.question')}
-              </h3>
+              <h3 style={{ marginBottom: 8, fontSize: 14, fontWeight: 600 }}>{t('game.question')}</h3>
 
               <div className="option-grid" role="group" aria-label={t('game.select')}>
                 {round.options.map((option) => {
@@ -180,9 +173,7 @@ export default function Detective() {
                     </div>
                   </div>
                 ) : (
-                  <p className="micro" style={{ marginTop: 10 }}>
-                    <Icon icon="info-sign" size={12} aria-hidden="true" /> {t('game.hint')}
-                  </p>
+                  <p className="micro" style={{ marginTop: 10 }}>{t('game.hint')}</p>
                 )}
               </div>
             </>

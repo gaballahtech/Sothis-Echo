@@ -1,13 +1,7 @@
-import { Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { Disclosure, Panel, SectionHead } from './ui';
+import { Disclosure, SectionHead } from './ui';
 
-const CARDS = [
-  { key: 'radar', icon: 'cloud' },
-  { key: 'bands', icon: 'layers' },
-  { key: 'heartbeat', icon: 'history' },
-  { key: 'open', icon: 'globe-network' },
-];
+const CARDS = ['radar', 'bands', 'heartbeat', 'open'];
 
 const FACT_KEYS = ['launch', 'orbit', 'repeat', 'bands', 'swath', 'resolution', 'baseline'];
 
@@ -19,19 +13,18 @@ export default function Mission() {
   return (
     <section id="mission" className="content-section chapter chapter--sky" aria-labelledby="mission-title">
       <div className="section-inner">
-        <SectionHead kicker={t('mission.kicker')} title={t('mission.title')} subtitle={t('mission.subtitle')} id="mission-title" />
+        <SectionHead title={t('mission.title')} subtitle={t('mission.subtitle')} id="mission-title" />
 
         <div className="stack">
-          <div className="callout-row">
-            <Icon icon="info-sign" size={16} style={{ color: 'var(--bp-intent-primary-rest)', flex: '0 0 auto' }} aria-hidden="true" />
-            <p className="body-copy" style={{ margin: 0 }}>{t('mission.lead')}</p>
-          </div>
+          <p className="body-copy lead-copy" style={{ margin: 0 }}>{t('mission.lead')}</p>
 
-          <div className="grid-2">
-            {CARDS.map((card, index) => (
-              <Panel key={card.key} title={t(`mission.cards.${card.key}.title`)} icon={card.icon} status={`0${index + 1}`} bodyClassName="card-pad">
-                <p className="body-copy-muted" style={{ margin: 0 }}>{t(`mission.cards.${card.key}.body`)}</p>
-              </Panel>
+          <div className="feature-grid">
+            {CARDS.map((key, index) => (
+              <article className="feature" key={key}>
+                <span className="feature-index">{String(index + 1).padStart(2, '0')}</span>
+                <h3 className="feature-title">{t(`mission.cards.${key}.title`)}</h3>
+                <p className="body-copy-muted" style={{ margin: 0 }}>{t(`mission.cards.${key}.body`)}</p>
+              </article>
             ))}
           </div>
         </div>
@@ -39,7 +32,6 @@ export default function Mission() {
         <Disclosure
           title={t('mission.detailsTitle')}
           subtitle={t('mission.detailsSubtitle')}
-          icon="properties"
           className="mission-details"
           testId="mission-details"
         >
