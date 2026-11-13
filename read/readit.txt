@@ -1,0 +1,66 @@
+Free programmatic access to Synthetic Aperture Radar (SAR) satellite data is primarily provided by space agencies and platforms that host open-access geospatial repositories. [1, 2]
+The top free SAR APIs available, grouped by provider type, include:
+1. Government & Space Agency APIs (Fully Free Global Archives)
+Copernicus Data Space Ecosystem (CDSE) API
+Data Provided: Sentinel-1 (C-band SAR, up to 10m resolution).
+Details: This is Europe’s primary open data ecosystem. It provides robust REST APIs (OData and STAC) allowing you to filter, query, and download complete historical and current Sentinel-1 radar data entirely for free.
+Access: Copernicus Data Space Ecosystem [1, 2, 3, 4, 5]
+NASA / Alaska Satellite Facility (ASF) asf_search API
+Data Provided: Sentinel-1, RADARSAT-1, SEASAT, ALOS PALSAR, UAVSAR.
+Details: Managed by the ASF DAAC, this is one of the easiest ways to access SAR data via Python. They offer a specialized python library called asf_search that minimizes API overhead, making querying and downloading Radiometrically Terrain Corrected (RTC) products highly streamlined.
+Access: NASA Earthdata / ASF [1, 2, 3, 4]
+Google Earth Engine (GEE) API
+Data Provided: Sentinel-1 Ground Range Detected (GRD) data.
+Details: GEE maintains an up-to-date, analysis-ready collection of Sentinel-1 imagery (COPERNICUS/S1_GRD). Using their Python or JavaScript API, you can filter and process SAR backscatter data directly on Google's cloud infrastructure without needing to download massive raw files.
+Access: Google Earth Engine SAR Basics [1]
+
+2. Commercial Multi-Provider Aggregators (Free Tier / Open Data)
+SkyFi API
+Data Provided: Integrated open data collections (including Sentinel-1 SAR).
+Details: SkyFi aggregates multiple satellite data providers into a unified developer API. While high-resolution tasking costs money, their Open Data API program allows developers to seamlessly download frequently updated lower-resolution datasets for free.
+Access: SkyFi Open Data [1]
+SkyWatch EarthCache API
+Data Provided: Open-access SAR datasets alongside commercial options.
+Details: Designed purely for developers, the SkyWatch BUILD API lets you connect to over 400 data providers. You can test pipelines and pull free open-source SAR datasets at zero cost.
+Access: SkyWatch Open Data [1]
+
+3. High-Resolution Commercial Open Data Initiatives
+Umbra Space Open Data Program
+Data Provided: Ultra-high resolution SAR imagery (under 25 cm resolution).
+Details: Umbra provides some of the highest-resolution commercial SAR data available. While tasking a satellite isn't free, their Open Data Program provides completely free, public access to time-series SAR datasets monitoring over 20 global locations, without even requiring a signup.
+Access: Umbra Open Data [1]
+ICEYE Open Data / AWS STAC API
+Data Provided: High-resolution X-band SAR sample datasets (up to 1m resolution).
+Details: While full API tasking of their constellation is a paid service, ICEYE hosts an Open Data catalog stored on AWS. You can query this archive programmatically using the SpatioTemporal Asset Catalog (STAC) API browser.
+Access: ICEYE Product Documentation [1, 2, 3]المرشح
+
+المرشحين بالترتيب حسب الافضل في العمل : 
+SkyWatch EarthCache API
+SkyFi API
+NASA / Alaska Satellite Facility (ASF) asf_search API
+Google Earth Engine (GEE) API
+
+
+
+المرشحين بالترتيب حسب الاولوية للجنة التحكيم : 
+NASA / Alaska Satellite Facility (ASF) asf_search API
+Google Earth Engine (GEE) API
+SkyWatch EarthCache API
+SkyFi API
+
+
+
+
+أما فهنا NASA / Alaska Satellite Facility (ASF) asf_search API و هذا المرشح هو الأقوى لسهولته و مجانيته و دقته العالية و المقبولة ة توفير مكتبة asf_search القابلة للعمل مع python و هنا سنستخدم  WKT polygon كصيغة موحدة و التي تعتمد على 5 نقاط جغرافية تمثل شكل خماسي الأضلاع و الذي يكون على الشكل 
+POLYGON ((30.0 31.0, 30.1 31.0, 30.1 31.1, 30.0 31.1, 30.0 31.0))  
+أما في الصفحة القادمة سنتعرف على مثال على البيانات الواردة مع شيء من التفصيل .
+
+{ "type": "FeatureCollection", "features": [ { "type": "Feature", "geometry": { "type": "Polygon", "coordinates": [ [ [31.20, 30.00], [31.30, 30.00], [31.30, 30.10], [31.20, 30.10], [31.20, 30.00] ] ] },
+"properties": { "fileID": "S1A_IW_GRDH_1SDV_20260908T154522_20260908T154547_054321_06789A_E1C2-V", "sceneName": "S1A_IW_GRDH_1SDV_20260908T154522", "platform": "Sentinel-1A", "sensor": "C-SAR", "processingLevel": "GRD", "beamModeType": "IW", "polarization": "VV+VH", "startTime": "2026-09-08T15:45:22.000Z", "stopTime": "2026-09-08T15:45:47.000Z", "flightDirection": "ASCENDING", "orbit": 54321, "pathNumber": 42, "frameNumber": 125, "bytes": 943718400, "md5sum": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6", "url": "https://alaska.edu", "pgeVersion": "003.61", "granuleType": "SENTINEL_1A_FRAME" } } ] } 
+و هنا سنجد أن geometry تشير الى نطاق التغطية و أن fileID و sceneName يشيران إلى المعرف المميز لملف المشهد الراداري و أن platform تشير إلى اسم القمر الصناعي و أن sensor تشير إلى نوع المستشعر المستخدم و أن processingLevel يشير إلى مستوى المعالجة و أن beaModeType يشير إلى نمط التصوير و فيه IW هو الأكثر شيوعا و أن polarization يشير الى الاستقطاب و الذي يوضح نوع المواد من ماء و مباني و صخر و غطاء نباتي و أن startTime و stopTime يشيرا إلى توقيت من بداية حتى نهاية اللقطة الرادارية و أن flightDirection يشير إلى اتجاه المسار أثناء التصوير و أن pathNumber و frameNumber يشيرا إلى رقم المدار الاهليجي و التأطير الجغرافي للمشهد
+و أن bytes يشير الى حجم الملف بوحدة البايت و الذي يكون كبير في العادة 
+و أن url يشير الى رابط التحميل المباشر للملف في صورة zip .
+اما بحكم وجود بيانات جغرافية فسنحتاج مكتبة geopandas .
+فأما بخصوص النموذج الذي سنستخدمه في توقع البيانات المستقبلية 
+و استنتاج المعاملات الغير مذكورة في البيانات الصادرة فسنستكشف 
+في الصفحة القادمة مجموعة من النماذج و سنرشح منهم نموذج ملائم .
