@@ -14,6 +14,20 @@ export default function Hero() {
 
   return (
     <section id="home" className="content-section hero-section" aria-labelledby="home-title">
+      <div className="hero-media" aria-hidden="true">
+        <video
+          className="hero-video"
+          src="/Video.mp4"
+          poster="/images/earth-limb.jpg"
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="metadata"
+          tabIndex={-1}
+        />
+      </div>
+
       <div className="section-inner hero-grid">
         <div>
           <div className="row" style={{ marginBottom: 14 }}>
@@ -58,14 +72,7 @@ export default function Hero() {
         </div>
       </div>
 
-      <a
-        className="hero-credit"
-        href="https://commons.wikimedia.org/wiki/File:ISS-20_Thunderstorms_on_the_Brazilian_Horizon.jpg"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        {t('hero.credit')}
-      </a>
+      <span className="hero-credit">{t('hero.credit')}</span>
     </section>
   );
 }
