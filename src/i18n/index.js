@@ -52,7 +52,7 @@ const en = {
       foot: 'SIMULATED SCENES · READY FOR NISAR PRODUCTS',
     },
     scroll: 'SCROLL TO DECODE',
-    credit: 'Earth limb from the ISS · NASA / Expedition 20',
+    credit: 'Earth from orbit · background footage',
   },
   mission: {
     kicker: '01 · THE INSTRUMENT',
@@ -493,7 +493,7 @@ const ar = {
       foot: 'مشاهد محاكاة · جاهزة لمنتجات نيسار',
     },
     scroll: 'مرّر للفك',
-    credit: 'أفق الأرض من محطة الفضاء الدولية · ناسا / البعثة 20',
+    credit: 'الأرض من المدار · لقطات خلفية',
   },
   mission: {
     kicker: '01 · الجهاز',
