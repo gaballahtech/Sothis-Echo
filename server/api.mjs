@@ -377,7 +377,9 @@ export async function handleRequest(req, res) {
   }
 
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
-  const path = url.pathname.replace(/\/+$/, '') || '/';
+  // Vercel only serves one path segment per function file, so every /api/*
+  // request is rewritten to the function and carries its real path here.
+  const path = (url.searchParams.get('__path') || url.pathname).replace(/\/+$/, '') || '/';
   const method = req.method || 'GET';
 
   try {
