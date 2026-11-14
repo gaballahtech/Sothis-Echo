@@ -18,6 +18,7 @@
  *   VITE_API_BASE_URL=http://127.0.0.1:3001/api npm run dev
  */
 import http from 'node:http';
+import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
 import { buildRealSite, clearRealCache } from './sentinel.mjs';
 import { clearNisarCache } from './nisar.mjs';
@@ -352,7 +353,11 @@ async function callGeoAI({ buffer, filename, contentType, prompt, model, point, 
 /* Server                                                              */
 /* ------------------------------------------------------------------ */
 
-const server = http.createServer(async (req, res) => {
+/**
+ * The whole router. Exported so the same code can be mounted as a Vercel
+ * serverless function (`api/[...path].mjs`) as well as a local http server.
+ */
+export async function handleRequest(req, res) {
   res.setHeader('Access-Control-Allow-Origin', resolveOrigin(req));
   res.setHeader('Vary', 'Origin');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
@@ -624,9 +629,15 @@ const server = http.createServer(async (req, res) => {
     const status = error?.status || 500;
     sendError(res, status, status === 500 ? 'Internal server error' : error.message, status === 500 ? String(error) : undefined);
   }
-});
+}
 
-server.listen(PORT, HOST, () => {
-  console.log(`[SOTHIS API] http://${HOST}:${PORT} — live search/geotiff/analyze + UI contract`);
-  console.log(`[SOTHIS API] GeoAI: ${GEOAI_BASE || 'disabled (demo report)'}`);
-});
+// Only bind a port when this file is the entry point (npm run api). Under a
+// serverless runtime the request handler is imported instead.
+const isEntry = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+
+if (isEntry) {
+  http.createServer(handleRequest).listen(PORT, HOST, () => {
+    console.log(`[SOTHIS API] http://${HOST}:${PORT} — live search/geotiff/analyze + UI contract`);
+    console.log(`[SOTHIS API] GeoAI: ${GEOAI_BASE || 'disabled (demo report)'}`);
+  });
+}
