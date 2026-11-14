@@ -2451,3 +2451,39 @@ button,
     animation-iteration-count: 1 !important;
   }
 }
+
+/* ---------- Detective engagement ---------- */
+@keyframes detective-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+.detective-shake { animation: detective-shake 0.45s ease; }
+
+@keyframes detective-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+.detective-correct-pop { animation: detective-pop 0.35s ease; }
+
+.detective-confetti {
+  position: relative;
+}
+.detective-confetti::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(22,90,54,0.35) 0 2px, transparent 3px),
+    radial-gradient(circle at 80% 30%, rgba(22,90,54,0.3) 0 2px, transparent 3px),
+    radial-gradient(circle at 50% 70%, rgba(22,90,54,0.25) 0 2px, transparent 3px);
+  animation: detective-fade 0.9s ease-out forwards;
+}
+@keyframes detective-fade {
+  0% { opacity: 1; }
+  100% { opacity: 0; }
+}

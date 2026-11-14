@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Callout, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
@@ -8,6 +8,30 @@ import { buildDetectiveEvidence, detectiveRounds } from '../data/quiz';
 import { SceneCanvas } from './SceneCanvas';
 import { Meter, Panel, SectionHead } from './ui';
 
+const ROUND_SECONDS = 30;
+
+function playBeep(kind) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return;
+    const ctx = new Ctx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = kind === 'correct' ? 660 : 220;
+    gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.2);
+    osc.onended = () => ctx.close();
+  } catch {
+    /* audio unavailable */
+  }
+}
+
 export default function Detective() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -16,7 +40,12 @@ export default function Detective() {
   const [selected, setSelected] = useState(null);
   const [revealed, setRevealed] = useState(false);
   const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [bestStreak, setBestStreak] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [finished, setFinished] = useState(false);
+  const [shake, setShake] = useState(false);
+  const timerRef = useRef(null);
 
   const L = (value) => localized(value, language);
   const round = detectiveRounds[roundIndex];
@@ -30,11 +59,45 @@ export default function Detective() {
   const correctOption = round.options.find((option) => option.id === round.answer);
   const ratio = score / total;
 
+  // countdown
+  useEffect(() => {
+    if (finished || revealed) return undefined;
+    setTimeLeft(ROUND_SECONDS);
+    timerRef.current = setInterval(() => {
+      setTimeLeft((value) => {
+        if (value <= 1) {
+          clearInterval(timerRef.current);
+          setSelected(null);
+          setRevealed(true);
+          setStreak(0);
+          playBeep('wrong');
+          return 0;
+        }
+        return value - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timerRef.current);
+  }, [roundIndex, finished, revealed]);
+
   const choose = (optionId) => {
     if (revealed) return;
+    clearInterval(timerRef.current);
     setSelected(optionId);
     setRevealed(true);
-    if (optionId === round.answer) setScore((value) => value + 1);
+    if (optionId === round.answer) {
+      setScore((value) => value + 1);
+      setStreak((value) => {
+        const next = value + 1;
+        setBestStreak((best) => Math.max(best, next));
+        return next;
+      });
+      playBeep('correct');
+    } else {
+      setStreak(0);
+      setShake(true);
+      setTimeout(() => setShake(false), 450);
+      playBeep('wrong');
+    }
   };
 
   const next = () => {
@@ -45,6 +108,7 @@ export default function Detective() {
     setRoundIndex((value) => value + 1);
     setSelected(null);
     setRevealed(false);
+    setShake(false);
   };
 
   const restart = () => {
@@ -52,13 +116,18 @@ export default function Detective() {
     setSelected(null);
     setRevealed(false);
     setScore(0);
+    setStreak(0);
+    setBestStreak(0);
+    setShake(false);
     setFinished(false);
+    setTimeLeft(ROUND_SECONDS);
   };
 
   const tier = ratio >= 0.75 ? 'tierHigh' : ratio >= 0.5 ? 'tierMedium' : 'tierLow';
+  const timerDanger = timeLeft <= 8;
 
   return (
-    <section id="game" className="content-section chapter chapter--teal" aria-labelledby="game-title">
+    <section id="game" className={`content-section chapter chapter--teal ${shake ? 'detective-shake' : ''}`} aria-labelledby="game-title">
       <div className="section-inner" style={{ maxWidth: 980 }}>
         <SectionHead title={t('game.title')} subtitle={t('game.subtitle')} id="game-title" />
 
@@ -72,6 +141,9 @@ export default function Detective() {
               <h3 style={{ margin: '0', fontSize: 20, fontWeight: 600 }}>{t('game.finishedTitle')}</h3>
               <p className="game-score" dir="ltr">{score} / {total}</p>
               <p className="body-copy-muted">{t('game.scoreLine', { score, total })}</p>
+              {bestStreak > 1 ? (
+                <p className="small muted" style={{ marginBottom: 8 }}>🔥 {bestStreak} streak best</p>
+              ) : null}
               <div style={{ maxWidth: 260, margin: '0 auto 12px' }}>
                 <Meter value={ratio} label={t('game.score', { score })} />
               </div>
@@ -80,11 +152,33 @@ export default function Detective() {
             </div>
           ) : (
             <>
-              <div className="row-between" style={{ marginBottom: 10 }}>
-                <p className="body-copy-muted" style={{ margin: 0, maxWidth: 640 }}>{L(round.brief)}</p>
-                <div className="row" style={{ gap: 6, minWidth: 140 }}>
-                  <span className="micro">{t('game.progress')}</span>
-                  <div style={{ width: 80 }}>
+              <div className="row-between" style={{ marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                <p className="body-copy-muted" style={{ margin: 0, maxWidth: 520 }}>{L(round.brief)}</p>
+                <div className="row" style={{ gap: 10, alignItems: 'center' }}>
+                  <div className="row" style={{ gap: 4 }} aria-label="progress">
+                    {detectiveRounds.map((_, i) => (
+                      <span
+                        key={i}
+                        style={{
+                          width: 10,
+                          height: 10,
+                          display: 'inline-block',
+                          background: i < roundIndex ? 'var(--bp-intent-success-rest)' : i === roundIndex ? 'var(--bp-intent-primary-rest)' : 'var(--bp-surface-border-color-default)',
+                        }}
+                      />
+                    ))}
+                  </div>
+                  {streak > 1 ? (
+                    <span className="micro" style={{ color: 'var(--bp-intent-warning-rest)' }}>🔥 ×{streak}</span>
+                  ) : null}
+                  <span
+                    className="micro numeric"
+                    style={{ color: timerDanger ? 'var(--bp-intent-danger-rest)' : 'var(--bp-typography-color-muted)', minWidth: 28, textAlign: 'right' }}
+                    data-testid="detective-timer"
+                  >
+                    {timeLeft}s
+                  </span>
+                  <div style={{ width: 70 }}>
                     <Meter value={(roundIndex + (revealed ? 1 : 0)) / total} label={t('game.progress')} />
                   </div>
                 </div>
@@ -128,6 +222,7 @@ export default function Detective() {
                       aria-pressed={isSelected}
                       data-testid={`detective-option-${option.id}`}
                       icon={revealed && isAnswer ? 'tick' : revealed && isSelected ? 'cross' : undefined}
+                      className={revealed && isAnswer ? 'detective-correct-pop' : ''}
                     >
                       {L(option.label)}
                     </Button>
@@ -137,9 +232,9 @@ export default function Detective() {
 
               <div aria-live="polite">
                 {revealed ? (
-                  <div data-testid="detective-feedback">
+                  <div data-testid="detective-feedback" className={correct ? 'detective-confetti' : ''}>
                     <Callout
-                      className="feedback"
+                      className={`feedback ${correct ? 'correct' : 'wrong'}`}
                       intent={correct ? 'success' : 'danger'}
                       icon={correct ? 'tick' : 'error'}
                       title={correct ? t('game.correct') : t('game.wrong')}
