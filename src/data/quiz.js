@@ -118,10 +118,10 @@ export function buildDetectiveEvidence(round, site) {
 
   if (before.water != null && after.water != null) {
     const delta = Math.round((after.water - before.water) * 100);
-    evidence.push({ id: 'water', label: { en: 'Water cover', ar: 'الغطاء المائي' }, value: `${signed(delta, 0)} pts` });
+    evidence.push({ id: 'water', label: { en: 'Dark share', ar: 'النسبة الداكنة' }, value: `${signed(delta, 0)} pts` });
   } else if (before.burn != null && after.burn != null) {
     const delta = Math.round((after.burn - before.burn) * 100);
-    evidence.push({ id: 'burn', label: { en: 'Burn cover', ar: 'مساحة الاحتراق' }, value: `${signed(delta, 0)} pts` });
+    evidence.push({ id: 'burn', label: { en: 'Dark share', ar: 'النسبة الداكنة' }, value: `${signed(delta, 0)} pts` });
   } else {
     const gap = after.vv - after.vh - (before.vv - before.vh);
     evidence.push({ id: 'gap', label: { en: 'VV\u2212VH gap', ar: 'فجوة VV\u2212VH' }, value: `${signed(gap, 1)} dB` });

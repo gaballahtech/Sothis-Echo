@@ -37,7 +37,7 @@ function Coordinates({ site }) {
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites } = useSiteData();
+  const { sites, source } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
 
   useEffect(() => {
@@ -64,6 +64,12 @@ export default function StudyAreas() {
     <section id="sites" className="content-section chapter chapter--mint" aria-labelledby="sites-title">
       <div className="section-inner">
         <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
+
+        {source !== 'api' ? (
+          <p className="micro" role="status" style={{ marginBottom: 12 }}>
+            {t('sites.localData')}
+          </p>
+        ) : null}
 
         <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
           {sites.map((item) => {

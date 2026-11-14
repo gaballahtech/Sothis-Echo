@@ -123,6 +123,8 @@ const en = {
     signalTab: 'Reading the signal',
     deepDive: 'Deep Dive Data',
     measurements: 'Signal measurements',
+    localData:
+      'Bundled fallback figures: the live backend is unreachable, so the numbers below are illustrative, not measurements.',
     observations: {
       title: 'Radar observation ledger',
       subtitle: 'Every pass in the bundled series, in one auditable table.',
@@ -131,7 +133,7 @@ const en = {
       columnVv: 'VV (dB)',
       columnVh: 'VH (dB)',
       columnCross: 'VV−VH (dB)',
-      columnWater: 'Water',
+      columnWater: 'Dark share',
       columnChange: 'Change',
       columnRecovery: 'Recovery',
       columnStatus: 'Status',
@@ -453,6 +455,8 @@ const ar = {
     readPol: 'اقرأ الاستقطاب',
     signalTab: 'قراءة الإشارة',
     deepDive: 'بيانات الباحثين',
+    localData:
+      'أرقام احتياطية مرفقة مع الموقع: الباك اند غير متاح، فالقيم أدناه توضيحية وليست قياسات.',
     measurements: 'قياسات الإشارة',
     observations: {
       title: 'سجل ملاحظات الرادار',
@@ -462,7 +466,7 @@ const ar = {
       columnVv: 'VV (ديسيبل)',
       columnVh: 'VH (ديسيبل)',
       columnCross: 'VV−VH (ديسيبل)',
-      columnWater: 'الماء',
+      columnWater: 'النسبة الداكنة',
       columnChange: 'التغير',
       columnRecovery: 'التعافي',
       columnStatus: 'الحالة',

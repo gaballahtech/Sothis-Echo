@@ -34,6 +34,12 @@ const s3ToHttps = (href) => {
 // σ⁰, but keeps the values in the same negative-dB range the UI expects.
 const toDb = (dn) => 20 * Math.log10(Math.max(1, dn) / 1000);
 
+// A pixel counts as "dark" when it is at least this much darker than the pass
+// median. Anchoring to the median keeps the number comparable between passes
+// and immune to the speckle outliers that made min+25%·range swing the same
+// site between 12% and 88%.
+const DARK_DROP_DB = 3;
+
 function stats(values) {
   let min = Infinity;
   let max = -Infinity;
@@ -52,9 +58,16 @@ function stats(values) {
   const mean = sum / count;
   const variance = Math.max(0, sumSq / count - mean * mean);
   const std = Math.sqrt(variance);
-  const threshold = min + (max - min) * 0.25;
-  for (let i = 0; i < values.length; i += 1) if (Number(values[i]) <= threshold) below += 1;
-  return { min, max, mean, std, lowFraction: below / count };
+  const finite = [];
+  for (let i = 0; i < values.length; i += 1) {
+    const value = Number(values[i]);
+    if (Number.isFinite(value)) finite.push(value);
+  }
+  finite.sort((a, b) => a - b);
+  const median = finite.length ? finite[Math.floor(finite.length / 2)] : 0;
+  const threshold = median / 10 ** (DARK_DROP_DB / 20);
+  for (let i = 0; i < finite.length; i += 1) if (finite[i] <= threshold) below += 1;
+  return { min, max, mean, std, median, lowFraction: below / count };
 }
 
 async function mapLimit(items, limit, fn) {

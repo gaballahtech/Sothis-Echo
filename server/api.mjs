@@ -30,7 +30,36 @@ try {
 
 const PORT = Number(process.env.API_PORT || process.env.MOCK_API_PORT || 3001);
 const HOST = process.env.API_HOST || process.env.MOCK_API_HOST || '0.0.0.0';
-const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
+// Origin allow-list. The deployed frontend and Vercel preview URLs must be
+// accepted by default, otherwise every browser request dies at the preflight
+// even though the API itself answers.
+const CORS_ALLOW = (process.env.CORS_ORIGIN ||
+  [
+    'https://sothisecho.vercel.app',
+    'https://*.vercel.app',
+    'http://localhost:3002',
+    'http://127.0.0.1:3002',
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ].join(','))
+  .split(',')
+  .map((entry) => entry.trim())
+  .filter(Boolean);
+
+function resolveOrigin(req) {
+  const origin = req?.headers?.origin;
+  if (CORS_ALLOW.includes('*')) return '*';
+  if (!origin) return CORS_ALLOW[0];
+  const allowed = CORS_ALLOW.some((rule) => {
+    if (rule === origin) return true;
+    const wildcard = rule.indexOf('*');
+    if (wildcard === -1) return false;
+    const prefix = rule.slice(0, wildcard);
+    const suffix = rule.slice(wildcard + 1);
+    return origin.startsWith(prefix) && origin.endsWith(suffix);
+  });
+  return allowed ? origin : CORS_ALLOW[0];
+}
 const GEOAI_BASE = (process.env.GEOAI_BASE_URL ?? 'https://mohamed4540-geoai-models.hf.space').replace(/\/+$/, '');
 const GEOAI_TIMEOUT = Number(process.env.GEOAI_TIMEOUT || 120000);
 const MAX_BYTES = Number(process.env.MAX_GEOTIFF_BYTES || 100 * 1024 * 1024);
@@ -173,7 +202,6 @@ async function getSites() {
 function send(res, status, payload, headers = {}) {
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
-    'Access-Control-Allow-Origin': CORS_ORIGIN,
     'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
     'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
     'Cache-Control': 'no-store',
@@ -325,11 +353,13 @@ async function callGeoAI({ buffer, filename, contentType, prompt, model, point, 
 /* ------------------------------------------------------------------ */
 
 const server = http.createServer(async (req, res) => {
+  res.setHeader('Access-Control-Allow-Origin', resolveOrigin(req));
+  res.setHeader('Vary', 'Origin');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization');
+
   if (req.method === 'OPTIONS') {
     res.writeHead(204, {
-      'Access-Control-Allow-Origin': CORS_ORIGIN,
-      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Accept, Authorization',
       'Access-Control-Max-Age': '600',
     });
     res.end();
