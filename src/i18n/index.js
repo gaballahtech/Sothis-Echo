@@ -171,7 +171,6 @@ const en = {
     map4: 'Static texture = rough, fragmented change',
     nowPlaying: 'Playing · pass {{current}} / {{total}}',
     noSupport: 'This browser does not support the Web Audio API. The visual series still shows the same pattern.',
-    hint: 'Use headphones. Start with the stable surface, then play the changing one.',
   },
   recovery: {
     title: 'When does it come back?',
@@ -493,7 +492,6 @@ const ar = {
     map4: 'النسيج المشوّش = تغيّر خشن ومتقطع',
     nowPlaying: 'قيد التشغيل · المرور {{current}} / {{total}}',
     noSupport: 'هذا المتصفح لا يدعم واجهة الصوت. السلسلة المرئية تُظهر النمط نفسه.',
-    hint: 'استخدم سماعات. ابدأ بالسطح المستقر ثم شغّل السطح المتغير.',
   },
   recovery: {
     title: 'متى يعود؟',

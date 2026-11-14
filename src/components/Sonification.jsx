@@ -127,7 +127,7 @@ export default function Sonification() {
         <p className="sound-status" data-testid="sound-status" aria-live="polite">
           {playing
             ? t('sound.nowPlaying', { current: step + 1, total: site.pulse.length })
-            : t('sound.hint')}
+            : null}
         </p>
       </div>
 
