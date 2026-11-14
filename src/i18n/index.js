@@ -132,7 +132,7 @@ const en = {
       columnDate: 'Pass date',
       columnVv: 'VV (dB)',
       columnVh: 'VH (dB)',
-      columnCross: 'VV−VH (dB)',
+      columnCross: 'VH−VV (dB)',
       columnWater: 'Dark share',
       columnChange: 'Change',
       columnRecovery: 'Recovery',
@@ -148,9 +148,9 @@ const en = {
         'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve. Change is |ΔVV| against the pre-event pass, scaled so 1.00 = 12 dB.',
     },
     dbNote:
-      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
+      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
     dbNoteFallback:
-      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
+      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
     interpretation: 'Interpretation',
@@ -476,7 +476,7 @@ const ar = {
       columnDate: 'تاريخ المرور',
       columnVv: 'VV (ديسيبل)',
       columnVh: 'VH (ديسيبل)',
-      columnCross: 'VV−VH (ديسيبل)',
+      columnCross: 'VH−VV (ديسيبل)',
       columnWater: 'النسبة الداكنة',
       columnChange: 'التغير',
       columnRecovery: 'التعافي',
@@ -492,9 +492,9 @@ const ar = {
         'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔVV| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
     },
     dbNote:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
     dbNoteFallback:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
     interpretation: 'التفسير',

@@ -100,7 +100,7 @@ const signed = (value, digits) =>
 /**
  * Derive the evidence chips from the live study-area numbers.
  * Every chip is a real backscatter delta: ΔVV, ΔVH, and the change in the
- * VV−VH gap. The gap is the honest third signal — the "dark share" proxy is
+ * VH−VV gap. The gap is the honest third signal — the "dark share" proxy is
  * noisy across wind, soil moisture and tide, and on the live Vietnam passes it
  * moves opposite to the flood, so it is not shown as evidence.
  */
@@ -117,11 +117,12 @@ export function buildDetectiveEvidence(round, site) {
     { id: 'dvh', label: { en: '\u0394VH', ar: '\u0394VH' }, value: `${signed(after.vh - before.vh, 1)} dB` },
   ];
 
-  const gapBefore = before.vv - before.vh;
-  const gapAfter = after.vv - after.vh;
+  // Same convention as the ledger: cross-pol is VH minus VV.
+  const gapBefore = before.vh - before.vv;
+  const gapAfter = after.vh - after.vv;
   evidence.push({
     id: 'gap',
-    label: { en: 'VV\u2212VH gap', ar: 'فجوة VV\u2212VH' },
+    label: { en: 'VH\u2212VV gap', ar: 'فجوة VH\u2212VV' },
     value: `${signed(gapAfter - gapBefore, 1)} dB`,
   });
 
