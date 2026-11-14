@@ -110,12 +110,12 @@ test('light theme reaches Dialog and text contrast is AA', async ({ page }) => {
     };
   });
 
-  // Dialog inherits the body-level dark scope, including its portal.
+  // The guided-tour spot card inherits the body-level light scope.
   await page.getByTestId('tour-help').click();
-  const dialog = page.locator('.bp6-dialog').first();
+  const dialog = page.locator('.tour-spot .bp6-card').first();
   await expect(dialog).toBeVisible();
   const dialogColors = await dialog.evaluate((node) => {
-    const body = node.querySelector('.bp6-dialog-body');
+    const body = node.querySelector('[data-testid="tour-card"]');
     const bg = getComputedStyle(node).backgroundColor;
     return {
       background: bg,

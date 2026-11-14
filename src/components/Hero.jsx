@@ -6,12 +6,6 @@ export default function Hero() {
 
   const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-  const facts = [
-    { key: 'orbit', value: t('hero.panel.orbitValue') },
-    { key: 'repeat', value: t('hero.panel.repeatValue') },
-    { key: 'resolution', value: t('hero.panel.resolutionValue') },
-  ];
-
   return (
     <section id="home" className="content-section hero-section" aria-labelledby="home-title">
       <div className="hero-media" aria-hidden="true">
@@ -38,15 +32,6 @@ export default function Hero() {
           <div className="hero-actions">
             <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />
             <Button variant="outlined" icon="volume-up" text={t('hero.ctaListen')} onClick={() => go('sound')} />
-          </div>
-
-          <div className="hero-inline-stats" aria-label={t('hero.factsLabel')}>
-            {facts.map((fact) => (
-              <div className="hero-stat" key={fact.key}>
-                <span className="hero-stat-label">{t(`hero.panel.${fact.key}`)}</span>
-                <span className="hero-stat-value">{fact.value}</span>
-              </div>
-            ))}
           </div>
         </div>
       </div>
