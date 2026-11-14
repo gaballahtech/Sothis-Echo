@@ -53,8 +53,8 @@ export const studyAreas = [
         label: { en: 'BEFORE THE RAIN', ar: 'قبل المطر' },
         params: { water: 0.2, emergent: 0.6, burn: 0, cloud: 0.7 },
         caption: {
-          en: 'Rivers inside their banks; fields and towns dry.',
-          ar: 'الأنهار داخل ضفافها، والحقول والبلدات جافة.',
+          en: 'Land inside its channels: bright, textured return from fields, towns and trees.',
+          ar: 'أرض داخل قنواتها: ارتداد لامع ذو نسيج من الحقول والبلدات والأشجار.',
         },
         happened: {
           en: 'The lowland is a mosaic of rice fields, towns, roads and narrow rivers. Water is confined to channels and ponds.',
@@ -74,8 +74,8 @@ export const studyAreas = [
         label: { en: 'AFTER THE FLOOD', ar: 'بعد الفيضان' },
         params: { water: 0.85, emergent: 0.55, burn: 0, cloud: 0.9 },
         caption: {
-          en: 'River water spreads across fields and streets; only roofs and tree crowns remain bright.',
-          ar: 'ماء النهر ينتشر فوق الحقول والشوارع، ولا يبقى لامعًا إلا الأسطح وتيجان الأشجار.',
+          en: 'Open water reads dark where the pulse scatters away; buildings and crowns above the surface stay bright.',
+          ar: 'الماء المكشوف داكن حيث تتبدد النبضة، وتبقى المباني والتيجان فوق السطح لامعة.',
         },
         happened: {
           en: 'Flood water left the channels and covered the lowland. Towns, roads and rice fields were submerged for days.',
@@ -217,8 +217,8 @@ export const studyAreas = [
         label: { en: 'BEFORE THE FIRE', ar: 'قبل الحريق' },
         params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 },
         caption: {
-          en: 'Continuous pine and scrub on dry slopes. Bright, textured volume scattering.',
-          ar: 'صنوبر وشجيرات متصلة على منحدرات جافة، وتشتت حجمي لامع ذو نسيج.',
+          en: 'Canopy intact: bright, textured volume scattering in both channels.',
+          ar: 'المظلة سليمة: تشتت حجمي لامع ذو نسيج في القناتين.',
         },
         happened: {
           en: 'Mature Mediterranean pine and scrub cover the slopes. The soil is dry after a rainless summer, but the canopy is intact.',
@@ -238,8 +238,8 @@ export const studyAreas = [
         label: { en: 'AFTER THE FIRE', ar: 'بعد الحريق' },
         params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 },
         caption: {
-          en: 'A dark, smooth burn scar. Surviving trunks stand as isolated bright points.',
-          ar: 'أثر حرق داكن وأملس. الجذوع الناجية تقف كنقاط لامعة معزولة.',
+          en: 'Canopy and litter gone: a darker, smoother return, with surviving trunks as isolated bright points.',
+          ar: 'بغياب المظلة والغطاء الميت: ارتداد أغمق وأنعم، والجذوع الناجية نقاط لامعة معزولة.',
         },
         happened: {
           en: 'Crown fire and severe burning removed the canopy across the scar. Ash and exposed soil replaced needles and branches.',
@@ -384,8 +384,8 @@ export const contrastRows = [
   {
     id: 'recovery',
     label: { en: 'Signal returns to 80%', ar: 'عودة الإشارة إلى 80%' },
-    sundarbans: { en: 'Months', ar: 'أشهر' },
-    caldor: { en: 'Years', ar: 'سنوات' },
+    sundarbans: { en: 'About two months', ar: 'نحو شهرين' },
+    caldor: { en: 'Not yet reached in this record', ar: 'لم يتحقق بعد في هذا السجل' },
   },
 ];
 

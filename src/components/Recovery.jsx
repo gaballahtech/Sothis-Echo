@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, ButtonGroup, Collapse } from '@blueprintjs/core';
+import { Button, ButtonGroup, Callout, Collapse } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -264,6 +264,16 @@ export default function Recovery() {
           </Panel>
 
           <Panel title={t('recovery.chartTitle')} bodyClassName="card-pad">
+            {site.recovery.fromApi !== true ? (
+              <Callout
+                intent="warning"
+                icon="info-sign"
+                data-testid="recovery-fallback"
+                style={{ marginBottom: 10 }}
+              >
+                {t('recovery.fallbackNotice')}
+              </Callout>
+            ) : null}
             <div className="chart-scroll">
               <RecoveryChart
                 points={site.recovery.points}

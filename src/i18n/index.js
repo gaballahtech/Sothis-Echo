@@ -144,7 +144,8 @@ const en = {
         recovery: 'Recovering',
         change: 'Changed',
       },
-      note: 'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve.',
+      note:
+        'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve. Change is |ΔVV| against the pre-event pass, scaled so 1.00 = 12 dB.',
     },
     dbNote:
       'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
@@ -169,7 +170,7 @@ const en = {
   sound: {
     title: 'See and hear the surface dance',
     subtitle:
-      'Each satellite pass becomes both a wave and a pulse. Watch the terrain shift and listen for the change when a flood or fire hits.',
+      'The record of satellite passes becomes both a wave and a pulse. Watch the trace and listen for the change when a flood or fire hits.',
     stableTitle: 'A stable surface',
     stableSub: 'A reference series with almost no change. Same low pitch, slow steady pulse.',
     changeTitle: 'A changing surface',
@@ -177,11 +178,11 @@ const en = {
     play: 'Play',
     stop: 'Stop',
     mappingTitle: 'How the data becomes sound',
-    map1: 'One pulse = one satellite pass',
+    map1: 'One pulse = one step of the 16-step series',
     map2: 'Pitch = amount of change',
     map3: 'Rhythm = speed of change',
     map4: 'Static texture = rough, fragmented change',
-    nowPlaying: 'Playing · pass {{current}} / {{total}}',
+    nowPlaying: 'Playing · step {{current}} / {{total}}',
     noSupport: 'This browser does not support the Web Audio API. The visual series still shows the same pattern.',
   },
   recovery: {
@@ -199,7 +200,9 @@ const en = {
       'This is a structural proxy, not full ecological recovery. Radar brightness can return while carbon, species and soil are still rebuilding.',
     methodLabel: 'How this estimate is made',
     methodBody:
-      'Each point is one satellite pass over {{site}}, divided by its level before the event — so 100% is back to where it started. The dashed tail is an extrapolation, not an observation. The estimate is the first month the curve meets your target.',
+      'Each point is one post-event satellite pass over {{site}}, divided by its level before the event — so 100% is back to where it started. The dashed tail is an extrapolation, not an observation. The estimate is the first month the curve meets your target.',
+    fallbackNotice:
+      'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -282,7 +285,7 @@ const en = {
       },
       sound: {
         title: 'Hear the change',
-        body: 'Each satellite pass becomes a pulse. A calm surface keeps a steady beat; a flood or fire changes pitch and rhythm. Try the stable surface, then the changing one.',
+        body: 'The series of passes becomes a sequence of pulses. A calm surface keeps a steady beat; a flood or fire changes pitch and rhythm.',
       },
       game: {
         title: 'Test your eye',
@@ -485,7 +488,8 @@ const ar = {
         recovery: 'يتعافى',
         change: 'متغير',
       },
-      note: 'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي.',
+      note:
+        'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔVV| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
     },
     dbNote:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
@@ -510,7 +514,7 @@ const ar = {
   sound: {
     title: 'شاهد واسمع سطح الأرض يرقص',
     subtitle:
-      'كل مرور للقمر يصبح موجة ونبضة. شاهد التضاريس تتحرك واسمع التغيّر عندما يضرب الفيضان أو الحريق.',
+      'سجل مرورات القمر يصبح موجة ونبضة. شاهد الأثر واسمع التغيّر عندما يضرب الفيضان أو الحريق.',
     stableTitle: 'سطح مستقر',
     stableSub: 'سلسلة مرجعية بلا تغيّر تقريبًا. النغمة المنخفضة نفسها والنبض البطيء الثابت.',
     changeTitle: 'سطح متغيّر',
@@ -518,11 +522,11 @@ const ar = {
     play: 'تشغيل',
     stop: 'إيقاف',
     mappingTitle: 'كيف تتحول البيانات إلى صوت',
-    map1: 'نبضة واحدة = مرور قمر واحد',
+    map1: 'نبضة واحدة = خطوة من 16 خطوة في السلسلة',
     map2: 'النغمة = مقدار التغير',
     map3: 'الإيقاع = سرعة التغير',
     map4: 'النسيج المشوّش = تغيّر خشن ومتقطع',
-    nowPlaying: 'قيد التشغيل · المرور {{current}} / {{total}}',
+    nowPlaying: 'قيد التشغيل · الخطوة {{current}} / {{total}}',
     noSupport: 'هذا المتصفح لا يدعم واجهة الصوت. السلسلة المرئية تُظهر النمط نفسه.',
   },
   recovery: {
@@ -540,7 +544,9 @@ const ar = {
       'هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا. قد يعود سطوع الرادار بينما الكربون والأنواع والتربة ما زالت تتعافى.',
     methodLabel: 'كيف حُسب هذا التقدير',
     methodBody:
-      'كل نقطة هي مرور واحد للقمر فوق {{site}}، مقسومًا على مستواها قبل الحدث؛ أي أن 100% تعني العودة إلى ما كانت عليه. الذيل المتقطع استقراء وليس رصدًا. والتقدير هو أول شهر يبلغ فيه المنحنى هدفك.',
+      'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}، مقسومًا على مستواها قبل الحدث؛ أي أن 100% تعني العودة إلى ما كانت عليه. الذيل المتقطع استقراء وليس رصدًا. والتقدير هو أول شهر يبلغ فيه المنحنى هدفك.',
+    fallbackNotice:
+      'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {
@@ -621,7 +627,7 @@ const ar = {
       },
       sound: {
         title: 'اسمع التغيّر',
-        body: 'كل مرور قمر يصبح نبضة. السطح الهادئ يحافظ على إيقاع ثابت، والفيضان أو الحريق يغيّر النغمة والإيقاع. جرّب السطح المستقر ثم المتغير.',
+        body: 'سلسلة المرورات تتحول إلى نبضات. السطح الهادئ يحافظ على إيقاع ثابت، والفيضان أو الحريق يغيّر النغمة والإيقاع.',
       },
       game: {
         title: 'اختبر عينك',

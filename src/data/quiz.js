@@ -99,9 +99,10 @@ const signed = (value, digits) =>
 
 /**
  * Derive the evidence chips from the live study-area numbers.
- * Radar deltas come from the real before/after passes; the third chip is the
- * surface change that the site actually tracks (water fraction for the flood,
- * burn fraction for the burn scar), falling back to the cross-pol gap.
+ * Every chip is a real backscatter delta: ΔVV, ΔVH, and the change in the
+ * VV−VH gap. The gap is the honest third signal — the "dark share" proxy is
+ * noisy across wind, soil moisture and tide, and on the live Vietnam passes it
+ * moves opposite to the flood, so it is not shown as evidence.
  */
 export function buildDetectiveEvidence(round, site) {
   if (!round || !site) return [];
@@ -116,16 +117,13 @@ export function buildDetectiveEvidence(round, site) {
     { id: 'dvh', label: { en: '\u0394VH', ar: '\u0394VH' }, value: `${signed(after.vh - before.vh, 1)} dB` },
   ];
 
-  if (before.water != null && after.water != null) {
-    const delta = Math.round((after.water - before.water) * 100);
-    evidence.push({ id: 'water', label: { en: 'Dark share', ar: 'النسبة الداكنة' }, value: `${signed(delta, 0)} pts` });
-  } else if (before.burn != null && after.burn != null) {
-    const delta = Math.round((after.burn - before.burn) * 100);
-    evidence.push({ id: 'burn', label: { en: 'Dark share', ar: 'النسبة الداكنة' }, value: `${signed(delta, 0)} pts` });
-  } else {
-    const gap = after.vv - after.vh - (before.vv - before.vh);
-    evidence.push({ id: 'gap', label: { en: 'VV\u2212VH gap', ar: 'فجوة VV\u2212VH' }, value: `${signed(gap, 1)} dB` });
-  }
+  const gapBefore = before.vv - before.vh;
+  const gapAfter = after.vv - after.vh;
+  evidence.push({
+    id: 'gap',
+    label: { en: 'VV\u2212VH gap', ar: 'فجوة VV\u2212VH' },
+    value: `${signed(gapAfter - gapBefore, 1)} dB`,
+  });
 
   return evidence;
 }

@@ -152,7 +152,10 @@ function mergePulse(local, remote) {
 }
 
 function mergeRecovery(local, remote) {
-  if (!remote || !Array.isArray(remote.points)) return local;
+  // `fromApi` tells the UI whether this curve was actually fitted to passes.
+  // When the live record is too short, the bundled reference curve is kept —
+  // and must be shown as illustrative instead of presented as a measurement.
+  if (!remote || !Array.isArray(remote.points)) return { ...local, fromApi: false };
   const seen = new Set();
   const points = remote.points
     .filter((point) => point && toNumber(point.month) != null && toNumber(point.pct) != null)
@@ -167,12 +170,13 @@ function mergeRecovery(local, remote) {
       return true;
     })
     .sort((a, b) => a.month - b.month);
-  if (points.length < 2) return local;
+  if (points.length < 2) return { ...local, fromApi: false };
   const threshold = toNumber(remote.thresholdDefault);
   return {
     ...local,
     thresholdDefault: threshold != null ? Math.max(50, Math.min(95, threshold)) : local.thresholdDefault,
     points,
+    fromApi: true,
   };
 }
 
@@ -390,7 +394,7 @@ export async function analyzeScene(id, { prompt, requestedModel = 'auto', point,
 export function buildSiteCsv(site) {
   const localizedName = site.name?.en ?? site.id;
   const rows = [
-    ['site', 'date_or_month', 'vv_db', 'vh_db', 'water_fraction', 'burn_fraction', 'change_index', 'recovery_pct', 'projected'],
+    ['site', 'date_or_month', 'vv_db', 'vh_db', 'dark_share', 'change_index', 'recovery_pct', 'projected'],
   ];
   for (const point of site.series || []) {
     rows.push([
@@ -398,8 +402,7 @@ export function buildSiteCsv(site) {
       point.date,
       point.vv ?? '',
       point.vh ?? '',
-      point.water ?? '',
-      point.burn ?? '',
+      point.water ?? point.burn ?? '',
       point.change ?? '',
       '',
       '',
