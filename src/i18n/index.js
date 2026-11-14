@@ -2,8 +2,11 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 const en = {
+  app: {
+    tagline: 'Radar stories of a changing Earth',
+  },
   navbar: {
-    brand: 'Dancing with SAR',
+    brand: 'Sothis Echo',
     mission: 'Mission',
     seeThrough: 'Camera vs radar',
     sites: 'Study areas',
@@ -14,6 +17,7 @@ const en = {
     menu: 'Toggle navigation menu',
     home: 'Overview',
     team: 'Team',
+    switchLanguage: 'Switch to Arabic',
   },
   hero: {
     title: 'Earth is always dancing.',
@@ -23,14 +27,13 @@ const en = {
     ctaListen: 'Hear the surface',
     panel: {
       orbit: 'Orbit',
-      orbitValue: '747 km · sun-synchronous',
-      repeat: 'Repeat cycle',
-      repeatValue: '12 days · ~6 day revisit',
-      resolution: 'Resolution',
-      resolutionValue: '3–10 m',
+      orbitValue: '747 km, polar',
+      repeat: 'Full coverage',
+      repeatValue: 'every 12 days',
+      resolution: 'Detail',
+      resolutionValue: '3–10 m per pixel',
     },
     factsLabel: 'Mission facts',
-    credit: 'Earth from orbit · background footage',
   },
   mission: {
     title: 'Meet NISAR',
@@ -152,9 +155,9 @@ const en = {
     ariaScene: '{{site}} {{state}} radar scene',
   },
   sound: {
-    title: 'Hear the surface dance',
+    title: 'See and hear the surface dance',
     subtitle:
-      'Each satellite pass becomes one pulse. A quiet surface keeps a steady beat; a flood or fire changes pitch and rhythm. Listen for the difference.',
+      'Each satellite pass becomes both a wave and a pulse. Watch the terrain shift and listen for the change when a flood or fire hits.',
     stableTitle: 'A stable surface',
     stableSub: 'A reference series with almost no change. Same low pitch, slow steady pulse.',
     changeTitle: 'A changing surface',
@@ -183,13 +186,10 @@ const en = {
     chartX: 'Months since event',
     caveat:
       'This is a structural proxy, not full ecological recovery. Radar brightness can return while carbon, species and soil are still rebuilding.',
-    info: 'Info',
-    researcherTitle: 'Fit & assumptions',
-    researcherBody:
-      'The curve is normalized to the pre-event VH baseline. The dashed segment is a logistic projection; the estimate is a linear interpolation between the two bracketing points, so treat it as an order-of-magnitude answer, not a forecast.',
+    methodLabel: 'How this estimate is made',
+    methodBody:
+      'Each point is one satellite pass over {{site}}, divided by its level before the event — so 100% is back to where it started. The dashed tail is an extrapolation, not an observation. The estimate is the first month the curve meets your target.',
     signalToday: 'Signal at the end of the record',
-    researchExtra:
-      'Score the fit on withheld passes, report RMSE in dB, and test sensitivity to speckle filtering before publishing a recovery date.',
   },
   game: {
     title: 'Radar detective',
@@ -275,7 +275,7 @@ const en = {
   },
   team: {
     title: 'The team',
-    subtitle: 'The people behind Dancing with SAR',
+    subtitle: 'The people behind Sothis Echo',
     roles: {
       frontendLead: 'Frontend lead · project lead',
       backendDev: 'Backend developer',
@@ -289,7 +289,7 @@ const en = {
     },
   },
   footer: {
-    brand: 'Dancing with SAR',
+    brand: 'Sothis Echo',
     tagline: 'Reading the rhythm of Earth’s surface with NISAR.',
     challenge: 'NASA Space Apps Challenge · NISAR',
     columns: {
@@ -308,7 +308,7 @@ const en = {
       issues: 'Report an issue',
       contribute: 'Contribute',
     },
-    copyright: '© {{year}} Dancing with SAR',
+    copyright: '© {{year}} Sothis Echo',
     disclosure: 'Independent educational prototype for the NASA Space Apps Challenge. Mission facts: NASA / ISRO.',
   },
   errorBoundary: {
@@ -320,14 +320,16 @@ const en = {
   common: {
     loading: 'Loading',
     retry: 'Retry',
-    site: 'Site',
     sitePicker: 'Study area',
   },
 };
 
 const ar = {
+  app: {
+    tagline: 'حكايات الأرض المتغيّرة بالرادار',
+  },
   navbar: {
-    brand: 'الرقص مع الرادار',
+    brand: 'صدى الأرض',
     mission: 'المهمة',
     seeThrough: 'كاميرا أم رادار',
     sites: 'مناطق الدراسة',
@@ -338,6 +340,7 @@ const ar = {
     menu: 'تبديل قائمة التنقل',
     home: 'نظرة عامة',
     team: 'الفريق',
+    switchLanguage: 'التبديل إلى الإنجليزية',
   },
   hero: {
     title: 'الأرض ترقص دائمًا.',
@@ -347,14 +350,13 @@ const ar = {
     ctaListen: 'اسمع سطح الأرض',
     panel: {
       orbit: 'المدار',
-      orbitValue: '747 كم · متزامن مع الشمس',
-      repeat: 'دورة التكرار',
-      repeatValue: '12 يومًا · زيارة كل 6 أيام تقريبًا',
-      resolution: 'الدقة',
-      resolutionValue: '3–10 م',
+      orbitValue: '747 كم، قطبي',
+      repeat: 'تغطية الأرض',
+      repeatValue: 'كل 12 يومًا',
+      resolution: 'التفاصيل',
+      resolutionValue: '3–10 أمتار للبكسل',
     },
     factsLabel: 'أرقام المهمة',
-    credit: 'الأرض من المدار · لقطات خلفية',
   },
   mission: {
     title: 'تعرّف على نيسار',
@@ -475,9 +477,9 @@ const ar = {
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
   },
   sound: {
-    title: 'اسمع رقصة السطح',
+    title: 'شاهد واسمع سطح الأرض يرقص',
     subtitle:
-      'كل مرور قمر يصبح نبضة. السطح الهادئ يحافظ على إيقاع ثابت، والفيضان أو الحريق يغيّر النغمة والإيقاع. استمع للفرق.',
+      'كل مرور للقمر يصبح موجة ونبضة. شاهد التضاريس تتحرك واسمع التغيّر عندما يضرب الفيضان أو الحريق.',
     stableTitle: 'سطح مستقر',
     stableSub: 'سلسلة مرجعية بلا تغيّر تقريبًا. النغمة المنخفضة نفسها والنبض البطيء الثابت.',
     changeTitle: 'سطح متغيّر',
@@ -506,13 +508,10 @@ const ar = {
     chartX: 'أشهر منذ الحدث',
     caveat:
       'هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا. قد يعود سطوع الرادار بينما الكربون والأنواع والتربة ما زالت تتعافى.',
-    info: 'معلومات',
-    researcherTitle: 'الملاءمة والافتراضات',
-    researcherBody:
-      'تم تعيير المنحنى إلى خط أساس VH قبل الحدث. الجزء المتقطع إسقاط لوجستي؛ والتقدير استيفاء خطي بين النقطتين المحيطتين، لذا اعتبره إجابة بمقياس رتبة لا تنبؤًا دقيقًا.',
+    methodLabel: 'كيف حُسب هذا التقدير',
+    methodBody:
+      'كل نقطة هي مرور واحد للقمر فوق {{site}}، مقسومًا على مستواها قبل الحدث؛ أي أن 100% تعني العودة إلى ما كانت عليه. الذيل المتقطع استقراء وليس رصدًا. والتقدير هو أول شهر يبلغ فيه المنحنى هدفك.',
     signalToday: 'الإشارة عند نهاية السجل',
-    researchExtra:
-      'قيّم الملاءمة على مرورات محجوبة، وأبلغ عن RMSE بالديسيبل، واختبر الحساسية لتنقية التشويش قبل نشر تاريخ تعافٍ.',
   },
   game: {
     title: 'محقق الرادار',
@@ -596,7 +595,7 @@ const ar = {
   },
   team: {
     title: 'الفريق',
-    subtitle: 'الأشخاص خلف «الرقص مع الرادار»',
+    subtitle: 'الأشخاص خلف «صدى الأرض»',
     roles: {
       frontendLead: 'قائد الواجهة الأمامية وقائد المشروع',
       backendDev: 'مطور الخلفية',
@@ -610,7 +609,7 @@ const ar = {
     },
   },
   footer: {
-    brand: 'الرقص مع الرادار',
+    brand: 'صدى الأرض',
     tagline: 'قراءة إيقاع سطح الأرض مع نيسار.',
     challenge: 'تحدي ناسا لتطبيقات الفضاء · نيسار',
     columns: {
@@ -629,7 +628,7 @@ const ar = {
       issues: 'الإبلاغ عن مشكلة',
       contribute: 'المساهمة',
     },
-    copyright: '© {{year}} الرقص مع الرادار',
+    copyright: '© {{year}} صدى الأرض',
     disclosure: 'نموذج تعليمي مستقل لتحدي ناسا لتطبيقات الفضاء. حقائق المهمة: ناسا / إيسرو.',
   },
   errorBoundary: {
@@ -641,7 +640,6 @@ const ar = {
   common: {
     loading: 'جارٍ التحميل',
     retry: 'إعادة المحاولة',
-    site: 'موقع',
     sitePicker: 'منطقة الدراسة',
   },
 };
@@ -650,7 +648,7 @@ const savedLanguage =
   typeof window !== 'undefined'
     ? (() => {
         try {
-          return localStorage.getItem('dancing-with-sar-language') || localStorage.getItem('aura-sar-language');
+          return localStorage.getItem('sothis-echo-language') || localStorage.getItem('dancing-with-sar-language');
         } catch {
           return null;
         }

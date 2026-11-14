@@ -3,9 +3,8 @@ import { expect, test } from '@playwright/test';
 async function openApp(page) {
   await page.addInitScript(() => {
     try {
-      localStorage.setItem('dancing-with-sar-tour-seen', '1');
-      localStorage.setItem('dancing-with-sar-mode', 'public');
-      localStorage.setItem('dancing-with-sar-language', 'en');
+      localStorage.setItem('sothis-echo-tour-seen', '1');
+      localStorage.setItem('sothis-echo-language', 'en');
     } catch {
       /* storage unavailable */
     }
@@ -61,11 +60,11 @@ test('Tech Editorial tokens and typography are applied', async ({ page }) => {
   });
 
   expect(base.bodyBackground).toBe('rgb(247, 246, 242)');
-  expect(base.bodyFont).toContain('Space Grotesk');
-  expect(base.heroFont).toContain('Playfair Display');
+  expect(base.bodyFont).toContain('Instrument Sans');
+  expect(base.heroFont).toContain('Newsreader');
   expect(base.heroColor).toBe('rgb(28, 28, 28)');
   expect(base.buttonRadius).toBe('0px');
-  expect(base.buttonFont).toContain('Space Mono');
+  expect(base.buttonFont).toContain('JetBrains Mono');
   expect(base.cardRadius).toBe('0px');
   expect(base.cardShadow).toBe('none');
 
@@ -76,8 +75,8 @@ test('Tech Editorial tokens and typography are applied', async ({ page }) => {
     font: getComputedStyle(cell).fontFamily,
     headerFont: getComputedStyle(document.querySelector('.observations-table .bp6-table-header')).fontFamily,
   }));
-  expect(tableType.font).toContain('Space Mono');
-  expect(tableType.headerFont).toContain('Space Mono');
+  expect(tableType.font).toContain('JetBrains Mono');
+  expect(tableType.headerFont).toContain('JetBrains Mono');
 });
 
 test('light theme reaches Dialog and text contrast is AA', async ({ page }) => {
@@ -208,9 +207,8 @@ test('light theme reaches Dialog and text contrast is AA', async ({ page }) => {
 test('Arabic flips the ledger columns and right-aligns headers and cells', async ({ page }) => {
   await page.addInitScript(() => {
     try {
-      localStorage.setItem('dancing-with-sar-tour-seen', '1');
-      localStorage.setItem('dancing-with-sar-mode', 'public');
-      localStorage.setItem('dancing-with-sar-language', 'ar');
+      localStorage.setItem('sothis-echo-tour-seen', '1');
+      localStorage.setItem('sothis-echo-language', 'ar');
     } catch {
       /* storage unavailable */
     }

@@ -1,4 +1,4 @@
-# Dancing with SAR — Backend API Contract
+# Sothis Echo — Backend API Contract
 
 > Frontend status: **backend-ready**. With `VITE_API_BASE_URL` unset the app makes
 > **zero network requests** and renders the bundled illustrative dataset

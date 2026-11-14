@@ -23,7 +23,7 @@ export default function Hero() {
           muted
           loop
           playsInline
-          preload="metadata"
+          preload="none"
           tabIndex={-1}
         />
       </div>
@@ -51,7 +51,6 @@ export default function Hero() {
         </div>
       </div>
 
-      <span className="hero-credit">{t('hero.credit')}</span>
     </section>
   );
 }

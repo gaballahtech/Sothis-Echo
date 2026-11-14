@@ -69,7 +69,7 @@ export default function SeeThrough() {
                         flex: '0 0 34px',
                         background: item.swatch,
                         border: '1px solid var(--bp-surface-border-color-strong)',
-                        borderRadius: 2,
+                        borderRadius: 0,
                       }}
                     />
                     <span className="small">{t(`seeThrough.${item.key}`)}</span>

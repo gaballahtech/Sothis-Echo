@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useTour } from '../context/TourContext';
 import { Meter } from './ui';
 
-const STORAGE_KEY = 'dancing-with-sar-tour-seen';
+const STORAGE_KEY = 'sothis-echo-tour-seen';
 
 const STEPS = [
   { id: 'mission', key: 'mission' },

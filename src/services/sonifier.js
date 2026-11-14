@@ -1,5 +1,5 @@
 /**
- * Data sonification — “Dancing with SAR”.
+ * Data sonification — Sothis Echo.
  *
  * Mapping is deliberately simple and explainable:
  *   one pulse  = one satellite pass (12-day repeat)
@@ -14,6 +14,8 @@
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24];
 const ROOT_HZ = 146.83; // D3 — low, calm register
 const MASTER_LEVEL = 0.26;
+const NOISE_LEVEL = 0.07;
+const NOISE_DURATION = 0.11;
 
 export const isAudioSupported = () =>
   typeof window !== 'undefined' && Boolean(window.AudioContext || window.webkitAudioContext);
@@ -36,6 +38,7 @@ export function createSonifier() {
   let activeNodes = new Set();
   let session = 0;
   let playing = false;
+  let timeline = null;
 
   function ensureContext() {
     if (ctx) return ctx;
@@ -43,12 +46,18 @@ export function createSonifier() {
     ctx = new AudioCtor();
     master = ctx.createGain();
     master.gain.value = MASTER_LEVEL;
-    master.connect(ctx.destination);
+    // gentle lowpass keeps the noise texture soft and the pitch readable
+    const softener = ctx.createBiquadFilter();
+    softener.type = 'lowpass';
+    softener.frequency.value = 5200;
+    softener.Q.value = 0.4;
+    master.connect(softener);
+    softener.connect(ctx.destination);
     return ctx;
   }
 
   function noiseBurst(start, value) {
-    const duration = 0.13;
+    const duration = NOISE_DURATION;
     const length = Math.max(1, Math.floor(ctx.sampleRate * duration));
     const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
     const data = buffer.getChannelData(0);
@@ -62,7 +71,7 @@ export function createSonifier() {
     filter.frequency.value = 800 + value * 1900;
     filter.Q.value = 0.9;
     const gain = ctx.createGain();
-    gain.gain.value = value * 0.1;
+    gain.gain.value = value * NOISE_LEVEL;
     source.connect(filter);
     filter.connect(gain);
     gain.connect(master);
@@ -114,6 +123,7 @@ export function createSonifier() {
   function stop() {
     session += 1;
     playing = false;
+    timeline = null;
     timers.forEach((id) => clearTimeout(id));
     timers = [];
     if (ctx) {
@@ -155,6 +165,12 @@ export function createSonifier() {
       cursor += stepDuration(value);
     });
 
+    // The audio clock (ctx.currentTime) is the single source of truth for the
+    // visuals: rAF loops read getTimeState() every frame, so the playhead and
+    // the terrain pulse land exactly on the scheduled notes (web.dev,
+    // "A tale of two clocks").
+    timeline = { offsets, startAt, total: cursor - startAt };
+
     values.forEach((_, index) => {
       timers.push(
         setTimeout(() => {
@@ -176,6 +192,32 @@ export function createSonifier() {
     return true;
   }
 
+  /**
+   * Playback position measured on the audio clock. Returns
+   * `{ passIndex, passT, sinceOnset, ratio }` while a sequence is playing, or
+   * `null` when nothing is playing. `sinceOnset` is the time in seconds since
+   * the current note started, so visuals can decay their envelope in step
+   * with the scheduled audio.
+   */
+  function getTimeState() {
+    if (!playing || !ctx || !timeline) return null;
+    const t = ctx.currentTime - timeline.startAt;
+    if (t < 0) return { passIndex: 0, passT: 0, sinceOnset: 0, ratio: 0 };
+    if (t >= timeline.total) return null;
+    const { offsets, total } = timeline;
+    let index = offsets.length - 1;
+    while (index > 0 && offsets[index] > t) index -= 1;
+    const stepEnd = index + 1 < offsets.length ? offsets[index + 1] : total;
+    const span = Math.max(0.0001, stepEnd - offsets[index]);
+    const sinceOnset = Math.max(0, t - offsets[index]);
+    return {
+      passIndex: index,
+      passT: Math.min(1, sinceOnset / span),
+      sinceOnset,
+      ratio: Math.min(1, t / total),
+    };
+  }
+
   function dispose() {
     stop();
     if (ctx) {
@@ -189,6 +231,7 @@ export function createSonifier() {
     play,
     stop,
     dispose,
+    getTimeState,
     get isPlaying() {
       return playing;
     },
