@@ -45,6 +45,29 @@ async function request(path) {
   }
 }
 
+async function requestJson(path, { method = 'GET', body, headers = {}, timeout = TIMEOUT_MS } = {}) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method,
+      headers: { Accept: 'application/json', ...headers },
+      body,
+      signal: controller.signal,
+    });
+    const payload = await response.json().catch(() => null);
+    if (!response.ok) {
+      const error = new Error(payload?.error || `HTTP ${response.status}`);
+      error.status = response.status;
+      error.detail = payload?.detail;
+      throw error;
+    }
+    return payload?.data ?? payload;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 const toNumber = (value) => (Number.isFinite(Number(value)) ? Number(value) : null);
 const clamp01 = (value, fallback) => {
   const number = toNumber(value);
@@ -266,6 +289,79 @@ export async function loadHealth() {
   try {
     const payload = await request('/health');
     return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Search the live SAR backend for scenes over a WKT polygon. */
+export async function searchScenes({ wkt, startDate, endDate, platform = 'SENTINEL-1' } = {}) {
+  if (!isApiConfigured() || !wkt) return null;
+  try {
+    return await requestJson('/search/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ wkt, start_date: startDate, end_date: endDate, platform }),
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** List saved scenes from the live backend. */
+export async function loadScenes() {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await requestJson('/scenes/');
+    return Array.isArray(payload) ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Load one saved scene. */
+export async function loadScene(id) {
+  if (!isApiConfigured()) return null;
+  try {
+    return await requestJson(`/scenes/${encodeURIComponent(id)}/`);
+  } catch {
+    return null;
+  }
+}
+
+/** Upload VV/VH GeoTIFFs and build a compressed preview. */
+export async function buildGeotiff(id, { vvFile, vhFile, maxBytes } = {}) {
+  if (!isApiConfigured() || !vvFile) return null;
+  const form = new FormData();
+  form.append('vv_file', vvFile);
+  if (vhFile) form.append('vh_file', vhFile);
+  if (maxBytes) form.append('max_bytes', String(maxBytes));
+  try {
+    return await requestJson(`/scenes/${encodeURIComponent(id)}/geotiff/`, {
+      method: 'POST',
+      body: form,
+      timeout: Math.max(TIMEOUT_MS, 120000),
+    });
+  } catch {
+    return null;
+  }
+}
+
+/** Send the built preview to GeoAI and return the saved scene + report. */
+export async function analyzeScene(id, { prompt, requestedModel = 'auto', point, box } = {}) {
+  if (!isApiConfigured() || !prompt) return null;
+  try {
+    return await requestJson(`/scenes/${encodeURIComponent(id)}/analyze/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt,
+        requested_model: requestedModel,
+        ...(point ? { point } : {}),
+        ...(box ? { box } : {}),
+      }),
+      timeout: Math.max(TIMEOUT_MS, 180000),
+    });
   } catch {
     return null;
   }

@@ -46,11 +46,12 @@ npm run build
 npm run preview
 ```
 
-No API key is required for the demo. To connect a backend:
+No API key is required for the demo. A complete local backend ships in
+[`server/`](./server/README.md):
 
 ```bash
-cp .env.example .env.local
-# set VITE_API_BASE_URL=http://localhost:3001/api
+npm run api     # http://127.0.0.1:3001
+# then set VITE_API_BASE_URL=http://127.0.0.1:3001/api in .env.local
 ```
 
 With no base URL, the app performs **zero** network requests (apart from web

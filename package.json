@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test:e2e": "playwright test",
+    "api": "node server/api.mjs",
     "api:mock": "node server/mock-api.mjs"
   },
   "dependencies": {
