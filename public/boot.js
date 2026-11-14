@@ -4,8 +4,8 @@
 (function () {
   try {
     var saved =
-      localStorage.getItem('dancing-with-sar-language') ||
-      localStorage.getItem('aura-sar-language');
+      localStorage.getItem('sothis-echo-language') ||
+      localStorage.getItem('dancing-with-sar-language');
     if (saved === 'ar') {
       document.documentElement.setAttribute('lang', 'ar');
       document.documentElement.setAttribute('dir', 'rtl');

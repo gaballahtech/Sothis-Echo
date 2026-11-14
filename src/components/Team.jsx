@@ -4,7 +4,7 @@ import { Panel, SectionHead } from './ui';
 
 const teamMembers = [
   {
-    name: 'gaballahtech',
+    name: 'Abdelrahman Gaballah',
     handle: 'gaballahtech',
     roleKey: 'frontendLead',
     icon: 'code',

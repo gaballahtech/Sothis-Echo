@@ -25,7 +25,7 @@ function AppContent() {
   const { t } = useTranslation();
 
   useEffect(() => {
-    document.title = `${t('footer.brand')} | NISAR · NASA / ISRO`;
+    document.title = `${t('footer.brand')} · ${t('app.tagline')}`;
   }, [language, t]);
 
   return (

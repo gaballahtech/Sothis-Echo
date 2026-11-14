@@ -5,54 +5,15 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { createSonifier, isAudioSupported } from '../services/sonifier';
-import { Panel, SectionHead } from './ui';
-
-function PulseStrip({ values, active = -1, change = false }) {
-  return (
-    <div className="pulse-strip" aria-hidden="true">
-      {values.map((value, index) => {
-        const height = 6 + Math.max(0, Math.min(1, value)) * 94;
-        const isActive = index === active;
-        return (
-          <span
-            key={index}
-            className={`pulse-bar ${change ? 'change' : ''} ${isActive ? 'active' : ''}`}
-            style={{ height: `${height}%` }}
-          />
-        );
-      })}
-    </div>
-  );
-}
-
-function TrackCard({ title, subtitle, values, playing, supported, onToggle, playLabel, stopLabel, change, testKey }) {
-  return (
-    <Panel title={title} tone={playing ? 'primary' : 'default'} className="track-card" bodyClassName="card-pad">
-      <p className="body-copy-muted" style={{ marginBottom: 8 }}>{subtitle}</p>
-      <PulseStrip values={values} change={change} />
-      <div className="sound-actions">
-        <Button
-          fill
-          intent={playing ? 'warning' : undefined}
-          variant={playing ? 'solid' : 'outlined'}
-          icon={playing ? 'stop' : 'play'}
-          text={playing ? stopLabel : playLabel}
-          onClick={onToggle}
-          disabled={!supported}
-          aria-pressed={playing}
-          data-testid={`sound-play-${testKey}`}
-        />
-      </div>
-    </Panel>
-  );
-}
+import { SectionHead } from './ui';
+import BreathingSarTerrain from './BreathingSarTerrain';
 
 export default function Sonification() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites } = useSiteData();
   const [siteId, setSiteId] = useState(() => sites[0]?.id);
-  const [track, setTrack] = useState(null);
+  const [playing, setPlaying] = useState(false);
   const [step, setStep] = useState(-1);
   const [supported, setSupported] = useState(true);
   const sonifierRef = useRef(null);
@@ -75,7 +36,7 @@ export default function Sonification() {
 
   useEffect(() => {
     sonifierRef.current?.stop();
-    setTrack(null);
+    setPlaying(false);
     setStep(-1);
   }, [siteId]);
 
@@ -88,34 +49,33 @@ export default function Sonification() {
 
   const stop = () => {
     sonifierRef.current?.stop();
-    setTrack(null);
+    setPlaying(false);
     setStep(-1);
   };
 
-  const toggle = (key) => {
-    if (track === key) {
+  const toggle = () => {
+    if (playing) {
       stop();
       return;
     }
-    sonifierRef.current?.stop();
     setStep(0);
-    setTrack(key);
-    const values = key === 'stable' ? site.stablePulse : site.pulse;
-    const ok = sonifierRef.current?.play(values, {
+    setPlaying(true);
+    const ok = sonifierRef.current?.play(site.pulse, {
       onStep: setStep,
       onEnd: () => {
-        setTrack(null);
+        setPlaying(false);
         setStep(-1);
       },
     });
     if (!ok) {
       setSupported(false);
-      setTrack(null);
+      setPlaying(false);
       setStep(-1);
     }
   };
 
-  const visualValues = track === 'stable' ? site.stablePulse : site.pulse;
+  // Sample-accurate playhead, read from the audio clock by the visuals.
+  const getPass = () => sonifierRef.current?.getTimeState?.() ?? null;
 
   return (
     <section id="sound" className="content-section chapter chapter--gold" aria-labelledby="sound-title">
@@ -138,41 +98,47 @@ export default function Sonification() {
           </ButtonGroup>
         </div>
 
-        <div className="grid-2">
-          <TrackCard
-            title={t('sound.stableTitle')}
-            subtitle={t('sound.stableSub')}
-            values={site.stablePulse}
-            playing={track === 'stable'}
-            supported={supported}
-            onToggle={() => toggle('stable')}
-            playLabel={t('sound.play')}
-            stopLabel={t('sound.stop')}
-            testKey="stable"
-          />
-          <TrackCard
-            title={`${t('sound.changeTitle')} — ${siteName}`}
-            subtitle={t('sound.changeSub')}
-            values={site.pulse}
-            playing={track === 'change'}
-            supported={supported}
-            onToggle={() => toggle('change')}
-            playLabel={t('sound.play')}
-            stopLabel={t('sound.stop')}
-            change
-            testKey="change"
+        <div className="sound-actions-bar" role="group" aria-label={t('sound.title')}>
+          <Button
+            className="sound-action-btn"
+            intent={playing ? 'warning' : 'none'}
+            variant="outlined"
+            icon={playing ? 'stop' : 'play'}
+            text={
+              playing
+                ? t('sound.stop')
+                : `${t('sound.changeTitle')} — ${siteName}`
+            }
+            onClick={toggle}
+            disabled={!supported}
+            aria-pressed={playing}
+            data-testid="sound-play-change"
           />
         </div>
 
         <p className="sound-status" data-testid="sound-status" aria-live="polite">
-          {track ? t('sound.nowPlaying', { current: step + 1, total: visualValues.length }) : t('sound.hint')}
+          {playing
+            ? t('sound.nowPlaying', { current: step + 1, total: site.pulse.length })
+            : t('sound.hint')}
         </p>
+      </div>
 
+      <div className="sound-stage">
+        <BreathingSarTerrain
+          selectedSite={site.id}
+          playingTrack={playing ? 'changing' : null}
+          getPass={getPass}
+          values={site.pulse}
+          currentPassIndex={step}
+          language={language}
+        />
+      </div>
+
+      <div className="section-inner">
         <div className="sound-map-strip" aria-label={t('sound.mappingTitle')}>
-          {mapping.map((line, index) => (
+          {mapping.map((line) => (
             <div key={line} className="sound-map-item">
-              <span className="sound-map-index">0{index + 1}</span>
-              <span>{line}</span>
+              {line}
             </div>
           ))}
         </div>
@@ -182,7 +148,6 @@ export default function Sonification() {
             {t('sound.noSupport')}
           </Callout>
         ) : null}
-
       </div>
     </section>
   );

@@ -1,4 +1,4 @@
-# Dancing with SAR
+# Sothis Echo
 
 An interactive NISAR story about the changes a camera misses: a cyclone-flooded
 mangrove delta and a Sierra Nevada burn scar, read through radar.

@@ -7,7 +7,7 @@ export const LanguageProvider = ({ children }) => {
   const [language, setLanguageState] = useState(() => {
     if (typeof window !== 'undefined') {
       try {
-        return localStorage.getItem('dancing-with-sar-language') || localStorage.getItem('aura-sar-language') || 'en';
+        return localStorage.getItem('sothis-echo-language') || localStorage.getItem('dancing-with-sar-language') || 'en';
       } catch {
         return 'en';
       }
@@ -19,7 +19,7 @@ export const LanguageProvider = ({ children }) => {
     i18n.changeLanguage(lng);
     setLanguageState(lng);
     try {
-      localStorage.setItem('dancing-with-sar-language', lng);
+      localStorage.setItem('sothis-echo-language', lng);
     } catch {
       /* storage may be blocked; the language still applies for this session */
     }

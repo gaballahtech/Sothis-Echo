@@ -39,7 +39,7 @@ export default function Method() {
 
   const downloadJson = () => {
     download(
-      'dancing-with-sar-dataset.json',
+      'sothis-echo-dataset.json',
       JSON.stringify(
         {
           datasetVersion: api.version,
@@ -56,7 +56,7 @@ export default function Method() {
   };
 
   const downloadCsv = () => {
-    download('dancing-with-sar-series.csv', sites.map(buildSiteCsv).join('\n\n'), 'text/csv;charset=utf-8');
+    download('sothis-echo-series.csv', sites.map(buildSiteCsv).join('\n\n'), 'text/csv;charset=utf-8');
   };
 
   return (

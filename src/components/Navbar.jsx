@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Alignment,
   Button,
-  ButtonGroup,
   Drawer,
   Icon,
   Navbar as BpNavbar,
@@ -18,7 +17,7 @@ import { NavigationMenu } from './NavigationMenu';
 
 export default function Navbar() {
   const { t } = useTranslation();
-  const { language, setLanguage } = useLanguage();
+  const { language, toggleLanguage } = useLanguage();
   const [menuOpen, setMenuOpen] = useState(false);
   const active = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
@@ -46,32 +45,19 @@ export default function Navbar() {
             </span>
             <NavbarHeading className="brand-copy">
               <span className="brand-name">{t('navbar.brand')}</span>
-              <span className="brand-sub">NISAR · NASA / ISRO</span>
             </NavbarHeading>
           </a>
         </NavbarGroup>
 
         <NavbarGroup align={Alignment.END} className="navbar-end">
-          <ButtonGroup className="language-group">
-            <Button
-              small
-              variant={language === 'en' ? 'solid' : 'minimal'}
-              active={language === 'en'}
-              onClick={() => setLanguage('en')}
-              aria-pressed={language === 'en'}
-              aria-label="English"
-              text="EN"
-            />
-            <Button
-              small
-              variant={language === 'ar' ? 'solid' : 'minimal'}
-              active={language === 'ar'}
-              onClick={() => setLanguage('ar')}
-              aria-pressed={language === 'ar'}
-              aria-label="العربية"
-              text="AR"
-            />
-          </ButtonGroup>
+          <Button
+            className="language-toggle"
+            variant="outlined"
+            small
+            onClick={toggleLanguage}
+            aria-label={t('navbar.switchLanguage')}
+            text={language === 'en' ? 'العربية' : 'English'}
+          />
         </NavbarGroup>
       </BpNavbar>
 

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, ButtonGroup, Tab, Tabs, Tag, HTMLTable } from '@blueprintjs/core';
+import { Button, ButtonGroup, Tab, Tabs, HTMLTable } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -7,7 +7,7 @@ import { localized } from '../data/localized';
 import { contrastRows } from '../data/sites';
 import { buildSiteCsv } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
-import { Disclosure, Panel, SectionHead, SourceBadge } from './ui';
+import { Disclosure, Panel, SectionHead } from './ui';
 import ObservationTable from './ObservationTable';
 
 const STATE_KEYS = ['before', 'after'];
@@ -36,7 +36,7 @@ function Coordinates({ site }) {
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source, error } = useSiteData();
+  const { sites } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function StudyAreas() {
         <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
 
         <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
-          {sites.map((item, index) => {
+          {sites.map((item) => {
             const selected = item.id === site.id;
             return (
               <Button
@@ -79,9 +79,6 @@ export default function StudyAreas() {
                 data-testid={`site-tab-${item.id}`}
               >
                 <span className="site-tab-content">
-                  <span className="micro" style={{ color: selected ? 'inherit' : undefined }}>
-                    {String(index + 1).padStart(2, '0')} / {String(sites.length).padStart(2, '0')}
-                  </span>
                   <span style={{ fontWeight: 600 }}>{L(item.name)}</span>
                   <span className="small" style={{ opacity: 0.78 }}>{L(item.region)}</span>
                 </span>
@@ -92,14 +89,6 @@ export default function StudyAreas() {
 
         <div role="tabpanel" aria-label={L(site.name)} className="stack" style={{ marginTop: 14 }}>
           <div className="stack" style={{ gap: 10 }}>
-            <div className="row">
-              <Tag minimal intent="primary">
-                {t('common.site')} {String(sites.findIndex((item) => item.id === site.id) + 1).padStart(2, '0')}
-              </Tag>
-              <Tag minimal>{L(site.tags[0]?.value)}</Tag>
-              <Tag minimal>{L(site.tags[3]?.value)}</Tag>
-              <SourceBadge source={source} error={error} />
-            </div>
             <h3 style={{ margin: 0, fontSize: 22, fontWeight: 600, lineHeight: 1.25 }} dir="auto">
               {L(site.headline)}
             </h3>

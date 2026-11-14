@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Button, ButtonGroup, Popover } from '@blueprintjs/core';
+import { Button, ButtonGroup, Collapse } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -184,6 +184,7 @@ export default function Recovery() {
   const { sites } = useSiteData();
   const [siteId, setSiteId] = useState(() => sites[0]?.id);
   const site = sites.find((item) => item.id === siteId) ?? sites[0];
+  const [infoOpen, setInfoOpen] = useState(false);
   const [threshold, setThreshold] = useState(() => site?.recovery?.thresholdDefault ?? 80);
 
   const estimate = useMemo(
@@ -263,30 +264,6 @@ export default function Recovery() {
           </Panel>
 
           <Panel title={t('recovery.chartTitle')} bodyClassName="card-pad">
-            <div className="row" style={{ justifyContent: 'flex-end' }}>
-              <Popover
-                placement="bottom-end"
-                content={
-                  <div className="recovery-info-popover">
-                    <h4>{t('recovery.researcherTitle')}</h4>
-                    <p>{t('recovery.researcherBody')}</p>
-                    <p>{L(site.recovery.note)}</p>
-                    <p>{t('recovery.researchExtra')}</p>
-                    <p className="recovery-info-caveat">{t('recovery.caveat')}</p>
-                  </div>
-                }
-              >
-                <Button
-                  variant="minimal"
-                  small
-                  icon="info-sign"
-                  text={t('recovery.info')}
-                  className="recovery-info-button"
-                  aria-label={t('recovery.researcherTitle')}
-                  data-testid="recovery-info"
-                />
-              </Popover>
-            </div>
             <div className="chart-scroll">
               <RecoveryChart
                 points={site.recovery.points}
@@ -298,6 +275,27 @@ export default function Recovery() {
                 targetLabel={t('recovery.target')}
                 rtl={language === 'ar'}
               />
+            </div>
+
+            <div className="recovery-method-block">
+              <Button
+                variant="minimal"
+                small
+                icon={infoOpen ? 'chevron-up' : 'info-sign'}
+                text={t('recovery.methodLabel')}
+                className="recovery-info-button"
+                aria-expanded={infoOpen}
+                aria-controls="recovery-method"
+                data-testid="recovery-info"
+                onClick={() => setInfoOpen((open) => !open)}
+              />
+              <Collapse isOpen={infoOpen} transitionDuration={300}>
+                <div className="recovery-method" id="recovery-method">
+                  <p>{t('recovery.methodBody', { site: siteName })}</p>
+                  <p>{L(site.recovery.note)}</p>
+                  <p className="recovery-info-caveat">{t('recovery.caveat')}</p>
+                </div>
+              </Collapse>
             </div>
           </Panel>
         </div>

@@ -1,7 +1,7 @@
 {
-  "name": "aura-sar-frontend",
+  "name": "sothis-echo",
   "version": "2.0.0",
-  "description": "Dancing with SAR: an interactive NISAR story about Earth's surface change — public and researcher views, optical/radar comparison, sonification, recovery estimates, and a radar detective game.",
+  "description": "Sothis Echo: an interactive NISAR story about Earth's surface change — optical/radar comparison, two study areas, sonification, recovery estimates, and a radar detective game.",
   "type": "module",
   "scripts": {
     "dev": "vite",

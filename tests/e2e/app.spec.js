@@ -4,9 +4,8 @@ async function openApp(page, { tourSeen = true, mode = 'public', language = 'en'
   await page.addInitScript(
     ({ seen, savedMode, savedLanguage }) => {
       try {
-        localStorage.setItem('dancing-with-sar-tour-seen', seen ? '1' : '0');
-        localStorage.setItem('dancing-with-sar-mode', savedMode);
-        localStorage.setItem('dancing-with-sar-language', savedLanguage);
+        localStorage.setItem('sothis-echo-tour-seen', seen ? '1' : '0');
+        localStorage.setItem('sothis-echo-language', savedLanguage);
       } catch {
         /* storage unavailable */
       }
@@ -82,12 +81,6 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   await play.click();
   await expect(play).toHaveAttribute('aria-pressed', 'false');
   await expect(page.getByTestId('sound-status')).not.toContainText(/Playing/i);
-
-  const stable = page.getByTestId('sound-play-stable');
-  await stable.click();
-  await expect(stable).toHaveAttribute('aria-pressed', 'true');
-  await stable.click();
-  await expect(stable).toHaveAttribute('aria-pressed', 'false');
 
   expect(errors).toEqual([]);
 });
@@ -166,7 +159,8 @@ test('advanced documentation stays collapsed until opened', async ({ page }) => 
 
   await page.locator('#recovery').scrollIntoViewIfNeeded();
   await page.getByTestId('recovery-info').click();
-  await expect(page.getByText(/Fit & assumptions/i)).toBeVisible();
+  await expect(page.getByText(/How this estimate is made/i)).toBeVisible();
+  await expect(page.getByText(/divided by its level before the event/i)).toBeVisible();
 
   await page.locator('#sites').scrollIntoViewIfNeeded();
   const researcher = page.getByTestId('for-researchers');

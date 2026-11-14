@@ -1,7 +1,7 @@
 /* ==========================================================================
-   DANCING WITH SAR — TECH EDITORIAL DESIGN SYSTEM
-   Warm off-white paper, near-black ink, muted teal, Playfair / Space Grotesk /
-   Space Mono, with Cairo + IBM Plex Sans Arabic for RTL.
+   SOTHIS ECHO — TECH EDITORIAL DESIGN SYSTEM
+   Warm off-white paper, near-black ink, muted teal, Newsreader / Instrument
+   Sans / JetBrains Mono, with Alexandria + IBM Plex Sans Arabic for RTL.
    One system only: flat surfaces, no radii, no shadows, one warm rule per edge.
    ========================================================================== */
 
@@ -20,11 +20,11 @@
   --te-border: #e5e4de;
   --te-wash: #f1efe9;
   --te-guide: rgba(28, 28, 28, 0.055);
-  --te-display: 'Playfair Display', 'Iowan Old Style', Georgia, serif;
-  --te-body: 'Space Grotesk', 'Helvetica Neue', Arial, sans-serif;
-  --te-mono: 'Space Mono', 'SFMono-Regular', Consolas, monospace;
-  --te-arabic-body: 'IBM Plex Sans Arabic', 'Space Grotesk', sans-serif;
-  --te-arabic-display: 'Cairo', 'IBM Plex Sans Arabic', sans-serif;
+  --te-display: 'Newsreader', 'Iowan Old Style', Georgia, serif;
+  --te-body: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+  --te-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  --te-arabic-body: 'IBM Plex Sans Arabic', 'Instrument Sans', sans-serif;
+  --te-arabic-display: 'Alexandria', 'IBM Plex Sans Arabic', sans-serif;
   --te-ease: cubic-bezier(0.16, 1, 0.3, 1);
   --te-motion: 800ms;
 }
@@ -52,6 +52,33 @@ body {
   --bp-surface-border-color-strong: var(--te-border);
   --bp-surface-border-radius: 0;
   --bp-emphasis-focus-color: var(--te-accent);
+}
+
+/* Square system: Blueprint ships rounded primitives, but every corner in this
+   interface is a right angle — rectangles, never pills or circles. */
+.bp6-button,
+.bp6-button-group .bp6-button,
+.bp6-tag,
+.bp6-card,
+.bp6-section,
+.bp6-section-card,
+.bp6-dialog,
+.bp6-drawer,
+.bp6-menu,
+.bp6-menu-item,
+.bp6-input,
+.bp6-html-select select,
+.bp6-progress-bar,
+.bp6-progress-bar .bp6-progress-bar-meter,
+.bp6-progress-bar .bp6-progress-meter,
+.bp6-popover-content,
+.bp6-toast,
+.bp6-callout,
+.bp6-breadcrumb,
+.bp6-tab,
+.bp6-navbar,
+.bp6-divider {
+  border-radius: 0;
 }
 
 /* ---------- Base ---------- */
@@ -173,7 +200,7 @@ a:hover {
 [dir='rtl'] .brand-name,
 [dir='rtl'] .docs-title {
   font-family: var(--te-arabic-display);
-  font-weight: 600 !important;
+  font-weight: 500 !important;
   letter-spacing: 0;
   text-transform: none;
 }
@@ -202,7 +229,6 @@ li,
 .hero-copy,
 .section-subtitle,
 .callout-body,
-.recovery-info-popover,
 .bp6-dialog-body {
   font-family: var(--te-body);
 }
@@ -269,7 +295,6 @@ li,
 .bp6-button,
 .bp6-tab,
 .bp6-menu-item,
-.hero-credit,
 .hero-scroll {
   font-family: var(--te-mono);
 }
@@ -456,18 +481,13 @@ li,
   line-height: 1.1;
 }
 
-.brand-sub {
-  color: var(--te-muted);
-  font-family: var(--te-mono);
-  font-size: 8px;
-  letter-spacing: 0.2em;
-  line-height: 1.2;
-  text-transform: uppercase;
-}
-
-.language-group .bp6-button {
-  min-width: 40px;
+.app-navbar .language-toggle {
+  flex: 0 0 auto;
+  min-width: 58px;
   min-height: 32px;
+  padding: 0 10px;
+  font-family: var(--te-body);
+  font-size: 12px;
 }
 
 .app-drawer-body {
@@ -910,31 +930,6 @@ li,
   text-decoration: none;
 }
 
-.hero-credit {
-  position: absolute;
-  z-index: 2;
-  right: 20px;
-  bottom: 12px;
-  max-width: min(420px, calc(100vw - 40px));
-  padding: 4px 8px;
-  color: var(--te-muted);
-  font-family: var(--te-mono);
-  font-size: 9px;
-  letter-spacing: 0.03em;
-  text-align: end;
-  text-decoration: none;
-  background: color-mix(in srgb, var(--te-bg) 86%, transparent);
-  border: 1px solid var(--te-border);
-  border-radius: 0;
-  backdrop-filter: blur(8px);
-}
-
-[dir='rtl'] .hero-credit {
-  right: auto;
-  left: 20px;
-  text-align: start;
-}
-
 .telemetry-list {
   margin: 0;
 }
@@ -1040,7 +1035,7 @@ li,
   color: #ffffff;
   background: var(--te-accent);
   border: 1px solid var(--te-accent-active);
-  border-radius: 6px;
+  border-radius: 0;
   transform: translate(-50%, -50%);
 }
 
@@ -1404,6 +1399,43 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   background: #b07a2a;
 }
 
+.pulse-strip.tall {
+  height: 150px;
+  gap: 4px;
+}
+
+.pulse-strip.tall .pulse-bar {
+  background: color-mix(in srgb, var(--te-accent) 42%, transparent);
+}
+
+.pulse-strip.tall .pulse-bar.active {
+  background: var(--te-accent);
+}
+
+.pulse-strip.tall .pulse-bar.event {
+  background: #b07a2a;
+}
+
+.pulse-bar.event {
+  background: #b07a2a;
+}
+
+.pulse-bar.event.active {
+  background: #8c5f1f;
+}
+
+.sound-sequence {
+  margin-top: 14px;
+}
+
+.sequence-scale {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 16px;
+  justify-content: space-between;
+  margin-top: 10px;
+}
+
 .track-card {
   height: 100%;
 }
@@ -1445,8 +1477,6 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 }
 
 .sound-map-item {
-  display: flex;
-  gap: 8px;
   padding: 10px 12px;
   color: var(--te-ink-soft);
   font-size: 11px;
@@ -1458,11 +1488,31 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   border-inline-start: 0;
 }
 
-.sound-map-index {
-  flex: 0 0 auto;
-  color: var(--te-accent);
-  font-family: var(--te-mono);
-  font-size: 10px;
+.sound-actions-bar {
+  display: flex;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.sound-actions-bar .bp6-button {
+  flex: 1;
+  min-width: 0;
+}
+
+.sound-stage {
+  margin-top: 18px;
+  overflow: hidden;
+  border-block: 1px solid var(--te-border);
+  background: #f2efe9;
+  /* break out of .section-inner to the full width of the page */
+  width: calc(100% + 104px);
+  margin-inline: -52px;
+}
+
+@media (max-width: 640px) {
+  .sound-actions-bar {
+    flex-direction: column;
+  }
 }
 
 /* ---------- Recovery ---------- */
@@ -1553,33 +1603,25 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   white-space: nowrap;
 }
 
-.recovery-info-popover {
-  width: min(360px, calc(100vw - 32px));
-  padding: 14px;
+.recovery-method-block {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--te-border);
 }
 
-.recovery-info-popover .bp6-popover-content {
-  background: var(--te-surface);
-  border: 1px solid var(--te-border);
-  border-radius: 0;
-  box-shadow: none;
+.recovery-method {
+  padding-top: 8px;
+  max-width: 62ch;
 }
 
-.recovery-info-popover h4 {
+.recovery-method p {
   margin-bottom: 8px;
-  color: var(--te-ink);
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.recovery-info-popover p {
-  margin-bottom: 9px;
   color: var(--te-muted);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 13px;
+  line-height: 1.6;
 }
 
-.recovery-info-popover p:last-child {
+.recovery-method p:last-child {
   margin-bottom: 0;
 }
 
@@ -1647,8 +1689,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 
 .callout-row,
 .method-callout,
-.endpoint-block,
-.recovery-info {
+.endpoint-block {
   background: transparent !important;
   border: 1px solid var(--te-border) !important;
   border-radius: 0 !important;
@@ -1969,17 +2010,6 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   text-transform: none;
 }
 
-.language-group .bp6-button[aria-pressed='true'] {
-  color: #ffffff !important;
-  background: var(--te-accent) !important;
-  border: 1px solid var(--te-accent) !important;
-}
-
-.language-group .bp6-button[aria-pressed='true']:hover {
-  background: var(--te-accent-hover) !important;
-  border-color: var(--te-accent-hover) !important;
-}
-
 /* ---------- Tags ---------- */
 
 .bp6-tag {
@@ -2165,7 +2195,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 
 [dir='rtl'] .bp6-dialog-header .bp6-heading {
   font-family: var(--te-arabic-display);
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .bp6-dialog-body {
@@ -2229,6 +2259,11 @@ button,
 @media (max-width: 1100px) {
   .app-rail {
     display: none;
+  }
+
+  .sound-stage {
+    width: calc(100% + 48px);
+    margin-inline: -24px;
   }
 
   .mobile-only {
@@ -2302,6 +2337,11 @@ button,
     padding: 38px 16px;
   }
 
+  .sound-stage {
+    width: calc(100% + 32px);
+    margin-inline: -16px;
+  }
+
   .hero-section {
     padding: 38px 16px 34px;
   }
@@ -2316,11 +2356,6 @@ button,
 
   .site-choice .bp6-button {
     flex: 1 1 auto;
-  }
-
-  .brand-sub,
-  .navbar-end .bp6-button-text {
-    display: none;
   }
 
   .grid-2,
@@ -2385,16 +2420,6 @@ button,
 
   .app-footer {
     padding: 28px 16px;
-  }
-
-  .hero-credit {
-    right: 12px;
-    bottom: 8px;
-    max-width: calc(100vw - 24px);
-  }
-
-  [dir='rtl'] .hero-credit {
-    left: 12px;
   }
 
   .table-shell {
