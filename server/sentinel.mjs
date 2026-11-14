@@ -218,6 +218,9 @@ async function readScene(item, site) {
     datetime: item.properties?.datetime || null,
     vvDb: toDb(vv.mean),
     vhDb: toDb(vh.mean),
+    // Note: this gap is only comparable between passes over the same window.
+    // A coastal window (see the wildfire site, which is half open water) makes
+    // it wind-sensitive — sea VV swings by several dB pull while VH stays low.
     crossDb: toDb(vh.mean) - toDb(vv.mean),
     lowFraction: vv.lowFraction,
     stdDb: 20 * Math.log10(1 + vv.std / Math.max(1, vv.mean)),

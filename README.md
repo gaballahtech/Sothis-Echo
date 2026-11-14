@@ -37,6 +37,16 @@ acquisition dates, real quicklook images, and backscatter statistics read from a
 numbers), not calibrated σ⁰. Without the backend, the bundled illustrative
 dataset is used and labelled as such.
 
+### Known caveat: the wildfire window is coastal
+
+The wildfire study area sits on the shore of the Alkyonides Gulf, so its 512×512
+window (≈5 × 5 km) is roughly half open water. Water backscatter is wind-driven:
+VV can move by several dB between passes while VH stays low and steady, so the
+absolute VV level and the VV−VH gap there track the wind, not the fire (measured
+30 Jul 2026: VV −15.1 dB, VH −29.2 dB; 5 Aug 2026: VV −21.5 dB, VH −30.7 dB).
+The change figure is still sound because both passes read the same window; only
+the absolute level and the polarisation gap should be read as wind-sensitive.
+
 See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
 
 ## Run
