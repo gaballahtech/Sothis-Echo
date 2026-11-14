@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button, ButtonGroup, Tab, Tabs, HTMLTable } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
@@ -34,90 +34,6 @@ function Coordinates({ site }) {
   );
 }
 
-function WorldMap({ sites, activeId, onSelect, language }) {
-  const W = 640;
-  const H = 320;
-  const project = (lat, lng) => ({
-    x: ((lng + 180) / 360) * W,
-    y: ((90 - lat) / 180) * H,
-  });
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      className="world-map"
-      role="img"
-      aria-label="Study areas map"
-      style={{ width: '100%', height: 'auto', background: '#eef2ea', border: '1px solid var(--bp-surface-border-color-default)' }}
-    >
-      {/* graticule */}
-      {[...Array(7)].map((_, i) => (
-        <line key={`v${i}`} x1={(i * W) / 6} y1={0} x2={(i * W) / 6} y2={H} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
-      ))}
-      {[...Array(5)].map((_, i) => (
-        <line key={`h${i}`} x1={0} y1={(i * H) / 4} x2={W} y2={(i * H) / 4} stroke="rgba(0,0,0,0.06)" strokeWidth="1" />
-      ))}
-      <line x1={0} y1={H / 2} x2={W} y2={H / 2} stroke="rgba(0,0,0,0.12)" strokeWidth="1" />
-      {sites.map((site) => {
-        const { x, y } = project(site.coords.lat, site.coords.lng);
-        const active = site.id === activeId;
-        return (
-          <g key={site.id} onClick={() => onSelect(site.id)} style={{ cursor: 'pointer' }}>
-            <circle cx={x} cy={y} r={active ? 9 : 6} fill={active ? 'var(--bp-intent-primary-rest)' : 'var(--bp-intent-warning-rest)'} stroke="#fff" strokeWidth="2" />
-            <text x={x} y={y - 12} textAnchor="middle" fontSize="11" fontWeight={active ? 'bold' : 'normal'} fill="var(--bp-typography-color-default-rest)">
-              {localized(site.name, language)}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-}
-
-function TimeSeriesChart({ site, language }) {
-  const points = site?.series || [];
-  if (points.length < 2) return null;
-  const W = 640;
-  const H = 220;
-  const pad = { l: 44, r: 16, t: 12, b: 30 };
-  const innerW = W - pad.l - pad.r;
-  const innerH = H - pad.t - pad.b;
-  const vvValues = points.map((p) => p.vv).filter((v) => Number.isFinite(v));
-  const vhValues = points.map((p) => p.vh).filter((v) => Number.isFinite(v));
-  const all = [...vvValues, ...vhValues];
-  const min = Math.min(...all);
-  const max = Math.max(...all);
-  const range = Math.max(1, max - min);
-  const x = (i) => pad.l + (i / Math.max(1, points.length - 1)) * innerW;
-  const y = (v) => pad.t + ((max - v) / range) * innerH;
-  const vvPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(p.vv)}`).join(' ');
-  const vhPath = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(p.vh)}`).join(' ');
-  const ticks = [0, Math.floor((points.length - 1) / 2), points.length - 1];
-  return (
-    <svg viewBox={`0 0 ${W} ${H}`} className="ts-chart" role="img" aria-label="Backscatter time series" style={{ width: '100%', height: 'auto' }}>
-      {[min, (min + max) / 2, max].map((v, i) => (
-        <g key={i}>
-          <line x1={pad.l} x2={W - pad.r} y1={y(v)} y2={y(v)} stroke="var(--bp-surface-border-color-default)" strokeWidth="1" strokeDasharray="2 4" />
-          <text x={pad.l - 6} y={y(v) + 3} textAnchor="end" fontSize="9" fill="var(--bp-typography-color-muted)">{v.toFixed(1)}</text>
-        </g>
-      ))}
-      <path d={vvPath} fill="none" stroke="var(--bp-intent-primary-rest)" strokeWidth="2" />
-      <path d={vhPath} fill="none" stroke="var(--bp-intent-success-rest)" strokeWidth="2" />
-      {ticks.map((i) => (
-        <text key={i} x={x(i)} y={H - 8} textAnchor="middle" fontSize="9" fill="var(--bp-typography-color-muted)">
-          {points[i]?.date?.slice(0, 7)}
-        </text>
-      ))}
-      {/* legend */}
-      <g transform={`translate(${pad.l}, ${pad.t - 2})`}>
-        <line x1={0} x2={14} y1={0} y2={0} stroke="var(--bp-intent-primary-rest)" strokeWidth="2" />
-        <text x={18} y={3} fontSize="9" fill="var(--bp-typography-color-muted)">VV</text>
-        <line x1={50} x2={64} y1={0} y2={0} stroke="var(--bp-intent-success-rest)" strokeWidth="2" />
-        <text x={68} y={3} fontSize="9" fill="var(--bp-typography-color-muted)">VH</text>
-      </g>
-    </svg>
-  );
-}
-
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -148,10 +64,6 @@ export default function StudyAreas() {
     <section id="sites" className="content-section chapter chapter--mint" aria-labelledby="sites-title">
       <div className="section-inner">
         <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
-
-        <div style={{ marginBottom: 14 }}>
-          <WorldMap sites={sites} activeId={site.id} onSelect={setActiveId} language={language} />
-        </div>
 
         <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
           {sites.map((item) => {
@@ -226,9 +138,6 @@ export default function StudyAreas() {
           </div>
 
           <Panel title={t('sites.measurements')} bodyClassName="card-pad">
-            <div style={{ marginBottom: 12 }}>
-              <TimeSeriesChart site={site} language={language} />
-            </div>
             <div data-testid="deep-dive-tabs">
               <Tabs id="site-data" defaultSelectedTabId="reading" renderActiveTabPanelOnly>
                 <Tab

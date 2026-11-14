@@ -41,7 +41,7 @@ export default function Navbar() {
             }}
           >
             <span className="brand-mark">
-              <Icon icon="globe-network" size={22} aria-hidden="true" />
+              <Icon icon="star" size={22} aria-hidden="true" />
             </span>
             <NavbarHeading className="brand-copy">
               <span className="brand-name">{t('navbar.brand')}</span>

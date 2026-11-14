@@ -45,11 +45,22 @@ export default function Detective() {
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [finished, setFinished] = useState(false);
   const [shake, setShake] = useState(false);
+  const [shuffled, setShuffled] = useState([]);
   const timerRef = useRef(null);
 
   const L = (value) => localized(value, language);
   const round = detectiveRounds[roundIndex];
   const site = useMemo(() => sites.find((item) => item.id === round?.siteId), [sites, round?.siteId]);
+
+  useEffect(() => {
+    if (!round) return;
+    const arr = [...round.options];
+    for (let i = arr.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    setShuffled(arr);
+  }, [roundIndex, round]);
   const evidence = useMemo(() => buildDetectiveEvidence(round, site), [round, site]);
 
   if (!round || !site) return null;
@@ -206,7 +217,7 @@ export default function Detective() {
               <h3 style={{ marginBottom: 8, fontSize: 14, fontWeight: 600 }}>{t('game.question')}</h3>
 
               <div className="option-grid" role="group" aria-label={t('game.select')}>
-                {round.options.map((option) => {
+                {shuffled.map((option) => {
                   const isSelected = selected === option.id;
                   const isAnswer = option.id === round.answer;
                   const intent = revealed && isAnswer ? 'success' : revealed && isSelected ? 'danger' : undefined;
