@@ -1,52 +1,38 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { paintScene } from '../services/sceneRenderer';
 
-export function SceneCanvas({ site, params, channel = 'radar', alt, className = '', imageUrl }) {
-  const ref = useRef(null);
-  const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
+export function SceneCanvas({ alt, className = '', imageUrl }) {
+  const { t } = useTranslation();
 
-  useEffect(() => {
-    const node = ref.current;
-    if (!node || visible) return undefined;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setVisible(true);
-          observer.disconnect();
-        }
-      },
-      { rootMargin: '400px 0px' }
-    );
-    observer.observe(node);
-    return () => observer.disconnect();
-  }, [visible]);
-
-  useEffect(() => {
-    if (!visible) return;
-    paintScene(ref.current, site, params, channel);
-  }, [visible, site, channel, params?.water, params?.emergent, params?.burn, params?.cloud]);
-
-  if (imageUrl) {
+  if (!imageUrl) {
     return (
       <div className={`scene-wrap ${className}`}>
-        <img src={imageUrl} alt={alt} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+        <div className="scene-unavailable" role="img" aria-label={alt}>
+          {t('seeThrough.noImage')}
+        </div>
       </div>
     );
   }
 
   return (
     <div className={`scene-wrap ${className}`}>
-      <canvas ref={ref} role="img" aria-label={alt} />
+      <img
+        src={imageUrl}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
     </div>
   );
 }
 
-export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel, radarLabel }) {
+export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, opticalUrl, radarUrl }) {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
+
   const wrapRef = useRef(null);
 
   const updateFromClientX = (clientX) => {
@@ -110,23 +96,17 @@ export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel
         onKeyDown={onKeyDown}
         style={{ cursor: dragging ? 'ew-resize' : 'ew-resize' }}
       >
-        <SceneCanvas
-          site={site}
-          params={params}
-          channel="radar"
-          alt={radarAlt}
-          className="compare-layer"
-          showSim={false}
-        />
+        {radarUrl ? (
+          <SceneCanvas alt={radarAlt} className="compare-layer" imageUrl={radarUrl} />
+        ) : (
+          <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
+        )}
         <div className="compare-layer" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
-          <SceneCanvas
-            site={site}
-            params={params}
-            channel="optical"
-            alt={opticalAlt}
-            className="compare-layer"
-            showSim={false}
-          />
+          {opticalUrl ? (
+            <SceneCanvas alt={opticalAlt} className="compare-layer" imageUrl={opticalUrl} />
+          ) : (
+            <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
+          )}
         </div>
 
         <div className="compare-handle" style={{ left: `${position}%` }} aria-hidden="true">
@@ -139,7 +119,6 @@ export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel
           <Tag minimal intent="warning">{opticalLabel}</Tag>
           <Tag minimal intent="primary">{radarLabel}</Tag>
         </div>
-
       </div>
 
       <div className="compare-help">

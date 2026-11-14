@@ -12,8 +12,9 @@ ISRO; this is an independent, open-source educational prototype.
   radar sees structure and moisture instead of colour.
 - **Camera vs radar slider** — drag a divider between a cloud-blinded optical
   scene and the same place in radar.
-- **Two study areas** — Sundarbans (wetland, cyclone surge) and Caldor (conifer
-  forest, wildfire). Each has before/after scenes, “what happened / why radar saw
+- **Two post-launch study areas** — the September 2026 Central Vietnam flood and
+  the July 2026 West Attica (Greece) wildfire. Both happened after NISAR began
+  returning data. Each has before/after scenes, “what happened / why radar saw
   it / read the polarization” boxes, and a side-by-side comparison.
 - **Sonification** — “hear the dance”: one pulse per satellite pass, pitch and
   rhythm driven by the change series, with a stable reference to compare against.

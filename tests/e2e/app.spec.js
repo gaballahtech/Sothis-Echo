@@ -16,22 +16,6 @@ async function openApp(page, { tourSeen = true, mode = 'public', language = 'en'
   await expect(page.locator('h1')).toBeVisible();
 }
 
-async function expectPaintedCanvas(page, scope) {
-  const canvas = page.locator(`${scope} canvas`).first();
-  await expect(canvas).toBeVisible();
-  await expect
-    .poll(async () => canvas.evaluate((node) => node.width), { message: 'canvas should be painted' })
-    .toBe(760);
-  const energy = await canvas.evaluate((node) => {
-    const ctx = node.getContext('2d');
-    const data = ctx.getImageData(0, 0, node.width, node.height).data;
-    let sum = 0;
-    for (let i = 0; i < data.length; i += 4000) sum += data[i] + data[i + 1] + data[i + 2];
-    return sum;
-  });
-  expect(energy).toBeGreaterThan(0);
-}
-
 test('comparison slider responds to keyboard and pointer', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
@@ -42,7 +26,6 @@ test('comparison slider responds to keyboard and pointer', async ({ page }) => {
   await expect(slider).toHaveAttribute('aria-valuenow', '50');
   await expect(slider.getByText('OPTICAL · CLOUDED')).toBeVisible();
   await expect(slider.getByText('RADAR · L-BAND')).toBeVisible();
-  await expectPaintedCanvas(page, '#see-through');
 
   await slider.focus();
   await page.keyboard.press('End');
@@ -85,11 +68,11 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('detective game scores four correct cases and resets', async ({ page }) => {
+test('detective game scores two real cases and resets', async ({ page }) => {
   await openApp(page);
   await page.locator('#game').scrollIntoViewIfNeeded();
 
-  const answers = ['flood', 'fire', 'drought', 'recovery'];
+  const answers = ['flood', 'fire'];
   for (let index = 0; index < answers.length; index += 1) {
     await page.getByTestId(`detective-option-${answers[index]}`).click();
     const feedback = page.getByTestId('detective-feedback');
@@ -101,7 +84,7 @@ test('detective game scores four correct cases and resets', async ({ page }) => 
 
   const result = page.getByTestId('detective-result');
   await expect(result).toBeVisible();
-  await expect(result).toContainText('4 / 4');
+  await expect(result).toContainText('2 / 2');
   await result.getByRole('button', { name: /Play again/i }).click();
   await expect(page.getByTestId('detective-option-flood')).toBeVisible();
 });

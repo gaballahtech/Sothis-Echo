@@ -40,7 +40,14 @@ export default function SeeThrough() {
               radarAlt={`${siteName} — ${t('seeThrough.radar')}`}
               opticalLabel={t('seeThrough.optical')}
               radarLabel={t('seeThrough.radar')}
+              opticalUrl={state.opticalUrl}
+              radarUrl={state.imageUrl}
             />
+            <p className="micro" style={{ margin: '8px 0 0' }}>
+              {state.opticalUrl
+                ? `${state.opticalPlatform || 'Sentinel-2'} · ${state.opticalDate} · ${Math.round(state.opticalCloudCover ?? 0)}% ${language === 'ar' ? 'غيوم' : 'cloud'} — Sentinel-1 · ${state.date}`
+                : t('seeThrough.noImage')}
+            </p>
 
             <div className="info-list" style={{ marginTop: 12, border: '1px solid var(--bp-surface-border-color-default)', borderRadius: 'var(--bp-surface-border-radius)' }}>
               <div className="info-block">

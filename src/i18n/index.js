@@ -98,8 +98,11 @@ const en = {
     radar: 'RADAR · L-BAND',
     dragHint: 'DRAG THE DIVIDER',
     keyboardHint: 'or use arrow keys',
-    opticalCaption: 'A cloud deck hides the flood. This is what a normal satellite photo would give you.',
-    radarCaption: 'The same scene in radar. Smooth water is dark; trunks standing in water return a bright double bounce.',
+    opticalCaption:
+      'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
+    radarCaption:
+      'The real Sentinel-1 radar quicklook. Smooth water is dark; trunks standing in water can return a bright double bounce.',
+    noImage: 'Live imagery unavailable — start the backend to load the real scene.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
       'Brightness is returned energy, not colour. Open water scatters the pulse away and looks black; rough canopy looks textured; a trunk standing in water can act like a corner reflector and glow.',
@@ -149,8 +152,8 @@ const en = {
     contrastSubtitle: 'Why a flood in a mangrove and a fire in a conifer forest do not look alike in the same channel.',
     downloadCsv: 'Download series (CSV)',
     comparison: {
-      sundarbans: 'Sundarbans',
-      caldor: 'Caldor scar',
+      sundarbans: 'Vietnam flood',
+      caldor: 'Greece fire',
       label: 'Field',
     },
     ariaScene: '{{site}} {{state}} radar scene',
@@ -194,7 +197,7 @@ const en = {
   game: {
     title: 'Radar detective',
     subtitle:
-      'Four scenes. One question each. Read the signal, not the caption. Evidence is revealed only after you answer.',
+      'Two real post-launch cases. One question each. Read the signal, not the caption. Evidence is revealed only after you answer.',
     round: 'ROUND {{current}} / {{total}}',
     score: 'SCORE {{score}}',
     question: 'What changed here?',
@@ -269,7 +272,7 @@ const en = {
       },
       game: {
         title: 'Test your eye',
-        body: 'Four radar pairs, four causes. Choose an answer, then read the evidence.',
+        body: 'Two real Sentinel-1 pairs from 2026: a Vietnam flood and a Greek wildfire. Choose an answer, then read the evidence.',
       },
     },
   },
@@ -321,6 +324,8 @@ const en = {
     loading: 'Loading',
     retry: 'Retry',
     sitePicker: 'Study area',
+    demoBanner:
+      'Demo mode — the backend is not connected, so the values below are illustrative. Start `npm run api` for real Sentinel-1 data.',
   },
 };
 
@@ -420,8 +425,11 @@ const ar = {
     radar: 'رادار · نطاق L',
     dragHint: 'اسحب الفاصل',
     keyboardHint: 'أو استخدم مفاتيح الأسهم',
-    opticalCaption: 'طبقة غيوم تخفي الفيضان. هذا ما ستعطيه صورة فضائية عادية.',
-    radarCaption: 'المشهد نفسه بالرادار. الماء الأملس داكن، والجذوع الواقفة في الماء تعيد ارتدادًا مزدوجًا لامعًا.',
+    opticalCaption:
+      'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
+    radarCaption:
+      'صورة رادار حقيقية من Sentinel-1. الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
+    noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:
       'السطوع طاقة عائدة لا لون. الماء المكشوف يصرف النبضة فيبدو أسود، والمظلة الخشنة تبدو ذات نسيج، والجذع الواقف في الماء قد يعمل كعاكس زاوي فيلمع.',
@@ -471,8 +479,8 @@ const ar = {
     contrastSubtitle: 'لماذا لا يبدو فيضان في المانغروف وحريق في غابة صنوبر بالشكل نفسه في القناة ذاتها.',
     downloadCsv: 'تنزيل السلسلة (CSV)',
     comparison: {
-      sundarbans: 'سندربانز',
-      caldor: 'أثر كالدور',
+      sundarbans: 'فيضان فيتنام',
+      caldor: 'حريق اليونان',
       label: 'الحقل',
     },
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
@@ -515,7 +523,7 @@ const ar = {
   },
   game: {
     title: 'محقق الرادار',
-    subtitle: 'أربعة مشاهد وسؤال لكل منها. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
+    subtitle: 'حالتان حقيقيتان بعد إطلاق نيسار. سؤال لكل حالة. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
     round: 'الجولة {{current}} / {{total}}',
     score: 'النقاط {{score}}',
     question: 'ماذا تغيّر هنا؟',
@@ -589,7 +597,7 @@ const ar = {
       },
       game: {
         title: 'اختبر عينك',
-        body: 'أربعة أزواج رادار وأربعة أسباب. اختر ثم اقرأ الأدلة.',
+        body: 'زوجان حقيقيان من Sentinel-1 عام 2026: فيضان فيتنام وحريق اليونان. اختر ثم اقرأ الأدلة.',
       },
     },
   },
@@ -641,6 +649,8 @@ const ar = {
     loading: 'جارٍ التحميل',
     retry: 'إعادة المحاولة',
     sitePicker: 'منطقة الدراسة',
+    demoBanner:
+      'وضع تجريبي — الباك اند غير متصل، والقيم أدناه توضيحية. شغّل `npm run api` لبيانات Sentinel-1 الحقيقية.',
   },
 };
 

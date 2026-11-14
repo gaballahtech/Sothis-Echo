@@ -2487,3 +2487,25 @@ button,
   0% { opacity: 1; }
   100% { opacity: 0; }
 }
+
+.scene-unavailable {
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  padding: 16px;
+  text-align: center;
+  background: var(--te-wash);
+  color: var(--bp-typography-color-muted);
+  font-size: 12px;
+  border: 1px solid var(--te-border);
+}
+
+.demo-banner {
+  padding: 7px 16px;
+  background: color-mix(in srgb, #b8860b 14%, var(--te-surface));
+  border-bottom: 1px solid var(--te-border);
+  color: var(--bp-typography-color-default-rest);
+  font-family: var(--te-mono);
+  font-size: 11px;
+  text-align: center;
+}

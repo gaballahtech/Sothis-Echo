@@ -137,6 +137,43 @@ async function readBand(item, asset, lat, lng) {
   throw lastError;
 }
 
+async function findOptical({ bbox, targetDate, start, end }) {
+  try {
+    const response = await fetch(STAC_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        collections: ['sentinel-2-l2a'],
+        bbox,
+        datetime: `${start}T00:00:00Z/${end}T23:59:59Z`,
+        query: { 'eo:cloud_cover': { lt: 95 } },
+        limit: 40,
+      }),
+      signal: AbortSignal.timeout(30000),
+    });
+    if (!response.ok) return null;
+    const payload = await response.json();
+    const items = payload.features || [];
+    if (!items.length) return null;
+    const target = new Date(`${targetDate}T00:00:00Z`).getTime();
+    items.sort((a, b) => {
+      const da = Math.abs(new Date(a.properties.datetime).getTime() - target);
+      const db = Math.abs(new Date(b.properties.datetime).getTime() - target);
+      return da - db;
+    });
+    const item = items[0];
+    return {
+      url: s3ToHttps(item.assets?.thumbnail?.href),
+      date: (item.properties?.datetime || '').slice(0, 10),
+      cloudCover: item.properties?.['eo:cloud_cover'] ?? null,
+      platform: item.properties?.platform || 'Sentinel-2',
+      itemId: item.id,
+    };
+  } catch {
+    return null;
+  }
+}
+
 async function readScene(item, site) {
   const lat = site.coords.lat;
   const lng = site.coords.lng;
@@ -292,6 +329,17 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       (point, index, list) => index === 0 || point.month > list[index - 1].month
     );
 
+    const optical = await findOptical({
+      bbox,
+      targetDate: afterScene.date,
+      start: new Date(new Date(`${afterScene.date}T00:00:00Z`).getTime() - 20 * 86400000)
+        .toISOString()
+        .slice(0, 10),
+      end: new Date(new Date(`${afterScene.date}T00:00:00Z`).getTime() + 20 * 86400000)
+        .toISOString()
+        .slice(0, 10),
+    });
+
     const changes = series.map((point) => point.change);
     const stableChanges = changes.slice(0, Math.max(2, Math.floor(changes.length / 2)));
 
@@ -321,6 +369,16 @@ export async function buildRealSite(site, { start, end, eventDate }) {
           acquiredAt: afterScene.datetime,
           product: 'Sentinel-1 GRD',
           notSimulated: true,
+          ...(optical?.url
+            ? {
+                opticalUrl: optical.url,
+                opticalDate: optical.date,
+                opticalCloudCover: optical.cloudCover,
+                opticalPlatform: optical.platform,
+                opticalAttribution:
+                  'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
+              }
+            : {}),
         },
       },
       measurements: {

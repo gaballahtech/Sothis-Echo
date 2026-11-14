@@ -6,7 +6,7 @@ import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { createSonifier, isAudioSupported } from '../services/sonifier';
 import { SectionHead } from './ui';
-import BreathingSarTerrain from './BreathingSarTerrain';
+import PulseTrace from './PulseTrace';
 
 export default function Sonification() {
   const { t } = useTranslation();
@@ -81,9 +81,6 @@ export default function Sonification() {
     }, 620);
   };
 
-  // Sample-accurate playhead, read from the audio clock by the visuals.
-  const getPass = () => sonifierRef.current?.getTimeState?.() ?? null;
-
   return (
     <section id="sound" className="content-section chapter chapter--gold" aria-labelledby="sound-title">
       <div className="section-inner">
@@ -132,14 +129,7 @@ export default function Sonification() {
       </div>
 
       <div className="sound-stage">
-        <BreathingSarTerrain
-          selectedSite={site.id}
-          playingTrack={playing ? 'changing' : null}
-          getPass={getPass}
-          values={site.pulse}
-          currentPassIndex={step}
-          language={language}
-        />
+        <PulseTrace values={site.pulse} currentPassIndex={step} playing={playing} />
       </div>
 
       <div className="section-inner">

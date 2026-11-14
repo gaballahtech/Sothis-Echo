@@ -34,7 +34,7 @@ test('Blueprint ledger renders virtualized and resizable inside Deep Dive Data',
 
   const header = shell.locator('.bp6-table-column-header-cell').first();
   await expect(header).toBeVisible();
-  await expect(shell).toContainText('Sundarbans');
+  await expect(shell).toContainText('Central Vietnam flood');
 
   expect(errors).toEqual([]);
 });

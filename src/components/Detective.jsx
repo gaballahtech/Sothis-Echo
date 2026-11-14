@@ -49,7 +49,8 @@ export default function Detective() {
   const timerRef = useRef(null);
 
   const L = (value) => localized(value, language);
-  const round = detectiveRounds[roundIndex];
+  const rounds = detectiveRounds.slice(0, 2);
+  const round = rounds[roundIndex];
   const site = useMemo(() => sites.find((item) => item.id === round?.siteId), [sites, round?.siteId]);
 
   useEffect(() => {
@@ -65,7 +66,7 @@ export default function Detective() {
 
   if (!round || !site) return null;
 
-  const total = detectiveRounds.length;
+  const total = rounds.length;
   const correct = selected === round.answer;
   const correctOption = round.options.find((option) => option.id === round.answer);
   const ratio = score / total;
@@ -164,10 +165,15 @@ export default function Detective() {
           ) : (
             <>
               <div className="row-between" style={{ marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
-                <p className="body-copy-muted" style={{ margin: 0, maxWidth: 520 }}>{L(round.brief)}</p>
+                <div style={{ maxWidth: 520 }}>
+                  <p className="body-copy-muted" style={{ margin: 0 }}>{L(round.brief)}</p>
+                  <p className="micro" style={{ margin: '4px 0 0' }}>
+                    Sentinel-1 · {site.measurements?.dateBefore} → {site.measurements?.dateAfter}
+                  </p>
+                </div>
                 <div className="row" style={{ gap: 10, alignItems: 'center' }}>
                   <div className="row" style={{ gap: 4 }} aria-label="progress">
-                    {detectiveRounds.map((_, i) => (
+                    {rounds.map((_, i) => (
                       <span
                         key={i}
                         style={{
@@ -195,14 +201,17 @@ export default function Detective() {
                 </div>
               </div>
 
-              <div className="scene-pair">
-                {[
+              <div className="scene-pair">                  {[
                   { key: 'before', label: t('game.before') },
                   { key: 'after', label: t('game.after') },
                 ].map((item) => {
                   const state = round[item.key];
+                  const realDate =
+                    item.key === 'before'
+                      ? site.measurements?.dateBefore || state.date
+                      : site.measurements?.dateAfter || state.date;
                   return (
-                    <Panel key={item.key} title={item.label} icon="camera" status={state.date}>
+                    <Panel key={item.key} title={item.label} icon="camera" status={realDate}>
                       <SceneCanvas
                         site={site}
                         params={state.params}
