@@ -13,8 +13,8 @@
 
 const SCALE = [0, 3, 5, 7, 10, 12, 15, 17, 19, 22, 24];
 const ROOT_HZ = 146.83; // D3 — low, calm register
-const MASTER_LEVEL = 0.26;
-const NOISE_LEVEL = 0.07;
+const MASTER_LEVEL = 0.62;
+const NOISE_LEVEL = 0.1;
 const NOISE_DURATION = 0.11;
 
 export const isAudioSupported = () =>
@@ -51,8 +51,18 @@ export function createSonifier() {
     softener.type = 'lowpass';
     softener.frequency.value = 5200;
     softener.Q.value = 0.4;
+    // The pulse sat low in the mix and read as silence on laptop speakers.
+    // Keep the gentle filter, then squeeze peaks so the higher master level
+    // does not clip when notes and noise bursts land together.
+    const limiter = ctx.createDynamicsCompressor();
+    limiter.threshold.value = -10;
+    limiter.knee.value = 6;
+    limiter.ratio.value = 8;
+    limiter.attack.value = 0.003;
+    limiter.release.value = 0.18;
     master.connect(softener);
-    softener.connect(ctx.destination);
+    softener.connect(limiter);
+    limiter.connect(ctx.destination);
     return ctx;
   }
 
@@ -84,7 +94,7 @@ export function createSonifier() {
   function note(start, value) {
     const frequency = stepFrequency(value);
     const duration = 0.34 - value * 0.1;
-    const volume = 0.11 + value * 0.16;
+    const volume = 0.24 + value * 0.26;
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
@@ -107,7 +117,7 @@ export function createSonifier() {
       shimmer.type = 'sine';
       shimmer.frequency.setValueAtTime(frequency * 2.005, start);
       shimmerGain.gain.setValueAtTime(0.0001, start);
-      shimmerGain.gain.linearRampToValueAtTime(value * 0.045, start + 0.02);
+      shimmerGain.gain.linearRampToValueAtTime(value * 0.08, start + 0.02);
       shimmerGain.gain.exponentialRampToValueAtTime(0.0001, start + duration * 0.85);
       shimmer.connect(shimmerGain);
       shimmerGain.connect(master);

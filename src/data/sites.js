@@ -203,8 +203,8 @@ export const studyAreas = [
     ],
     story: [
       {
-        en: 'On 31 July 2026 a wildfire broke out near Psatha and Porto Germeno, west of Athens. It burned more than 10,000 hectares of pine and scrub, damaged or destroyed more than 100 homes, and sent a smoke plume across the Gulf of Corinth. Copernicus EMS Rapid Mapping was activated (EMSR909).',
-        ar: 'في 31 يوليو 2026 اندلع حريق قرب بساثا وبورتو جيرمينو غرب أثينا. أحرق أكثر من 10,000 هكتار من الصنوبر والشجيرات، وأتلف أو دمّر أكثر من 100 منزل، وأرسل عمود دخان عبر خليج كورنث. فُعّل رسم خرائط كوبرنيكوس السريع (EMSR909).',
+        en: 'On 31 July 2026 a wildfire broke out near Agios Vasileios, then ran to Psatha and Porto Germeno on the northern shore of the Gulf of Corinth, west of Athens. It burned 11,339 hectares of pine and scrub, damaged or destroyed more than 100 homes, and sent a smoke plume more than 70 km south-east across the Saronic Gulf. Copernicus EMS Rapid Mapping was activated (EMSR909).',
+        ar: 'في 31 يوليو 2026 اندلع حريق قرب أغيوس فاسيليوس، ثم امتد إلى بساثا وبورتو جيرمينو على الشاطئ الشمالي لخليج كورنث غرب أثينا. أحرق 11,339 هكتارًا من الصنوبر والشجيرات، وأتلف أو دمّر أكثر من 100 منزل، وأرسل عمود دخان أكثر من 70 كم جنوب شرق عبر خليج سارونيك. فُعّل رسم خرائط كوبرنيكوس السريع (EMSR909).',
       },
       {
         en: 'Radar does not see flame. It sees structure. Before the fire the pulse bounced through pine needles and branches; afterwards it met ash, dry soil and standing dead trunks. The scar reads darker and smoother, and it stayed that way for months.',

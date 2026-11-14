@@ -44,6 +44,7 @@ export default function Detective() {
   const [bestStreak, setBestStreak] = useState(0);
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [finished, setFinished] = useState(false);
+  const [started, setStarted] = useState(false);
   const [shake, setShake] = useState(false);
   const [shuffled, setShuffled] = useState([]);
   const timerRef = useRef(null);
@@ -71,9 +72,10 @@ export default function Detective() {
   const correctOption = round.options.find((option) => option.id === round.answer);
   const ratio = score / total;
 
-  // countdown
+  // countdown — only after the visitor presses start, so landing on the section
+  // never burns a round, and it pauses while the answer is being read.
   useEffect(() => {
-    if (finished || revealed) return undefined;
+    if (!started || finished || revealed) return undefined;
     setTimeLeft(ROUND_SECONDS);
     timerRef.current = setInterval(() => {
       setTimeLeft((value) => {
@@ -89,7 +91,7 @@ export default function Detective() {
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [roundIndex, finished, revealed]);
+  }, [started, roundIndex, finished, revealed]);
 
   const choose = (optionId) => {
     if (revealed) return;
@@ -123,7 +125,13 @@ export default function Detective() {
     setShake(false);
   };
 
+  const startRun = () => {
+    setTimeLeft(ROUND_SECONDS);
+    setStarted(true);
+  };
+
   const restart = () => {
+    setStarted(true);
     setRoundIndex(0);
     setSelected(null);
     setRevealed(false);
@@ -162,6 +170,21 @@ export default function Detective() {
               <p className="small muted" style={{ maxWidth: 460, margin: '0 auto 16px' }}>{t(`game.${tier}`)}</p>
               <Button intent="primary" icon="refresh" text={t('game.restart')} onClick={restart} />
             </div>
+          ) : !started ? (
+            <div className="game-start" data-testid="detective-start-panel">
+              <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600 }}>{t('game.startTitle')}</h3>
+              <p className="body-copy-muted" style={{ margin: '0 0 6px', maxWidth: 520 }}>
+                {t('game.startBody', { seconds: ROUND_SECONDS, total })}
+              </p>
+              <p className="micro" style={{ margin: '0 0 14px' }}>{t('game.startHint')}</p>
+              <Button
+                intent="primary"
+                icon="play"
+                text={t('game.start')}
+                onClick={startRun}
+                data-testid="detective-start"
+              />
+            </div>
           ) : (
             <>
               <div className="row-between" style={{ marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
@@ -188,13 +211,21 @@ export default function Detective() {
                   {streak > 1 ? (
                     <span className="micro" style={{ color: 'var(--bp-intent-warning-rest)' }}>🔥 ×{streak}</span>
                   ) : null}
-                  <span
-                    className="micro numeric"
-                    style={{ color: timerDanger ? 'var(--bp-intent-danger-rest)' : 'var(--bp-typography-color-muted)', minWidth: 28, textAlign: 'right' }}
+                  <div
+                    className={`detective-timer${timerDanger ? ' is-danger' : ''}`}
                     data-testid="detective-timer"
+                    role="timer"
+                    aria-live="off"
+                    aria-label={`${t('game.timeLeft')}: ${timeLeft}s`}
                   >
-                    {timeLeft}s
-                  </span>
+                    <span className="detective-timer-label">{t('game.timeLeft')}</span>
+                    <span className="detective-timer-value numeric" dir="ltr">
+                      {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                    </span>
+                    <span className="detective-timer-bar" aria-hidden="true">
+                      <span style={{ width: `${(timeLeft / ROUND_SECONDS) * 100}%` }} />
+                    </span>
+                  </div>
                   <div style={{ width: 70 }}>
                     <Meter value={(roundIndex + (revealed ? 1 : 0)) / total} label={t('game.progress')} />
                   </div>

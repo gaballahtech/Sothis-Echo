@@ -2459,6 +2459,61 @@ button,
 }
 
 /* ---------- Detective engagement ---------- */
+.game-start {
+  padding: 18px 4px;
+  text-align: center;
+}
+.game-start h3,
+.game-start p {
+  margin-inline: auto;
+}
+
+.detective-timer {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: center;
+  gap: 2px 6px;
+  padding: 4px 8px;
+  border: 1px solid var(--bp-surface-border-color-default);
+  background: var(--te-wash);
+  min-width: 86px;
+}
+.detective-timer-label {
+  font-size: 9px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bp-typography-color-muted);
+}
+.detective-timer-value {
+  font-size: 18px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  justify-self: end;
+}
+.detective-timer-bar {
+  grid-column: 1 / -1;
+  display: block;
+  height: 3px;
+  background: var(--bp-surface-border-color-default);
+  overflow: hidden;
+}
+.detective-timer-bar > span {
+  display: block;
+  height: 100%;
+  background: var(--bp-intent-primary-rest);
+  transition: width 0.9s linear;
+}
+.detective-timer.is-danger {
+  border-color: var(--bp-intent-danger-rest);
+}
+.detective-timer.is-danger .detective-timer-value {
+  color: var(--bp-intent-danger-rest);
+}
+.detective-timer.is-danger .detective-timer-bar > span {
+  background: var(--bp-intent-danger-rest);
+}
+
+
 @keyframes detective-shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-6px); }

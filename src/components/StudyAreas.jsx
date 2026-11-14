@@ -261,7 +261,9 @@ export default function StudyAreas() {
                       ))}
                     </ul>
                   </div>
-                  <p className="micro" style={{ margin: 0 }}>{t('sites.dbNote')}</p>
+                  <p className="micro" style={{ margin: 0 }}>
+                    {t(source === 'api' ? 'sites.dbNote' : 'sites.dbNoteFallback')}
+                  </p>
                 </div>
               </div>
           </Disclosure>

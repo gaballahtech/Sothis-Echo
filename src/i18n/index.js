@@ -127,7 +127,7 @@ const en = {
       'Bundled fallback figures: the live backend is unreachable, so the numbers below are illustrative, not measurements.',
     observations: {
       title: 'Radar observation ledger',
-      subtitle: 'Every pass in the bundled series, in one auditable table.',
+      subtitle: 'Every pass in the current series, in one auditable table.',
       columnSite: 'Study area',
       columnDate: 'Pass date',
       columnVv: 'VV (dB)',
@@ -148,6 +148,8 @@ const en = {
     },
     dbNote:
       'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
+    dbNoteFallback:
+      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
     interpretation: 'Interpretation',
@@ -225,6 +227,12 @@ const en = {
     progress: 'Case progress',
     before: 'THEN',
     after: 'NOW',
+    start: 'Start the case',
+    startTitle: 'Two cases, two scenes each',
+    startBody:
+      'The clock starts when you press start. You get {{seconds}} seconds per scene, {{total}} scenes in total. Reading the signal matters more than speed.',
+    startHint: 'The timer pauses while the evidence is open.',
+    timeLeft: 'TIME',
   },
   method: {
     title: 'Data we can defend',
@@ -460,7 +468,7 @@ const ar = {
     measurements: 'قياسات الإشارة',
     observations: {
       title: 'سجل ملاحظات الرادار',
-      subtitle: 'كل مرور في السلسلة المرفقة في جدول واحد قابل للتدقيق.',
+      subtitle: 'كل مرور في السلسلة الحالية في جدول واحد قابل للتدقيق.',
       columnSite: 'منطقة الدراسة',
       columnDate: 'تاريخ المرور',
       columnVv: 'VV (ديسيبل)',
@@ -481,6 +489,8 @@ const ar = {
     },
     dbNote:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
+    dbNoteFallback:
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
     interpretation: 'التفسير',
@@ -557,6 +567,12 @@ const ar = {
     progress: 'تقدم القضية',
     before: 'سابقًا',
     after: 'الآن',
+    start: 'ابدأ القضية',
+    startTitle: 'قضيتان، مشهدان لكل واحدة',
+    startBody:
+      'العدّاد يبدأ عند ضغطك على «ابدأ». عندك {{seconds}} ثانية لكل مشهد، و{{total}} مشاهد إجمالًا. قراءة الإشارة أهم من السرعة.',
+    startHint: 'المؤقت يتوقف أثناء عرض الأدلة.',
+    timeLeft: 'الوقت',
   },
   method: {
     title: 'بيانات قابلة للدفاع',
