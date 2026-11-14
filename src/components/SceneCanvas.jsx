@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-export function SceneCanvas({ alt, className = '', imageUrl }) {
+export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover' }) {
   const { t } = useTranslation();
 
   if (!imageUrl) {
@@ -22,13 +22,13 @@ export function SceneCanvas({ alt, className = '', imageUrl }) {
         alt={alt}
         loading="lazy"
         decoding="async"
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        style={{ width: '100%', height: '100%', objectFit: fit, display: 'block' }}
       />
     </div>
   );
 }
 
-export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, opticalUrl, radarUrl }) {
+export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, opticalUrl, radarUrl, radarFit = 'cover' }) {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
@@ -97,7 +97,7 @@ export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, 
         style={{ cursor: dragging ? 'ew-resize' : 'ew-resize' }}
       >
         {radarUrl ? (
-          <SceneCanvas alt={radarAlt} className="compare-layer" imageUrl={radarUrl} />
+          <SceneCanvas alt={radarAlt} className="compare-layer" imageUrl={radarUrl} fit={radarFit} />
         ) : (
           <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
         )}

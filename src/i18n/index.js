@@ -102,6 +102,8 @@ const en = {
       'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
     radarCaption:
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
+    nisarSwath:
+      'Shown uncropped: the NISAR footprint is far wider than this study site, so the radar side covers a much larger area than the optical side.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
@@ -429,6 +431,8 @@ const ar = {
       'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
+    nisarSwath:
+      'معروضة كاملة بدون قص: نطاق NISAR أوسع بكثير من مساحة الدراسة، فجانب الرادار يغطي منطقة أكبر من الجانب البصري.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:

@@ -45,7 +45,13 @@ export default function SeeThrough() {
               radarLabel={t('seeThrough.radar')}
               opticalUrl={state.opticalUrl}
               radarUrl={radarUrl}
+              radarFit={state.nisarImageUrl ? 'contain' : 'cover'}
             />
+            {state.nisarImageUrl ? (
+              <p className="micro" style={{ margin: '6px 0 0' }}>
+                {t('seeThrough.nisarSwath')}
+              </p>
+            ) : null}
             <p className="micro" style={{ margin: '8px 0 0' }}>
               {state.opticalUrl
                 ? `${state.opticalPlatform || 'Sentinel-2'} · ${state.opticalDate} · ${Math.round(state.opticalCloudCover ?? 0)}% ${language === 'ar' ? 'غيوم' : 'cloud'} — ${radarPlatform} · ${radarDate}`
