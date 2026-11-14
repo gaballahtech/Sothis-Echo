@@ -55,7 +55,9 @@ const teamMembers = [
     handle: 'mariam-emad',
     roleKey: 'designer',
     icon: 'style',
-    links: [],
+    links: [
+      { icon: 'briefcase', href: 'https://www.linkedin.com/in/mariam-emad-803703326/', labelKey: 'linkedin' },
+    ],
   },
 ];
 
