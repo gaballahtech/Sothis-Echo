@@ -1,10 +1,44 @@
+import { useEffect, useState } from 'react';
 import { Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
+import { loadMissionStatus, isApiConfigured } from '../services/sarApi';
 
 export default function Hero() {
   const { t } = useTranslation();
+  const { language } = useLanguage();
+  const [status, setStatus] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!isApiConfigured()) {
+      setStatus(null);
+      return undefined;
+    }
+    loadMissionStatus().then((result) => {
+      if (cancelled) return;
+      setStatus(result);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const go = (id) => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const formatDate = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      numberingSystem: 'latn',
+    }).format(date);
+  };
+
+  const live = Boolean(status?.operational ?? status);
 
   return (
     <section id="home" className="content-section hero-section" aria-labelledby="home-title">
@@ -33,6 +67,17 @@ export default function Hero() {
             <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />
             <Button variant="outlined" icon="volume-up" text={t('hero.ctaListen')} onClick={() => go('sound')} />
           </div>
+
+          {isApiConfigured() ? (
+            <div className="hero-status" data-testid="hero-status" style={{ marginTop: 14 }}>
+              <span className="micro">
+                {status ? (live ? 'LIVE' : 'LOCAL') : '…'} ·{' '}
+                {status?.lastAcquisition
+                  ? `${t('method.statusLabel')}: ${formatDate(status.lastAcquisition)}`
+                  : t('method.statusLabel')}
+              </span>
+            </div>
+          ) : null}
         </div>
       </div>
 

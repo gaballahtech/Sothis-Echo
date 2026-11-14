@@ -63,11 +63,15 @@ function mergeParams(local, remote) {
 
 function mergeSceneState(local, remote) {
   if (!remote || typeof remote !== 'object') return local;
-  return {
+  const merged = {
     ...local,
     date: typeof remote.date === 'string' && remote.date.length >= 4 ? remote.date : local.date,
     params: mergeParams(local.params, remote.params),
   };
+  for (const key of ['imageUrl', 'opticalUrl', 'attribution', 'acquiredAt', 'product', 'notSimulated']) {
+    if (remote[key] != null) merged[key] = remote[key];
+  }
+  return merged;
 }
 
 function mergeMeasurements(local, remote) {
@@ -181,6 +185,87 @@ export async function loadMissionStatus() {
   if (!isApiConfigured()) return null;
   try {
     return await request('/nisar/status');
+  } catch {
+    return null;
+  }
+}
+
+/** Load one study area by id. */
+export async function loadSite(id) {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/study-areas/${encodeURIComponent(id)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Backscatter time series for one site. */
+export async function loadSeries(id, { start, end } = {}) {
+  if (!isApiConfigured()) return null;
+  try {
+    const params = new URLSearchParams();
+    if (start) params.set('start', start);
+    if (end) params.set('end', end);
+    const qs = params.toString();
+    const payload = await request(`/sites/${encodeURIComponent(id)}/series${qs ? `?${qs}` : ''}`);
+    return Array.isArray(payload) ? payload : payload?.series ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Recovery curve + fit for one site. */
+export async function loadRecovery(id, threshold = 80) {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/sites/${encodeURIComponent(id)}/recovery?threshold=${encodeURIComponent(threshold)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** 16-pass sonification series. */
+export async function loadSonification(id) {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/sonification/${encodeURIComponent(id)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Optional scene image metadata + attribution. */
+export async function loadSceneMeta(id, state) {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/scenes/${encodeURIComponent(id)}/${encodeURIComponent(state)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Provenance block. */
+export async function loadAttribution(id) {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/attribution/${encodeURIComponent(id)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Health check. */
+export async function loadHealth() {
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request('/health');
+    return payload && typeof payload === 'object' ? payload : null;
   } catch {
     return null;
   }

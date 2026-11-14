@@ -3,7 +3,7 @@ import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { paintScene } from '../services/sceneRenderer';
 
-export function SceneCanvas({ site, params, channel = 'radar', alt, className = '' }) {
+export function SceneCanvas({ site, params, channel = 'radar', alt, className = '', imageUrl }) {
   const ref = useRef(null);
   const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
 
@@ -27,6 +27,14 @@ export function SceneCanvas({ site, params, channel = 'radar', alt, className = 
     if (!visible) return;
     paintScene(ref.current, site, params, channel);
   }, [visible, site, channel, params?.water, params?.emergent, params?.burn, params?.cloud]);
+
+  if (imageUrl) {
+    return (
+      <div className={`scene-wrap ${className}`}>
+        <img src={imageUrl} alt={alt} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+      </div>
+    );
+  }
 
   return (
     <div className={`scene-wrap ${className}`}>
