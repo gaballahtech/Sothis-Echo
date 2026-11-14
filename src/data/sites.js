@@ -185,7 +185,10 @@ export const studyAreas = [
     seed: 84,
     name: { en: 'West Attica wildfire', ar: 'حريق غرب أتيكا' },
     region: { en: 'Porto Germeno · Greece', ar: 'بورتو جيرمينو · اليونان' },
-    coords: { lat: 38.14, lng: 23.21 },
+    // Inland at Agios Vasileios, where the fire started: the earlier shoreline
+    // point put half of the 512×512 window over open water, and wind-driven sea
+    // backscatter then swung the absolute VV level and the VV−VH gap.
+    coords: { lat: 38.19, lng: 23.16 },
     wkt: 'POLYGON ((23.05 38.04, 23.36 38.04, 23.36 38.24, 23.05 38.24, 23.05 38.04))',
     eventDate: '2026-07-31',
     headline: {
