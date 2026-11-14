@@ -52,7 +52,11 @@ export function formatMonths(months, language = 'en') {
   if (months < 1) return language === 'ar' ? 'شهر واحد' : '< 1 month';
   if (months < 24) {
     const value = Math.round(months);
-    return language === 'ar' ? `${value} شهرًا` : `${value} months`;
+    if (language !== 'ar') return `${value} months`;
+    if (value === 1) return 'شهر واحد';
+    if (value === 2) return 'شهرين';
+    if (value >= 3 && value <= 10) return `${value} أشهر`;
+    return `${value} شهرًا`;
   }
   const years = (months / 12).toFixed(1).replace(/\.0$/, '');
   return language === 'ar' ? `${years} سنة` : `${years} years`;

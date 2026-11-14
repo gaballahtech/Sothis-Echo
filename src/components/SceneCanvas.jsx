@@ -137,7 +137,7 @@ export function CompareSlider({ site, params, opticalAlt, radarAlt, opticalLabel
       <div className="compare-help">
         <span>{t('seeThrough.dragHint')}</span>
         <span className="numeric">
-          {Math.round(position)}% OPTICAL · {Math.round(100 - position)}% RADAR
+          {Math.round(position)}% {t('seeThrough.optical').split(' · ')[0]} · {Math.round(100 - position)}% {t('seeThrough.radar').split(' · ')[0]}
         </span>
         <span>{t('seeThrough.keyboardHint')}</span>
       </div>
