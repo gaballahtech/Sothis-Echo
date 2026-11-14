@@ -176,7 +176,6 @@ a:hover {
 [dir='rtl'] .kicker,
 [dir='rtl'] .panel-title,
 [dir='rtl'] .stat-label,
-[dir='rtl'] .hero-stat-label,
 [dir='rtl'] .footer-title,
 [dir='rtl'] .nav-section-label,
 [dir='rtl'] .rail-kicker,
@@ -237,7 +236,6 @@ li,
 .kicker,
 .panel-title,
 .stat-label,
-.hero-stat-label,
 .nav-section-label,
 .rail-kicker,
 .table-toolbar,
@@ -256,7 +254,6 @@ li,
 
 .micro,
 .kicker,
-.hero-stat-label,
 .stat-label,
 .nav-section-label,
 .rail-kicker,
@@ -269,7 +266,6 @@ li,
 .mono,
 .stat-value,
 .telemetry-row dd,
-.hero-stat-value,
 .pulse-readout,
 .table-toolbar {
   font-family: var(--te-mono);
@@ -280,7 +276,6 @@ li,
 .kicker,
 .panel-title,
 .stat-label,
-.hero-stat-label,
 .footer-title,
 .table-toolbar,
 .scene-chip,
@@ -488,6 +483,12 @@ li,
   padding: 0 10px;
   font-family: var(--te-body);
   font-size: 12px;
+}
+
+/* Icon–label breathing room, direction-safe (Blueprint uses physical margins). */
+.bp6-button > .bp6-icon:first-child {
+  margin-inline-end: 7px !important;
+  margin-inline-start: 0 !important;
 }
 
 .app-drawer-body {
@@ -877,40 +878,6 @@ li,
   margin-bottom: 22px;
 }
 
-.hero-inline-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0;
-  max-width: 620px;
-  padding-top: 14px;
-  border-top: 1px solid var(--te-border);
-}
-
-.hero-stat {
-  min-width: 0;
-  padding: 0 18px;
-  border-inline-start: 1px solid var(--te-border);
-}
-
-.hero-stat:first-child {
-  padding-inline-start: 0;
-  border-inline-start: 0;
-}
-
-.hero-stat-label {
-  display: block;
-  margin-bottom: 3px;
-  color: var(--te-muted);
-  font-family: var(--te-mono);
-  letter-spacing: 0.2em;
-}
-
-.hero-stat-value {
-  display: block;
-  color: var(--te-ink);
-  font-size: 11px;
-  line-height: 1.35;
-}
 
 .hero-scroll {
   display: inline-flex;
@@ -1460,7 +1427,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 
 .sound-status {
   min-height: 20px;
-  margin-top: 9px;
+  margin-top: 6px;
   color: var(--te-muted);
   font-size: 11px;
   line-height: 1.5;
@@ -1491,7 +1458,26 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 .sound-actions-bar {
   display: flex;
   gap: 10px;
-  margin-top: 16px;
+  margin-top: 10px;
+}
+
+/* soft "wave" pulse while the sonifier warms up */
+@keyframes sound-boot {
+  0%,
+  100% {
+    background-color: transparent;
+  }
+  50% {
+    background-color: rgba(31, 94, 91, 0.16);
+  }
+}
+
+.sound-action-btn.is-booting {
+  animation: sound-boot 0.9s ease-in-out infinite;
+}
+
+.sound-action-btn .bp6-spinner {
+  color: var(--te-accent);
 }
 
 .sound-actions-bar .bp6-button {
@@ -1500,7 +1486,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 }
 
 .sound-stage {
-  margin-top: 18px;
+  margin-top: 6px;
   overflow: hidden;
   border-block: 1px solid var(--te-border);
   background: #f2efe9;
@@ -1932,6 +1918,40 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   width: min(480px, calc(100vw - 24px));
 }
 
+/* Anchored spotlight tour card — sits beside the target, glides between steps */
+.tour-spot-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: color-mix(in srgb, var(--te-bg) 34%, transparent);
+}
+
+.tour-spot {
+  position: fixed;
+  z-index: 60;
+  width: min(340px, calc(100vw - 24px));
+  padding: 0;
+  transition:
+    top 0.42s var(--te-ease),
+    left 0.42s var(--te-ease),
+    opacity 0.2s ease;
+  will-change: top, left;
+}
+
+.tour-spot .bp6-card {
+  padding: 14px;
+  background: var(--te-bg);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--te-border);
+}
+
+.tour-spot-highlight {
+  position: relative;
+  outline: 2px solid var(--te-accent);
+  outline-offset: 4px;
+  transition: outline-color 0.3s ease;
+}
+
 .tour-progress {
   margin: 12px 0;
 }
@@ -2294,10 +2314,6 @@ button,
     padding-block: 54px 46px;
   }
 
-  .hero-inline-stats {
-    max-width: 100%;
-  }
-
   .footer-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2350,6 +2366,16 @@ button,
     padding: 0 10px;
   }
 
+  .brand-copy {
+    display: none;
+  }
+
+  .app-navbar .language-toggle {
+    min-width: 44px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
   .site-choice {
     flex-wrap: wrap;
   }
@@ -2376,18 +2402,6 @@ button,
 
   .section-subtitle {
     font-size: 14px;
-  }
-
-  .hero-inline-stats {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 9px;
-    padding-top: 12px;
-  }
-
-  .hero-stat {
-    padding: 0;
-    border-inline-start: 0;
   }
 
   .sound-map-strip,

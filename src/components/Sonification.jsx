@@ -14,6 +14,7 @@ export default function Sonification() {
   const { sites } = useSiteData();
   const [siteId, setSiteId] = useState(() => sites[0]?.id);
   const [playing, setPlaying] = useState(false);
+  const [booting, setBooting] = useState(false);
   const [step, setStep] = useState(-1);
   const [supported, setSupported] = useState(true);
   const sonifierRef = useRef(null);
@@ -54,24 +55,30 @@ export default function Sonification() {
   };
 
   const toggle = () => {
+    if (booting) return;
     if (playing) {
       stop();
       return;
     }
-    setStep(0);
-    setPlaying(true);
-    const ok = sonifierRef.current?.play(site.pulse, {
-      onStep: setStep,
-      onEnd: () => {
+    // the sonifier "warms up" — spinner + wave pulse inside the button
+    setBooting(true);
+    window.setTimeout(() => {
+      setStep(0);
+      setPlaying(true);
+      const ok = sonifierRef.current?.play(site.pulse, {
+        onStep: setStep,
+        onEnd: () => {
+          setPlaying(false);
+          setStep(-1);
+        },
+      });
+      setBooting(false);
+      if (!ok) {
+        setSupported(false);
         setPlaying(false);
         setStep(-1);
-      },
-    });
-    if (!ok) {
-      setSupported(false);
-      setPlaying(false);
-      setStep(-1);
-    }
+      }
+    }, 620);
   };
 
   // Sample-accurate playhead, read from the audio clock by the visuals.
@@ -100,10 +107,11 @@ export default function Sonification() {
 
         <div className="sound-actions-bar" role="group" aria-label={t('sound.title')}>
           <Button
-            className="sound-action-btn"
+            className={`sound-action-btn${booting ? ' is-booting' : ''}`}
             intent={playing ? 'warning' : 'none'}
             variant="outlined"
-            icon={playing ? 'stop' : 'play'}
+            icon={booting ? undefined : playing ? 'stop' : 'play'}
+            loading={booting}
             text={
               playing
                 ? t('sound.stop')
