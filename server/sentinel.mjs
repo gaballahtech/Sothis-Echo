@@ -9,7 +9,7 @@
  * calibrated σ⁰. The UI labels the source accordingly.
  */
 import { fromUrl } from 'geotiff';
-import { buildNisarBrowse, buildNisarSite } from './nisar.mjs';
+import { buildNisarBrowse, buildNisarSite, comparisonCrops } from './nisar.mjs';
 
 const STAC_URL = 'https://earth-search.aws.element84.com/v1/search';
 const COLLECTION = 'sentinel-1-grd';
@@ -185,6 +185,7 @@ async function findOptical({ bbox, point, targetDate, start, end }) {
       cloudCover: item.properties?.['eo:cloud_cover'] ?? null,
       platform: item.properties?.platform || 'Sentinel-2',
       itemId: item.id,
+      bbox: item.bbox,
     };
   } catch {
     return null;
@@ -398,6 +399,17 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         .slice(0, 10),
     });
 
+    // Crop both comparison images to one geographic window around the site, so
+    // the slider really shows the same place on both sides.
+    if (nisarBrowse?.after?.quad && optical?.bbox) {
+      const crops = comparisonCrops(site, { quad: nisarBrowse.after.quad, imageBbox: optical.bbox });
+      if (crops) {
+        nisarBrowse.after.imageUrl = nisarBrowse.after.latlonUrl || nisarBrowse.after.imageUrl;
+        nisarBrowse.after.crop = crops.crop;
+        optical.crop = crops.opticalCrop;
+      }
+    }
+
     const changes = series.map((point) => point.change);
     const stableChanges = changes.slice(0, Math.max(2, Math.floor(changes.length / 2)));
 
@@ -427,6 +439,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
               opticalDate: optical.date,
               opticalCloudCover: optical.cloudCover,
               opticalPlatform: optical.platform,
+              opticalCrop: optical.crop ?? null,
               opticalAttribution:
                 'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
             }
@@ -444,6 +457,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         // comparison, where it is shown once.
         Object.assign(states[side], {
           nisarImageUrl: nisar.imageUrl,
+          nisarCrop: nisar.crop ?? null,
           nisarDate: nisar.date,
           nisarAttribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
           nisarAcquiredAt: nisar.datetime,

@@ -44,7 +44,9 @@ export default function SeeThrough() {
               opticalLabel={t('seeThrough.optical')}
               radarLabel={t('seeThrough.radar')}
               opticalUrl={state.opticalUrl}
+              opticalCrop={state.opticalCrop ?? null}
               radarUrl={radarUrl}
+              radarCrop={state.nisarCrop ?? null}
               radarFit={state.nisarImageUrl ? 'contain' : 'cover'}
               radarClassName={state.nisarImageUrl ? 'compare-layer--nisar' : ''}
             />

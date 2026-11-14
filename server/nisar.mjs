@@ -85,6 +85,117 @@ function browseUrl(granule) {
   );
 }
 
+/** The north-up preview: its pixels sit on a regular lat/lon (Mercator) grid. */
+function latlonUrl(granule) {
+  const urls = Array.isArray(granule.browse) ? granule.browse : [];
+  return urls.find((url) => /LATLON\.png$/i.test(url)) || null;
+}
+
+const MERC = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+const FROM_RADIANS = 180 / Math.PI;
+const mercSpan = (south, north) => (MERC(north) - MERC(south)) * FROM_RADIANS;
+
+/**
+ * Every NISAR product ships a `_LATLON.kml` whose GroundOverlay pins the
+ * browse PNG to a lat/lon quad. That is the georeferencing ASF does not
+ * publish next to the image itself, and it needs an Earthdata token.
+ */
+async function browseQuad(granule) {
+  const token = process.env.EARTHDATA_TOKEN;
+  if (!token || !granule?.downloadUrl) return null;
+  const url = `${String(granule.downloadUrl).replace(/\.h5$/i, '')}_LATLON.kml`;
+  const response = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+    signal: AbortSignal.timeout(20000),
+  });
+  if (!response.ok) {
+    log('kml', response.status, url);
+    return null;
+  }
+  const match = /<\w*:?LatLonQuad>[\s\S]*?<coordinates>([^<]+)<\/coordinates>/i.exec(await response.text());
+  if (!match) return null;
+  const pairs = match[1]
+    .trim()
+    .split(/\s+/)
+    .map((pair) => pair.split(',').map(Number));
+  if (pairs.length < 4) return null;
+  const lngs = pairs.map(([lng]) => lng);
+  const lats = pairs.map(([, lat]) => lat);
+  if (![...lngs, ...lats].every(Number.isFinite)) return null;
+  return {
+    west: Math.min(...lngs),
+    east: Math.max(...lngs),
+    south: Math.min(...lats),
+    north: Math.max(...lats),
+  };
+}
+
+/**
+ * Fractional crop that puts the same geographic window into the NISAR browse
+ * (georeferenced by the KML quad) and the Sentinel-2 quicklook (tile bbox).
+ * Both images are north-up Mercator, so a lat/lon window is an axis-aligned
+ * rectangle in each. The window keeps the comparison frame's aspect ratio and
+ * stays inside both images.
+ */
+export function comparisonCrops(site, { quad, imageBbox, aspect = 760 / 500 }) {
+  const bbox = site?.bbox || bboxFromWkt(site?.wkt);
+  if (!bbox || !quad) return null;
+  const siteWidth = bbox[2] - bbox[0];
+  const siteHeight = mercSpan(bbox[1], bbox[3]);
+  let width = Math.max(siteWidth, siteHeight * aspect);
+  let height = width / aspect;
+
+  const quadWidth = quad.east - quad.west;
+  const quadMinMerc = MERC(quad.south);
+  const quadMaxMerc = MERC(quad.north);
+  const hasTile = Array.isArray(imageBbox) && imageBbox.length === 4;
+  const tileWidth = hasTile ? imageBbox[2] - imageBbox[0] : Infinity;
+  const tileHeight = hasTile ? mercSpan(imageBbox[1], imageBbox[3]) : Infinity;
+
+  // The window has to stay inside both images, so clamp it to their overlap and
+  // leave a small margin so the crop never touches an image edge.
+  const minLng = Math.max(quad.west, hasTile ? imageBbox[0] : -Infinity);
+  const maxLng = Math.min(quad.east, hasTile ? imageBbox[2] : Infinity);
+  const minMerc = Math.max(quadMinMerc, hasTile ? MERC(imageBbox[1]) : -Infinity);
+  const maxMerc = Math.min(quadMaxMerc, hasTile ? MERC(imageBbox[3]) : Infinity);
+  const maxWidth = (maxLng - minLng) * 0.98;
+  const maxHeight = (maxMerc - minMerc) * FROM_RADIANS * 0.98;
+  if (width > maxWidth) {
+    width = maxWidth;
+    height = width / aspect;
+  }
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * aspect;
+  }
+
+  const centreLng = (bbox[0] + bbox[2]) / 2;
+  const halfHeight = height / 2 / FROM_RADIANS;
+  const centreMerc = MERC((bbox[1] + bbox[3]) / 2);
+
+  const west = Math.min(Math.max(centreLng - width / 2, minLng), maxLng - width);
+  // The window's top edge must leave room for its full height below it.
+  const topMerc = Math.min(Math.max(centreMerc + halfHeight, minMerc + 2 * halfHeight), maxMerc);
+
+  const crop = {
+    x: (west - quad.west) / quadWidth,
+    w: width / quadWidth,
+    y: (quadMaxMerc - topMerc) / (quadMaxMerc - quadMinMerc),
+    h: (2 * halfHeight) / (quadMaxMerc - quadMinMerc),
+  };
+
+  const opticalCrop = Array.isArray(imageBbox)
+    ? {
+        x: (west - imageBbox[0]) / tileWidth,
+        w: width / tileWidth,
+        y: (MERC(imageBbox[3]) - topMerc) / (MERC(imageBbox[3]) - MERC(imageBbox[1])),
+        h: (2 * halfHeight * FROM_RADIANS) / tileHeight,
+      }
+    : null;
+
+  return { crop, opticalCrop, window: { west, width, height } };
+}
+
 async function harmonyGeoTiff(granule, bbox, variable) {
   const tag = `${granule.granuleName}_${variable.split('/').pop()}`;
   const file = path.join(CACHE_DIR, `${tag}.tif`);
@@ -270,18 +381,27 @@ export async function buildNisarBrowse(site, { start, end, eventDate }) {
   const after = [...picked]
     .filter((item) => new Date(item.startTime).getTime() > event)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))[0];
-  const shape = (granule) =>
+  if (!before || !after) return null;
+  // The georeferenced (north-up) preview is the one that can be cropped to the
+  // study site, so resolve its KML quad for the "after" browse.
+  const quad = await browseQuad(after).catch((error) => {
+    log('kml failed', error?.message);
+    return null;
+  });
+  const shape = (granule, overlay) =>
     granule && {
       date: (granule.startTime || '').slice(0, 10),
       datetime: granule.startTime || null,
-      imageUrl: browseUrl(granule),
+      imageUrl: overlay ? latlonUrl(granule) || browseUrl(granule) : browseUrl(granule),
+      latlonUrl: latlonUrl(granule),
+      nativeUrl: browseUrl(granule),
+      quad: overlay || null,
       granuleName: granule.granuleName,
       track: granule.track,
       frame: granule.frameNumber,
       product: 'NISAR GCOV L-band (HH) browse',
     };
-  if (!before || !after) return null;
-  return { before: shape(before), after: shape(after) };
+  return { before: shape(before), after: shape(after, quad) };
 }
 
 export async function buildNisarSite(site, { start, end, eventDate }) {

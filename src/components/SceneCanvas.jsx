@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover' }) {
+export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop = null }) {
   const { t } = useTranslation();
 
   if (!imageUrl) {
@@ -15,15 +15,24 @@ export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover' }) {
     );
   }
 
+  // A fractional crop ({x, y, w, h} in 0..1) shows one geographic window of the
+  // source image: scale the image up by 1/w × 1/h and shift the window's corner
+  // out of frame.
+  const cropStyle = crop
+    ? {
+        position: 'absolute',
+        maxWidth: 'none',
+        width: `${100 / crop.w}%`,
+        height: `${100 / crop.h}%`,
+        left: `${(-crop.x / crop.w) * 100}%`,
+        top: `${(-crop.y / crop.h) * 100}%`,
+        display: 'block',
+      }
+    : { width: '100%', height: '100%', objectFit: fit, display: 'block' };
+
   return (
     <div className={`scene-wrap ${className}`}>
-      <img
-        src={imageUrl}
-        alt={alt}
-        loading="lazy"
-        decoding="async"
-        style={{ width: '100%', height: '100%', objectFit: fit, display: 'block' }}
-      />
+      <img src={imageUrl} alt={alt} loading="lazy" decoding="async" style={cropStyle} />
     </div>
   );
 }
@@ -37,6 +46,8 @@ export function CompareSlider({
   radarUrl,
   radarFit = 'cover',
   radarClassName = '',
+  opticalCrop = null,
+  radarCrop = null,
 }) {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
@@ -111,13 +122,19 @@ export function CompareSlider({
             className={`compare-layer ${radarClassName}`.trim()}
             imageUrl={radarUrl}
             fit={radarFit}
+            crop={radarCrop}
           />
         ) : (
           <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
         )}
         <div className="compare-layer" style={{ clipPath: `inset(0 ${100 - position}% 0 0)` }}>
           {opticalUrl ? (
-            <SceneCanvas alt={opticalAlt} className="compare-layer" imageUrl={opticalUrl} />
+            <SceneCanvas
+              alt={opticalAlt}
+              className="compare-layer"
+              imageUrl={opticalUrl}
+              crop={opticalCrop}
+            />
           ) : (
             <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
           )}

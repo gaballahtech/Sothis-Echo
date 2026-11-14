@@ -104,7 +104,7 @@ const en = {
     radarCaption:
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
     nisarSwath:
-      'Shown whole and unrotated: the NISAR swath is several times wider than the study site and runs at the orbit’s angle, so it is not aligned pixel for pixel with the optical frame.',
+      'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar scene comes from a tilted orbit and a wider swath, so fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
@@ -434,7 +434,7 @@ const ar = {
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
     nisarSwath:
-      'معروضة كاملة وبدون تدوير: نطاق NISAR أوسع عدة مرات من مساحة الدراسة ويميل بزاوية المدار، لذلك لا ينطبق بكسل ببكسل على الإطار البصري.',
+      'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. المشهد الراداري من مدار مائل ونطاق أوسع، فالتفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:
