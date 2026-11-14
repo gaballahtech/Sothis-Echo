@@ -187,9 +187,14 @@ async function getSites() {
       const end = new Date(event + 120 * DAY).toISOString().slice(0, 10);
       try {
         const real = await buildRealSite(site, { start, end, eventDate: site.eventDate });
-        if (!real) return fixture;
+        if (!real) {
+          console.error('[SOTHIS API] real build empty for', site.id);
+          return fixture;
+        }
         return { ...fixture, ...real };
-      } catch {
+      } catch (error) {
+        // Silent fallbacks hid a broken deploy; always leave a trace.
+        console.error('[SOTHIS API] real build failed for', site.id, error?.message, error?.stack);
         return fixture;
       }
     })
