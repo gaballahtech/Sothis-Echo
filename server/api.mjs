@@ -18,8 +18,8 @@
  *   VITE_API_BASE_URL=http://127.0.0.1:3001/api npm run dev
  */
 import http from 'node:http';
-import { randomUUID } from 'node:crypto';
 import { studyAreas } from '../src/data/sites.js';
+import { buildRealSite, clearRealCache } from './sentinel.mjs';
 
 const PORT = Number(process.env.API_PORT || process.env.MOCK_API_PORT || 3001);
 const HOST = process.env.API_HOST || process.env.MOCK_API_HOST || '0.0.0.0';
@@ -27,7 +27,8 @@ const CORS_ORIGIN = process.env.CORS_ORIGIN || '*';
 const GEOAI_BASE = (process.env.GEOAI_BASE_URL ?? 'https://mohamed4540-geoai-models.hf.space').replace(/\/+$/, '');
 const GEOAI_TIMEOUT = Number(process.env.GEOAI_TIMEOUT || 120000);
 const MAX_BYTES = Number(process.env.MAX_GEOTIFF_BYTES || 100 * 1024 * 1024);
-const VERSION = 'sothis-echo-backend-1';
+const VERSION = 'sothis-echo-backend-2';
+const REAL_DATA = process.env.REAL_DATA !== '0';
 
 const MODELS = new Set(['auto', 'gemini_only', 'prithvi', 'sam_hq']);
 
@@ -132,6 +133,31 @@ const fixtures = studyAreas.map((site) => {
     },
   };
 });
+
+const DAY = 86_400_000;
+
+/**
+ * Real Sentinel-1 data first; fall back to the labelled fixtures when the
+ * public STAC/COG services are unreachable.
+ */
+async function getSites() {
+  if (!REAL_DATA) return fixtures;
+  return Promise.all(
+    studyAreas.map(async (site) => {
+      const fixture = fixtures.find((item) => item.id === site.id);
+      const event = new Date(`${site.eventDate}T00:00:00Z`).getTime();
+      const start = new Date(event - 90 * DAY).toISOString().slice(0, 10);
+      const end = new Date(event + 120 * DAY).toISOString().slice(0, 10);
+      try {
+        const real = await buildRealSite(site, { start, end, eventDate: site.eventDate });
+        if (!real) return fixture;
+        return { ...fixture, ...real };
+      } catch {
+        return fixture;
+      }
+    })
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* HTTP helpers                                                        */
@@ -311,7 +337,13 @@ const server = http.createServer(async (req, res) => {
     /* ---------------- live SAR workflow ---------------- */
 
     if (path === '/health' || path === '/api/health') {
-      send(res, 200, { status: 'ok', timestamp: new Date().toISOString(), version: VERSION });
+      send(res, 200, { status: 'ok', timestamp: new Date().toISOString(), version: VERSION, realData: REAL_DATA });
+      return;
+    }
+
+    if (path === '/api/live/refresh' && method === 'POST') {
+      clearRealCache();
+      send(res, 200, { success: true, message: 'Real-data cache cleared' });
       return;
     }
 
@@ -464,6 +496,7 @@ const server = http.createServer(async (req, res) => {
           lastAcquisition: new Date(Date.now() - 86_400_000).toISOString(),
           nextAcquisition: new Date(Date.now() + 11 * 86_400_000).toISOString(),
           products: ['sentinel-1-grd'],
+          realData: REAL_DATA,
         },
         success: true,
       });
@@ -471,13 +504,15 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (path === '/api/study-areas') {
-      send(res, 200, { data: fixtures, success: true });
+      const sites = await getSites();
+      send(res, 200, { data: sites, success: true });
       return;
     }
 
     const siteMatch = path.match(/^\/api\/study-areas\/([^/]+)$/);
     if (siteMatch) {
-      const site = fixtures.find((item) => item.id === siteMatch[1]);
+      const sites = await getSites();
+      const site = sites.find((item) => item.id === siteMatch[1]);
       if (!site) sendError(res, 404, 'Unknown site');
       else send(res, 200, { data: site, success: true });
       return;

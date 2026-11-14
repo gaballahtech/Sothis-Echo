@@ -207,6 +207,7 @@ export default function Detective() {
                         site={site}
                         params={state.params}
                         channel="radar"
+                        imageUrl={item.key === 'before' ? site.states?.before?.imageUrl : site.states?.after?.imageUrl}
                         alt={t('sites.ariaScene', { site: L(site.name), state: item.label })}
                       />
                     </Panel>

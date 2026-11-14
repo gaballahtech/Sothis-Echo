@@ -137,7 +137,8 @@ const en = {
       },
       note: 'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve.',
     },
-    dbNote: 'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio.',
+    dbNote:
+      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Live values are relative dB derived from Sentinel-1 GRD digital numbers (uncalibrated).',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
     interpretation: 'Interpretation',
@@ -458,7 +459,8 @@ const ar = {
       },
       note: 'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي.',
     },
-    dbNote: 'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع.',
+    dbNote:
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. القيم الحية ديسيبل نسبية مشتقة من أرقام Sentinel-1 GRD الرقمية (غير معايرة).',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
     interpretation: 'التفسير',

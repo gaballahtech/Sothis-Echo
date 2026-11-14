@@ -29,11 +29,12 @@ ISRO; this is an independent, open-source educational prototype.
 ## Data honesty
 
 Narrative, mission facts, event dates and scattering physics are real or
-literature-informed. **Scene pixels, backscatter values, sonification series and
-recovery curves are illustrative** — physically plausible, not official NISAR
-products. Every scene is labelled `SIMULATED`. The frontend has a documented,
-API-ready data layer so real NISAR / Sentinel-1 products can replace the numbers
-without changing the UI.
+literature-informed. With the local backend running (`npm run api`), the study
+areas use **real Sentinel-1 GRD scenes** from Earth Search + AWS Open Data: real
+acquisition dates, real quicklook images, and backscatter statistics read from a
+512×512 COG window around each site. Values are **relative dB** (from GRD digital
+numbers), not calibrated σ⁰. Without the backend, the bundled illustrative
+dataset is used and labelled as such.
 
 See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
 

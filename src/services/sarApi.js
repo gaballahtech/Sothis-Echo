@@ -16,7 +16,7 @@ import { studyAreas, SITE_DATA_VERSION } from '../data/sites.js';
 const ENV = import.meta.env || {};
 const RAW_BASE = ENV.VITE_API_BASE_URL || '';
 export const API_BASE = RAW_BASE.replace(/\/+$/, '');
-const TIMEOUT_MS = Number(ENV.VITE_API_TIMEOUT || 10000);
+const TIMEOUT_MS = Number(ENV.VITE_API_TIMEOUT || 60000);
 
 export const isApiConfigured = () => Boolean(API_BASE);
 

@@ -18,6 +18,25 @@ VITE_API_BASE_URL=http://127.0.0.1:3001/api
 
 With no `VITE_API_BASE_URL`, the frontend still runs entirely offline.
 
+## Real Sentinel-1 data (default)
+
+The `/api/study-areas` response is built from **real Sentinel-1 GRD** scenes:
+
+- [Earth Search STAC](https://earth-search.aws.element84.com/v1) finds scenes
+  around each study area's event date.
+- Public **AWS Open Data COGs** (`sentinel-s1-l1c`) are read with HTTP range
+  requests: only a **512×512 window** around each site is downloaded.
+- Real **quicklook PNGs** become the scene images (`imageUrl`).
+- Measurements/series/recovery are derived from the real GRD digital numbers.
+
+Values are **relative amplitude dB** (`20·log10(DN / 1000)`), not calibrated σ⁰.
+The UI labels them as live and uncalibrated. No Earthdata login and no multi-GB
+download are required.
+
+The first request takes ~30–40 s (12 COG windows); results are cached for 6 h.
+Use `POST /api/live/refresh` to clear the cache, or set `REAL_DATA=0` to serve
+the labelled fixtures instead.
+
 ## Live SAR workflow
 
 ```
