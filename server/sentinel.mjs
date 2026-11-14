@@ -363,17 +363,14 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     for (const scene of scenes) {
       if (!unique.some((item) => item.date === scene.date)) unique.push(scene);
     }
-    // Drop passes whose mean backscatter is a robust outlier (a different
-    // sub-swath, a corrupt window, an extreme wet/dry pass). Without this a
-    // single 13 dB-low pass dragged the before/after pair and the change index.
-    const sortedVv = unique.map((scene) => scene.vvDb).sort((a, b) => a - b);
-    const medianVv = sortedVv[Math.floor(sortedVv.length / 2)] ?? 0;
-    const deviations = sortedVv.map((value) => Math.abs(value - medianVv)).sort((a, b) => a - b);
-    const mad = deviations[Math.floor(deviations.length / 2)] ?? 0;
-    const limit = Math.max(4, 4 * mad);
-    const filtered = unique.filter((scene) => Math.abs(scene.vvDb - medianVv) <= limit);
-    const samples = filtered.length >= 2 ? filtered : unique;
-    log(site.id, 'outliers', unique.length - samples.length, 'limit', limit.toFixed(1));
+    // A broken window — off-swath, masked, or clipped at the noise floor — reads
+    // as almost identical VV and VH. Real land, water and burn scars always keep
+    // VH several dB below VV at C-band, so a gap that closes up is a data fault,
+    // not a change. This drops those passes without hiding genuine flood or burn
+    // signals, which is what a plain brightness outlier test did.
+    const healthy = unique.filter((scene) => scene.vhDb - scene.vvDb <= -4);
+    const samples = healthy.length >= 2 ? healthy : unique;
+    log(site.id, 'dropped passes', unique.length - samples.length, 'of', unique.length);
 
     const before = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
     const after = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
