@@ -41,6 +41,22 @@ const teamMembers = [
       { icon: 'briefcase', href: 'https://www.linkedin.com/in/ahd-fayez-2049a0363/', labelKey: 'linkedin' },
     ],
   },
+  {
+    name: 'Nouran Ahmed',
+    handle: 'nouran-ahmed',
+    roleKey: 'researcher',
+    icon: 'book',
+    links: [
+      { icon: 'briefcase', href: 'https://www.linkedin.com/in/noran-ahmed-a05162373?utm_source=share_via&utm_content=profile&utm_medium=member_android', labelKey: 'linkedin' },
+    ],
+  },
+  {
+    name: 'Mariam Emad',
+    handle: 'mariam-emad',
+    roleKey: 'designer',
+    icon: 'style',
+    links: [],
+  },
 ];
 
 export default function Team() {
