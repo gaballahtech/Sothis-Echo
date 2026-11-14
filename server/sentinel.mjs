@@ -138,7 +138,7 @@ async function readBand(item, asset, lat, lng) {
   throw lastError;
 }
 
-async function findOptical({ bbox, targetDate, start, end }) {
+async function findOptical({ bbox, point, targetDate, start, end }) {
   try {
     const response = await fetch(STAC_URL, {
       method: 'POST',
@@ -157,12 +157,28 @@ async function findOptical({ bbox, targetDate, start, end }) {
     const items = payload.features || [];
     if (!items.length) return null;
     const target = new Date(`${targetDate}T00:00:00Z`).getTime();
-    items.sort((a, b) => {
-      const da = Math.abs(new Date(a.properties.datetime).getTime() - target);
-      const db = Math.abs(new Date(b.properties.datetime).getTime() - target);
-      return da - db;
-    });
-    const item = items[0];
+    // A neighbouring MGRS tile can intersect the study bbox without covering
+    // its centre, which yields a picture of somewhere else. Keep the tiles
+    // that actually contain the site when any of them exist.
+    const covers = (item) =>
+      !point || !Array.isArray(item.bbox)
+        ? true
+        : item.bbox[0] <= point.lng &&
+          item.bbox[2] >= point.lng &&
+          item.bbox[1] <= point.lat &&
+          item.bbox[3] >= point.lat;
+    const covering = items.filter(covers);
+    const pool = covering.length ? covering : items;
+    // Prefer the clearest pass near the radar date: a scene three days closer
+    // but 90% clouded shows nothing. Cloud percent dominates, day distance
+    // breaks ties.
+    const score = (item) => {
+      const cloud = Number(item.properties?.['eo:cloud_cover']);
+      const days = Math.abs(new Date(item.properties.datetime).getTime() - target) / 86400000;
+      return (Number.isFinite(cloud) ? cloud : 100) + 3 * days;
+    };
+    pool.sort((a, b) => score(a) - score(b));
+    const item = pool[0];
     return {
       url: s3ToHttps(item.assets?.thumbnail?.href),
       date: (item.properties?.datetime || '').slice(0, 10),
@@ -281,6 +297,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       const afterDate = nisarCalibrated.states.after.date;
       const optical = await findOptical({
         bbox,
+        point: site.coords,
         targetDate: afterDate,
         start: new Date(new Date(`${afterDate}T00:00:00Z`).getTime() - 20 * 86400000)
           .toISOString()
@@ -371,6 +388,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
 
     const optical = await findOptical({
       bbox,
+      point: site.coords,
       targetDate: afterScene.date,
       start: new Date(new Date(`${afterScene.date}T00:00:00Z`).getTime() - 20 * 86400000)
         .toISOString()

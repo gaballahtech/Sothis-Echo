@@ -973,6 +973,12 @@ li,
   inset: 0;
 }
 
+/* NISAR browse previews arrive on a white canvas; matching it stops the swath
+   from sitting on a dark slab. */
+.compare-layer--nisar {
+  background: #ffffff;
+}
+
 .compare-layer .scene-wrap,
 .compare-layer canvas {
   width: 100%;

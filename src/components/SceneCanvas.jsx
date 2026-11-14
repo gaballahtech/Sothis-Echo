@@ -28,7 +28,16 @@ export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover' }) {
   );
 }
 
-export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, opticalUrl, radarUrl, radarFit = 'cover' }) {
+export function CompareSlider({
+  opticalAlt,
+  radarAlt,
+  opticalLabel,
+  radarLabel,
+  opticalUrl,
+  radarUrl,
+  radarFit = 'cover',
+  radarClassName = '',
+}) {
   const { t } = useTranslation();
   const [position, setPosition] = useState(50);
   const [dragging, setDragging] = useState(false);
@@ -97,7 +106,12 @@ export function CompareSlider({ opticalAlt, radarAlt, opticalLabel, radarLabel, 
         style={{ cursor: dragging ? 'ew-resize' : 'ew-resize' }}
       >
         {radarUrl ? (
-          <SceneCanvas alt={radarAlt} className="compare-layer" imageUrl={radarUrl} fit={radarFit} />
+          <SceneCanvas
+            alt={radarAlt}
+            className={`compare-layer ${radarClassName}`.trim()}
+            imageUrl={radarUrl}
+            fit={radarFit}
+          />
         ) : (
           <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>
         )}

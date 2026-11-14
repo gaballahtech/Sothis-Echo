@@ -46,6 +46,7 @@ export default function SeeThrough() {
               opticalUrl={state.opticalUrl}
               radarUrl={radarUrl}
               radarFit={state.nisarImageUrl ? 'contain' : 'cover'}
+              radarClassName={state.nisarImageUrl ? 'compare-layer--nisar' : ''}
             />
             {state.nisarImageUrl ? (
               <p className="micro" style={{ margin: '6px 0 0' }}>

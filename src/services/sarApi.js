@@ -94,6 +94,10 @@ function mergeSceneState(local, remote) {
   for (const key of [
     'imageUrl',
     'opticalUrl',
+    'opticalDate',
+    'opticalCloudCover',
+    'opticalPlatform',
+    'opticalAttribution',
     'attribution',
     'acquiredAt',
     'product',
