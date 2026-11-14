@@ -94,10 +94,11 @@ const en = {
   seeThrough: {
     title: 'Why the camera misses the story',
     subtitle:
-      'Drag the line. Two views of the same study area: the clearest optical pass available, and a full NISAR swath.',
+      'Drag the line. Two views of the same study area: the clearest optical pass available, and the NISAR radar window cut to match it.',
     optical: 'OPTICAL · CLOUDED',
     radar: 'RADAR · L-BAND',
     dragHint: 'DRAG THE DIVIDER',
+    dividerAt: 'Divider at {{value}}% of the frame width',
     keyboardHint: 'or use arrow keys',
     opticalCaption:
       'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
@@ -111,7 +112,7 @@ const en = {
       'Brightness is returned energy, not colour. Open water scatters the pulse away and looks black; rough canopy looks textured; a trunk standing in water can act like a corner reflector and glow.',
     legendWater: 'Open water — dark',
     legendCanopy: 'Canopy — textured mid-tone',
-    legendTrunk: 'Flooded trunks — bright',
+    legendTrunk: 'Flooded trunks — specular, bright',
   },
   sites: {
     title: 'One change, two rhythms',
@@ -424,10 +425,11 @@ const ar = {
   seeThrough: {
     title: 'لماذا تفوت الكاميرا القصة',
     subtitle:
-      'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونطاق NISAR كامل.',
+      'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونافذة NISAR الرادارية المقصوصة لتطابقها.',
     optical: 'بصري · تحت الغيوم',
     radar: 'رادار · نطاق L',
     dragHint: 'اسحب الفاصل',
+    dividerAt: 'الفاصل عند {{value}}% من عرض الإطار',
     keyboardHint: 'أو استخدم مفاتيح الأسهم',
     opticalCaption:
       'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
@@ -441,7 +443,7 @@ const ar = {
       'السطوع طاقة عائدة لا لون. الماء المكشوف يصرف النبضة فيبدو أسود، والمظلة الخشنة تبدو ذات نسيج، والجذع الواقف في الماء قد يعمل كعاكس زاوي فيلمع.',
     legendWater: 'ماء مكشوف — داكن',
     legendCanopy: 'مظلة — نسيج متوسط',
-    legendTrunk: 'جذوع مغمورة — لامعة',
+    legendTrunk: 'جذوع مغمورة — لامعة (عاكس زاوي)',
   },
   sites: {
     title: 'تغيّر واحد، إيقاعان',
