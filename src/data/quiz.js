@@ -47,8 +47,8 @@ export const detectiveRounds = [
     ],
     answer: 'fire',
     explanation: {
-      en: 'Both channels fall, but VH falls further. That is the signature of lost 3-D canopy — needles and branches that used to twist the wave. A flood would darken open water and often brighten flooded trunks; an earthquake would shift phase, not erase texture.',
-      ar: 'تنخفض القناتان، لكن VH ينخفض أكثر. هذه بصمة فقدان المظلة المجسّمة: الإبر والأغصان التي كانت تلفّ الموجة. الفيضان كان سيُظلم الماء المكشوف وقد يُلمع الجذوع المغمورة؛ والزلزال كان سيغيّر الطور لا النسيج.',
+      en: 'The ground got darker and smoother: VV falls sharply as canopy and litter are removed, and VH — the channel fed by 3-D vegetation — drops wherever the canopy was fully consumed. A flood would leave roofs and banks bright inside the dark water; an earthquake would shift phase, not erase texture.',
+      ar: 'صار السطح أغمق وأنعم: ينخفض VV بحدة مع اختفاء المظلة والغطاء الميت، وينخفض VH — قناة النباتات المجسّمة — حيث تُستهلك المظلة بالكامل. الفيضان كان سيُبقي الأسطح والضفاف لامعة داخل الماء الداكن؛ والزلزال كان سيغيّر الطور لا النسيج.',
     },
   },
 ];

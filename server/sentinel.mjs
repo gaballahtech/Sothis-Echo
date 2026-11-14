@@ -363,16 +363,31 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     for (const scene of scenes) {
       if (!unique.some((item) => item.date === scene.date)) unique.push(scene);
     }
-    const before = unique.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
-    const after = unique.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
-    const beforeScene = before[before.length - 1] || unique[0];
-    const afterScene = after[0] || unique[unique.length - 1];
+    // Drop passes whose mean backscatter is a robust outlier (a different
+    // sub-swath, a corrupt window, an extreme wet/dry pass). Without this a
+    // single 13 dB-low pass dragged the before/after pair and the change index.
+    const sortedVv = unique.map((scene) => scene.vvDb).sort((a, b) => a - b);
+    const medianVv = sortedVv[Math.floor(sortedVv.length / 2)] ?? 0;
+    const deviations = sortedVv.map((value) => Math.abs(value - medianVv)).sort((a, b) => a - b);
+    const mad = deviations[Math.floor(deviations.length / 2)] ?? 0;
+    const limit = Math.max(4, 4 * mad);
+    const filtered = unique.filter((scene) => Math.abs(scene.vvDb - medianVv) <= limit);
+    const samples = filtered.length >= 2 ? filtered : unique;
+    log(site.id, 'outliers', unique.length - samples.length, 'limit', limit.toFixed(1));
+
+    const before = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
+    const after = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
+    const beforeScene = before[before.length - 1] || samples[0];
+    // Give a burn scar time to show: the first post-event pass is often a day
+    // or two old, when the canopy has not fallen yet.
+    const settled = after.find((scene) => (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / 86400000 >= 5);
+    const afterScene = settled || after[0] || samples[samples.length - 1];
 
     const baselineVv = beforeScene.vvDb;
     const baselineVh = beforeScene.vhDb;
     const eventVv = Math.min(...scenes.map((scene) => scene.vvDb));
 
-    const series = unique.map((scene) => ({
+    const series = samples.map((scene) => ({
       date: scene.date,
       vv: Number(scene.vvDb.toFixed(1)),
       vh: Number(scene.vhDb.toFixed(1)),

@@ -185,8 +185,8 @@ export const studyAreas = [
     seed: 84,
     name: { en: 'West Attica wildfire', ar: 'حريق غرب أتيكا' },
     region: { en: 'Porto Germeno · Greece', ar: 'بورتو جيرمينو · اليونان' },
-    coords: { lat: 38.16, lng: 23.03 },
-    wkt: 'POLYGON ((22.90 38.05, 23.18 38.05, 23.18 38.28, 22.90 38.28, 22.90 38.05))',
+    coords: { lat: 38.14, lng: 23.21 },
+    wkt: 'POLYGON ((23.05 38.04, 23.36 38.04, 23.36 38.24, 23.05 38.24, 23.05 38.04))',
     eventDate: '2026-07-31',
     headline: {
       en: 'The slope that burned to the sea',
@@ -204,8 +204,8 @@ export const studyAreas = [
         ar: 'في 31 يوليو 2026 اندلع حريق قرب بساثا وبورتو جيرمينو غرب أثينا. أحرق أكثر من 10,000 هكتار من الصنوبر والشجيرات، وأتلف أو دمّر أكثر من 100 منزل، وأرسل عمود دخان عبر خليج كورنث. فُعّل رسم خرائط كوبرنيكوس السريع (EMSR909).',
       },
       {
-        en: 'Radar does not see flame. It sees structure. Before the fire the pulse bounced through pine needles and branches; afterwards it met ash, dry soil and standing dead trunks. VH — the channel fed by three-dimensional vegetation — fell hardest, and the burn scar stayed dark for months.',
-        ar: 'الرادار لا يرى اللهب، بل يرى البنية. قبل الحريق كانت النبضة ترتد بين إبر الصنوبر والأغصان؛ وبعده لاقت رمادًا وتربة جافة وجذوعًا ميتة قائمة. وكان VH — القناة التي تتغذى من النباتات المجسّمة — الأشد انخفاضًا، وبقي أثر الحريق داكنًا لأشهر.',
+        en: 'Radar does not see flame. It sees structure. Before the fire the pulse bounced through pine needles and branches; afterwards it met ash, dry soil and standing dead trunks. The scar reads darker and smoother, and it stayed that way for months.',
+        ar: 'الرادار لا يرى اللهب، بل يرى البنية. قبل الحريق كانت النبضة ترتد بين إبر الصنوبر والأغصان؛ وبعده لاقت رمادًا وتربة جافة وجذوعًا ميتة قائمة. يبدو الأثر أغمق وأنعم، وبقي كذلك لأشهر.',
       },
     ],
     states: {
@@ -243,12 +243,12 @@ export const studyAreas = [
           ar: 'أزال حريق التاج والاحتراق الشديد المظلة عبر مساحة الأثر. حلّ الرماد والتربة المكشوفة محل الإبر والأغصان.',
         },
         why: {
-          en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. Both channels drop; VH drops more because the three-dimensional vegetation that twists the wave has disappeared.',
-          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. تنخفض القناتان، وينخفض VH أكثر لأن النباتات المجسّمة التي تلفّ الموجة قد اختفت.',
+          en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. VV drops hardest over the scorched strip; VH drops wherever the three-dimensional vegetation that twists the wave has actually disappeared.',
+          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. ينخفض VV بحدة فوق الشريط المحترق، وينخفض VH حيث تختفي فعلًا النباتات المجسّمة التي تلفّ الموجة.',
         },
         polarization: {
-          en: 'VV falls with surface roughness and soil moisture. VH falls further — the wider VH drop is the fingerprint of lost canopy structure.',
-          ar: 'ينخفض VV مع خشونة السطح ورطوبة التربة. وينخفض VH أكثر — والفجوة الأكبر في VH هي بصمة فقدان بنية المظلة.',
+          en: 'VV falls with surface roughness, litter and soil moisture. VH only falls where the canopy itself was consumed — over a partly burned coastal strip it barely moves.',
+          ar: 'ينخفض VV مع خشونة السطح والغطاء الميت ورطوبة التربة. أما VH فلا ينخفض إلا حيث استُهلكت المظلة نفسها — وعلى شريط ساحلي محترق جزئيًا يكاد لا يتغيّر.',
         },
       },
     },
@@ -295,7 +295,7 @@ export const studyAreas = [
     },
     contrast: {
       dominant: { en: 'Volume scattering', ar: 'تشتت حجمي' },
-      signature: { en: 'VV and VH fall; VH falls more', ar: 'ينخفض VV وVH، وVH أكثر' },
+      signature: { en: 'Both channels fall; VV drops hard, VH follows', ar: 'تنخفض القناتان: VV بحدة وVH تبعًا' },
       timescale: { en: 'Years', ar: 'سنوات' },
     },
     researcher: {
@@ -376,7 +376,7 @@ export const contrastRows = [
     id: 'fingerprint',
     label: { en: 'Change fingerprint', ar: 'بصمة التغير' },
     sundarbans: { en: 'Dark water sheet; bright roofs', ar: 'طبقة ماء داكنة وأسطح لامعة' },
-    caldor: { en: 'Both channels fall; VH falls more', ar: 'تنخفض القناتان وVH أكثر' },
+    caldor: { en: 'Both channels fall; VV drops hard', ar: 'تنخفض القناتان وVV بحدة' },
   },
   {
     id: 'recovery',
