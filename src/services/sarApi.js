@@ -91,7 +91,20 @@ function mergeSceneState(local, remote) {
     date: typeof remote.date === 'string' && remote.date.length >= 4 ? remote.date : local.date,
     params: mergeParams(local.params, remote.params),
   };
-  for (const key of ['imageUrl', 'opticalUrl', 'attribution', 'acquiredAt', 'product', 'notSimulated']) {
+  for (const key of [
+    'imageUrl',
+    'opticalUrl',
+    'attribution',
+    'acquiredAt',
+    'product',
+    'notSimulated',
+    'nisarImageUrl',
+    'nisarDate',
+    'nisarAttribution',
+    'nisarAcquiredAt',
+    'nisarProduct',
+    'nisarGranule',
+  ]) {
     if (remote[key] != null) merged[key] = remote[key];
   }
   return merged;

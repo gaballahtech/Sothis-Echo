@@ -18,9 +18,21 @@ VITE_API_BASE_URL=http://127.0.0.1:3001/api
 
 With no `VITE_API_BASE_URL`, the frontend still runs entirely offline.
 
-## Real Sentinel-1 data (default)
+## Real NISAR L-band imagery (default)
 
-The `/api/study-areas` response is built from **real Sentinel-1 GRD** scenes:
+Scene images in `/api/study-areas` are **real NASA NISAR GCOV L-band browse
+images** (`NATIVE_A_HHHH.png`) found through the ASF Search API. They are public
+and need no login. Before/after dates and granule IDs come from the same ASF
+response.
+
+Calibrated NISAR HH/HV backscatter needs Harmony + an Earthdata token. Set
+`EARTHDATA_TOKEN` in `.env.local` and `NISAR_GCOV=1` to enable that path; it is
+off by default because Harmony processing can be slow/queued. When it succeeds,
+measured values and the series come from NISAR GCOV HHHH/HVHV GeoTIFFs.
+
+## Real Sentinel-1 data (quantitative fallback)
+
+The numeric series in `/api/study-areas` is built from **real Sentinel-1 GRD** scenes:
 
 - [Earth Search STAC](https://earth-search.aws.element84.com/v1) finds scenes
   around each study area's event date.

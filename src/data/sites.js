@@ -137,8 +137,8 @@ export const studyAreas = [
     },
     researcher: {
       acquisition: {
-        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 13 Sep 2026 event; NISAR L-band is the intended future product once public. Same-track pairs, terrain-corrected.',
-        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حدث 13 سبتمبر 2026 وبعده؛ ونطاق NISAR L-band هو المنتج المستقبلي المقصود عند إتاحته. أزواج من المسار نفسه مع تصحيح تضاريسي.',
+        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 13 Sep 2026 event for the site cards and time series; the radar/optical comparison uses a real NASA NISAR L-band (HH) browse image.',
+        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حدث 13 سبتمبر 2026 وبعده لبطاقات الموقع والسلسلة الزمنية؛ بينما تستخدم مقارنة الرادار/البصري صورة حقيقية من NASA NISAR L-band (HH).',
       },
       interpretation: [
         {
@@ -300,8 +300,8 @@ export const studyAreas = [
     },
     researcher: {
       acquisition: {
-        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 31 Jul 2026 fire; NISAR L-band is the intended future product once public. Same-track, terrain-corrected pairs.',
-        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حريق 31 يوليو 2026 وبعده؛ ونطاق NISAR L-band هو المنتج المستقبلي المقصود عند إتاحته. أزواج من المسار نفسه مع تصحيح تضاريسي.',
+        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 31 Jul 2026 fire for the site cards and time series; the radar/optical comparison uses a real NASA NISAR L-band (HH) browse image.',
+        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حريق 31 يوليو 2026 وبعده لبطاقات الموقع والسلسلة الزمنية؛ بينما تستخدم مقارنة الرادار/البصري صورة حقيقية من NASA NISAR L-band (HH).',
       },
       interpretation: [
         {

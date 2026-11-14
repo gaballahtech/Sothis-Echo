@@ -101,7 +101,7 @@ const en = {
     opticalCaption:
       'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
     radarCaption:
-      'The real Sentinel-1 radar quicklook. Smooth water is dark; trunks standing in water can return a bright double bounce.',
+      'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
@@ -141,7 +141,7 @@ const en = {
       note: 'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve.',
     },
     dbNote:
-      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Live values are relative dB derived from Sentinel-1 GRD digital numbers (uncalibrated).',
+      'Lower dB means less energy returned — a darker pixel. VV−VH is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
     interpretation: 'Interpretation',
@@ -428,7 +428,7 @@ const ar = {
     opticalCaption:
       'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
     radarCaption:
-      'صورة رادار حقيقية من Sentinel-1. الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
+      'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:
@@ -468,7 +468,7 @@ const ar = {
       note: 'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي.',
     },
     dbNote:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. القيم الحية ديسيبل نسبية مشتقة من أرقام Sentinel-1 GRD الرقمية (غير معايرة).',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VV−VH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
     interpretation: 'التفسير',

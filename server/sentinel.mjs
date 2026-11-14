@@ -9,6 +9,7 @@
  * calibrated σ⁰. The UI labels the source accordingly.
  */
 import { fromUrl } from 'geotiff';
+import { buildNisarBrowse, buildNisarSite } from './nisar.mjs';
 
 const STAC_URL = 'https://earth-search.aws.element84.com/v1/search';
 const COLLECTION = 'sentinel-1-grd';
@@ -262,6 +263,45 @@ export async function buildRealSite(site, { start, end, eventDate }) {
   const promise = (async () => {
     const bbox = site.bbox || bboxFromWkt(site.wkt);
     if (!bbox) return null;
+
+    // Real NISAR L-band browse images (public, no Harmony queue). The
+    // calibrated HH/HV numbers come from the Harmony path when enabled.
+    const nisarBrowse = await buildNisarBrowse(site, { start, end, eventDate }).catch((error) => {
+      log(site.id, 'nisar browse failed', error?.message);
+      return null;
+    });
+    const nisarCalibrated =
+      process.env.NISAR_GCOV === '1'
+        ? await buildNisarSite(site, { start, end, eventDate }).catch((error) => {
+            log(site.id, 'nisar gcov failed', error?.message);
+            return null;
+          })
+        : null;
+    if (nisarCalibrated) {
+      const afterDate = nisarCalibrated.states.after.date;
+      const optical = await findOptical({
+        bbox,
+        targetDate: afterDate,
+        start: new Date(new Date(`${afterDate}T00:00:00Z`).getTime() - 20 * 86400000)
+          .toISOString()
+          .slice(0, 10),
+        end: new Date(new Date(`${afterDate}T00:00:00Z`).getTime() + 20 * 86400000)
+          .toISOString()
+          .slice(0, 10),
+      });
+      if (optical?.url) {
+        Object.assign(nisarCalibrated.states.after, {
+          opticalUrl: optical.url,
+          opticalDate: optical.date,
+          opticalCloudCover: optical.cloudCover,
+          opticalPlatform: optical.platform,
+          opticalAttribution:
+            'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
+        });
+      }
+      return { ...nisarCalibrated, seriesSource: 'nisar-gcov-l-band' };
+    }
+
     // Query both sides of the event so the series always has a real baseline.
     const [pre, post] = await Promise.all([
       searchStac({ bbox, start, end: eventDate }),
@@ -343,44 +383,65 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     const changes = series.map((point) => point.change);
     const stableChanges = changes.slice(0, Math.max(2, Math.floor(changes.length / 2)));
 
+    const states = {
+      before: {
+        date: beforeScene.date,
+        params: { ...site.states.before.params },
+        imageUrl: beforeScene.quicklook,
+        attribution:
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
+        acquiredAt: beforeScene.datetime,
+        product: 'Sentinel-1 GRD',
+        notSimulated: true,
+      },
+      after: {
+        date: afterScene.date,
+        params: { ...site.states.after.params },
+        imageUrl: afterScene.quicklook,
+        attribution:
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
+        acquiredAt: afterScene.datetime,
+        product: 'Sentinel-1 GRD',
+        notSimulated: true,
+        ...(optical?.url
+          ? {
+              opticalUrl: optical.url,
+              opticalDate: optical.date,
+              opticalCloudCover: optical.cloudCover,
+              opticalPlatform: optical.platform,
+              opticalAttribution:
+                'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
+            }
+          : {}),
+      },
+    };
+
+    if (nisarBrowse) {
+      for (const side of ['before', 'after']) {
+        const nisar = nisarBrowse[side];
+        if (!nisar?.imageUrl) continue;
+        // Keep the site-specific Sentinel-1 quicklook in `imageUrl` (it is
+        // reused by the before/after cards and the detective game). NISAR's
+        // full-swath browse is exposed separately for the radar/optical
+        // comparison, where it is shown once.
+        Object.assign(states[side], {
+          nisarImageUrl: nisar.imageUrl,
+          nisarDate: nisar.date,
+          nisarAttribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
+          nisarAcquiredAt: nisar.datetime,
+          nisarProduct: nisar.product,
+          nisarGranule: nisar.granuleName,
+        });
+      }
+    }
+
     return {
       id: site.id,
-      source: 'sentinel-1-cog',
+      source: nisarBrowse ? 'sentinel-1-cog+nisar-browse' : 'sentinel-1-cog',
       updatedAt: new Date().toISOString(),
       coords: site.coords,
       wkt: site.wkt,
-      states: {
-        before: {
-          date: beforeScene.date,
-          params: { ...site.states.before.params },
-          imageUrl: beforeScene.quicklook,
-          attribution:
-            'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
-          acquiredAt: beforeScene.datetime,
-          product: 'Sentinel-1 GRD',
-          notSimulated: true,
-        },
-        after: {
-          date: afterScene.date,
-          params: { ...site.states.after.params },
-          imageUrl: afterScene.quicklook,
-          attribution:
-            'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
-          acquiredAt: afterScene.datetime,
-          product: 'Sentinel-1 GRD',
-          notSimulated: true,
-          ...(optical?.url
-            ? {
-                opticalUrl: optical.url,
-                opticalDate: optical.date,
-                opticalCloudCover: optical.cloudCover,
-                opticalPlatform: optical.platform,
-                opticalAttribution:
-                  'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
-              }
-            : {}),
-        },
-      },
+      states,
       measurements: {
         vv: { before: Number(beforeScene.vvDb.toFixed(1)), after: Number(afterScene.vvDb.toFixed(1)) },
         vh: { before: Number(beforeScene.vhDb.toFixed(1)), after: Number(afterScene.vhDb.toFixed(1)) },

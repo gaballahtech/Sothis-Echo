@@ -20,6 +20,13 @@
 import http from 'node:http';
 import { studyAreas } from '../src/data/sites.js';
 import { buildRealSite, clearRealCache } from './sentinel.mjs';
+import { clearNisarCache } from './nisar.mjs';
+
+try {
+  process.loadEnvFile('.env.local');
+} catch {
+  /* .env.local is optional */
+}
 
 const PORT = Number(process.env.API_PORT || process.env.MOCK_API_PORT || 3001);
 const HOST = process.env.API_HOST || process.env.MOCK_API_HOST || '0.0.0.0';
@@ -343,6 +350,7 @@ const server = http.createServer(async (req, res) => {
 
     if (path === '/api/live/refresh' && method === 'POST') {
       clearRealCache();
+      clearNisarCache();
       send(res, 200, { success: true, message: 'Real-data cache cleared' });
       return;
     }
@@ -495,7 +503,7 @@ const server = http.createServer(async (req, res) => {
           phase: 'backend',
           lastAcquisition: new Date(Date.now() - 86_400_000).toISOString(),
           nextAcquisition: new Date(Date.now() + 11 * 86_400_000).toISOString(),
-          products: ['sentinel-1-grd'],
+          products: ['nisar-gcov-l-band', 'sentinel-1-grd'],
           realData: REAL_DATA,
         },
         success: true,

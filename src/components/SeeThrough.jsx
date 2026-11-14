@@ -22,6 +22,9 @@ export default function SeeThrough() {
 
   const siteName = localized(site.name, language);
   const stateLabel = localized(state.label, language);
+  const radarUrl = state.nisarImageUrl || state.imageUrl;
+  const radarDate = state.nisarDate || state.date;
+  const radarPlatform = state.nisarImageUrl ? 'NASA NISAR L-band' : 'Sentinel-1';
 
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
@@ -30,7 +33,7 @@ export default function SeeThrough() {
 
         <div className="split-main">
           <Panel
-            title={`${siteName} · ${state.date} · ${stateLabel}`}
+            title={`${siteName} · ${radarDate} · ${stateLabel}`}
             bodyClassName="card-pad"
           >
             <CompareSlider
@@ -41,11 +44,11 @@ export default function SeeThrough() {
               opticalLabel={t('seeThrough.optical')}
               radarLabel={t('seeThrough.radar')}
               opticalUrl={state.opticalUrl}
-              radarUrl={state.imageUrl}
+              radarUrl={radarUrl}
             />
             <p className="micro" style={{ margin: '8px 0 0' }}>
               {state.opticalUrl
-                ? `${state.opticalPlatform || 'Sentinel-2'} · ${state.opticalDate} · ${Math.round(state.opticalCloudCover ?? 0)}% ${language === 'ar' ? 'غيوم' : 'cloud'} — Sentinel-1 · ${state.date}`
+                ? `${state.opticalPlatform || 'Sentinel-2'} · ${state.opticalDate} · ${Math.round(state.opticalCloudCover ?? 0)}% ${language === 'ar' ? 'غيوم' : 'cloud'} — ${radarPlatform} · ${radarDate}`
                 : t('seeThrough.noImage')}
             </p>
 
