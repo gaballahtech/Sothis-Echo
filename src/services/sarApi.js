@@ -20,6 +20,14 @@ const TIMEOUT_MS = Number(ENV.VITE_API_TIMEOUT || 60000);
 
 export const isApiConfigured = () => Boolean(API_BASE);
 
+/**
+ * URL of a server-rendered scene image. The path is absolute below /api, while
+ * the configured base usually ends in /api itself — keep the origin only.
+ */
+export function sceneImageUrl(siteId, side) {
+  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}`;
+}
+
 export function getApiConfig() {
   return {
     configured: isApiConfigured(),

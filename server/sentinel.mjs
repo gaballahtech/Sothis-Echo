@@ -109,12 +109,7 @@ function windowForRect(transform, shape, { lat, lng }) {
  * Render one pass over the fixed study window as a greyscale PNG.
  * @returns {Promise<Buffer|null>} null when no real pass is registered.
  */
-export async function renderSceneCrop(siteId, side) {
-  const ref = sceneRefs.get(siteId)?.[side];
-  if (!ref) return null;
-  const cached = imageCache.get(`${siteId}:${side}`);
-  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
-
+async function readWindowDb(ref) {
   const window = windowForRect(ref.transform, ref.shape, ref);
   const tiff = await fromUrl(ref.href, { allowFullFile: false });
   const image = await tiff.getImage();
@@ -126,15 +121,49 @@ export async function renderSceneCrop(siteId, side) {
     interleave: false,
   });
   const values = rasters[0];
+  const out = new Float32Array(IMAGE_WIDTH * IMAGE_HEIGHT);
+  for (let i = 0; i < out.length; i += 1) {
+    out[i] = 20 * Math.log10(Math.max(1, Number(values[i]) || 1));
+  }
+  return out;
+}
+
+export async function renderSceneCrop(siteId, side) {
+  const ref = sceneRefs.get(siteId)?.[side];
+  if (!ref) return null;
+  const cached = imageCache.get(`${siteId}:${side}`);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
+
+  const db = await readWindowDb(ref);
   const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
   for (let i = 0; i < pixels.length; i += 1) {
-    const dn = Math.max(1, Number(values[i]) || 1);
-    const db = 20 * Math.log10(dn);
-    const level = ((db - IMAGE_DB_MIN) / (IMAGE_DB_MAX - IMAGE_DB_MIN)) * 255;
+    const level = ((db[i] - IMAGE_DB_MIN) / (IMAGE_DB_MAX - IMAGE_DB_MIN)) * 255;
     pixels[i] = Math.max(0, Math.min(255, Math.round(level)));
   }
   const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
   imageCache.set(`${siteId}:${side}`, { png, at: Date.now() });
+  return png;
+}
+
+// Absolute change between the two passes over the same window: brighter means
+// the surface returned a different amount of radar energy. This is the picture
+// the eye cannot get from two near-identical greyscale frames.
+const CHANGE_DB_SPAN = 8;
+
+export async function renderChangeCrop(siteId) {
+  const refs = sceneRefs.get(siteId);
+  if (!refs?.before || !refs?.after) return null;
+  const cached = imageCache.get(`${siteId}:change`);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
+
+  const [before, after] = await Promise.all([readWindowDb(refs.before), readWindowDb(refs.after)]);
+  const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
+  for (let i = 0; i < pixels.length; i += 1) {
+    const delta = Math.min(CHANGE_DB_SPAN, Math.abs(after[i] - before[i]));
+    pixels[i] = Math.max(0, Math.min(255, Math.round((delta / CHANGE_DB_SPAN) * 255)));
+  }
+  const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
+  imageCache.set(`${siteId}:change`, { png, at: Date.now() });
   return png;
 }
 
@@ -682,6 +711,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     });
     imageCache.delete(`${site.id}:before`);
     imageCache.delete(`${site.id}:after`);
+    imageCache.delete(`${site.id}:change`);
 
     const states = {
       before: {

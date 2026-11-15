@@ -168,6 +168,11 @@ const en = {
       label: 'Field',
     },
     ariaScene: '{{site}} {{state}} radar scene',
+    changeTitle: 'CHANGE · {{date}}',
+    changeCaption:
+      'The difference the eye cannot catch: |after − before| per pixel, on the same window. Bright means the surface gave back a different amount of radar energy. Scale: black 0 dB, white 8 dB and above.',
+    changeAria: '{{site}} change map between the two passes',
+    changeNote: 'Rain and tide move pixels too — bright is change, not automatically damage.',
   },
   sound: {
     title: 'See and hear the surface dance',
@@ -520,6 +525,11 @@ const ar = {
       label: 'الحقل',
     },
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
+    changeTitle: 'الاختلاف · {{date}}',
+    changeCaption:
+      'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لكل بكسل على النافذة نفسها. الأبيض معناه إن السطح رجّع كمية طاقة رادار مختلفة. المقياس: أسود = ٠ ديسيبل، أبيض = ٨ ديسيبل أو أكتر.',
+    changeAria: 'خريطة الاختلاف لـ{{site}} بين المرورين',
+    changeNote: 'المطر والمد بيحركوا البكسلات كمان — الأبيض تغيّر، مش بالضرورة ضرر.',
   },
   sound: {
     title: 'شاهد واسمع سطح الأرض يرقص',

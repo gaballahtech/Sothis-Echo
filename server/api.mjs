@@ -20,7 +20,7 @@
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
-import { buildRealSite, clearRealCache, renderSceneCrop } from './sentinel.mjs';
+import { buildRealSite, clearRealCache, renderChangeCrop, renderSceneCrop } from './sentinel.mjs';
 import { clearNisarCache } from './nisar.mjs';
 
 try {
@@ -562,14 +562,14 @@ export async function handleRequest(req, res) {
     if (path === '/api/scene-image') {
       const siteId = url.searchParams.get('site');
       const side = url.searchParams.get('side');
-      if (!siteId || (side !== 'before' && side !== 'after')) {
-        sendError(res, 400, 'site and side=before|after are required');
+      if (!siteId || (side !== 'before' && side !== 'after' && side !== 'change')) {
+        sendError(res, 400, 'site and side=before|after|change are required');
         return;
       }
       // Building the site registers the two real passes this image is drawn
       // from; a cold request pays one build, afterwards the crop is cached.
       await getSites();
-      const png = await renderSceneCrop(siteId, side);
+      const png = side === 'change' ? await renderChangeCrop(siteId) : await renderSceneCrop(siteId, side);
       if (!png) {
         sendError(res, 404, 'No real pass registered for this site');
         return;

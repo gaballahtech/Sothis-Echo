@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { contrastRows } from '../data/sites';
-import { buildSiteCsv } from '../services/sarApi';
+import { buildSiteCsv, sceneImageUrl } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
 import { Disclosure, Panel, SectionHead } from './ui';
 import ObservationTable from './ObservationTable';
@@ -153,6 +153,22 @@ export default function StudyAreas() {
                 </div>
               );
             })}
+            {site?.source?.startsWith('sentinel-1') ? (
+              <div className="stack" style={{ gap: 0 }}>
+                <Panel title={t('sites.changeTitle', { date: `${site.states.before.date} → ${site.states.after.date}` })}>
+                  <SceneCanvas
+                    imageUrl={sceneImageUrl(site.id, 'change')}
+                    alt={t('sites.changeAria', { site: L(site.name) })}
+                  />
+                  <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
+                    <p className="micro" style={{ margin: 0 }}>{t('sites.changeCaption')}</p>
+                  </div>
+                </Panel>
+                <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
+                  {t('sites.changeNote')}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <Panel title={t('sites.measurements')} bodyClassName="card-pad">
