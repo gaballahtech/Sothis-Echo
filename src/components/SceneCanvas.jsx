@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
-export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop = null }) {
+export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop = null, eager = false }) {
   const { t } = useTranslation();
 
   if (!imageUrl) {
@@ -32,7 +32,7 @@ export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop
 
   return (
     <div className={`scene-wrap ${className}`}>
-      <img src={imageUrl} alt={alt} loading="lazy" decoding="async" style={cropStyle} />
+      <img src={imageUrl} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" style={cropStyle} />
     </div>
   );
 }
@@ -46,6 +46,7 @@ export function CompareSlider({
   radarUrl,
   radarFit = 'cover',
   radarClassName = '',
+  radarEager = false,
   opticalCrop = null,
   radarCrop = null,
 }) {
@@ -123,6 +124,7 @@ export function CompareSlider({
             imageUrl={radarUrl}
             fit={radarFit}
             crop={radarCrop}
+            eager={radarEager}
           />
         ) : (
           <div className="compare-layer scene-unavailable">{t('seeThrough.noImage')}</div>

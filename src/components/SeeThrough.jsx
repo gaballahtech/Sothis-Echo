@@ -56,6 +56,7 @@ export default function SeeThrough() {
               radarCrop={state.nisarCrop ?? null}
               radarFit={state.nisarImageUrl ? 'contain' : 'cover'}
               radarClassName={state.nisarImageUrl ? 'compare-layer--nisar' : ''}
+              radarEager
             />
             {state.nisarImageUrl ? (
               <p className="micro" style={{ margin: '6px 0 0' }}>
