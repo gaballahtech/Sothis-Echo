@@ -93,15 +93,21 @@ export function createSonifier() {
 
   function note(start, value) {
     const frequency = stepFrequency(value);
-    const duration = 0.34 - value * 0.1;
-    const volume = 0.24 + value * 0.26;
+    // A pulse used to be a ~0.25 s blip that read as a click on laptop
+    // speakers. Fill most of the step instead, so each pass has a body long
+    // enough to hear the pitch, and hold a sustain after the attack.
+    const duration = Math.max(0.32, Math.min(0.6, stepDuration(value) * 0.94));
+    const volume = 0.2 + value * 0.24;
+    const sustain = volume * 0.68;
 
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
     osc.type = value > 0.58 ? 'triangle' : 'sine';
     osc.frequency.setValueAtTime(frequency, start);
     gain.gain.setValueAtTime(0.0001, start);
-    gain.gain.linearRampToValueAtTime(volume, start + 0.018);
+    gain.gain.linearRampToValueAtTime(volume, start + 0.012);
+    gain.gain.linearRampToValueAtTime(sustain, start + 0.085);
+    gain.gain.setValueAtTime(sustain, start + duration * 0.6);
     gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
     osc.connect(gain);
     gain.connect(master);
@@ -117,8 +123,9 @@ export function createSonifier() {
       shimmer.type = 'sine';
       shimmer.frequency.setValueAtTime(frequency * 2.005, start);
       shimmerGain.gain.setValueAtTime(0.0001, start);
-      shimmerGain.gain.linearRampToValueAtTime(value * 0.08, start + 0.02);
-      shimmerGain.gain.exponentialRampToValueAtTime(0.0001, start + duration * 0.85);
+      shimmerGain.gain.linearRampToValueAtTime(value * 0.07, start + 0.02);
+      shimmerGain.gain.setValueAtTime(value * 0.05, start + duration * 0.55);
+      shimmerGain.gain.exponentialRampToValueAtTime(0.0001, start + duration * 0.9);
       shimmer.connect(shimmerGain);
       shimmerGain.connect(master);
       shimmer.start(start);
@@ -127,7 +134,7 @@ export function createSonifier() {
       shimmer.onended = () => activeNodes.delete(shimmer);
     }
 
-    if (value > 0.3) noiseBurst(start, value);
+    if (value > 0.3) noiseBurst(start + 0.005, value);
   }
 
   function stop() {
