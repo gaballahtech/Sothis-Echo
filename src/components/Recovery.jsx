@@ -9,6 +9,99 @@ import { Meter, Panel, SectionHead } from './ui';
 
 const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 40 };
 
+// When there are too few passes to fit a recovery curve, the measured passes
+// are still real data — plot them directly in dB instead of leaving the panel
+// empty. No fitted trend is drawn, because none is warranted.
+function PassChart({ series, eventDate, language }) {
+  const points = (series || [])
+    .map((pass) => ({
+      date: pass?.date,
+      vv: Number(pass?.vv),
+      at: pass?.date ? new Date(`${pass.date}T00:00:00Z`).getTime() : NaN,
+    }))
+    .filter((pass) => Number.isFinite(pass.vv) && Number.isFinite(pass.at))
+    .sort((a, b) => a.at - b.at);
+  if (points.length < 2) return null;
+
+  const eventAt = eventDate ? new Date(`${eventDate}T00:00:00Z`).getTime() : points[0].at;
+  const values = points.map((pass) => pass.vv);
+  const lo = Math.floor(Math.min(...values) - 1);
+  const hi = Math.ceil(Math.max(...values) + 1);
+  const span = Math.max(1, hi - lo);
+  const first = Math.min(points[0].at, eventAt);
+  const last = Math.max(points[points.length - 1].at, eventAt);
+  const width = 720;
+  const height = 260;
+  const pad = { top: 18, right: 24, bottom: 34, left: 44 };
+  const innerW = width - pad.left - pad.right;
+  const innerH = height - pad.top - pad.bottom;
+  const x = (at) => pad.left + ((at - first) / Math.max(1, last - first)) * innerW;
+  const y = (db) => pad.top + ((hi - db) / span) * innerH;
+  const fmt = (at) => new Date(at).toISOString().slice(0, 10);
+  const label = language === 'ar' ? 'الاستطاعة الحقيقية لكل مرور (ديسيبل)' : 'Measured backscatter per pass (dB)';
+  const eventLabel = language === 'ar' ? 'الحدث' : 'event';
+  const summary =
+    language === 'ar'
+      ? `مرورات مقاسة من ${fmt(points[0].at)} إلى ${fmt(points[points.length - 1].at)}، بين ${lo} و${hi} ديسيبل.`
+      : `Measured passes from ${fmt(points[0].at)} to ${fmt(points[points.length - 1].at)}, between ${lo} and ${hi} dB.`;
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="recovery-chart" role="img" aria-label={summary} dir="ltr">
+      <title>{label}</title>
+      <desc>{summary}</desc>
+      {[lo, Math.round((lo + hi) / 2), hi].map((value, index) => (
+        <g key={value}>
+          <line
+            x1={pad.left}
+            x2={width - pad.right}
+            y1={y(value)}
+            y2={y(value)}
+            stroke="var(--bp-surface-border-color-default)"
+            strokeWidth="1"
+            strokeDasharray={index === 0 ? '' : '2 4'}
+          />
+          <text x={pad.left - 8} y={y(value) + 3} textAnchor="end" fontSize="9" fill="var(--bp-typography-color-muted)">
+            {value}
+          </text>
+        </g>
+      ))}
+      <line
+        x1={x(eventAt)}
+        x2={x(eventAt)}
+        y1={pad.top}
+        y2={height - pad.bottom}
+        stroke="var(--bp-intent-warning-color, #c58b3a)"
+        strokeWidth="1.5"
+        strokeDasharray="4 4"
+      />
+      <text x={x(eventAt) + 4} y={pad.top + 8} fontSize="9" fill="var(--bp-typography-color-muted)">
+        {eventLabel} {fmt(eventAt)}
+      </text>
+      <polyline
+        points={points.map((pass) => `${x(pass.at)},${y(pass.vv)}`).join(' ')}
+        fill="none"
+        stroke="var(--bp-intent-primary-color, #2d72d9)"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      {points.map((pass) => (
+        <circle key={pass.date} cx={x(pass.at)} cy={y(pass.vv)} r="3.5" fill="var(--bp-intent-primary-color, #2d72d9)">
+          <title>{`${pass.date} · ${pass.vv.toFixed(1)} dB`}</title>
+        </circle>
+      ))}
+      <text x={pad.left} y={height - 10} fontSize="9" fill="var(--bp-typography-color-muted)">
+        {fmt(points[0].at)}
+      </text>
+      <text x={width - pad.right} y={height - 10} textAnchor="end" fontSize="9" fill="var(--bp-typography-color-muted)">
+        {fmt(points[points.length - 1].at)}
+      </text>
+      <text x={width - pad.right} y={pad.top - 6} textAnchor="end" fontSize="9" fill="var(--bp-typography-color-muted)">
+        {label}
+      </text>
+    </svg>
+  );
+}
+
 function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel, rtl }) {
   const maxMonth = Math.max(...points.map((p) => p.month));
   const measured = points.filter((p) => !p.projected);
@@ -307,6 +400,11 @@ export default function Recovery() {
                 {t('recovery.sourceLine', { passes: measuredPoints.length })}
               </p>
             )}
+            {!loading && site.recovery.insufficient ? (
+              <div className="chart-scroll">
+                <PassChart series={site.series} eventDate={site.eventDate} language={language} />
+              </div>
+            ) : null}
             <div className="chart-scroll" style={loading || site.recovery.insufficient ? { display: 'none' } : undefined}>
               <RecoveryChart
                 points={site.recovery.points}
