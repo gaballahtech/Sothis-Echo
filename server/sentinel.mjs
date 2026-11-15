@@ -229,6 +229,10 @@ async function readScene(item, site) {
     vvHref: s3ToHttps(item.assets?.vv?.href),
     vhHref: s3ToHttps(item.assets?.vh?.href),
     platform: item.properties?.platform || item.properties?.['sar:platform'] || 'Sentinel-1',
+    // Absolute dB only compares within one imaging geometry: ascending and
+    // descending passes see the site from different look angles, and mixing
+    // them made the same site swing several dB on the days after the event.
+    orbit: `${item.properties?.['sat:orbit_state'] || '?'}/${item.properties?.['sat:relative_orbit'] ?? '?'}`,
   };
 }
 
@@ -254,24 +258,30 @@ function sampleEvenly(list, count) {
   }).filter((item, index, array) => array.indexOf(item) === index);
 }
 
-function pickScenes(items, eventDate, max = 8) {
+// A recovery curve needs several post-event passes spread over months, so the
+// sampler keeps more of them than the eight that were enough for a before/after
+// pair. Sampling evenly over both sides keeps the spread without reading 80 COGs.
+function pickScenes(items, eventDate, max = 16) {
   const sorted = [...items].sort(
     (a, b) => new Date(a.properties.datetime) - new Date(b.properties.datetime)
   );
   if (sorted.length <= max) return sorted;
+  const time = (item) => new Date(item.properties.datetime).getTime();
   const event = new Date(`${eventDate}T00:00:00Z`).getTime();
-  const before = sorted.filter((item) => new Date(item.properties.datetime).getTime() <= event);
-  const after = sorted.filter((item) => new Date(item.properties.datetime).getTime() > event);
-  const perSide = Math.max(1, Math.floor(max / 2));
-  const picked = [...sampleEvenly(before, perSide), ...sampleEvenly(after, max - Math.min(perSide, before.length))];
-  const remaining = sorted.filter((item) => !picked.includes(item));
-  for (const item of remaining) {
-    if (picked.length >= max) break;
-    picked.push(item);
-  }
-  return picked
+  const before = sorted.filter((item) => time(item) <= event);
+  const after = sorted.filter((item) => time(item) > event);
+  // Evening out the sample alone dropped the flood peak and the first burn pass,
+  // which are the two frames the whole story is about. Anchor the closest pass
+  // on each side of the event, then spread the rest across the window.
+  const anchors = [];
+  if (before.length) anchors.push(before[before.length - 1]);
+  if (after.length) anchors.push(after[0]);
+  const budget = Math.max(0, max - anchors.length);
+  const pool = sorted.filter((item) => !anchors.includes(item));
+  const sampled = sampleEvenly(pool, budget);
+  return [...anchors, ...sampled]
     .filter((item, index, array) => array.indexOf(item) === index)
-    .sort((a, b) => new Date(a.properties.datetime) - new Date(b.properties.datetime));
+    .sort((a, b) => time(a) - time(b));
 }
 
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
@@ -349,7 +359,42 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     });
     log(site.id, 'bbox', bbox, 'items', items.length, 'pre', pre.length, 'post', post.length);
     if (!items.length) return null;
-    const picked = pickScenes(items, eventDate);
+
+    const eventMs = new Date(`${eventDate}T00:00:00Z`).getTime();
+    // Absolute dB only compares within one imaging geometry, and a site is seen
+    // by several orbits (ascending/descending × relative orbit). Pick the orbit
+    // that covers both sides of the event most densely, then sample inside it.
+    const orbitKeyOf = (item) =>
+      `${item.properties?.['sat:orbit_state'] || '?'}/${item.properties?.['sat:relative_orbit'] ?? '?'}`;
+    const byOrbit = new Map();
+    for (const item of items) {
+      const key = orbitKeyOf(item);
+      if (!byOrbit.has(key)) byOrbit.set(key, []);
+      byOrbit.get(key).push(item);
+    }
+    const straddles = (list) =>
+      list.some((item) => new Date(item.properties.datetime).getTime() <= eventMs) &&
+      list.some((item) => new Date(item.properties.datetime).getTime() > eventMs);
+    const orbitRanked = [...byOrbit.entries()].sort(
+      (a, b) => Number(straddles(b[1])) - Number(straddles(a[1])) || b[1].length - a[1].length
+    );
+    // The densest orbit is not always the one that sees the event, so sample the
+    // two densest and keep whichever records the clearest step at the event.
+    const candidates = orbitRanked.slice(0, 2);
+    const perGroup = Math.max(4, Math.floor(12 / Math.max(1, candidates.length)));
+    log(
+      site.id,
+      'orbits',
+      orbitRanked.length,
+      'candidates',
+      candidates.map(([key, list]) => `${key}:${list.length}`).join(' '),
+      'sampling',
+      perGroup,
+      'each'
+    );
+    const picked = candidates.length
+      ? candidates.flatMap(([, list]) => pickScenes(list, eventDate, perGroup))
+      : pickScenes(items, eventDate, 12);
     const scenes = (
       await mapLimit(picked, 2, (item) =>
         readScene(item, site).catch((error) => {
@@ -360,8 +405,6 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     ).filter(Boolean);
     log(site.id, 'picked', picked.length, 'scenes', scenes.length);
     if (scenes.length < 2) return null;
-
-    const eventMs = new Date(`${eventDate}T00:00:00Z`).getTime();
     const unique = [];
     for (const scene of scenes) {
       if (!unique.some((item) => item.date === scene.date)) unique.push(scene);
@@ -371,9 +414,48 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     // VH several dB below VV at C-band, so a gap that closes up is a data fault,
     // not a change. This drops those passes without hiding genuine flood or burn
     // signals, which is what a plain brightness outlier test did.
-    const healthy = unique.filter((scene) => scene.vhDb - scene.vvDb <= -4);
-    const samples = healthy.length >= 2 ? healthy : unique;
-    log(site.id, 'dropped passes', unique.length - samples.length, 'of', unique.length);
+    // Keep one imaging geometry (orbit direction + relative orbit) for the dB
+    // series: a scene from another orbit still contributes a browse image, but
+    // its absolute values are not comparable with these.
+    const groups = new Map();
+    for (const scene of unique) {
+      const list = groups.get(scene.orbit) || [];
+      list.push(scene);
+      groups.set(scene.orbit, list);
+    }
+    const stepAtEvent = (list) => {
+      const before = list.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
+      const after = list.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
+      if (!before.length || !after.length) return -1;
+      return Math.abs(after[0].vvDb - before[before.length - 1].vvDb);
+    };
+    const ranked = [...groups.entries()].sort((a, b) => {
+      const pairs = (list) =>
+        list.some((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs) &&
+        list.some((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs)
+          ? 1
+          : 0;
+      return (
+        pairs(b[1]) - pairs(a[1]) ||
+        b[1].length - a[1].length ||
+        stepAtEvent(b[1]) - stepAtEvent(a[1])
+      );
+    });
+    const [chosenOrbit, chosenScenes] = ranked[0] || ['?', unique];
+    log(
+      site.id,
+      'orbit ->',
+      chosenOrbit,
+      'passes',
+      chosenScenes.length,
+      'of',
+      unique.length,
+      'step',
+      stepAtEvent(chosenScenes).toFixed(1)
+    );
+    const healthy = chosenScenes.filter((scene) => scene.vhDb - scene.vvDb <= -4);
+    const samples = healthy.length >= 2 ? healthy : chosenScenes;
+    log(site.id, 'dropped passes', chosenScenes.length - samples.length, 'of', chosenScenes.length);
 
     const before = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
     const after = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
@@ -385,7 +467,12 @@ export async function buildRealSite(site, { start, end, eventDate }) {
 
     const baselineVv = beforeScene.vvDb;
     const baselineVh = beforeScene.vhDb;
-    const eventVv = Math.min(...scenes.map((scene) => scene.vvDb));
+    // The event level is the first settled pass after the event — the scar/flood
+    // as the satellite first saw it. Taking the minimum over the whole window let
+    // a wet pre-event pass, or autumn rain three months later, act as "the event".
+    const eventVv = afterScene.vvDb;
+    const eventStep = baselineVv - eventVv;
+    const spread = Math.max(...samples.map((scene) => scene.vvDb)) - Math.min(...samples.map((scene) => scene.vvDb));
 
     const series = samples.map((scene) => ({
       date: scene.date,
@@ -397,7 +484,8 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       change: Number(clamp01(Math.abs(scene.vvDb - baselineVv) / 12).toFixed(2)),
     }));
 
-    const recoveryPoints = after.map((scene) => {
+    const recoveryFit = after.length >= 2 && eventStep >= 1.5;
+    const recoveryPoints = recoveryFit ? after.map((scene) => {
       const month = Math.max(
         0,
         Math.round(
@@ -409,7 +497,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
           ? 100
           : clamp01((scene.vvDb - eventVv) / (baselineVv - eventVv)) * 100;
       return { month, pct: Math.round(pct), projected: false };
-    });
+    }) : [];
     // ensure strictly increasing months
     const recovery = recoveryPoints.filter(
       (point, index, list) => index === 0 || point.month > list[index - 1].month
@@ -516,7 +604,17 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       series,
       pulse: resample16(changes),
       stablePulse: resample16(stableChanges),
-      recovery: { thresholdDefault: 80, points: recovery.length >= 2 ? recovery : undefined },
+      // Never emit a curve whose event step is smaller than the pass-to-pass
+      // scatter: that curve is noise wearing a trend line.
+      recovery:
+        recoveryFit && recovery.length >= 2
+          ? { thresholdDefault: 80, points: recovery, eventStep: Number(eventStep.toFixed(1)) }
+          : {
+              thresholdDefault: 80,
+              insufficient: true,
+              eventStep: Number(eventStep.toFixed(1)),
+              scatter: Number(spread.toFixed(1)),
+            },
       _meta: {
         scenes: scenes.length,
         window: `${WINDOW}×${WINDOW}`,

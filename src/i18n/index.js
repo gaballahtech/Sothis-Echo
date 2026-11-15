@@ -205,6 +205,8 @@ const en = {
       'Each point is one post-event satellite pass over {{site}}, divided by its level before the event — so 100% is back to where it started. The dashed tail is an extrapolation, not an observation. The estimate is the first month the curve meets your target.',
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
+    insufficientNotice:
+      'No measured curve here: the first pass after the event moved {{step}} dB, less than the {{scatter}} dB the same window swings between passes. The real passes are in the observation ledger; a curve drawn from them would be noise.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -551,6 +553,8 @@ const ar = {
       'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}، مقسومًا على مستواها قبل الحدث؛ أي أن 100% تعني العودة إلى ما كانت عليه. الذيل المتقطع استقراء وليس رصدًا. والتقدير هو أول شهر يبلغ فيه المنحنى هدفك.',
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
+    insufficientNotice:
+      'لا يوجد منحنى مقاس هنا: أول مرور بعد الحدث تغيّر {{step}} ديسيبل، وهو أقل من {{scatter}} ديسيبل تذبذب بها النافذة نفسها بين المرورات. المرورات الحقيقية في سجل الملاحظات، وأي منحنى منها سيكون ضوضاء.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {

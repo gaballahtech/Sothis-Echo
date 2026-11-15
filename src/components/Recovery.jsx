@@ -264,7 +264,19 @@ export default function Recovery() {
           </Panel>
 
           <Panel title={t('recovery.chartTitle')} bodyClassName="card-pad">
-            {site.recovery.fromApi !== true ? (
+            {site.recovery.insufficient ? (
+              <Callout
+                intent="warning"
+                icon="info-sign"
+                data-testid="recovery-insufficient"
+                style={{ marginBottom: 10 }}
+              >
+                {t('recovery.insufficientNotice', {
+                  step: Math.abs(site.recovery.eventStep ?? 0).toFixed(1),
+                  scatter: (site.recovery.scatter ?? 0).toFixed(1),
+                })}
+              </Callout>
+            ) : site.recovery.fromApi !== true ? (
               <Callout
                 intent="warning"
                 icon="info-sign"

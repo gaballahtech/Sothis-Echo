@@ -155,6 +155,15 @@ function mergeRecovery(local, remote) {
   // `fromApi` tells the UI whether this curve was actually fitted to passes.
   // When the live record is too short, the bundled reference curve is kept —
   // and must be shown as illustrative instead of presented as a measurement.
+  if (remote?.insufficient) {
+    return {
+      ...local,
+      fromApi: false,
+      insufficient: true,
+      eventStep: toNumber(remote.eventStep),
+      scatter: toNumber(remote.scatter),
+    };
+  }
   if (!remote || !Array.isArray(remote.points)) return { ...local, fromApi: false };
   const seen = new Set();
   const points = remote.points
