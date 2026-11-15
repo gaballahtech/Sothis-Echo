@@ -23,7 +23,7 @@ import './index.css';
 function AppContent() {
   const { language } = useLanguage();
   const { t } = useTranslation();
-  const { source } = useSiteData();
+  const { source, loading } = useSiteData();
 
   useEffect(() => {
     document.title = `${t('footer.brand')} · ${t('app.tagline')}`;
@@ -32,7 +32,7 @@ function AppContent() {
   return (
     <div className="bp6-light app-shell">
       <Navbar />
-      {source !== 'api' ? (
+      {!loading && source !== 'api' ? (
         <div className="demo-banner" role="status">
           {t('common.demoBanner')}
         </div>
