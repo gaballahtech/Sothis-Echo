@@ -1,6 +1,5 @@
 import { Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
-import { RadarMark } from './ui';
 
 const GITHUB = 'https://github.com/gaballahtech/Sothis-Echo';
 
@@ -43,10 +42,7 @@ export default function Footer() {
               document.getElementById('home')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           >
-            <RadarMark size={22} />
-            <span className="brand-copy">
-              <span className="brand-name">{t('footer.brand')}</span>
-            </span>
+            <img className="brand-logo" src="/logo.png" alt={t('footer.brand')} />
           </a>
           <p className="body-copy-muted" style={{ maxWidth: 330, margin: 0 }}>{t('footer.tagline')}</p>
         </div>

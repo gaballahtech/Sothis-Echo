@@ -3,10 +3,8 @@ import {
   Alignment,
   Button,
   Drawer,
-  Icon,
   Navbar as BpNavbar,
   NavbarGroup,
-  NavbarHeading,
   Position,
 } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
@@ -40,12 +38,7 @@ export default function Navbar() {
               document.getElementById('home')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
           >
-            <span className="brand-mark">
-              <Icon icon="star" size={22} aria-hidden="true" />
-            </span>
-            <NavbarHeading className="brand-copy">
-              <span className="brand-name">{t('navbar.brand')}</span>
-            </NavbarHeading>
+            <img className="brand-logo" src="/logo.png" alt={t('navbar.brand')} />
           </a>
         </NavbarGroup>
 
