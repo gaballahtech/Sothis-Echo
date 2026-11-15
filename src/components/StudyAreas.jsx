@@ -37,7 +37,7 @@ function Coordinates({ site }) {
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source } = useSiteData();
+  const { sites, source, loading } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
 
   useEffect(() => {
@@ -65,7 +65,7 @@ export default function StudyAreas() {
       <div className="section-inner">
         <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
 
-        {source !== 'api' ? (
+        {!loading && source !== 'api' ? (
           <p className="micro" role="status" style={{ marginBottom: 12 }}>
             {t('sites.localData')}
           </p>

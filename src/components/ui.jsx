@@ -65,16 +65,16 @@ export function Disclosure({
   );
 }
 
-export function SourceBadge({ source, error, className = '' }) {
+export function SourceBadge({ source, error, loading = false, className = '' }) {
   const live = source === 'api';
   return (
     <Tag
       className={className}
       minimal
-      intent={live ? 'success' : error ? 'warning' : 'none'}
+      intent={loading ? 'none' : live ? 'success' : error ? 'warning' : 'none'}
       title={error || undefined}
     >
-      {live ? 'LIVE' : 'LOCAL'}
+      {loading ? '…' : live ? 'LIVE' : 'LOCAL'}
     </Tag>
   );
 }

@@ -181,7 +181,7 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
 export default function Recovery() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites } = useSiteData();
+  const { sites, loading } = useSiteData();
   const [siteId, setSiteId] = useState(() => sites[0]?.id);
   const site = sites.find((item) => item.id === siteId) ?? sites[0];
   const [infoOpen, setInfoOpen] = useState(false);
@@ -228,7 +228,9 @@ export default function Recovery() {
         <div className="recovery-grid">
           <Panel title={`${t('recovery.estimateLabel')} · ${siteName}`} bodyClassName="card-pad-lg">
             <p className={`recovery-value ${estimateClass}`} aria-live="polite" data-testid="recovery-estimate" dir="auto">
-              {site.recovery.insufficient
+              {loading
+                ? t('common.checkingLive')
+                : site.recovery.insufficient
                 ? t('recovery.notMeasured')
                 : estimate.months == null
                   ? t('recovery.notReached')
@@ -275,7 +277,11 @@ export default function Recovery() {
           </Panel>
 
           <Panel title={t('recovery.chartTitle')} bodyClassName="card-pad">
-            {site.recovery.insufficient ? (
+            {loading ? (
+              <Callout intent="none" icon="refresh" data-testid="recovery-loading" style={{ marginBottom: 10 }}>
+                {t('common.checkingLive')}
+              </Callout>
+            ) : site.recovery.insufficient ? (
               <Callout
                 intent="warning"
                 icon="info-sign"
@@ -301,7 +307,7 @@ export default function Recovery() {
                 {t('recovery.sourceLine', { passes: measuredPoints.length })}
               </p>
             )}
-            <div className="chart-scroll" style={site.recovery.insufficient ? { display: 'none' } : undefined}>
+            <div className="chart-scroll" style={loading || site.recovery.insufficient ? { display: 'none' } : undefined}>
               <RecoveryChart
                 points={site.recovery.points}
                 threshold={threshold}

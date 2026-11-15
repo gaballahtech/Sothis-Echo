@@ -11,7 +11,7 @@ import PulseTrace from './PulseTrace';
 export default function Sonification() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source } = useSiteData();
+  const { sites, source, loading } = useSiteData();
   const [siteId, setSiteId] = useState(() => sites[0]?.id);
   const [playing, setPlaying] = useState(false);
   const [booting, setBooting] = useState(false);
@@ -134,9 +134,11 @@ export default function Sonification() {
 
       <div className="section-inner">
         <p className="micro sound-source" data-testid="sound-source">
-          {source === 'api'
-            ? t('sound.sourceLine', { passes: site.series?.length ?? 0 })
-            : t('sites.localData')}
+          {loading
+            ? t('common.checkingLive')
+            : source === 'api'
+              ? t('sound.sourceLine', { passes: site.series?.length ?? 0 })
+              : t('sites.localData')}
         </p>
       </div>
 

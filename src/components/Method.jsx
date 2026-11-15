@@ -76,7 +76,7 @@ export default function Method() {
                 <dl className="telemetry-list">
                   <div className="telemetry-row">
                     <dt>{t('method.statusLabel')}</dt>
-                    <dd><SourceBadge source={source} error={error} /></dd>
+                    <dd><SourceBadge source={source} error={error} loading={loading} /></dd>
                   </div>
                   <div className="telemetry-row">
                     <dt>API BASE</dt>

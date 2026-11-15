@@ -347,6 +347,7 @@ const en = {
   common: {
     loading: 'Loading',
     retry: 'Retry',
+    checkingLive: 'Reading live Sentinel-1 record…',
     sitePicker: 'Study area',
     demoBanner:
       'Demo mode — the backend is not connected, so the values below are illustrative. Start `npm run api` for real Sentinel-1 data.',
@@ -696,6 +697,7 @@ const ar = {
   common: {
     loading: 'جارٍ التحميل',
     retry: 'إعادة المحاولة',
+    checkingLive: 'جارٍ قراءة سجل Sentinel-1 الحيّ…',
     sitePicker: 'منطقة الدراسة',
     demoBanner:
       'وضع تجريبي — الباك اند غير متصل، والقيم أدناه توضيحية. شغّل `npm run api` لبيانات Sentinel-1 الحقيقية.',
