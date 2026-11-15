@@ -119,9 +119,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
   const y = (pct) => CHART.top + ((100 - pct) / 100) * innerH;
   const polyline = (list) => list.map((p) => `${x(p.month)},${y(p.pct)}`).join(' ');
 
-  const tickStep = maxMonth > 48 ? 24 : 12;
+  // A flood can recover in days and a burn in weeks; a 12-month tick grid would
+  // collapse those points onto "0". Use half-month ticks for short records.
+  const tickStep = maxMonth <= 2 ? 0.5 : maxMonth <= 6 ? 1 : maxMonth > 48 ? 24 : 12;
   const ticks = [];
-  for (let month = 0; month <= maxMonth; month += tickStep) ticks.push(month);
+  for (let month = 0; month <= maxMonth + 1e-9; month += tickStep) {
+    ticks.push(Number(month.toFixed(2)));
+  }
 
   const crossingX = estimate?.months != null ? x(estimate.months) : null;
   const crossingY = y(threshold);
@@ -381,10 +385,16 @@ export default function Recovery() {
                 data-testid="recovery-insufficient"
                 style={{ marginBottom: 10 }}
               >
-                {t('recovery.insufficientNotice', {
-                  step: Math.abs(site.recovery.eventStep ?? 0).toFixed(1),
-                  scatter: (site.recovery.scatter ?? 0).toFixed(1),
-                })}
+                {t(
+                  site.recovery.noPeakPass
+                    ? 'recovery.noPeakPassNotice'
+                    : 'recovery.insufficientNotice',
+                  {
+                    change: Math.round(Number(site.recovery.eventChange ?? 0)),
+                    noise: Math.round(Number(site.recovery.noise ?? 0)),
+                    gap: Math.round(Number(site.recovery.gapDays ?? 0)),
+                  }
+                )}
               </Callout>
             ) : site.recovery.fromApi !== true ? (
               <Callout

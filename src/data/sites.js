@@ -19,7 +19,7 @@
  * Central Vietnam flood and the 2026 West Attica wildfire.
  */
 
-export const SITE_DATA_VERSION = '2026.11-real.1';
+export const SITE_DATA_VERSION = '2026.11-real.2';
 
 export const studyAreas = [
   {
@@ -28,7 +28,10 @@ export const studyAreas = [
     seed: 21,
     name: { en: 'Central Vietnam flood', ar: 'فيضان وسط فيتنام' },
     region: { en: 'Quảng Trị – Huế · Vietnam', ar: 'كوانغ تري – هوي · فيتنام' },
-    coords: { lat: 16.55, lng: 107.35 },
+    // Hai Lang lowland, Quảng Trị: the Sep 2026 flood hit the rice plain and
+    // the Mỹ Chánh river here. The old 16.55/107.35 window was the coastal
+    // lagoon, which the flood did not reach.
+    coords: { lat: 16.68, lng: 107.27 },
     wkt: 'POLYGON ((106.90 16.20, 107.80 16.20, 107.80 16.95, 106.90 16.95, 106.90 16.20))',
     eventDate: '2026-09-13',
     headline: {
@@ -180,8 +183,8 @@ export const studyAreas = [
       ],
       methods: [
         {
-          en: 'Recovery is a normalized radar-structure index relative to the pre-flood baseline; the projection is a logistic fit.',
-          ar: 'التعافي مؤشر بنيوي راداري مُعيَّر نسبةً إلى خط الأساس قبل الفيضان، والإسقاط ملاءمة لوجستية.',
+          en: 'On the live record, recovery is the share of the study window that has returned to its pre-flood VV level, measured block by block on same-satellite, same-orbit passes. If no pass sampled the flood peak, the panel reports that instead of drawing a curve.',
+          ar: 'في السجل الحيّ، التعافي هو حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الفيضان، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وإذا لم يرصد أي مرور ذروة الفيضان، تعرض اللوحة ذلك بدل رسم منحنى.',
         },
       ],
       sources: [
@@ -202,8 +205,8 @@ export const studyAreas = [
     // Inland at Agios Vasileios, where the fire started: the earlier shoreline
     // point put half of the 512×512 window over open water, and wind-driven sea
     // backscatter then swung the absolute VV level and the VV−VH gap.
-    coords: { lat: 38.19, lng: 23.16 },
-    wkt: 'POLYGON ((23.05 38.04, 23.36 38.04, 23.36 38.24, 23.05 38.24, 23.05 38.04))',
+    coords: { lat: 38.19, lng: 23.10 },
+    wkt: 'POLYGON ((23.00 38.00, 23.40 38.00, 23.40 38.30, 23.00 38.30, 23.00 38.00))',
     eventDate: '2026-07-31',
     headline: {
       en: 'The slope that burned to the sea',
@@ -360,8 +363,8 @@ export const studyAreas = [
       ],
       methods: [
         {
-          en: 'Recovery points are normalized to the pre-fire VH baseline; the dashed segment is a logistic projection.',
-          ar: 'نقاط التعافي مُعيَّرة إلى خط أساس VH قبل الحريق؛ والجزء المتقطع إسقاط لوجستي.',
+          en: 'Recovery is the share of the study window that has returned to its pre-fire VV level, measured block by block on same-satellite, same-orbit passes. It is a structural proxy: radar change can fade before the ecosystem recovers.',
+          ar: 'التعافي هو حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الحريق، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وهو مؤشر بنيوي بديل: قد يتلاشى تغيّر الرادار قبل تعافي النظام البيئي.',
         },
       ],
       sources: [

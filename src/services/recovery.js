@@ -46,14 +46,25 @@ export function estimateRecovery(points, threshold) {
   };
 }
 
+function formatDays(days, language = 'en') {
+  if (language !== 'ar') return days === 1 ? '1 day' : `${days} days`;
+  if (days === 1) return 'يوم واحد';
+  if (days === 2) return 'يومان';
+  if (days >= 3 && days <= 10) return `${days} أيام`;
+  return `${days} يومًا`;
+}
+
 /** Translate months into a compact, localized duration. */
 export function formatMonths(months, language = 'en') {
   if (months == null) return language === 'ar' ? 'خارج الأفق' : 'beyond horizon';
-  if (months < 1) return language === 'ar' ? 'شهر واحد' : '< 1 month';
+  if (months < 2) {
+    const days = Math.max(1, Math.round(months * 30.44));
+    if (months < 1 / 30.44) return language === 'ar' ? 'عند الحدث' : 'at the event';
+    return formatDays(days, language);
+  }
   if (months < 24) {
     const value = Math.round(months);
     if (language !== 'ar') return `${value} months`;
-    if (value === 1) return 'شهر واحد';
     if (value === 2) return 'شهرين';
     if (value >= 3 && value <= 10) return `${value} أشهر`;
     return `${value} شهرًا`;
@@ -62,9 +73,17 @@ export function formatMonths(months, language = 'en') {
   return language === 'ar' ? `${years} سنة` : `${years} years`;
 }
 
-/** Months as years for axis ticks. */
+/** Time axis ticks: days under a month, months under a year, then years. */
 export function formatMonthTick(month, language = 'en') {
   if (month === 0) return '0';
+  if (month < 1) {
+    const days = Math.max(1, Math.round(month * 30.44));
+    return language === 'ar' ? `${days}ي` : `${days}d`;
+  }
+  if (month < 12) {
+    const value = Number.isInteger(month) ? String(month) : month.toFixed(1);
+    return language === 'ar' ? `${value}ش` : `${value}m`;
+  }
   const years = month / 12;
   const label = Number.isInteger(years) ? String(years) : years.toFixed(1);
   return language === 'ar' ? `${label}س` : `${label}y`;

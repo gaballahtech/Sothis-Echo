@@ -211,16 +211,18 @@ const en = {
     sourceLine: 'Fitted to {{passes}} real post-event passes.',
     chartTitle: 'Normalized radar-structure recovery',
     chartY: 'Signal vs baseline (%)',
-    chartX: 'Months since event',
+    chartX: 'Time since event',
     caveat:
       'This is a structural proxy, not full ecological recovery. Radar brightness can return while carbon, species and soil are still rebuilding.',
     methodLabel: 'How this estimate is made',
     methodBody:
-      'Each point is one post-event satellite pass over {{site}}, divided by its level before the event — so 100% is back to where it started. The dashed tail is an extrapolation, not an observation. The estimate is the first month the curve meets your target.',
+      'Each point is one post-event satellite pass over {{site}}. The percentage is the share of the study window that has returned to its pre-event VV level, measured block by block on same-satellite, same-orbit passes; 100% means the changed area has faded into the window\'s own pass-to-pass noise. The estimate is the first time the curve meets your target. It is a structural proxy, not full ecological recovery.',
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'Finding, not a gap: inside this ~5 km window the last pass before the event and the first pass after it differ by {{step}} dB, which is less than the {{scatter}} dB the same window moves between passes. At this scale the record cannot support a recovery curve, and plotting one would be noise wearing a trend line. A real curve needs per-pixel change detection over the whole event area — that is the next measurement, not a drawn line.',
+      'Finding, not a gap: the event pass changed {{change}}% of this ~5 km window by at least 5 dB, while the same window moves by {{noise}}% between two pre-event passes. That is not enough separation to fit a recovery curve, and plotting one would be noise wearing a trend line.',
+    noPeakPassNotice:
+      'No Sentinel-1 pass sampled the flood peak: the first post-event pass came {{gap}} days after the event, and it changed {{change}}% of the window against {{noise}}% pre-event noise. With no peak observation, a recovery curve would be an extrapolation, so it is not drawn.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -574,16 +576,18 @@ const ar = {
     sourceLine: 'مُطابَق على {{passes}} مرورًا حقيقيًا بعد الحدث.',
     chartTitle: 'تعافي البنية الرادارية المُعيَّر',
     chartY: 'الإشارة مقابل الأساس (%)',
-    chartX: 'أشهر منذ الحدث',
+    chartX: 'الزمن منذ الحدث',
     caveat:
       'هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا. قد يعود سطوع الرادار بينما الكربون والأنواع والتربة ما زالت تتعافى.',
     methodLabel: 'كيف حُسب هذا التقدير',
     methodBody:
-      'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}، مقسومًا على مستواها قبل الحدث؛ أي أن 100% تعني العودة إلى ما كانت عليه. الذيل المتقطع استقراء وليس رصدًا. والتقدير هو أول شهر يبلغ فيه المنحنى هدفك.',
+      'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}. النسبة هي حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الحدث، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه؛ و100% تعني أن مساحة التغيّر ذابت في حدود ضوضاء المرورات. والتقدير هو أول زمن يبلغ فيه المنحنى هدفك. هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا.',
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'نتيجة، وليست فجوة: داخل نافذة ٥ كم تقريبًا، الفرق بين آخر مرور قبل الحدث وأول مرور بعده {{step}} ديسيبل، وهو أقل من {{scatter}} ديسيبل تتحركها النافذة نفسها بين المرورات. على هذا المقياس لا يدعم السجل منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه. المنحنى الحقيقي يحتاج كشف تغيّر لكل بكسل على مساحة الحدث كاملة — وهذا هو القياس التالي، وليس خطًا مرسومًا.',
+      'نتيجة، وليست فجوة: غيّر مرور الحدث {{change}}% من نافذة ٥ كم تقريبًا بمقدار ٥ ديسيبل على الأقل، بينما تتحرك النافذة نفسها بنسبة {{noise}}% بين مرورين قبل الحدث. الفصل غير كافٍ لبناء منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه.',
+    noPeakPassNotice:
+      'لم يرصد أي مرور Sentinel-1 ذروة الفيضان: جاء أول مرور بعد الحدث بعد {{gap}} أيام، وغيّر {{change}}% من النافذة مقابل ضوضاء قبل الحدث {{noise}}%. بدون رصد الذروة سيكون منحنى التعافي استقراءً، لذلك لا يُرسم.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {

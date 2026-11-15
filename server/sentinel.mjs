@@ -30,11 +30,8 @@ const cache = new Map();
 const IMAGE_WIDTH = 560;
 const IMAGE_HEIGHT = 370;
 const IMAGE_LAT_SPAN = 0.06; // ~6.7 km tall window
-// Relative-DN dB (20·log10 DN) range shared by every render: both dates, and
-// both study areas, are stretched on one fixed scale so brightness stays
-// comparable instead of each frame being normalised to its own contrast.
-const IMAGE_DB_MIN = 32;
-const IMAGE_DB_MAX = 52;
+// Both dates of a pair share one greyscale scale (see renderPair), so
+// brightness stays comparable instead of each frame being normalised alone.
 const sceneRefs = new Map();
 const imageCache = new Map();
 
@@ -87,22 +84,54 @@ function pngGray(width, height, pixels) {
 /**
  * Pixel window covering one lon/lat rectangle in a north-up STAC COG. Both
  * dates use the same rectangle, which is what makes the pair comparable.
+ *
+ * The rectangle is built once per pair from the first pass's pixel size and
+ * read from both passes as a geographic bbox. Rounding each pass's window to
+ * its own pixel grid shifted the second image by up to a pixel, and that shift
+ * alone lit up every ridge and field edge in the change map.
  */
-function windowForRect(transform, shape, { lat, lng }) {
+function rectForPair(refs) {
+  const lonSpan = lonSpanForLat(refs.before.lat);
+  return {
+    west: refs.before.lng - lonSpan / 2,
+    east: refs.before.lng + lonSpan / 2,
+    south: refs.before.lat - IMAGE_LAT_SPAN / 2,
+    north: refs.before.lat + IMAGE_LAT_SPAN / 2,
+  };
+}
+
+// Width in degrees that gives the same ground scale as the height. Deriving it
+// from the raster's degree-per-pixel aspect instead of cos(lat) made the crop
+// ~22 km wide squeezed into 560 px, which shrank every field and channel to a
+// few pixels and hid the very change the picture exists to show.
+function lonSpanForLat(lat) {
+  const cos = Math.cos((lat * Math.PI) / 180) || 1;
+  return (IMAGE_LAT_SPAN * (IMAGE_WIDTH / IMAGE_HEIGHT)) / cos;
+}
+
+/** Integer pixel window for that rectangle, or null when it leaves the raster. */
+function windowForRect(transform, shape, rect) {
   const [a, , c, , e, f] = transform;
-  const height = shape[0];
-  const width = shape[1];
-  const lonSpan = IMAGE_LAT_SPAN * Math.abs(a / e) * (IMAGE_WIDTH / IMAGE_HEIGHT);
-  const x0 = Math.round((lng - lonSpan / 2 - c) / a);
-  const y0 = Math.round((lat + IMAGE_LAT_SPAN / 2 - f) / e);
-  const w = Math.round(lonSpan / a);
-  const h = Math.round(IMAGE_LAT_SPAN / Math.abs(e));
-  return [
-    Math.max(0, Math.min(width - w, x0)),
-    Math.max(0, Math.min(height - h, y0)),
-    Math.max(0, Math.min(width - w, x0)) + w,
-    Math.max(0, Math.min(height - h, y0)) + h,
+  if (!a || !e) return null;
+  const xs = [(rect.west - c) / a, (rect.east - c) / a];
+  const ys = [(rect.north - f) / e, (rect.south - f) / e];
+  const window = [
+    Math.floor(Math.min(...xs)),
+    Math.floor(Math.min(...ys)),
+    Math.ceil(Math.max(...xs)),
+    Math.ceil(Math.max(...ys)),
   ];
+  if (
+    window[0] < 0 ||
+    window[1] < 0 ||
+    window[2] > shape[1] ||
+    window[3] > shape[0] ||
+    window[2] - window[0] < 2 ||
+    window[3] - window[1] < 2
+  ) {
+    return null;
+  }
+  return window;
 }
 
 /**
@@ -140,8 +169,9 @@ function multilookDn(values, width, height, radius = 3) {
   return out;
 }
 
-async function readWindowDb(ref) {
-  const window = windowForRect(ref.transform, ref.shape, ref);
+async function readWindowDb(ref, rect) {
+  const window = windowForRect(ref.transform, ref.shape, rect);
+  if (!window) return null;
   const tiff = await fromUrl(ref.href, { allowFullFile: false });
   const image = await tiff.getImage();
   const rasters = await image.readRasters({
@@ -157,23 +187,6 @@ async function readWindowDb(ref) {
   return out;
 }
 
-export async function renderSceneCrop(siteId, side) {
-  const ref = sceneRefs.get(siteId)?.[side];
-  if (!ref) return null;
-  const cached = imageCache.get(`${siteId}:${side}`);
-  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
-
-  const db = await readWindowDb(ref);
-  const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
-  for (let i = 0; i < pixels.length; i += 1) {
-    const level = ((db[i] - IMAGE_DB_MIN) / (IMAGE_DB_MAX - IMAGE_DB_MIN)) * 255;
-    pixels[i] = Math.max(0, Math.min(255, Math.round(level)));
-  }
-  const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
-  imageCache.set(`${siteId}:${side}`, { png, at: Date.now() });
-  return png;
-}
-
 // Absolute change between the two passes over the same window: brighter means
 // the surface returned a different amount of radar energy. This is the picture
 // the eye cannot get from two near-identical greyscale frames.
@@ -181,22 +194,72 @@ const CHANGE_DB_SPAN = 8;
 // Change below this is inside the pass-to-pass noise of the averaged pixels.
 const CHANGE_DB_FLOOR = 2.5;
 
-export async function renderChangeCrop(siteId) {
+// One shared scale for both dates of a pair, taken from the pair's own 2–98%
+// range. The fixed 32–52 dB scale left a tropical window at ~0.77 of full
+// brightness with almost no contrast, which is why two genuinely different
+// passes looked identical on screen. Sharing the scale keeps the comparison
+// fair: a brighter pixel is a brighter surface on both sides.
+function percentile(values, fraction) {
+  const sorted = Float32Array.from(values).sort();
+  const index = Math.min(
+    sorted.length - 1,
+    Math.max(0, Math.round(fraction * (sorted.length - 1)))
+  );
+  return sorted[index];
+}
+
+function stretchPixels(db, lo, hi) {
+  const span = Math.max(6, hi - lo);
+  const pixels = new Uint8Array(db.length);
+  for (let i = 0; i < pixels.length; i += 1) {
+    pixels[i] = Math.max(0, Math.min(255, Math.round(((db[i] - lo) / span) * 255)));
+  }
+  return pixels;
+}
+
+async function renderPair(siteId) {
+  const cached = imageCache.get(`${siteId}:pair`);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.value;
   const refs = sceneRefs.get(siteId);
   if (!refs?.before || !refs?.after) return null;
-  const cached = imageCache.get(`${siteId}:change`);
-  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
 
-  const [before, after] = await Promise.all([readWindowDb(refs.before), readWindowDb(refs.after)]);
-  const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
-  for (let i = 0; i < pixels.length; i += 1) {
+  const rect = rectForPair(refs);
+  const [before, after] = await Promise.all([
+    readWindowDb(refs.before, rect),
+    readWindowDb(refs.after, rect),
+  ]);
+  if (!before || !after) return null;
+  const combined = new Float32Array(before.length + after.length);
+  combined.set(before, 0);
+  combined.set(after, before.length);
+  const lo = percentile(combined, 0.02);
+  const hi = percentile(combined, 0.98);
+
+  const change = new Uint8Array(before.length);
+  for (let i = 0; i < change.length; i += 1) {
     const delta = Math.min(CHANGE_DB_SPAN, Math.abs(after[i] - before[i]));
     const shown = delta <= CHANGE_DB_FLOOR ? 0 : delta;
-    pixels[i] = Math.max(0, Math.min(255, Math.round((shown / CHANGE_DB_SPAN) * 255)));
+    change[i] = Math.max(0, Math.min(255, Math.round((shown / CHANGE_DB_SPAN) * 255)));
   }
-  const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
-  imageCache.set(`${siteId}:change`, { png, at: Date.now() });
-  return png;
+
+  const value = {
+    before: pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, stretchPixels(before, lo, hi)),
+    after: pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, stretchPixels(after, lo, hi)),
+    change: pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, change),
+  };
+  imageCache.set(`${siteId}:pair`, { value, at: Date.now() });
+  return value;
+}
+
+export async function renderSceneCrop(siteId, side) {
+  const pair = await renderPair(siteId);
+  if (!pair) return null;
+  return side === 'after' ? pair.after : pair.before;
+}
+
+export async function renderChangeCrop(siteId) {
+  const pair = await renderPair(siteId);
+  return pair?.change ?? null;
 }
 
 /** Which real pass backs each card — set while a site is built. */
@@ -226,6 +289,12 @@ const toDb = (dn) => 20 * Math.log10(Math.max(1, dn) / 1000);
 // and immune to the speckle outliers that made min+25%·range swing the same
 // site between 12% and 88%.
 const DARK_DROP_DB = 3;
+
+// Change is measured on a coarse grid after multilook. A 5 dB step is large
+// enough to survive the pass-to-pass noise that remains even on the same
+// satellite and orbit, and small enough to catch a burn scar or flood edge.
+const GRID_SIZE = 64;
+const CHANGE_DB = 5;
 
 function stats(values) {
   let min = Infinity;
@@ -279,7 +348,7 @@ async function searchStac({ bbox, start, end }) {
       collections: [COLLECTION],
       bbox,
       datetime: `${start}T00:00:00Z/${end}T23:59:59Z`,
-      limit: 60,
+      limit: 200,
     }),
     signal: AbortSignal.timeout(30000),
   });
@@ -311,7 +380,40 @@ function pixelWindow(item, lat, lng) {
   return [x0, y0, x1, y1];
 }
 
-async function readBand(item, asset, lat, lng) {
+function gridDb(values, width, height) {
+  const out = new Float32Array(GRID_SIZE * GRID_SIZE);
+  const stepX = width / GRID_SIZE;
+  const stepY = height / GRID_SIZE;
+  for (let gy = 0; gy < GRID_SIZE; gy += 1) {
+    const y0 = Math.floor(gy * stepY);
+    const y1 = Math.floor((gy + 1) * stepY);
+    for (let gx = 0; gx < GRID_SIZE; gx += 1) {
+      const x0 = Math.floor(gx * stepX);
+      const x1 = Math.floor((gx + 1) * stepX);
+      let sum = 0;
+      let count = 0;
+      for (let y = y0; y < y1; y += 1) {
+        for (let x = x0; x < x1; x += 1) {
+          sum += values[y * width + x];
+          count += 1;
+        }
+      }
+      out[gy * GRID_SIZE + gx] = toDb(sum / Math.max(1, count));
+    }
+  }
+  return out;
+}
+
+function gridChange(a, b, threshold = CHANGE_DB) {
+  if (!a || !b || a.length !== b.length) return 0;
+  let changed = 0;
+  for (let i = 0; i < a.length; i += 1) {
+    if (Math.abs(a[i] - b[i]) >= threshold) changed += 1;
+  }
+  return changed / a.length;
+}
+
+async function readBand(item, asset, lat, lng, { grid = false } = {}) {
   const href = s3ToHttps(item.assets?.[asset]?.href);
   if (!href) return null;
   const window = pixelWindow(item, lat, lng);
@@ -328,7 +430,11 @@ async function readBand(item, asset, lat, lng) {
         samples: [0],
         interleave: false,
       });
-      return stats(rasters[0]);
+      const result = stats(rasters[0]);
+      if (grid) {
+        result.grid = gridDb(multilookDn(rasters[0], WINDOW, WINDOW), WINDOW, WINDOW);
+      }
+      return result;
     } catch (error) {
       lastError = error;
       log('band failed', asset, href, window, error?.message, error?.cause?.message);
@@ -392,23 +498,19 @@ async function findOptical({ bbox, point, targetDate, start, end }) {
   }
 }
 
-async function readScene(item, site) {
-  const lat = site.coords.lat;
-  const lng = site.coords.lng;
-  const vv = await readBand(item, 'vv', lat, lng);
-  const vh = await readBand(item, 'vh', lat, lng);
-  if (!vv || !vh) return null;
-  // A window outside valid data reads as near-zero DN; reject it.
-  if (vv.mean < 5 || vh.mean < 5) return null;
+function sceneFromBands(item, vv, vh = null) {
+  const platform = item.properties?.platform || item.properties?.['sar:platform'] || 'Sentinel-1';
+  const vvDb = toDb(vv.mean);
+  const vhDb = vh ? toDb(vh.mean) : null;
   return {
     date: (item.properties?.datetime || '').slice(0, 10),
     datetime: item.properties?.datetime || null,
-    vvDb: toDb(vv.mean),
-    vhDb: toDb(vh.mean),
+    vvDb,
+    vhDb,
     // Note: this gap is only comparable between passes over the same window.
     // A coastal window (see the wildfire site, which is half open water) makes
     // it wind-sensitive — sea VV swings by several dB pull while VH stays low.
-    crossDb: toDb(vh.mean) - toDb(vv.mean),
+    crossDb: vh ? vhDb - vvDb : null,
     lowFraction: vv.lowFraction,
     stdDb: 20 * Math.log10(1 + vv.std / Math.max(1, vv.mean)),
     itemId: item.id,
@@ -419,12 +521,29 @@ async function readScene(item, site) {
     transform: item.properties?.['proj:transform'] ?? null,
     shape: item.properties?.['proj:shape'] ?? null,
     vhHref: s3ToHttps(item.assets?.vh?.href),
-    platform: item.properties?.platform || item.properties?.['sar:platform'] || 'Sentinel-1',
+    platform,
     // Absolute dB only compares within one imaging geometry: ascending and
     // descending passes see the site from different look angles, and mixing
-    // them made the same site swing several dB on the days after the event.
-    orbit: `${item.properties?.['sat:orbit_state'] || '?'}/${item.properties?.['sat:relative_orbit'] ?? '?'}`,
+    // any of those — or two satellites — made the same site swing several dB
+    // on the days after the event.
+    orbit: `${platform}|${item.properties?.['sat:orbit_state'] || '?'}/${item.properties?.['sat:relative_orbit'] ?? '?'}`,
+    grid: vv.grid,
   };
+}
+
+async function readScene(item, site, { vv: givenVv = null, vvOnly = false } = {}) {
+  const lat = site.coords.lat;
+  const lng = site.coords.lng;
+  const vvPromise = givenVv ?? readBand(item, 'vv', lat, lng, { grid: true });
+  if (vvOnly) {
+    const vvOnlyBand = await vvPromise;
+    if (!vvOnlyBand || vvOnlyBand.mean < 5) return null;
+    return sceneFromBands(item, vvOnlyBand, null);
+  }
+  const [vv, vh] = await Promise.all([vvPromise, readBand(item, 'vh', lat, lng)]);
+  // A window outside valid data reads as near-zero DN; reject it.
+  if (!vv || vv.mean < 5 || !vh || vh.mean < 5) return null;
+  return sceneFromBands(item, vv, vh);
 }
 
 function bboxFromWkt(wkt) {
@@ -543,64 +662,179 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       searchStac({ bbox, start: eventDate, end }),
     ]);
     const seenIds = new Set();
+    // A granule that only clips the corner of the search box still comes back
+    // from STAC. Its pixel window then clamps to the scene edge, so the "same"
+    // site is read somewhere else entirely — keep only passes that contain a
+    // full study window around the point. Testing the raster extent rather than
+    // the coarse STAC bbox matters at swath edges: the 175 orbit over Attica is
+    // valid at the site even though its bbox stops ~0.08° short in longitude.
+    const coversWindow = (item) => {
+      const transform = item.properties?.['proj:transform'];
+      const shape = item.properties?.['proj:shape'];
+      if (!Array.isArray(transform) || !Array.isArray(shape)) return false;
+      const [a, , c, , e, f] = transform;
+      if (!a || !e) return false;
+      // The pass must contain the whole 6.7 km display window, not just the
+      // study point: a clamped crop would silently read different ground on
+      // one of the two dates.
+      const lonSpan = lonSpanForLat(site.coords.lat);
+      return Boolean(
+        windowForRect(transform, shape, {
+          west: site.coords.lng - lonSpan / 2,
+          east: site.coords.lng + lonSpan / 2,
+          south: site.coords.lat - IMAGE_LAT_SPAN / 2,
+          north: site.coords.lat + IMAGE_LAT_SPAN / 2,
+        })
+      );
+    };
     const items = [...pre, ...post].filter((item) => {
       if (seenIds.has(item.id)) return false;
-      // A granule that only clips the corner of the search box still comes back
-      // from STAC. Its pixel window then clamps to the scene edge, so the "same"
-      // site is read somewhere else entirely — keep only passes that actually
-      // contain the study point.
-      const box = item.bbox;
-      if (
-        Array.isArray(box) &&
-        box.length === 4 &&
-        !(box[0] <= site.coords.lng && box[2] >= site.coords.lng && box[1] <= site.coords.lat && box[3] >= site.coords.lat)
-      ) {
-        return false;
-      }
+      if (!coversWindow(item)) return false;
       seenIds.add(item.id);
       return true;
     });
     log(site.id, 'bbox', bbox, 'items', items.length, 'pre', pre.length, 'post', post.length);
     if (!items.length) return null;
 
-    const eventMs = new Date(`${eventDate}T00:00:00Z`).getTime();
-    // Absolute dB only compares within one imaging geometry, and a site is seen
-    // by several orbits (ascending/descending × relative orbit). Pick the orbit
-    // that covers both sides of the event most densely, then sample inside it.
-    const orbitKeyOf = (item) =>
-      `${item.properties?.['sat:orbit_state'] || '?'}/${item.properties?.['sat:relative_orbit'] ?? '?'}`;
-    const byOrbit = new Map();
+    // The same orbit sometimes publishes two granules on one date: one covers
+    // the site, the other is all zeros at this window. Keep the granule whose
+    // bbox gives the point the most margin; otherwise the zero granule can
+    // become the "baseline" and hide the event.
+    const groupKeyOf = (item) =>
+      `${item.properties?.platform || 'Sentinel-1'}|${item.properties?.['sat:orbit_state'] || '?'}|${item.properties?.['sat:relative_orbit'] ?? '?'}`;
+    const byDate = new Map();
     for (const item of items) {
-      const key = orbitKeyOf(item);
-      if (!byOrbit.has(key)) byOrbit.set(key, []);
-      byOrbit.get(key).push(item);
+      const date = (item.properties?.datetime || '').slice(0, 10);
+      const box = item.bbox;
+      const margin =
+        Array.isArray(box) && box.length === 4
+          ? Math.min(
+              site.coords.lng - box[0],
+              box[2] - site.coords.lng,
+              site.coords.lat - box[1],
+              box[3] - site.coords.lat
+            )
+          : -1;
+      const key = `${groupKeyOf(item)}|${date}`;
+      const previous = byDate.get(key);
+      if (!previous || margin > previous.margin) byDate.set(key, { item, margin });
     }
-    const straddles = (list) =>
-      list.some((item) => new Date(item.properties.datetime).getTime() <= eventMs) &&
-      list.some((item) => new Date(item.properties.datetime).getTime() > eventMs);
-    const orbitRanked = [...byOrbit.entries()].sort(
-      (a, b) => Number(straddles(b[1])) - Number(straddles(a[1])) || b[1].length - a[1].length
+    const datedItems = [...byDate.values()].map((entry) => entry.item);
+    log(site.id, 'dated items', datedItems.length);
+
+    const eventMs = new Date(`${eventDate}T00:00:00Z`).getTime();
+    const dayMs = 86400000;
+    const timeOf = (item) => new Date(item.properties.datetime).getTime();
+    // Two satellites now fly the same relative orbit a few days apart. Their
+    // absolute dB levels are not interchangeable, so a comparable time series
+    // must stay on one satellite AND one orbit. Mixing Sentinel-1C and -1D here
+    // was the source of the fake "change" and the missing recovery curve.
+    const byGroup = new Map();
+    for (const item of datedItems) {
+      const key = groupKeyOf(item);
+      if (!byGroup.has(key)) byGroup.set(key, []);
+      byGroup.get(key).push(item);
+    }
+    const groups = [...byGroup.entries()]
+      .map(([key, list]) => {
+        const sorted = [...list].sort((a, b) => timeOf(a) - timeOf(b));
+        const pre = sorted.filter((item) => timeOf(item) <= eventMs);
+        const post = sorted.filter((item) => timeOf(item) > eventMs);
+        return { key, sorted, pre, post };
+      })
+      .filter((group) => group.pre.length && group.post.length);
+    log(site.id, 'group list', groups.map((group) => `${group.key}:${group.sorted.length}`).join(' '));
+    if (!groups.length) return null;
+
+    // Probe a handful of passes per group (two pre, the first post) and score
+    // each group by how far its event pair rises above the group's own
+    // pass-to-pass noise. This is per-pixel change detection on a 64×64 grid,
+    // not a window-mean brightness step: a 20% flood or burn scar barely moves
+    // the mean but is obvious block by block.
+    // Probe the strongest groups with two passes each: the last pre-event pass
+    // and the first post-event pass. The group with the largest same-satellite
+    // change wins; its own pre-event passes then supply the noise estimate.
+    const probeCache = new Map();
+    const probes = [];
+    const candidateGroups = [...groups]
+      .sort((a, b) => b.sorted.length - a.sorted.length)
+      .slice(0, 5);
+    for (const group of candidateGroups) {
+      const near = group.post.filter((item) => (timeOf(item) - eventMs) / dayMs <= 14);
+      const eventItem = (near.length ? near : group.post)[0];
+      const probeItems = [group.pre[group.pre.length - 1], eventItem];
+      const uniqueProbe = probeItems.filter(
+        (item, index, list) => list.findIndex((candidate) => candidate.id === item.id) === index
+      );
+      const probeScenes = (
+        await mapLimit(uniqueProbe, 2, async (item) => {
+          try {
+            const vv = await readBand(item, 'vv', site.coords.lat, site.coords.lng, { grid: true });
+            if (!vv || vv.mean < 5) return null;
+            probeCache.set(item.id, vv);
+            return sceneFromBands(item, vv, null);
+          } catch (error) {
+            log(site.id, 'probe failed', item.id, error?.message);
+            return null;
+          }
+        })
+      ).filter(Boolean);
+      const baseline = probeScenes.find(
+        (scene) => scene.itemId === group.pre[group.pre.length - 1].id
+      );
+      const event = probeScenes.find((scene) => scene.itemId === eventItem.id);
+      if (!baseline?.grid || !event?.grid) continue;
+      const eventChange = gridChange(event.grid, baseline.grid);
+      probes.push({
+        group,
+        baseline,
+        event,
+        eventItem,
+        eventChange,
+        baselineVv: baseline.vvDb,
+      });
+      log(
+        site.id,
+        'probe',
+        group.key,
+        'baselineVv',
+        baseline.vvDb.toFixed(1),
+        'change',
+        (eventChange * 100).toFixed(1) + '%'
+      );
+    }
+    if (!probes.length) return null;
+
+    // Reject a broken granule, not a different imaging geometry. Ascending and
+    // descending passes read the same ground several dB apart by design, so a
+    // tight band around the median dropped the good orbit and left the weakest
+    // one. Only a radiometric outlier (off-swath or clipped DN) and a
+    // near-total "change" (a fault, not an event) are thrown out here.
+    const levels = probes.map((probe) => probe.baselineVv).sort((a, b) => a - b);
+    const medianLevel = levels[Math.floor(levels.length / 2)];
+    const sane = probes.filter(
+      (probe) => Math.abs(probe.baselineVv - medianLevel) <= 15 && probe.eventChange <= 0.9
     );
-    // The densest orbit is not always the one that sees the event, so sample the
-    // two densest and keep whichever records the clearest step at the event.
-    const candidates = orbitRanked.slice(0, 2);
-    const perGroup = Math.max(4, Math.floor(12 / Math.max(1, candidates.length)));
+    const best = [...(sane.length ? sane : probes)].sort(
+      (a, b) => b.eventChange - a.eventChange || b.group.sorted.length - a.group.sorted.length
+    )[0];
+    const chosen = best.group;
     log(
       site.id,
-      'orbits',
-      orbitRanked.length,
-      'candidates',
-      candidates.map(([key, list]) => `${key}:${list.length}`).join(' '),
-      'sampling',
-      perGroup,
-      'each'
+      'groups',
+      groups.length,
+      'chosen',
+      chosen.key,
+      'eventChange',
+      (best.eventChange * 100).toFixed(1) + '%',
+      'passes',
+      chosen.sorted.length
     );
-    const picked = candidates.length
-      ? candidates.flatMap(([, list]) => pickScenes(list, eventDate, perGroup))
-      : pickScenes(items, eventDate, 12);
+
+    const picked = pickScenes(chosen.sorted, eventDate, 10);
     const scenes = (
-      await mapLimit(picked, 2, (item) =>
-        readScene(item, site).catch((error) => {
+      await mapLimit(picked, 4, (item) =>
+        readScene(item, site, { vv: probeCache.get(item.id) }).catch((error) => {
           log(site.id, 'scene failed', item.id, error?.message, error?.stack?.split('\n')[1]);
           return null;
         })
@@ -617,91 +851,85 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     // VH several dB below VV at C-band, so a gap that closes up is a data fault,
     // not a change. This drops those passes without hiding genuine flood or burn
     // signals, which is what a plain brightness outlier test did.
-    // Keep one imaging geometry (orbit direction + relative orbit) for the dB
-    // series: a scene from another orbit still contributes a browse image, but
-    // its absolute values are not comparable with these.
-    const groups = new Map();
-    for (const scene of unique) {
-      const list = groups.get(scene.orbit) || [];
-      list.push(scene);
-      groups.set(scene.orbit, list);
-    }
-    const stepAtEvent = (list) => {
-      const before = list.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
-      const after = list.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
-      if (!before.length || !after.length) return -1;
-      return Math.abs(after[0].vvDb - before[before.length - 1].vvDb);
-    };
-    const ranked = [...groups.entries()].sort((a, b) => {
-      const pairs = (list) =>
-        list.some((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs) &&
-        list.some((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs)
-          ? 1
-          : 0;
-      return (
-        pairs(b[1]) - pairs(a[1]) ||
-        b[1].length - a[1].length ||
-        stepAtEvent(b[1]) - stepAtEvent(a[1])
-      );
-    });
-    const [chosenOrbit, chosenScenes] = ranked[0] || ['?', unique];
-    log(
-      site.id,
-      'orbit ->',
-      chosenOrbit,
-      'passes',
-      chosenScenes.length,
-      'of',
-      unique.length,
-      'step',
-      stepAtEvent(chosenScenes).toFixed(1)
+    const healthy = unique.filter(
+      (scene) => scene.vhDb != null && scene.vvDb != null && scene.vhDb - scene.vvDb <= -4
     );
-    const healthy = chosenScenes.filter((scene) => scene.vhDb - scene.vvDb <= -4);
-    const samples = healthy.length >= 2 ? healthy : chosenScenes;
-    log(site.id, 'dropped passes', chosenScenes.length - samples.length, 'of', chosenScenes.length);
+    let samples = healthy.length >= 2 ? healthy : unique;
+    // Drop a single radiometric outlier (a clipped edge or calibration fault)
+    // that sits >15 dB off the group's own median. Real flood water can darken
+    // the window, but not by this much across the whole 5 km footprint.
+    const vvLevels = samples.map((scene) => scene.vvDb).sort((a, b) => a - b);
+    const vvMedian = vvLevels[Math.floor(vvLevels.length / 2)];
+    const radiometric = samples.filter((scene) => Math.abs(scene.vvDb - vvMedian) <= 15);
+    if (radiometric.length >= 2) samples = radiometric;
+    log(site.id, 'dropped passes', unique.length - samples.length, 'of', unique.length);
 
     const before = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() <= eventMs);
     const after = samples.filter((scene) => new Date(`${scene.date}T00:00:00Z`).getTime() > eventMs);
     const beforeScene = before[before.length - 1] || samples[0];
-    // Give a burn scar time to show: the first post-event pass is often a day
-    // or two old, when the canopy has not fallen yet.
-    const settled = after.find((scene) => (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / 86400000 >= 5);
-    const afterScene = settled || after[0] || samples[samples.length - 1];
+    // The event frame is the first post-event pass inside the 14-day probe
+    // window (the one that made this group win), not an arbitrary "settled"
+    // pass five days later: by then a flood has usually receded.
+    const afterScene =
+      after.find((scene) => scene.itemId === best.eventItem.id) ||
+      after[0] ||
+      samples[samples.length - 1];
 
     const baselineVv = beforeScene.vvDb;
     const baselineVh = beforeScene.vhDb;
-    // The event level is the first settled pass after the event — the scar/flood
-    // as the satellite first saw it. Taking the minimum over the whole window let
-    // a wet pre-event pass, or autumn rain three months later, act as "the event".
     const eventVv = afterScene.vvDb;
     const eventStep = baselineVv - eventVv;
-    const spread = Math.max(...samples.map((scene) => scene.vvDb)) - Math.min(...samples.map((scene) => scene.vvDb));
+    const spread =
+      Math.max(...samples.map((scene) => scene.vvDb)) -
+      Math.min(...samples.map((scene) => scene.vvDb));
+    const beforeGrid = beforeScene.grid;
+    const eventChange =
+      beforeGrid && afterScene.grid ? gridChange(afterScene.grid, beforeGrid) : best.eventChange;
+    // Use the quietest of the two pre-event passes as the noise floor: one bad
+    // earlier pass should not disqualify an otherwise clean event pair.
+    const earlierPre = before.slice(-3, -1).filter((scene) => scene.grid);
+    const noiseCandidates =
+      beforeGrid && earlierPre.length
+        ? earlierPre.map((scene) => gridChange(scene.grid, beforeGrid))
+        : [];
+    const preNoise = noiseCandidates.length ? Math.min(...noiseCandidates) : 0.1;
+    const gapDays = Math.max(
+      0,
+      Math.round((new Date(`${afterScene.date}T00:00:00Z`).getTime() - eventMs) / dayMs)
+    );
+    const recoveryDenominator = Math.max(0.01, eventChange - preNoise);
+    const recoveryFit =
+      after.length >= 2 && eventChange >= 0.15 && eventChange - preNoise >= 0.05;
 
     const series = samples.map((scene) => ({
       date: scene.date,
       vv: Number(scene.vvDb.toFixed(1)),
       vh: Number(scene.vhDb.toFixed(1)),
-      ...(site.id === 'sundarbans'
+      ...(site.kind === 'wetland'
         ? { water: Number(scene.lowFraction.toFixed(2)) }
         : { burn: Number(scene.lowFraction.toFixed(2)) }),
       change: Number(clamp01(Math.abs(scene.vvDb - baselineVv) / 12).toFixed(2)),
     }));
 
-    const recoveryFit = after.length >= 2 && eventStep >= 1.5;
-    const recoveryPoints = recoveryFit ? after.map((scene) => {
-      const month = Math.max(
-        0,
-        Math.round(
-          (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / (30.44 * 24 * 3600 * 1000)
-        )
-      );
-      const pct =
-        baselineVv === eventVv
-          ? 100
-          : clamp01((scene.vvDb - eventVv) / (baselineVv - eventVv)) * 100;
-      return { month, pct: Math.round(pct), projected: false };
-    }) : [];
-    // ensure strictly increasing months
+    const recoveryPoints = recoveryFit
+      ? after.map((scene) => {
+          const days = Math.max(
+            0,
+            (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / dayMs
+          );
+          const change =
+            beforeGrid && scene.grid ? gridChange(scene.grid, beforeGrid) : eventChange;
+          const pct = clamp01((eventChange - change) / recoveryDenominator) * 100;
+          return {
+            day: Math.round(days),
+            month: Number((days / 30.44).toFixed(2)),
+            pct: Math.round(pct),
+            projected: false,
+          };
+        })
+      : [];
+    // Ensure strictly increasing time. Fractional months keep short floods and
+    // burns from collapsing onto a single "month 0" point.
     const recovery = recoveryPoints.filter(
       (point, index, list) => index === 0 || point.month > list[index - 1].month
     );
@@ -741,6 +969,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         ? { href: afterScene.vvHref, transform: afterScene.transform, shape: afterScene.shape, lat: site.coords.lat, lng: site.coords.lng }
         : null,
     });
+    imageCache.delete(`${site.id}:pair`);
     imageCache.delete(`${site.id}:before`);
     imageCache.delete(`${site.id}:after`);
     imageCache.delete(`${site.id}:change`);
@@ -820,16 +1049,29 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       series,
       pulse: resample16(changes),
       stablePulse: resample16(stableChanges),
-      // Never emit a curve whose event step is smaller than the pass-to-pass
-      // scatter: that curve is noise wearing a trend line.
+      // Never emit a curve whose event change is not larger than the window's
+      // own pre-event pass-to-pass noise: that curve is noise wearing a trend
+      // line. The percentages are the share of the 5 km window that changed by
+      // at least 5 dB, measured on same-satellite, same-orbit passes.
       recovery:
         recoveryFit && recovery.length >= 2
-          ? { thresholdDefault: 80, points: recovery, eventStep: Number(eventStep.toFixed(1)) }
+          ? {
+              thresholdDefault: 80,
+              points: recovery,
+              eventStep: Number(eventStep.toFixed(1)),
+              eventChange: Math.round(eventChange * 100),
+              noise: Math.round(preNoise * 100),
+              gapDays,
+            }
           : {
               thresholdDefault: 80,
               insufficient: true,
               eventStep: Number(eventStep.toFixed(1)),
               scatter: Number(spread.toFixed(1)),
+              eventChange: Math.round(eventChange * 100),
+              noise: Math.round(preNoise * 100),
+              gapDays,
+              noPeakPass: site.kind === 'wetland' && gapDays > 2,
             },
       _meta: {
         scenes: scenes.length,

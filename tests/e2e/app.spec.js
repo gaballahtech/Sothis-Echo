@@ -144,7 +144,7 @@ test('advanced documentation stays collapsed until opened', async ({ page }) => 
   await page.locator('#recovery').scrollIntoViewIfNeeded();
   await page.getByTestId('recovery-info').click();
   await expect(page.getByText(/How this estimate is made/i)).toBeVisible();
-  await expect(page.getByText(/divided by its level before the event/i)).toBeVisible();
+  await expect(page.getByText(/share of the study window that has returned/i)).toBeVisible();
 
   await page.locator('#sites').scrollIntoViewIfNeeded();
   const researcher = page.getByTestId('for-researchers');

@@ -177,6 +177,10 @@ function mergeRecovery(local, remote) {
       insufficient: true,
       eventStep: toNumber(remote.eventStep),
       scatter: toNumber(remote.scatter),
+      eventChange: toNumber(remote.eventChange),
+      noise: toNumber(remote.noise),
+      gapDays: toNumber(remote.gapDays),
+      noPeakPass: Boolean(remote.noPeakPass),
     };
   }
   if (!remote || !Array.isArray(remote.points)) return { ...local, fromApi: false };
@@ -200,6 +204,9 @@ function mergeRecovery(local, remote) {
     ...local,
     thresholdDefault: threshold != null ? Math.max(50, Math.min(95, threshold)) : local.thresholdDefault,
     points,
+    eventChange: toNumber(remote.eventChange),
+    noise: toNumber(remote.noise),
+    gapDays: toNumber(remote.gapDays),
     fromApi: true,
   };
 }
