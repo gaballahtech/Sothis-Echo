@@ -115,8 +115,10 @@ function mergeSceneState(local, remote) {
   }
   // Scene images are rendered by the API itself (/api/scene-image), which is
   // same-origin in production but a separate port under `npm run dev`.
+  // The path already starts with /api, while the base usually ends with it too —
+  // keep only the origin part so we never ask for /api/api/scene-image.
   if (typeof merged.imageUrl === 'string' && merged.imageUrl.startsWith('/') && API_BASE) {
-    merged.imageUrl = `${API_BASE}${merged.imageUrl}`;
+    merged.imageUrl = `${API_BASE.replace(/\/api\/?$/, '')}${merged.imageUrl}`;
   }
   return merged;
 }

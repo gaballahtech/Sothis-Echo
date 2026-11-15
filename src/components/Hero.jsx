@@ -46,7 +46,6 @@ export default function Hero() {
         <video
           className="hero-video"
           src="/Video.mp4"
-          poster="/images/earth-limb.jpg"
           autoPlay
           muted
           loop
