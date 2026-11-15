@@ -551,7 +551,13 @@ export async function handleRequest(req, res) {
 
     if (path === '/api/study-areas') {
       const sites = await getSites();
-      send(res, 200, { data: sites, success: true });
+      // A cold build walks the archive for a minute or more; without an edge
+      // cache every visitor after an idle spell waits it out and the page falls
+      // back to the bundled figures. Serve the last build instantly and refresh
+      // it in the background instead.
+      send(res, 200, { data: sites, success: true }, {
+        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+      });
       return;
     }
 
@@ -587,7 +593,10 @@ export async function handleRequest(req, res) {
       const sites = await getSites();
       const site = sites.find((item) => item.id === siteMatch[1]);
       if (!site) sendError(res, 404, 'Unknown site');
-      else send(res, 200, { data: site, success: true });
+      else
+        send(res, 200, { data: site, success: true }, {
+          'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+        });
       return;
     }
 
