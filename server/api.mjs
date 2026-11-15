@@ -38,10 +38,8 @@ const CORS_ALLOW = (process.env.CORS_ORIGIN ||
   [
     'https://sothisecho.vercel.app',
     'https://*.vercel.app',
-    'http://localhost:3002',
-    'http://127.0.0.1:3002',
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
+    'http://localhost:*',
+    'http://127.0.0.1:*',
   ].join(','))
   .split(',')
   .map((entry) => entry.trim())
@@ -543,8 +541,6 @@ export async function handleRequest(req, res) {
         data: {
           operational: true,
           phase: 'backend',
-          lastAcquisition: new Date(Date.now() - 86_400_000).toISOString(),
-          nextAcquisition: new Date(Date.now() + 11 * 86_400_000).toISOString(),
           products: ['nisar-gcov-l-band', 'sentinel-1-grd'],
           realData: REAL_DATA,
         },

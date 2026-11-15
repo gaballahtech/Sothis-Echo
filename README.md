@@ -1,7 +1,7 @@
 # Sothis Echo
 
-An interactive NISAR story about the changes a camera misses: a cyclone-flooded
-mangrove delta and a Sierra Nevada burn scar, read through radar.
+An interactive NISAR story about the changes a camera misses: the 2026 Central
+Vietnam flood and the 2026 West Attica wildfire, read through radar.
 
 Built for the NASA Space Apps Challenge. NISAR is a partnership between NASA and
 ISRO; this is an independent, open-source educational prototype.
@@ -16,12 +16,12 @@ ISRO; this is an independent, open-source educational prototype.
   the July 2026 West Attica (Greece) wildfire. Both happened after NISAR began
   returning data. Each has before/after scenes, “what happened / why radar saw
   it / read the polarization” boxes, and a side-by-side comparison.
-- **Sonification** — “hear the dance”: one pulse per satellite pass, pitch and
-  rhythm driven by the change series, with a stable reference to compare against.
+- **Sonification** — “hear the dance”: the satellite-pass series resampled to 16
+  steps, with pitch and rhythm driven by change, scaled to the record’s peak.
 - **Recovery clock** — choose a target percentage of the pre-event signal and get
   an interpolated recovery time, marked measured or projected.
-- **Radar detective** — four rounds of before/after radar pairs with evidence
-  revealed after answering.
+- **Radar detective** — two real post-launch cases with evidence revealed after
+  answering.
 - **Public / Researcher modes** — the same story at two depths. Researcher mode
   adds acquisition notes, dB tables, methods, failure modes, sources, and the API
   contract.
@@ -46,8 +46,8 @@ the wind rather than the fire (30 Jul 2026: VV −15.1 dB, VH −29.2 dB; 5 Aug 
 VV −21.5 dB, VH −30.7 dB — a gap that moved by 5 dB for no ground reason).
 
 The sample point now sits inland at Agios Vasileios, where the fire started, so
-the window is land only. The polarisation gap is then the same before and after
-(−10.3 dB on both passes) and the change is the scar itself (ΔVV −4.2 dB).
+the window is land only. The polarisation gap is stable across passes, so the
+change that remains is the scar itself rather than wind over water.
 
 See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
 
@@ -68,8 +68,8 @@ npm run api     # http://127.0.0.1:3001
 # then set VITE_API_BASE_URL=http://127.0.0.1:3001/api in .env.local
 ```
 
-With no base URL, the app performs **zero** network requests (apart from web
-fonts) and shows the labelled local dataset.
+With no base URL, the app performs **zero API requests** (the hero video and web
+fonts still load) and shows the labelled local dataset.
 
 ## Structure
 

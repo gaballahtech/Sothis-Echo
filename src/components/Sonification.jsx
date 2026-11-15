@@ -46,6 +46,13 @@ export default function Sonification() {
     [t]
   );
 
+  const audioValues = useMemo(() => {
+    const pulse = site?.pulse ?? [];
+    const peak = Math.max(0, ...pulse.map((value) => Math.max(0, Number(value) || 0)));
+    if (peak <= 0) return pulse;
+    return pulse.map((value) => Math.min(1, Math.max(0, Number(value) || 0) / peak));
+  }, [site]);
+
   if (!site) return null;
 
   const stop = () => {
@@ -65,7 +72,7 @@ export default function Sonification() {
     window.setTimeout(() => {
       setStep(0);
       setPlaying(true);
-      const ok = sonifierRef.current?.play(site.pulse, {
+      const ok = sonifierRef.current?.play(audioValues, {
         onStep: setStep,
         onEnd: () => {
           setPlaying(false);

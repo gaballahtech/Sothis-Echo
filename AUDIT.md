@@ -1,5 +1,10 @@
 # Sothis Echo — Audit & Readiness Review
 
+> Status note (Nov 2026): the backend now ships in `server/` and serves real
+> Sentinel-1 GRD and NISAR browse data on Vercel. This document is retained as a
+> point-in-time review of the frontend; current behaviour is documented in
+> `README.md` and `SITE_GUIDE.md`.
+
 > Perspective: auditor (not developer). Reviewed against the **2026 NASA Space Apps Challenge — "Dancing with SAR / NISAR"** brief (Advanced · Earth Science) and the repository's own `BACKEND_API_SPEC.md`. Goal: maximise judging score and leave the frontend ready for the backend my teammate will build.
 
 ## 1. Scorecard vs. the brief

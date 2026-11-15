@@ -334,7 +334,7 @@ export async function loadAttribution(id) {
 export async function loadHealth() {
   if (!isApiConfigured()) return null;
   try {
-    const payload = await request('/health');
+    const payload = await request('/health/');
     return payload && typeof payload === 'object' ? payload : null;
   } catch {
     return null;

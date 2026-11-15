@@ -15,7 +15,11 @@ export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites } = useSiteData();
-  const site = sites.find((item) => item.id === 'sundarbans') ?? sites[0];
+  const site =
+    sites.find((item) => item.states?.after?.nisarImageUrl && item.states?.after?.opticalUrl) ??
+    sites.find((item) => item.states?.after?.imageUrl && item.states?.after?.opticalUrl) ??
+    sites.find((item) => item.id === 'sundarbans') ??
+    sites[0];
   const state = site?.states?.after;
 
   if (!site || !state) return null;
@@ -25,6 +29,9 @@ export default function SeeThrough() {
   const radarUrl = state.nisarImageUrl || state.imageUrl;
   const radarDate = state.nisarDate || state.date;
   const radarPlatform = state.nisarImageUrl ? 'NASA NISAR L-band' : 'Sentinel-1';
+  const radarIsSentinel = !state.nisarImageUrl && Boolean(state.imageUrl);
+  const radarLabel = radarIsSentinel ? t('seeThrough.radarC') : t('seeThrough.radar');
+  const radarCaption = radarIsSentinel ? t('seeThrough.radarCaptionSentinel') : t('seeThrough.radarCaption');
 
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
@@ -40,9 +47,9 @@ export default function SeeThrough() {
               site={site}
               params={state.params}
               opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
-              radarAlt={`${siteName} — ${t('seeThrough.radar')}`}
+              radarAlt={`${siteName} — ${radarLabel}`}
               opticalLabel={t('seeThrough.optical')}
-              radarLabel={t('seeThrough.radar')}
+              radarLabel={radarLabel}
               opticalUrl={state.opticalUrl}
               opticalCrop={state.opticalCrop ?? null}
               radarUrl={radarUrl}
@@ -67,8 +74,8 @@ export default function SeeThrough() {
                 <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.opticalCaption')}</p>
               </div>
               <div className="info-block">
-                <h4>{t('seeThrough.radar')}</h4>
-                <p className="body-copy" style={{ margin: 0 }}>{t('seeThrough.radarCaption')}</p>
+                <h4>{radarLabel}</h4>
+                <p className="body-copy" style={{ margin: 0 }}>{radarCaption}</p>
               </div>
             </div>
 

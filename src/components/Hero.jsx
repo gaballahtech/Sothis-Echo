@@ -1,12 +1,14 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Button } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
+import { useSiteData } from '../context/SiteDataContext';
 import { loadMissionStatus, isApiConfigured } from '../services/sarApi';
 
 export default function Hero() {
   const { t } = useTranslation();
   const { language } = useLanguage();
+  const { sites, source } = useSiteData();
   const [status, setStatus] = useState(null);
 
   useEffect(() => {
@@ -40,6 +42,15 @@ export default function Hero() {
 
   const live = Boolean(status?.operational ?? status);
 
+  const latestPass = useMemo(() => {
+    if (!live || source !== 'api') return null;
+    const dates = sites
+      .flatMap((site) => (site.series ?? []).map((pass) => pass.date))
+      .filter(Boolean)
+      .sort();
+    return dates.at(-1) ?? null;
+  }, [live, source, sites]);
+
   return (
     <section id="home" className="content-section hero-section" aria-labelledby="home-title">
       <div className="hero-media" aria-hidden="true">
@@ -71,9 +82,11 @@ export default function Hero() {
             <div className="hero-status" data-testid="hero-status" style={{ marginTop: 14 }}>
               <span className="micro">
                 {status ? (live ? 'LIVE' : 'LOCAL') : '…'} ·{' '}
-                {status?.lastAcquisition
-                  ? `${t('method.statusLabel')}: ${formatDate(status.lastAcquisition)}`
-                  : t('method.statusLabel')}
+                {latestPass
+                  ? `${t('hero.lastPass')}: ${formatDate(latestPass)}`
+                  : live
+                    ? t('hero.liveData')
+                    : t('method.statusLabel')}
               </span>
             </div>
           ) : null}

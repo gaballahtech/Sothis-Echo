@@ -59,7 +59,7 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   await expect(play).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByTestId('sound-status')).toContainText(/Playing/i);
   await page.waitForTimeout(900);
-  await expect(page.getByTestId('sound-status')).toContainText(/pass/i);
+  await expect(page.getByTestId('sound-status')).toContainText(/step/i);
 
   await play.click();
   await expect(play).toHaveAttribute('aria-pressed', 'false');
@@ -71,6 +71,7 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
 test('detective game scores two real cases and resets', async ({ page }) => {
   await openApp(page);
   await page.locator('#game').scrollIntoViewIfNeeded();
+  await page.getByTestId('detective-start').click();
 
   const answers = ['flood', 'fire'];
   for (let index = 0; index < answers.length; index += 1) {

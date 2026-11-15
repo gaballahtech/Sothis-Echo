@@ -13,6 +13,10 @@
  * The bundled numbers below are only the offline fallback; with the backend
  * running, `src/services/sarApi.js` overwrites measurements, series, recovery,
  * pulse and scene imagery with real Sentinel-1 values.
+ *
+ * The internal ids (`sundarbans`, `caldor`) are kept as stable catalogue keys
+ * for URLs, tests and the backend. The events they describe are the 2026
+ * Central Vietnam flood and the 2026 West Attica wildfire.
  */
 
 export const SITE_DATA_VERSION = '2026.11-real.1';
@@ -399,13 +403,13 @@ export const contrastRows = [
     id: 'fingerprint',
     label: { en: 'Change fingerprint', ar: 'بصمة التغير' },
     sundarbans: { en: 'Dark water sheet; bright roofs', ar: 'طبقة ماء داكنة وأسطح لامعة' },
-    caldor: { en: 'Both channels fall; VV drops hard', ar: 'تنخفض القناتان وVV بحدة' },
+    caldor: { en: 'VH falls faster; the cross-pol gap widens', ar: 'VH ينخفض أسرع وتتسع الفجوة بين الاستقطابين' },
   },
   {
     id: 'recovery',
-    label: { en: 'Signal returns to 80%', ar: 'عودة الإشارة إلى 80%' },
-    sundarbans: { en: 'About two months', ar: 'نحو شهرين' },
-    caldor: { en: 'Not yet reached in this record', ar: 'لم يتحقق بعد في هذا السجل' },
+    label: { en: 'Expected recovery pattern', ar: 'نمط التعافي المتوقع' },
+    sundarbans: { en: 'Rapid once the flood water drains', ar: 'سريع بعد تصريف ماء الفيضان' },
+    caldor: { en: 'Slow: canopy structure must regrow', ar: 'بطيء: يجب أن تنمو بنية المظلة من جديد' },
   },
 ];
 

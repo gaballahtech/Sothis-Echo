@@ -25,6 +25,8 @@ const en = {
       'Radar sees through cloud, smoke and darkness. Meet NISAR and learn to read what it finds.',
     ctaSee: 'See what the camera misses',
     ctaListen: 'Hear the surface',
+    liveData: 'Sentinel-1 record · NISAR browse',
+    lastPass: 'Last real pass',
     panel: {
       orbit: 'Orbit',
       orbitValue: '747 km, polar',
@@ -94,9 +96,10 @@ const en = {
   seeThrough: {
     title: 'Why the camera misses the story',
     subtitle:
-      'Drag the line. Two views of the same study area: the clearest optical pass available, and the NISAR radar window cut to match it.',
+      'Drag the line. Two views of the same study area: the clearest optical pass available, and the radar window cut to match it.',
     optical: 'OPTICAL · CLOUDED',
     radar: 'RADAR · L-BAND',
+    radarC: 'RADAR · C-BAND',
     dragHint: 'DRAG THE DIVIDER',
     dividerAt: 'Divider at {{value}}% of the frame width',
     keyboardHint: 'or use arrow keys',
@@ -104,8 +107,10 @@ const en = {
       'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
     radarCaption:
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
+    radarCaptionSentinel:
+      'A real Sentinel-1 C-band scene over the same window. Smooth water is dark; rough canopy and built surfaces return more energy.',
     nisarSwath:
-      'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar scene comes from a tilted orbit and a wider swath, so fine detail differs — the ground area does not.',
+      'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar layer is NASA’s colourised quicklook, not a calibrated image; its tilted orbit and wider swath mean fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
     calloutTitle: 'What the radar is telling you',
     calloutBody:
@@ -117,7 +122,7 @@ const en = {
   sites: {
     title: 'One change, two rhythms',
     subtitle:
-      'The same event looks different in a mangrove and a conifer forest. Pick a site, compare before and after, then read why.',
+      'The same event looks different in a flooded river plain and on a burned Mediterranean hillside. Pick a site, compare before and after, then read why.',
     event: 'Event',
     readPol: 'Read the polarization',
     signalTab: 'Reading the signal',
@@ -158,7 +163,7 @@ const en = {
     methods: 'Method',
     sources: 'Sources',
     contrastTitle: 'Same physics, different fingerprint',
-    contrastSubtitle: 'Why a flood in a mangrove and a fire in a conifer forest do not look alike in the same channel.',
+    contrastSubtitle: 'Why a river flood and a wildfire do not look alike in the same radar channel.',
     downloadCsv: 'Download series (CSV)',
     impactUsers: 'Who reads this',
     impactDecision: 'Decision it informs',
@@ -185,6 +190,7 @@ const en = {
     play: 'Play',
     stop: 'Stop',
     sourceLine: 'Real data: {{passes}} Sentinel-1 passes, resampled to 16 steps.',
+    scaleNote: 'Bars and pitch are scaled to this record’s peak change ({{peak}}%).',
     mappingTitle: 'How the data becomes sound',
     map1: 'One pulse = one step of the 16-step series',
     map2: 'Pitch = amount of change',
@@ -214,7 +220,7 @@ const en = {
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'Finding, not a gap: inside this 5 km window, the gap between the last pass before the fire and the first pass after it reads {{step}} dB in the direction opposite to burning — no burn signature was detected at this scale. Rain between passes moves the same window {{scatter}} dB, so what hides the scar is weather, not noise. The window is far smaller than the 11,339 ha that burned, and a real fire curve needs per-pixel change detection across the whole scar: that is the next measurement, not a drawn line.',
+      'Finding, not a gap: inside this ~5 km window the last pass before the event and the first pass after it differ by {{step}} dB, which is less than the {{scatter}} dB the same window moves between passes. At this scale the record cannot support a recovery curve, and plotting one would be noise wearing a trend line. A real curve needs per-pixel change detection over the whole event area — that is the next measurement, not a drawn line.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -293,7 +299,7 @@ const en = {
       },
       sites: {
         title: 'Two places, two rhythms',
-        body: 'A mangrove flood and a forest fire do not look alike in radar. Open the boxes beside each image for the plain-language why.',
+        body: 'A river flood and a wildfire do not look alike in radar. Open the boxes beside each image for the plain-language why.',
       },
       sound: {
         title: 'Hear the change',
@@ -383,6 +389,8 @@ const ar = {
       'الرادار يرى عبر الغيوم والدخان والظلام. تعرّف على نيسار وتعلّم قراءة ما يجده.',
     ctaSee: 'شاهد ما تفوته الكاميرا',
     ctaListen: 'اسمع سطح الأرض',
+    liveData: 'سجل Sentinel-1 · صورة NISAR',
+    lastPass: 'آخر مرور حقيقي',
     panel: {
       orbit: 'المدار',
       orbitValue: '747 كم، قطبي',
@@ -451,9 +459,10 @@ const ar = {
   seeThrough: {
     title: 'لماذا تفوت الكاميرا القصة',
     subtitle:
-      'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونافذة NISAR الرادارية المقصوصة لتطابقها.',
+      'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونافذة الرادار المقصوصة لتطابقها.',
     optical: 'بصري · تحت الغيوم',
     radar: 'رادار · نطاق L',
+    radarC: 'رادار · نطاق C',
     dragHint: 'اسحب الفاصل',
     dividerAt: 'الفاصل عند {{value}}% من عرض الإطار',
     keyboardHint: 'أو استخدم مفاتيح الأسهم',
@@ -461,8 +470,10 @@ const ar = {
       'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
+    radarCaptionSentinel:
+      'مشهد حقيقي من Sentinel-1 (نطاق C) على النافذة نفسها. الماء الأملس داكن، والمظلة الخشنة والأسطح المبنية تعيد طاقة أكبر.',
     nisarSwath:
-      'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. المشهد الراداري من مدار مائل ونطاق أوسع، فالتفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
+      'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. طبقة الرادار صورة سريعة ملوّنة من ناسا وليست صورة معايرة؛ ومدارها المائل ونطاقها الأوسع يجعلان التفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
     calloutTitle: 'ما يقوله لك الرادار',
     calloutBody:
@@ -474,7 +485,7 @@ const ar = {
   sites: {
     title: 'تغيّر واحد، إيقاعان',
     subtitle:
-      'الحدث نفسه يبدو مختلفًا في المانغروف وغابة الصنوبر. اختر موقعًا، قارن قبل وبعد، ثم اقرأ السبب.',
+      'الحدث نفسه يبدو مختلفًا في سهل نهري غارق وعلى منحدر متوسطي محترق. اختر موقعًا، قارن قبل وبعد، ثم اقرأ السبب.',
     event: 'الحدث',
     readPol: 'اقرأ الاستقطاب',
     signalTab: 'قراءة الإشارة',
@@ -515,7 +526,7 @@ const ar = {
     methods: 'المنهج',
     sources: 'المصادر',
     contrastTitle: 'الفيزياء نفسها، البصمة مختلفة',
-    contrastSubtitle: 'لماذا لا يبدو فيضان في المانغروف وحريق في غابة صنوبر بالشكل نفسه في القناة ذاتها.',
+    contrastSubtitle: 'لماذا لا يبدو فيضان نهري وحريق غابة بالشكل نفسه في القناة الرادارية ذاتها.',
     downloadCsv: 'تنزيل السلسلة (CSV)',
     impactUsers: 'من يقرأ هذا',
     impactDecision: 'القرار الذي تخدمه',
@@ -542,6 +553,7 @@ const ar = {
     play: 'تشغيل',
     stop: 'إيقاف',
     sourceLine: 'بيانات حقيقية: {{passes}} مرورًا لـ Sentinel-1، أُعيد تشكيلها إلى 16 خطوة.',
+    scaleNote: 'الأعمدة والنغمة مُعيّرة على أقوى تغيّر في هذا السجل ({{peak}}%).',
     mappingTitle: 'كيف تتحول البيانات إلى صوت',
     map1: 'نبضة واحدة = خطوة من 16 خطوة في السلسلة',
     map2: 'النغمة = مقدار التغير',
@@ -571,7 +583,7 @@ const ar = {
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'نتيجة، وليست فجوة: داخل نافذة ٥ كم، الفرق بين آخر مرور قبل الحريق وأول مرور بعده يقرأ {{step}} ديسيبل في الاتجاه المعاكس للاحتراق — أي أنه لم يُكشف أي توقيع احتراق على هذا المقياس. وفي النافذة نفسها يحرّك المطر بين المرورات {{scatter}} ديسيبل، فالذي يخفي الأثر هو الطقس لا التشويش. النافذة أصغر بكثير من المساحة المحترقة (١١,٣٣٩ هكتارًا)، والمنحنى الحقيقي يحتاج كشف تغيّر بكسل-ببكسل على كامل الأثر: هذا القياس التالي، وليس خطًا مرسومًا.',
+      'نتيجة، وليست فجوة: داخل نافذة ٥ كم تقريبًا، الفرق بين آخر مرور قبل الحدث وأول مرور بعده {{step}} ديسيبل، وهو أقل من {{scatter}} ديسيبل تتحركها النافذة نفسها بين المرورات. على هذا المقياس لا يدعم السجل منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه. المنحنى الحقيقي يحتاج كشف تغيّر لكل بكسل على مساحة الحدث كاملة — وهذا هو القياس التالي، وليس خطًا مرسومًا.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {
@@ -648,7 +660,7 @@ const ar = {
       },
       sites: {
         title: 'مكانان، إيقاعان',
-        body: 'فيضان المانغروف وحريق الغابة لا يبدوان متشابهين في الرادار. افتح الصناديق بجانب كل صورة لتعرف السبب بلغة بسيطة.',
+        body: 'الفيضان النهري وحريق الغابة لا يبدوان متشابهين في الرادار. افتح الصناديق بجانب كل صورة لتعرف السبب بلغة بسيطة.',
       },
       sound: {
         title: 'اسمع التغيّر',

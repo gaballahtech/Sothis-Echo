@@ -1,8 +1,9 @@
 # Sothis Echo — Complete Site Guide
 
 > An interactive NISAR story: "Earth is always dancing." Built for the NASA Space
-> Apps Challenge (NISAR track). Frontend-only educational prototype with an
-> API-ready data layer.
+> Apps Challenge (NISAR track). Full-stack educational prototype: React front end
+> plus a Node data service in `server/` that serves real Sentinel-1 GRD and NASA
+> NISAR browse imagery.
 
 ---
 
@@ -12,8 +13,8 @@
 - **Stack:** Vite 8 + React 19 + Blueprint.js 6 + i18next.
 - **Node:** 26. **Dev server:** http://localhost:3000 (binds localhost).
 - **Repo:** https://github.com/gaballahtech/Sothis-Echo (branch `main`).
-- **RAM budget:** < 100 MB. Terrain canvas: 18×16 mesh, dpr cap 1.5, idle
-  throttle ~30 fps, IntersectionObserver pause.
+- **RAM budget:** < 100 MB. Canvas work is capped at dpr 1.5; the sound trace is
+  a 16-bar SVG and pauses when it leaves the viewport.
 
 ## 2. Run & build
 
@@ -32,8 +33,8 @@ cp .env.example .env.local
 # set VITE_API_BASE_URL=http://localhost:3001/api
 ```
 
-With no base URL, the app performs **zero** network requests (apart from web
-fonts) and shows the labelled local dataset.
+With no base URL, the app performs **zero API requests** (the hero video and web
+fonts still load) and shows the labelled local dataset.
 
 ## 3. Directory structure
 
@@ -48,7 +49,6 @@ src/
     localized.js        localized() helper
     observations.js     observation ledger rows
   services/
-    sceneRenderer.js    procedural radar scene canvas painter
     sonifier.js         Web Audio sonification
     recovery.js         recovery curve maths + Arabic plural
     sarApi.js           backend adapter (all endpoints)
@@ -61,7 +61,8 @@ src/
     Mission.jsx         NISAR 101 + details
     SeeThrough.jsx      optical vs radar slider
     StudyAreas.jsx      sites, scenes, observations table, researcher docs
-    Sound.jsx           sonification UI
+    Sonification.jsx    sonification UI
+    PulseTrace.jsx      adaptive-scale bar trace for the pass series
     Recovery.jsx        recovery clock
     Detective.jsx       radar detective game
     Method.jsx          data docs + downloads
@@ -73,6 +74,8 @@ src/
     ErrorBoundary.jsx
   i18n/index.js         EN + AR strings
 tests/e2e/              Playwright tests
+server/                 Node data service (Sentinel-1 GRD, NISAR browse, GeoAI)
+api/                    Vercel serverless entry point
 BACKEND_API_SPEC.md     API contract
 AUDIT.md                audit + readiness review
 ```
@@ -89,12 +92,12 @@ AUDIT.md                audit + readiness review
    happened / why radar saw it / read the polarization" boxes, side-by-side
    comparison, observation ledger table, researcher docs (acquisition,
    interpretation, limits, methods, sources), CSV download.
-5. **Sonification** — stable vs changing surface, play/stop, pass counter,
-   mapping legend, no-support fallback.
+5. **Sonification** — site picker, play/stop, step counter, mapping legend,
+   adaptive-scale trace, no-support fallback.
 6. **Recovery** — target slider, estimated time, normalized recovery chart,
    method explanation, caveat.
-7. **Detective** — 4 rounds, before/after scenes, options (shuffled per round),
-   evidence after answer, score, streak, timer, progress dots, confetti/shake.
+7. **Detective** — 2 real cases, before/after scenes, options (shuffled per
+   round), evidence after answer, score, streak, timer, progress dots.
 8. **Method / Data** — data source status, endpoints, limits, sources,
    downloads, version, disclosure, no-backend note.
 9. **Team** — members + links.
@@ -147,7 +150,7 @@ See `BACKEND_API_SPEC.md` and `AUDIT.md` for contract gaps.
 
 - Unified navigation (rail desktop + drawer mobile); removed Explore column,
   floating Help, ModeContext.
-- Fonts updated; square system; terrain perf.
+- Fonts updated; square system; trace render budget.
 - Guided tour: Dialog → anchored spotlight card.
 - Recovery plural + comparison bar + dates fixed.
 - GitHub description/topics updated; og-cover.png created.
@@ -160,5 +163,3 @@ See `BACKEND_API_SPEC.md` and `AUDIT.md` for contract gaps.
 
 Frontend & project lead: gaballahtech · Backend: Mohamed Khider · Research:
 Jana Ayman · Visual identity: Ahd Fayez.
-EOF
-echo created

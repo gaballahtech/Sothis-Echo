@@ -106,8 +106,6 @@ const server = http.createServer((req, res) => {
       data: {
         operational: true,
         phase: 'fixture',
-        lastAcquisition: new Date(Date.now() - 86_400_000).toISOString(),
-        nextAcquisition: new Date(Date.now() + 11 * 86_400_000).toISOString(),
         products: ['fixture'],
       },
       success: true,
