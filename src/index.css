@@ -87,12 +87,18 @@ html {
   scroll-behavior: smooth;
   scroll-padding-top: 74px;
   background: var(--te-bg);
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
   position: relative;
   margin: 0;
   min-width: 320px;
+  max-width: 100vw;
+  overflow-x: hidden;
+  overflow-x: clip;
   color: var(--te-ink);
   background: var(--te-bg);
   font-family: var(--te-body);
@@ -270,6 +276,19 @@ li,
 .table-toolbar {
   font-family: var(--te-mono);
   font-variant-numeric: tabular-nums;
+}
+
+/* Long unbroken tokens (granule IDs, scene names, endpoints) wrap instead of
+   widening the layout on narrow viewports. */
+.numeric,
+.mono,
+.micro,
+.stat-value,
+.telemetry-row dd,
+.pulse-readout,
+.table-toolbar {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .micro,
