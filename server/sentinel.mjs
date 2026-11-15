@@ -964,6 +964,17 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         }
       }
     }
+    // Without a cloud-free optical tile there is still a georeferenced NISAR
+    // quad, so crop each pass to the study window on its own.
+    for (const side of ['before', 'after']) {
+      const nisar = nisarBrowse?.[side];
+      if (!nisar?.quad || nisar.crop) continue;
+      const own = comparisonCrops(site, { quad: nisar.quad, imageBbox: null });
+      if (own?.crop) {
+        nisar.crop = own.crop;
+        nisar.imageUrl = nisar.latlonUrl || nisar.imageUrl;
+      }
+    }
 
     const changes = series.map((point) => point.change);
     const stableChanges = changes.slice(0, Math.max(2, Math.floor(changes.length / 2)));
@@ -1025,6 +1036,14 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         // full-swath browse is exposed separately for the radar/optical
         // comparison, where it is shown once.
         Object.assign(states[side], {
+          // NISAR L-band is the primary card image whenever a granule exists;
+          // Sentinel-1 stays as the secondary fallback.
+          sentinelImageUrl: states[side].imageUrl,
+          imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar`,
+          attribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
+          acquiredAt: nisar.datetime,
+          product: nisar.product,
+          notSimulated: true,
           nisarImageUrl: nisar.imageUrl,
           nisarCrop: nisar.crop ?? null,
           nisarDate: nisar.date,
@@ -1038,7 +1057,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
 
     return {
       id: site.id,
-      source: nisarBrowse ? 'sentinel-1-cog+nisar-browse' : 'sentinel-1-cog',
+      source: nisarBrowse ? 'nisar-l-band-browse' : 'sentinel-1-cog',
       updatedAt: new Date().toISOString(),
       coords: site.coords,
       wkt: site.wkt,

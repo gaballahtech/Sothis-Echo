@@ -11,7 +11,9 @@
  * calibrated backscatter convention for GCOV diagonal terms.
  */
 import fs from 'node:fs/promises';
+import os from 'node:os';
 import path from 'node:path';
+import zlib from 'node:zlib';
 import { spawn } from 'node:child_process';
 import { fromArrayBuffer } from 'geotiff';
 
@@ -19,7 +21,8 @@ const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
 const VALIDATED = 'C3622241360-ASF';
 const PROVISIONAL = 'C2854338529-ASF';
-const CACHE_DIR = path.resolve('server/.cache/nisar');
+// Only /tmp is writable on Vercel and most serverless runtimes.
+const CACHE_DIR = path.join(os.tmpdir(), 'nisar');
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 const DEBUG = process.env.DEBUG_REAL === '1';
 const log = (...args) => {
@@ -593,4 +596,263 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
 
 export function clearNisarCache() {
   cache.clear();
+  browsePngCache.clear();
+}
+
+/* ------------------------------------------------------------------ */
+/* NISAR browse rendering (server-side crop + change)                  */
+/* ------------------------------------------------------------------ */
+
+// The ASF browse products are PNGs: `_LATLON.png` is a north-up image
+// georeferenced by the granule KML quad. They are the only NISAR imagery
+// available without an Earthdata token, so the before/after/change cards are
+// cropped here instead of shipping the full swath to the browser.
+
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+const BROWSE_TTL = 6 * 60 * 60 * 1000;
+const browsePngCache = new Map();
+const OUT_WIDTH = 560;
+const OUT_HEIGHT = 370;
+
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n += 1) {
+    let c = n;
+    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < buffer.length; i += 1) crc = CRC_TABLE[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, data) {
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length, 0);
+  const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(body), 0);
+  return Buffer.concat([length, body, crc]);
+}
+
+/** 8-bit RGB PNG, no image library needed on the serverless runtime. */
+function pngRgb(width, height, pixels) {
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header[8] = 8; // bit depth
+  header[9] = 2; // colour type: truecolour
+  const stride = width * 3 + 1;
+  const raw = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y += 1) {
+    raw[y * stride] = 0; // filter: none
+    pixels.copy(raw, y * stride + 1, y * width * 3, (y + 1) * width * 3);
+  }
+  return Buffer.concat([
+    PNG_SIGNATURE,
+    pngChunk('IHDR', header),
+    pngChunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+const paeth = (left, up, upLeft) => {
+  const p = left + up - upLeft;
+  const pa = Math.abs(p - left);
+  const pb = Math.abs(p - up);
+  const pc = Math.abs(p - upLeft);
+  if (pa <= pb && pa <= pc) return left;
+  if (pb <= pc) return up;
+  return upLeft;
+};
+
+/** Minimal PNG decoder for 8-bit, non-interlaced browse imagery. */
+function decodePngToRgb(buffer) {
+  if (!buffer || buffer.length < 8 || !buffer.subarray(0, 8).equals(PNG_SIGNATURE)) {
+    throw new Error('Not a PNG');
+  }
+  let offset = 8;
+  let width = 0;
+  let height = 0;
+  let bitDepth = 0;
+  let colorType = 0;
+  let interlace = 0;
+  let palette = null;
+  const idat = [];
+  while (offset + 8 <= buffer.length) {
+    const length = buffer.readUInt32BE(offset);
+    const type = buffer.toString('ascii', offset + 4, offset + 8);
+    const dataStart = offset + 8;
+    const dataEnd = dataStart + length;
+    if (dataEnd + 4 > buffer.length) break;
+    const data = buffer.subarray(dataStart, dataEnd);
+    if (type === 'IHDR') {
+      width = data.readUInt32BE(0);
+      height = data.readUInt32BE(4);
+      bitDepth = data[8];
+      colorType = data[9];
+      interlace = data[12];
+    } else if (type === 'PLTE') {
+      palette = Buffer.from(data);
+    } else if (type === 'IDAT') {
+      idat.push(data);
+    } else if (type === 'IEND') {
+      break;
+    }
+    offset = dataEnd + 4;
+  }
+  if (!width || !height || !idat.length) throw new Error('Incomplete PNG');
+  if (bitDepth !== 8 || interlace !== 0) {
+    throw new Error(`Unsupported PNG (depth ${bitDepth}, interlace ${interlace})`);
+  }
+  const channels =
+    colorType === 0 ? 1 : colorType === 2 ? 3 : colorType === 3 ? 1 : colorType === 4 ? 2 : colorType === 6 ? 4 : 0;
+  if (!channels) throw new Error(`Unsupported PNG colour type ${colorType}`);
+
+  const raw = zlib.inflateSync(Buffer.concat(idat));
+  const stride = width * channels;
+  if (raw.length < (stride + 1) * height) throw new Error('Truncated PNG data');
+  const out = Buffer.alloc(width * height * 3);
+  let prev = Buffer.alloc(stride);
+  for (let y = 0; y < height; y += 1) {
+    const rowStart = y * (stride + 1);
+    const filter = raw[rowStart];
+    const line = Buffer.from(raw.subarray(rowStart + 1, rowStart + 1 + stride));
+    for (let x = 0; x < stride; x += 1) {
+      const left = x >= channels ? line[x - channels] : 0;
+      const up = prev[x];
+      const upLeft = x >= channels ? prev[x - channels] : 0;
+      let value = line[x];
+      if (filter === 1) value += left;
+      else if (filter === 2) value += up;
+      else if (filter === 3) value += Math.floor((left + up) / 2);
+      else if (filter === 4) value += paeth(left, up, upLeft);
+      line[x] = value & 0xff;
+    }
+    for (let x = 0; x < width; x += 1) {
+      let r;
+      let g;
+      let b;
+      if (colorType === 0 || colorType === 4) {
+        r = g = b = line[x * channels];
+      } else if (colorType === 3) {
+        const index = line[x];
+        if (palette && index * 3 + 2 < palette.length) {
+          r = palette[index * 3];
+          g = palette[index * 3 + 1];
+          b = palette[index * 3 + 2];
+        } else {
+          r = g = b = 0;
+        }
+      } else {
+        r = line[x * channels];
+        g = line[x * channels + 1];
+        b = line[x * channels + 2];
+      }
+      const o = (y * width + x) * 3;
+      out[o] = r;
+      out[o + 1] = g;
+      out[o + 2] = b;
+    }
+    prev = line;
+  }
+  return { width, height, data: out };
+}
+
+function normalizeCrop(crop) {
+  if (!crop || typeof crop !== 'object') return null;
+  const x = Number(crop.x);
+  const y = Number(crop.y);
+  const w = Number(crop.w);
+  const h = Number(crop.h);
+  if (![x, y, w, h].every(Number.isFinite) || w <= 0 || h <= 0) return null;
+  return {
+    x: Math.max(0, Math.min(1, x)),
+    y: Math.max(0, Math.min(1, y)),
+    w: Math.max(0.01, Math.min(1, w)),
+    h: Math.max(0.01, Math.min(1, h)),
+  };
+}
+
+/** Resample one fractional window of a browse PNG to the card frame. */
+function sampleCrop(image, crop) {
+  const rect = normalizeCrop(crop) || { x: 0, y: 0, w: 1, h: 1 };
+  const sx0 = rect.x * image.width;
+  const sy0 = rect.y * image.height;
+  const sw = Math.max(1, rect.w * image.width);
+  const sh = Math.max(1, rect.h * image.height);
+  const out = Buffer.alloc(OUT_WIDTH * OUT_HEIGHT * 3);
+  for (let y = 0; y < OUT_HEIGHT; y += 1) {
+    const sourceY = Math.min(image.height - 1, Math.floor(sy0 + ((y + 0.5) / OUT_HEIGHT) * sh));
+    for (let x = 0; x < OUT_WIDTH; x += 1) {
+      const sourceX = Math.min(image.width - 1, Math.floor(sx0 + ((x + 0.5) / OUT_WIDTH) * sw));
+      const source = (sourceY * image.width + sourceX) * 3;
+      const target = (y * OUT_WIDTH + x) * 3;
+      out[target] = image.data[source];
+      out[target + 1] = image.data[source + 1];
+      out[target + 2] = image.data[source + 2];
+    }
+  }
+  return out;
+}
+
+async function fetchBrowsePng(url) {
+  const cached = browsePngCache.get(url);
+  if (cached && Date.now() - cached.at < BROWSE_TTL) return cached.value;
+  const response = await fetch(url, { signal: AbortSignal.timeout(45000) });
+  if (!response.ok) throw new Error(`Browse HTTP ${response.status}`);
+  const value = Buffer.from(await response.arrayBuffer());
+  browsePngCache.set(url, { value, at: Date.now() });
+  return value;
+}
+
+async function loadBrowse(url) {
+  return decodePngToRgb(await fetchBrowsePng(url));
+}
+
+/** Cropped NISAR L-band browse image for a before/after card. */
+export async function renderNisarCrop(url, crop) {
+  if (!url) return null;
+  const key = `crop:${url}:${JSON.stringify(normalizeCrop(crop))}`;
+  const cached = browsePngCache.get(key);
+  if (cached && Date.now() - cached.at < BROWSE_TTL) return cached.value;
+  const image = await loadBrowse(url);
+  const png = pngRgb(OUT_WIDTH, OUT_HEIGHT, sampleCrop(image, crop));
+  browsePngCache.set(key, { value: png, at: Date.now() });
+  return png;
+}
+
+/** Absolute change between two NISAR L-band browse images over one window. */
+export async function renderNisarChange({ beforeUrl, beforeCrop, afterUrl, afterCrop }) {
+  if (!beforeUrl || !afterUrl) return null;
+  const key = `change:${beforeUrl}:${afterUrl}:${JSON.stringify(normalizeCrop(beforeCrop))}:${JSON.stringify(
+    normalizeCrop(afterCrop)
+  )}`;
+  const cached = browsePngCache.get(key);
+  if (cached && Date.now() - cached.at < BROWSE_TTL) return cached.value;
+
+  const [beforeImage, afterImage] = await Promise.all([loadBrowse(beforeUrl), loadBrowse(afterUrl)]);
+  const before = sampleCrop(beforeImage, beforeCrop);
+  const after = sampleCrop(afterImage, afterCrop);
+  const out = Buffer.alloc(OUT_WIDTH * OUT_HEIGHT * 3);
+  const floor = 8; // browse-image noise floor (0-255)
+  const span = 70;
+  for (let i = 0; i < OUT_WIDTH * OUT_HEIGHT; i += 1) {
+    const index = i * 3;
+    const lumBefore = 0.299 * before[index] + 0.587 * before[index + 1] + 0.114 * before[index + 2];
+    const lumAfter = 0.299 * after[index] + 0.587 * after[index + 1] + 0.114 * after[index + 2];
+    const delta = Math.abs(lumAfter - lumBefore);
+    const shown = delta <= floor ? 0 : Math.min(span, delta);
+    const value = Math.round((shown / span) * 255);
+    out[index] = value;
+    out[index + 1] = value;
+    out[index + 2] = value;
+  }
+  const png = pngRgb(OUT_WIDTH, OUT_HEIGHT, out);
+  browsePngCache.set(key, { value: png, at: Date.now() });
+  return png;
 }

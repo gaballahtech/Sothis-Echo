@@ -147,17 +147,24 @@ export default function StudyAreas() {
                     </div>
                   </Panel>
 
+                  {state.nisarGranule || state.acquiredAt ? (
+                    <p className="micro" dir="ltr" data-testid={`scene-meta-${stateKey}`} style={{ margin: 0 }}>
+                      {state.nisarGranule ? `${state.nisarGranule} · ` : ''}
+                      {state.nisarAcquiredAt || state.acquiredAt || state.date}
+                    </p>
+                  ) : null}
+
                   <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
                     {L(state.happened)} {L(state.why)}
                   </p>
                 </div>
               );
             })}
-            {site?.source?.startsWith('sentinel-1') ? (
+            {site?.source?.startsWith('sentinel-1') || site?.source?.startsWith('nisar') || site?.states?.after?.nisarImageUrl ? (
               <div className="stack" style={{ gap: 0 }}>
                 <Panel title={t('sites.changeTitle', { date: `${site.states.before.date} → ${site.states.after.date}` })}>
                   <SceneCanvas
-                    imageUrl={sceneImageUrl(site.id, 'change')}
+                    imageUrl={sceneImageUrl(site.id, 'change', site?.states?.after?.nisarImageUrl ? 'nisar' : undefined)}
                     alt={t('sites.changeAria', { site: L(site.name) })}
                   />
                   <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>

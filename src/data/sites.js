@@ -27,12 +27,12 @@ export const studyAreas = [
     kind: 'wetland',
     seed: 21,
     name: { en: 'Central Vietnam flood', ar: 'فيضان وسط فيتنام' },
-    region: { en: 'Quảng Trị – Huế · Vietnam', ar: 'كوانغ تري – هوي · فيتنام' },
-    // Hai Lang lowland, Quảng Trị: the Sep 2026 flood hit the rice plain and
-    // the Mỹ Chánh river here. The old 16.55/107.35 window was the coastal
-    // lagoon, which the flood did not reach.
-    coords: { lat: 16.68, lng: 107.27 },
-    wkt: 'POLYGON ((106.90 16.20, 107.80 16.20, 107.80 16.95, 106.90 16.95, 106.90 16.20))',
+    region: { en: 'Huế · Tam Giang · Vietnam', ar: 'هوي · تام جيانغ · فيتنام' },
+    // Low-lying Huế / Tam Giang agricultural plain: the Sep 2026 flood pooled
+    // on the rice fields and lagoon margins. The old Hai Lang window (16.68,
+    // 107.27) sat against the hills and showed less inundation.
+    coords: { lat: 16.55, lng: 107.575 },
+    wkt: 'POLYGON ((107.45 16.45, 107.70 16.45, 107.70 16.65, 107.45 16.65, 107.45 16.45))',
     eventDate: '2026-09-13',
     headline: {
       en: 'When the rivers overrun the plain',
@@ -201,12 +201,13 @@ export const studyAreas = [
     kind: 'forest',
     seed: 84,
     name: { en: 'West Attica wildfire', ar: 'حريق غرب أتيكا' },
-    region: { en: 'Porto Germeno · Greece', ar: 'بورتو جيرمينو · اليونان' },
-    // Inland at Agios Vasileios, where the fire started: the earlier shoreline
-    // point put half of the 512×512 window over open water, and wind-driven sea
-    // backscatter then swung the absolute VV level and the VV−VH gap.
-    coords: { lat: 38.19, lng: 23.10 },
-    wkt: 'POLYGON ((23.00 38.00, 23.40 38.00, 23.40 38.30, 23.00 38.30, 23.00 38.00))',
+    region: { en: 'West Attica · Mount Pateras · Greece', ar: 'غرب أتيكا · جبل باتيراس · اليونان' },
+    // Inland forested hills of West Attica (Mount Pateras / Dervenochoria),
+    // entirely on land. The old shoreline window put half of the 512×512
+    // window over the Aegean, and wind-driven sea backscatter swung the VV
+    // level and the VV−VH gap for reasons that had nothing to do with the fire.
+    coords: { lat: 38.15, lng: 23.45 },
+    wkt: 'POLYGON ((23.35 38.08, 23.55 38.08, 23.55 38.22, 23.35 38.22, 23.35 38.08))',
     eventDate: '2026-07-31',
     headline: {
       en: 'The slope that burned to the sea',

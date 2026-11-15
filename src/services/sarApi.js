@@ -27,8 +27,9 @@ export const isApiConfigured = () => Boolean(API_BASE);
  * URL of a server-rendered scene image. The path is absolute below /api, while
  * the configured base usually ends in /api itself — keep the origin only.
  */
-export function sceneImageUrl(siteId, side) {
-  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}`;
+export function sceneImageUrl(siteId, side, source) {
+  const suffix = source ? `&source=${encodeURIComponent(source)}` : '';
+  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}${suffix}`;
 }
 
 export function getApiConfig() {

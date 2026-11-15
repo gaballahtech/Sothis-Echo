@@ -21,7 +21,7 @@ import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
 import { buildRealSite, clearRealCache, renderChangeCrop, renderSceneCrop } from './sentinel.mjs';
-import { clearNisarCache } from './nisar.mjs';
+import { clearNisarCache, renderNisarChange, renderNisarCrop } from './nisar.mjs';
 
 try {
   process.loadEnvFile('.env.local');
@@ -564,14 +564,39 @@ export async function handleRequest(req, res) {
     if (path === '/api/scene-image') {
       const siteId = url.searchParams.get('site');
       const side = url.searchParams.get('side');
+      const source = url.searchParams.get('source');
       if (!siteId || (side !== 'before' && side !== 'after' && side !== 'change')) {
         sendError(res, 400, 'site and side=before|after|change are required');
         return;
       }
       // Building the site registers the two real passes this image is drawn
       // from; a cold request pays one build, afterwards the crop is cached.
-      await getSites();
-      const png = side === 'change' ? await renderChangeCrop(siteId) : await renderSceneCrop(siteId, side);
+      const sites = await getSites();
+      const site = sites.find((item) => item.id === siteId);
+      let png = null;
+      if (source === 'nisar' && site) {
+        try {
+          if (side === 'change') {
+            const before = site.states?.before;
+            const after = site.states?.after;
+            png = await renderNisarChange({
+              beforeUrl: before?.nisarImageUrl,
+              beforeCrop: before?.nisarCrop,
+              afterUrl: after?.nisarImageUrl,
+              afterCrop: after?.nisarCrop,
+            });
+          } else {
+            const state = site.states?.[side];
+            png = await renderNisarCrop(state?.nisarImageUrl, state?.nisarCrop);
+          }
+        } catch (error) {
+          console.error('[SOTHIS API] NISAR browse crop failed', siteId, side, error?.message);
+        }
+      }
+      // Sentinel-1 remains the secondary fallback when no NISAR granule exists.
+      if (!png) {
+        png = side === 'change' ? await renderChangeCrop(siteId) : await renderSceneCrop(siteId, side);
+      }
       if (!png) {
         sendError(res, 404, 'No real pass registered for this site');
         return;
@@ -602,7 +627,7 @@ export async function handleRequest(req, res) {
 
     const seriesMatch = path.match(/^\/api\/sites\/([^/]+)\/series$/);
     if (seriesMatch) {
-      const site = fixtures.find((item) => item.id === seriesMatch[1]);
+      const site = (await getSites()).find((item) => item.id === seriesMatch[1]);
       if (!site) sendError(res, 404, 'Unknown site');
       else send(res, 200, { data: site.series, success: true });
       return;
@@ -610,7 +635,7 @@ export async function handleRequest(req, res) {
 
     const recoveryMatch = path.match(/^\/api\/sites\/([^/]+)\/recovery$/);
     if (recoveryMatch) {
-      const site = fixtures.find((item) => item.id === recoveryMatch[1]);
+      const site = (await getSites()).find((item) => item.id === recoveryMatch[1]);
       if (!site) sendError(res, 404, 'Unknown site');
       else send(res, 200, { data: site.recovery, success: true });
       return;
@@ -618,7 +643,7 @@ export async function handleRequest(req, res) {
 
     const soundMatch = path.match(/^\/api\/sonification\/([^/]+)$/);
     if (soundMatch) {
-      const site = fixtures.find((item) => item.id === soundMatch[1]);
+      const site = (await getSites()).find((item) => item.id === soundMatch[1]);
       if (!site) sendError(res, 404, 'Unknown site');
       else send(res, 200, { data: { pulse: site.pulse, stablePulse: site.stablePulse }, success: true });
       return;
@@ -626,40 +651,49 @@ export async function handleRequest(req, res) {
 
     const attributionMatch = path.match(/^\/api\/attribution\/([^/]+)$/);
     if (attributionMatch) {
-      const site = fixtures.find((item) => item.id === attributionMatch[1]);
-      if (!site) sendError(res, 404, 'Unknown site');
-      else
-        send(res, 200, {
-          data: {
-            sources: [
-              { label: 'NASA NISAR', href: 'https://nisar.jpl.nasa.gov/' },
-              { label: 'ASF DAAC', href: 'https://asf.alaska.edu/' },
-            ],
-            license: 'Educational prototype',
-            product: 'Sentinel-1 GRD fixture',
-            updatedAt: site.updatedAt,
-          },
-          success: true,
-        });
+      const site = (await getSites()).find((item) => item.id === attributionMatch[1]);
+      if (!site) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const state = site.states?.after || {};
+      send(res, 200, {
+        data: {
+          sources: [
+            { label: 'NASA NISAR L-band GCOV', href: 'https://nisar.jpl.nasa.gov/' },
+            { label: 'ASF DAAC', href: 'https://asf.alaska.edu/' },
+          ],
+          license: 'Educational prototype',
+          product: state.nisarProduct || state.product || 'Sentinel-1 GRD',
+          granule: state.nisarGranule || null,
+          acquiredAt: state.nisarAcquiredAt || state.acquiredAt || null,
+          updatedAt: site.updatedAt,
+        },
+        success: true,
+      });
       return;
     }
 
     const stateMatch = path.match(/^\/api\/scenes\/([^/]+)\/(before|after)$/);
     if (stateMatch) {
-      const site = fixtures.find((item) => item.id === stateMatch[1]);
-      if (!site) sendError(res, 404, 'Unknown site');
-      else
-        send(res, 200, {
-          data: {
-            imageUrl: null,
-            opticalUrl: null,
-            attribution: 'Procedural illustration — not a NISAR product',
-            acquiredAt: site.states[stateMatch[2]].date,
-            product: 'illustrative',
-            notSimulated: false,
-          },
-          success: true,
-        });
+      const site = (await getSites()).find((item) => item.id === stateMatch[1]);
+      if (!site) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const state = site.states[stateMatch[2]];
+      send(res, 200, {
+        data: {
+          imageUrl: state.imageUrl || null,
+          opticalUrl: state.opticalUrl || null,
+          attribution: state.nisarAttribution || state.attribution || null,
+          acquiredAt: state.nisarAcquiredAt || state.acquiredAt || state.date,
+          product: state.nisarProduct || state.product || 'illustrative',
+          notSimulated: Boolean(state.notSimulated),
+          granule: state.nisarGranule || null,
+        },
+        success: true,
+      });
       return;
     }
 
