@@ -3,6 +3,8 @@
 An interactive NISAR story about the changes a camera misses: the 2026 Central
 Vietnam flood and the 2026 West Attica wildfire, read through radar.
 
+**Live demo:** https://sothisecho.vercel.app
+
 Built for the NASA Space Apps Challenge. NISAR is a partnership between NASA and
 ISRO; this is an independent, open-source educational prototype.
 
@@ -30,12 +32,23 @@ ISRO; this is an independent, open-source educational prototype.
 ## Data honesty
 
 Narrative, mission facts, event dates and scattering physics are real or
-literature-informed. With the local backend running (`npm run api`), the study
-areas use **real Sentinel-1 GRD scenes** from Earth Search + AWS Open Data: real
-acquisition dates, real quicklook images, and backscatter statistics read from a
-512×512 COG window around each site. Values are **relative dB** (from GRD digital
-numbers), not calibrated σ⁰. Without the backend, the bundled illustrative
-dataset is used and labelled as such.
+literature-informed. With the backend running (`npm run api` or the deployed
+API), the production study areas combine two real sources:
+
+- **NISAR L-band cards** — the `before`, `after`, and `change` cards render
+  geo-referenced **NASA NISAR L2 GCOV browse imagery** from the NASA ASF DAAC,
+  cropped server-side to the study window. Each card shows the official
+  **Granule ID** and acquisition time. The `change` card is a pixel-level
+  `|After − Before|` difference map built from the two browse images.
+- **Sentinel-1 GRD time series** — acquisition dates and backscatter statistics
+  come from Earth Search + AWS Open Data, read from a 512×512 COG window around
+  each site. Values are **relative dB** (from GRD digital numbers), not
+  calibrated σ⁰.
+
+The NISAR browse cards are visual evidence, not calibrated radiometry; the
+quantitative series remains Sentinel-1 GRD. If no NISAR granule covers a site,
+the cards fall back to the Sentinel-1 quicklook and say so. Without the backend,
+the bundled illustrative dataset is used and labelled as such.
 
 ### Why the wildfire window is inland, not on the shore
 
@@ -45,9 +58,9 @@ backscatter is wind-driven, so the absolute VV level and the VV−VH gap followe
 the wind rather than the fire (30 Jul 2026: VV −15.1 dB, VH −29.2 dB; 5 Aug 2026:
 VV −21.5 dB, VH −30.7 dB — a gap that moved by 5 dB for no ground reason).
 
-The sample point now sits inland at Agios Vasileios, where the fire started, so
-the window is land only. The polarisation gap is stable across passes, so the
-change that remains is the scar itself rather than wind over water.
+The sample point now sits inland in the West Attica hills (Mount Pateras /
+Dervenochoria), so the window is land only. The polarisation gap is stable across
+passes, so the change that remains is the scar itself rather than wind over water.
 
 See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
 
@@ -55,7 +68,7 @@ See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
 
 ```bash
 npm install
-npm run dev      # http://localhost:3000
+npm run dev      # http://localhost:5173
 npm run build
 npm run preview
 ```
@@ -102,3 +115,13 @@ Sources: [NASA NISAR](https://nisar.jpl.nasa.gov/mission/quick-facts),
 
 Frontend & project lead: gaballahtech · Backend: Mohamed Khider · Research:
 Jana Ayman · Visual identity: Ahd Fayez.
+
+## Contributing
+
+See [`CONTRIBUTING.md`](./CONTRIBUTING.md) for local setup, end-to-end testing,
+and pull request guidelines. By participating you agree to the
+[Code of Conduct](./CODE_OF_CONDUCT.md).
+
+## License
+
+Released under the [MIT License](./LICENSE).
