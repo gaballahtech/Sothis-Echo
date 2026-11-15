@@ -173,10 +173,10 @@ export default function Detective() {
           ) : !started ? (
             <div className="game-start" data-testid="detective-start-panel">
               <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 600 }}>{t('game.startTitle')}</h3>
-              <p className="body-copy-muted" style={{ margin: '0 0 6px', maxWidth: 520 }}>
+              <p className="body-copy-muted" style={{ margin: '0 auto 6px', maxWidth: 520 }}>
                 {t('game.startBody', { seconds: ROUND_SECONDS, total })}
               </p>
-              <p className="micro" style={{ margin: '0 0 14px' }}>{t('game.startHint')}</p>
+              <p className="micro" style={{ margin: '0 auto 14px' }}>{t('game.startHint')}</p>
               <Button
                 intent="primary"
                 icon="play"

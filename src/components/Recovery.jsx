@@ -273,7 +273,11 @@ export default function Recovery() {
               >
                 {t('recovery.fallbackNotice')}
               </Callout>
-            ) : null}
+            ) : (
+              <p className="micro" data-testid="recovery-source" style={{ marginBottom: 8 }}>
+                {t('recovery.sourceLine', { passes: measuredPoints.length })}
+              </p>
+            )}
             <div className="chart-scroll">
               <RecoveryChart
                 points={site.recovery.points}

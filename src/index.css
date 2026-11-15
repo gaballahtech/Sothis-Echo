@@ -2468,6 +2468,11 @@ button,
   margin-inline: auto;
 }
 
+.sound-source {
+  margin: 6px 0 0;
+  text-align: center;
+}
+
 .detective-timer {
   display: grid;
   grid-template-columns: auto auto;
