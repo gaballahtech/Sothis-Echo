@@ -2575,3 +2575,41 @@ button,
   font-size: 11px;
   text-align: center;
 }
+
+.impact-list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 10px 12px;
+  border-left: 2px solid var(--bp-palette-blue3, #4c90f0);
+  background: color-mix(in srgb, var(--bp-palette-blue3, #4c90f0) 8%, transparent);
+  border-radius: 0 4px 4px 0;
+}
+
+.impact-list > div {
+  display: grid;
+  grid-template-columns: minmax(110px, 26%) 1fr;
+  gap: 10px;
+  align-items: baseline;
+}
+
+.impact-list dt {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.72;
+}
+
+.impact-list dd {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+@media (max-width: 620px) {
+  .impact-list > div {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

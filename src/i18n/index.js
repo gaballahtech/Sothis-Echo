@@ -160,6 +160,8 @@ const en = {
     contrastTitle: 'Same physics, different fingerprint',
     contrastSubtitle: 'Why a flood in a mangrove and a fire in a conifer forest do not look alike in the same channel.',
     downloadCsv: 'Download series (CSV)',
+    impactUsers: 'Who reads this',
+    impactDecision: 'Decision it informs',
     comparison: {
       sundarbans: 'Vietnam flood',
       caldor: 'Greece fire',
@@ -207,7 +209,7 @@ const en = {
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'No measured curve here: the first pass after the event moved {{step}} dB, less than the {{scatter}} dB the same window swings between passes. The real passes are in the observation ledger; a curve drawn from them would be noise.',
+      'Finding, not a gap: across this 5 km window the fire moved the signal {{step}} dB, while rain between passes moves the same window {{scatter}} dB — so the scar hides under weather, not under noise. A real fire curve needs per-pixel change detection over the whole 11,339 ha scar, which is the next measurement, not a drawn line.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -509,6 +511,8 @@ const ar = {
     contrastTitle: 'الفيزياء نفسها، البصمة مختلفة',
     contrastSubtitle: 'لماذا لا يبدو فيضان في المانغروف وحريق في غابة صنوبر بالشكل نفسه في القناة ذاتها.',
     downloadCsv: 'تنزيل السلسلة (CSV)',
+    impactUsers: 'من يقرأ هذا',
+    impactDecision: 'القرار الذي تخدمه',
     comparison: {
       sundarbans: 'فيضان فيتنام',
       caldor: 'حريق اليونان',
@@ -556,7 +560,7 @@ const ar = {
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'لا يوجد منحنى مقاس هنا: أول مرور بعد الحدث تغيّر {{step}} ديسيبل، وهو أقل من {{scatter}} ديسيبل تذبذب بها النافذة نفسها بين المرورات. المرورات الحقيقية في سجل الملاحظات، وأي منحنى منها سيكون ضوضاء.',
+      'نتيجة، وليست فجوة: داخل نافذة ٥ كم حرّك الحريق الإشارة {{step}} ديسيبل، بينما يحرّك المطر بين المرورات النافذة نفسها {{scatter}} ديسيبل — أي أن أثر الحريق يختفي تحت الطقس لا تحت التشويش. المنحنى الحقيقي يحتاج كشف تغيّر بكسل-ببكسل على مساحة ١١,٣٣٩ هكتارًا كلها، وهذا قياس تالٍ وليس خطًا مرسومًا.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {

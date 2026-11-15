@@ -112,6 +112,18 @@ export default function StudyAreas() {
                 <p key={index} className="body-copy-muted" style={{ margin: 0 }}>{L(paragraph)}</p>
               ))}
             </div>
+            {site.impact ? (
+              <dl className="impact-list" data-testid="site-impact">
+                <div>
+                  <dt>{t('sites.impactUsers')}</dt>
+                  <dd>{L(site.impact.users)}</dd>
+                </div>
+                <div>
+                  <dt>{t('sites.impactDecision')}</dt>
+                  <dd>{L(site.impact.decision)}</dd>
+                </div>
+              </dl>
+            ) : null}
             <div>
               <Button variant="outlined" small icon="download" text={t('sites.downloadCsv')} onClick={downloadCsv} />
             </div>

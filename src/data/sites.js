@@ -31,6 +31,16 @@ export const studyAreas = [
       en: 'When the rivers overrun the plain',
       ar: 'حين تفيض الأنهار على السهل',
     },
+    impact: {
+      users: {
+        en: 'Provincial flood-warning teams, embankment managers and rice cooperatives.',
+        ar: 'فرق الإنذار بالفيضانات في المحافظة، ومشرفو السدود الترابية، وتعاونيات الأرز.',
+      },
+      decision: {
+        en: 'Which compartments to drain first, and where boats go before the roads fail.',
+        ar: 'أي الأحواض تُصرَّف أولًا، وأين تُوجَّه القوارب قبل أن تنقطع الطرق.',
+      },
+    },
     tags: [
       { key: 'terrain', value: { en: 'Coastal plain and river delta', ar: 'سهل ساحلي ودلتا نهرية' } },
       { key: 'soil', value: { en: 'Saturated alluvium', ar: 'طمي مشبع بالماء' } },
@@ -194,6 +204,16 @@ export const studyAreas = [
     headline: {
       en: 'The slope that burned to the sea',
       ar: 'المنحدر الذي احترق حتى البحر',
+    },
+    impact: {
+      users: {
+        en: 'Civil protection, foresters and reforestation planners.',
+        ar: 'الحماية المدنية والحراجيون ومخططو إعادة التشجير.',
+      },
+      decision: {
+        en: 'Where to seed and terrace first: a bare burn scar sheds the first autumn rain as a flash flood.',
+        ar: 'أين تُبذر وتُشقّ المدرجات أولًا: أرض الحريق العارية تُصرّف أول مطر خريفي على شكل سيل مفاجئ.',
+      },
     },
     tags: [
       { key: 'terrain', value: { en: 'Steep Mediterranean hills', ar: 'تلال متوسطية شديدة الانحدار' } },
