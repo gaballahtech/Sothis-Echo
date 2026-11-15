@@ -228,10 +228,21 @@ export default function Recovery() {
         <div className="recovery-grid">
           <Panel title={`${t('recovery.estimateLabel')} · ${siteName}`} bodyClassName="card-pad-lg">
             <p className={`recovery-value ${estimateClass}`} aria-live="polite" data-testid="recovery-estimate" dir="auto">
-              {estimate.months == null ? t('recovery.notReached') : formatMonths(estimate.months, language)}
+              {site.recovery.insufficient
+                ? t('recovery.notMeasured')
+                : estimate.months == null
+                  ? t('recovery.notReached')
+                  : formatMonths(estimate.months, language)}
             </p>
 
-            <div style={{ paddingTop: 12, borderTop: '1px solid var(--bp-surface-border-color-default)', marginBottom: 16 }}>
+            <div
+              style={{
+                paddingTop: 12,
+                borderTop: '1px solid var(--bp-surface-border-color-default)',
+                marginBottom: 16,
+                display: site.recovery.insufficient ? 'none' : undefined,
+              }}
+            >
               <div className="row-between" style={{ marginBottom: 6 }}>
                 <span className="micro">{t('recovery.signalToday')}</span>
                 <span className="numeric small">{current}%</span>
@@ -290,7 +301,7 @@ export default function Recovery() {
                 {t('recovery.sourceLine', { passes: measuredPoints.length })}
               </p>
             )}
-            <div className="chart-scroll">
+            <div className="chart-scroll" style={site.recovery.insufficient ? { display: 'none' } : undefined}>
               <RecoveryChart
                 points={site.recovery.points}
                 threshold={threshold}
