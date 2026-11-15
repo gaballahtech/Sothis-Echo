@@ -113,6 +113,11 @@ function mergeSceneState(local, remote) {
   ]) {
     if (remote[key] != null) merged[key] = remote[key];
   }
+  // Scene images are rendered by the API itself (/api/scene-image), which is
+  // same-origin in production but a separate port under `npm run dev`.
+  if (typeof merged.imageUrl === 'string' && merged.imageUrl.startsWith('/') && API_BASE) {
+    merged.imageUrl = `${API_BASE}${merged.imageUrl}`;
+  }
   return merged;
 }
 

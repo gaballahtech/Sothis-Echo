@@ -209,7 +209,7 @@ const en = {
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'Finding, not a gap: across this 5 km window the fire moved the signal {{step}} dB, while rain between passes moves the same window {{scatter}} dB — so the scar hides under weather, not under noise. A real fire curve needs per-pixel change detection over the whole 11,339 ha scar, which is the next measurement, not a drawn line.',
+      'Finding, not a gap: inside this 5 km window, the gap between the last pass before the fire and the first pass after it reads {{step}} dB in the direction opposite to burning — no burn signature was detected at this scale. Rain between passes moves the same window {{scatter}} dB, so what hides the scar is weather, not noise. The window is far smaller than the 11,339 ha that burned, and a real fire curve needs per-pixel change detection across the whole scar: that is the next measurement, not a drawn line.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -561,7 +561,7 @@ const ar = {
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'نتيجة، وليست فجوة: داخل نافذة ٥ كم حرّك الحريق الإشارة {{step}} ديسيبل، بينما يحرّك المطر بين المرورات النافذة نفسها {{scatter}} ديسيبل — أي أن أثر الحريق يختفي تحت الطقس لا تحت التشويش. المنحنى الحقيقي يحتاج كشف تغيّر بكسل-ببكسل على مساحة ١١,٣٣٩ هكتارًا كلها، وهذا قياس تالٍ وليس خطًا مرسومًا.',
+      'نتيجة، وليست فجوة: داخل نافذة ٥ كم، الفرق بين آخر مرور قبل الحريق وأول مرور بعده يقرأ {{step}} ديسيبل في الاتجاه المعاكس للاحتراق — أي أنه لم يُكشف أي توقيع احتراق على هذا المقياس. وفي النافذة نفسها يحرّك المطر بين المرورات {{scatter}} ديسيبل، فالذي يخفي الأثر هو الطقس لا التشويش. النافذة أصغر بكثير من المساحة المحترقة (١١,٣٣٩ هكتارًا)، والمنحنى الحقيقي يحتاج كشف تغيّر بكسل-ببكسل على كامل الأثر: هذا القياس التالي، وليس خطًا مرسومًا.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {

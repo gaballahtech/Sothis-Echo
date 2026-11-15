@@ -8,6 +8,7 @@
  * Values are relative amplitude dB (20·log10 of the GRD DN mean), not
  * calibrated σ⁰. The UI labels the source accordingly.
  */
+import zlib from 'node:zlib';
 import { fromUrl } from 'geotiff';
 import { buildNisarBrowse, buildNisarSite, comparisonCrops } from './nisar.mjs';
 
@@ -16,6 +17,131 @@ const COLLECTION = 'sentinel-1-grd';
 const WINDOW = 512;
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 const cache = new Map();
+
+/* ------------------------------------------------------------------ */
+/* Georeferenced scene images                                          */
+/* ------------------------------------------------------------------ */
+
+// The before/after cards used to show each granule's own preview PNG. Those are
+// the full acquisition footprint, so the same site landed at a different
+// position and scale in the two frames — and the two passes can even come from
+// different satellites. Instead each card is rendered here from the VV COG over
+// one fixed lon/lat window, so both dates show the same ground.
+const IMAGE_WIDTH = 560;
+const IMAGE_HEIGHT = 370;
+const IMAGE_LAT_SPAN = 0.06; // ~6.7 km tall window
+// Relative-DN dB (20·log10 DN) range shared by every render: both dates, and
+// both study areas, are stretched on one fixed scale so brightness stays
+// comparable instead of each frame being normalised to its own contrast.
+const IMAGE_DB_MIN = 32;
+const IMAGE_DB_MAX = 52;
+const sceneRefs = new Map();
+const imageCache = new Map();
+
+const CRC_TABLE = (() => {
+  const table = new Uint32Array(256);
+  for (let n = 0; n < 256; n += 1) {
+    let c = n;
+    for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+
+function crc32(buffer) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < buffer.length; i += 1) crc = CRC_TABLE[(crc ^ buffer[i]) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
+function pngChunk(type, data) {
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length, 0);
+  const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(body), 0);
+  return Buffer.concat([length, body, crc]);
+}
+
+/** 8-bit greyscale PNG — no image library needed on the serverless runtime. */
+function pngGray(width, height, pixels) {
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header[8] = 8; // bit depth
+  header[9] = 0; // colour type: greyscale
+  const stride = width + 1;
+  const raw = Buffer.alloc(stride * height);
+  for (let y = 0; y < height; y += 1) {
+    raw[y * stride] = 0; // filter: none
+    for (let x = 0; x < width; x += 1) raw[y * stride + 1 + x] = pixels[y * width + x];
+  }
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    pngChunk('IHDR', header),
+    pngChunk('IDAT', zlib.deflateSync(raw, { level: 9 })),
+    pngChunk('IEND', Buffer.alloc(0)),
+  ]);
+}
+
+/**
+ * Pixel window covering one lon/lat rectangle in a north-up STAC COG. Both
+ * dates use the same rectangle, which is what makes the pair comparable.
+ */
+function windowForRect(transform, shape, { lat, lng }) {
+  const [a, , c, , e, f] = transform;
+  const height = shape[0];
+  const width = shape[1];
+  const lonSpan = IMAGE_LAT_SPAN * Math.abs(a / e) * (IMAGE_WIDTH / IMAGE_HEIGHT);
+  const x0 = Math.round((lng - lonSpan / 2 - c) / a);
+  const y0 = Math.round((lat + IMAGE_LAT_SPAN / 2 - f) / e);
+  const w = Math.round(lonSpan / a);
+  const h = Math.round(IMAGE_LAT_SPAN / Math.abs(e));
+  return [
+    Math.max(0, Math.min(width - w, x0)),
+    Math.max(0, Math.min(height - h, y0)),
+    Math.max(0, Math.min(width - w, x0)) + w,
+    Math.max(0, Math.min(height - h, y0)) + h,
+  ];
+}
+
+/**
+ * Render one pass over the fixed study window as a greyscale PNG.
+ * @returns {Promise<Buffer|null>} null when no real pass is registered.
+ */
+export async function renderSceneCrop(siteId, side) {
+  const ref = sceneRefs.get(siteId)?.[side];
+  if (!ref) return null;
+  const cached = imageCache.get(`${siteId}:${side}`);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.png;
+
+  const window = windowForRect(ref.transform, ref.shape, ref);
+  const tiff = await fromUrl(ref.href, { allowFullFile: false });
+  const image = await tiff.getImage();
+  const rasters = await image.readRasters({
+    window,
+    width: IMAGE_WIDTH,
+    height: IMAGE_HEIGHT,
+    samples: [0],
+    interleave: false,
+  });
+  const values = rasters[0];
+  const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
+  for (let i = 0; i < pixels.length; i += 1) {
+    const dn = Math.max(1, Number(values[i]) || 1);
+    const db = 20 * Math.log10(dn);
+    const level = ((db - IMAGE_DB_MIN) / (IMAGE_DB_MAX - IMAGE_DB_MIN)) * 255;
+    pixels[i] = Math.max(0, Math.min(255, Math.round(level)));
+  }
+  const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
+  imageCache.set(`${siteId}:${side}`, { png, at: Date.now() });
+  return png;
+}
+
+/** Which real pass backs each card — set while a site is built. */
+export function sceneRefFor(siteId, side) {
+  return sceneRefs.get(siteId)?.[side] ?? null;
+}
 const DEBUG = process.env.DEBUG_REAL === '1';
 const log = (...args) => {
   if (DEBUG) console.error('[real]', ...args);
@@ -227,6 +353,10 @@ async function readScene(item, site) {
     itemId: item.id,
     quicklook: s3ToHttps(item.assets?.thumbnail?.href),
     vvHref: s3ToHttps(item.assets?.vv?.href),
+    // Georeferencing of the VV COG, kept so the scene image can be rendered
+    // over the same lon/lat window for every pass.
+    transform: item.properties?.['proj:transform'] ?? null,
+    shape: item.properties?.['proj:shape'] ?? null,
     vhHref: s3ToHttps(item.assets?.vh?.href),
     platform: item.properties?.platform || item.properties?.['sar:platform'] || 'Sentinel-1',
     // Absolute dB only compares within one imaging geometry: ascending and
@@ -354,6 +484,18 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     const seenIds = new Set();
     const items = [...pre, ...post].filter((item) => {
       if (seenIds.has(item.id)) return false;
+      // A granule that only clips the corner of the search box still comes back
+      // from STAC. Its pixel window then clamps to the scene edge, so the "same"
+      // site is read somewhere else entirely — keep only passes that actually
+      // contain the study point.
+      const box = item.bbox;
+      if (
+        Array.isArray(box) &&
+        box.length === 4 &&
+        !(box[0] <= site.coords.lng && box[2] >= site.coords.lng && box[1] <= site.coords.lat && box[3] >= site.coords.lat)
+      ) {
+        return false;
+      }
       seenIds.add(item.id);
       return true;
     });
@@ -529,13 +671,25 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     const changes = series.map((point) => point.change);
     const stableChanges = changes.slice(0, Math.max(2, Math.floor(changes.length / 2)));
 
+    // Register the real passes behind the two comparison frames.
+    sceneRefs.set(site.id, {
+      before: beforeScene.transform && beforeScene.shape && beforeScene.vvHref
+        ? { href: beforeScene.vvHref, transform: beforeScene.transform, shape: beforeScene.shape, lat: site.coords.lat, lng: site.coords.lng }
+        : null,
+      after: afterScene.transform && afterScene.shape && afterScene.vvHref
+        ? { href: afterScene.vvHref, transform: afterScene.transform, shape: afterScene.shape, lat: site.coords.lat, lng: site.coords.lng }
+        : null,
+    });
+    imageCache.delete(`${site.id}:before`);
+    imageCache.delete(`${site.id}:after`);
+
     const states = {
       before: {
         date: beforeScene.date,
         params: { ...site.states.before.params },
-        imageUrl: beforeScene.quicklook,
+        imageUrl: `/api/scene-image?site=${site.id}&side=before`,
         attribution:
-          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: beforeScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,
@@ -543,9 +697,9 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       after: {
         date: afterScene.date,
         params: { ...site.states.after.params },
-        imageUrl: afterScene.quicklook,
+        imageUrl: `/api/scene-image?site=${site.id}&side=after`,
         attribution:
-          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook.',
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: afterScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,

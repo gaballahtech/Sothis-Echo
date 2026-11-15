@@ -20,7 +20,7 @@
 import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
-import { buildRealSite, clearRealCache } from './sentinel.mjs';
+import { buildRealSite, clearRealCache, renderSceneCrop } from './sentinel.mjs';
 import { clearNisarCache } from './nisar.mjs';
 
 try {
@@ -556,6 +556,33 @@ export async function handleRequest(req, res) {
     if (path === '/api/study-areas') {
       const sites = await getSites();
       send(res, 200, { data: sites, success: true });
+      return;
+    }
+
+    if (path === '/api/scene-image') {
+      const siteId = url.searchParams.get('site');
+      const side = url.searchParams.get('side');
+      if (!siteId || (side !== 'before' && side !== 'after')) {
+        sendError(res, 400, 'site and side=before|after are required');
+        return;
+      }
+      // Building the site registers the two real passes this image is drawn
+      // from; a cold request pays one build, afterwards the crop is cached.
+      await getSites();
+      const png = await renderSceneCrop(siteId, side);
+      if (!png) {
+        sendError(res, 404, 'No real pass registered for this site');
+        return;
+      }
+      res.writeHead(200, {
+        'Content-Type': 'image/png',
+        'Content-Length': png.length,
+        // The window and the passes behind it are historical; the render is
+        // rebuilt whenever the site payload is, so a day of caching is safe.
+        'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+        'Access-Control-Allow-Origin': '*',
+      });
+      res.end(png);
       return;
     }
 
