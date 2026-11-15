@@ -109,6 +109,37 @@ function windowForRect(transform, shape, { lat, lng }) {
  * Render one pass over the fixed study window as a greyscale PNG.
  * @returns {Promise<Buffer|null>} null when no real pass is registered.
  */
+// Single-look SAR pixels are dominated by speckle: without averaging, two
+// repeats of the same unchanged ground still differ by several dB and swamp any
+// real change. Averaging the linear power over a small box is the standard
+// multilook fix; it costs resolution but makes structure and change legible.
+function multilookDn(values, width, height, radius = 3) {
+  const integral = new Float64Array((width + 1) * (height + 1));
+  for (let y = 0; y < height; y += 1) {
+    let rowSum = 0;
+    for (let x = 0; x < width; x += 1) {
+      rowSum += Math.max(1, Number(values[y * width + x]) || 1);
+      integral[(y + 1) * (width + 1) + (x + 1)] = integral[y * (width + 1) + (x + 1)] + rowSum;
+    }
+  }
+  const out = new Float32Array(width * height);
+  for (let y = 0; y < height; y += 1) {
+    const y0 = Math.max(0, y - radius);
+    const y1 = Math.min(height - 1, y + radius);
+    for (let x = 0; x < width; x += 1) {
+      const x0 = Math.max(0, x - radius);
+      const x1 = Math.min(width - 1, x + radius);
+      const sum =
+        integral[(y1 + 1) * (width + 1) + (x1 + 1)] -
+        integral[y0 * (width + 1) + (x1 + 1)] -
+        integral[(y1 + 1) * (width + 1) + x0] +
+        integral[y0 * (width + 1) + x0];
+      out[y * width + x] = sum / ((x1 - x0 + 1) * (y1 - y0 + 1));
+    }
+  }
+  return out;
+}
+
 async function readWindowDb(ref) {
   const window = windowForRect(ref.transform, ref.shape, ref);
   const tiff = await fromUrl(ref.href, { allowFullFile: false });
@@ -120,11 +151,9 @@ async function readWindowDb(ref) {
     samples: [0],
     interleave: false,
   });
-  const values = rasters[0];
+  const values = multilookDn(rasters[0], IMAGE_WIDTH, IMAGE_HEIGHT);
   const out = new Float32Array(IMAGE_WIDTH * IMAGE_HEIGHT);
-  for (let i = 0; i < out.length; i += 1) {
-    out[i] = 20 * Math.log10(Math.max(1, Number(values[i]) || 1));
-  }
+  for (let i = 0; i < out.length; i += 1) out[i] = 20 * Math.log10(Math.max(1, values[i]));
   return out;
 }
 
@@ -149,6 +178,8 @@ export async function renderSceneCrop(siteId, side) {
 // the surface returned a different amount of radar energy. This is the picture
 // the eye cannot get from two near-identical greyscale frames.
 const CHANGE_DB_SPAN = 8;
+// Change below this is inside the pass-to-pass noise of the averaged pixels.
+const CHANGE_DB_FLOOR = 2.5;
 
 export async function renderChangeCrop(siteId) {
   const refs = sceneRefs.get(siteId);
@@ -160,7 +191,8 @@ export async function renderChangeCrop(siteId) {
   const pixels = new Uint8Array(IMAGE_WIDTH * IMAGE_HEIGHT);
   for (let i = 0; i < pixels.length; i += 1) {
     const delta = Math.min(CHANGE_DB_SPAN, Math.abs(after[i] - before[i]));
-    pixels[i] = Math.max(0, Math.min(255, Math.round((delta / CHANGE_DB_SPAN) * 255)));
+    const shown = delta <= CHANGE_DB_FLOOR ? 0 : delta;
+    pixels[i] = Math.max(0, Math.min(255, Math.round((shown / CHANGE_DB_SPAN) * 255)));
   }
   const png = pngGray(IMAGE_WIDTH, IMAGE_HEIGHT, pixels);
   imageCache.set(`${siteId}:change`, { png, at: Date.now() });
