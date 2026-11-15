@@ -29,7 +29,7 @@ const cache = new Map();
 // one fixed lon/lat window, so both dates show the same ground.
 const IMAGE_WIDTH = 560;
 const IMAGE_HEIGHT = 370;
-const IMAGE_LAT_SPAN = 0.06; // ~6.7 km tall window
+const IMAGE_LAT_SPAN = 0.14; // ~15.6 km tall window (~24 km wide at the frame aspect)
 // Both dates of a pair share one greyscale scale (see renderPair), so
 // brightness stays comparable instead of each frame being normalised alone.
 const sceneRefs = new Map();
@@ -986,10 +986,9 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       before: {
         date: beforeScene.date,
         params: { ...site.states.before.params },
-        imageUrl: beforeScene.quicklook || `/api/scene-image?site=${site.id}&side=before`,
-        attribution: beforeScene.quicklook
-          ? 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook of this pass.'
-          : 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
+        imageUrl: `/api/scene-image?site=${site.id}&side=before`,
+        attribution:
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: beforeScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,
@@ -997,10 +996,9 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       after: {
         date: afterScene.date,
         params: { ...site.states.after.params },
-        imageUrl: afterScene.quicklook || `/api/scene-image?site=${site.id}&side=after`,
-        attribution: afterScene.quicklook
-          ? 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook of this pass.'
-          : 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
+        imageUrl: `/api/scene-image?site=${site.id}&side=after`,
+        attribution:
+          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: afterScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,
