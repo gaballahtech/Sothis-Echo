@@ -96,13 +96,35 @@ const FROM_RADIANS = 180 / Math.PI;
 const mercSpan = (south, north) => (MERC(north) - MERC(south)) * FROM_RADIANS;
 
 /**
+ * The LATLON preview is drawn on a north-up lat/lon canvas that spans the
+ * granule footprint, so the footprint's bounding box is the georeferencing
+ * quad when the KML is out of reach. Without a token this is the only way to
+ * crop the browse to the study window instead of showing the whole swath.
+ */
+function footprintBox(granule) {
+  const pairs = [...String(granule?.stringFootprint || '').matchAll(/(-?\d+(?:\.\d+)?)\s+(-?\d+(?:\.\d+)?)/g)]
+    .map((match) => [Number(match[1]), Number(match[2])])
+    .filter(([lng, lat]) => Number.isFinite(lng) && Number.isFinite(lat));
+  if (pairs.length < 3) return null;
+  const lngs = pairs.map(([lng]) => lng);
+  const lats = pairs.map(([, lat]) => lat);
+  return {
+    west: Math.min(...lngs),
+    east: Math.max(...lngs),
+    south: Math.min(...lats),
+    north: Math.max(...lats),
+  };
+}
+
+/**
  * Every NISAR product ships a `_LATLON.kml` whose GroundOverlay pins the
  * browse PNG to a lat/lon quad. That is the georeferencing ASF does not
- * publish next to the image itself, and it needs an Earthdata token.
+ * publish next to the image itself, and it needs an Earthdata token — so the
+ * footprint box stands in whenever the KML cannot be read.
  */
 async function browseQuad(granule) {
   const token = process.env.EARTHDATA_TOKEN;
-  if (!token || !granule?.downloadUrl) return null;
+  if (!token || !granule?.downloadUrl) return footprintBox(granule);
   const url = `${String(granule.downloadUrl).replace(/\.h5$/i, '')}_LATLON.kml`;
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${token}` },
@@ -110,18 +132,18 @@ async function browseQuad(granule) {
   });
   if (!response.ok) {
     log('kml', response.status, url);
-    return null;
+    return footprintBox(granule);
   }
   const match = /<\w*:?LatLonQuad>[\s\S]*?<coordinates>([^<]+)<\/coordinates>/i.exec(await response.text());
-  if (!match) return null;
+  if (!match) return footprintBox(granule);
   const pairs = match[1]
     .trim()
     .split(/\s+/)
     .map((pair) => pair.split(',').map(Number));
-  if (pairs.length < 4) return null;
+  if (pairs.length < 4) return footprintBox(granule);
   const lngs = pairs.map(([lng]) => lng);
   const lats = pairs.map(([, lat]) => lat);
-  if (![...lngs, ...lats].every(Number.isFinite)) return null;
+  if (![...lngs, ...lats].every(Number.isFinite)) return footprintBox(granule);
   return {
     west: Math.min(...lngs),
     east: Math.max(...lngs),
@@ -193,7 +215,32 @@ export function comparisonCrops(site, { quad, imageBbox, aspect = 760 / 500 }) {
       }
     : null;
 
-  return { crop, opticalCrop, window: { west, width, height } };
+  return {
+    crop,
+    opticalCrop,
+    // The window in degrees plus the Mercator edges a crop needs to be
+    // re-projected onto another granule's browse canvas.
+    window: { west, width, height, topMerc, mercHeight: 2 * halfHeight },
+  };
+}
+
+/** The same geographic window as a fractional crop of another browse canvas. */
+export function cropForWindow(quad, window) {
+  if (!quad || !window) return null;
+  const quadWidth = quad.east - quad.west;
+  const quadMax = MERC(quad.north);
+  const quadMin = MERC(quad.south);
+  if (!(quadWidth > 0) || !(quadMax > quadMin)) return null;
+  const crop = {
+    x: (window.west - quad.west) / quadWidth,
+    w: window.width / quadWidth,
+    y: (quadMax - window.topMerc) / (quadMax - quadMin),
+    h: window.mercHeight / (quadMax - quadMin),
+  };
+  const inside = [crop.x, crop.y, crop.x + crop.w, crop.y + crop.h].every(
+    (value) => value >= -0.01 && value <= 1.01
+  );
+  return inside ? crop : null;
 }
 
 async function harmonyGeoTiff(granule, bbox, variable) {
@@ -382,26 +429,30 @@ export async function buildNisarBrowse(site, { start, end, eventDate }) {
     .filter((item) => new Date(item.startTime).getTime() > event)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))[0];
   if (!before || !after) return null;
-  // The georeferenced (north-up) preview is the one that can be cropped to the
-  // study site, so resolve its KML quad for the "after" browse.
-  const quad = await browseQuad(after).catch((error) => {
-    log('kml failed', error?.message);
-    return null;
-  });
-  const shape = (granule, overlay) =>
+  // Each pass carries its own footprint, so both sides get their own quad and
+  // each browse can be cropped to the same geographic window.
+  const [beforeQuad, afterQuad] = await Promise.all(
+    [before, after].map((granule) =>
+      browseQuad(granule).catch((error) => {
+        log('quad failed', error?.message);
+        return null;
+      })
+    )
+  );
+  const shape = (granule, quad) =>
     granule && {
       date: (granule.startTime || '').slice(0, 10),
       datetime: granule.startTime || null,
-      imageUrl: overlay ? latlonUrl(granule) || browseUrl(granule) : browseUrl(granule),
+      imageUrl: (quad && latlonUrl(granule)) || browseUrl(granule),
       latlonUrl: latlonUrl(granule),
       nativeUrl: browseUrl(granule),
-      quad: overlay || null,
+      quad: quad || null,
       granuleName: granule.granuleName,
       track: granule.track,
       frame: granule.frameNumber,
       product: 'NISAR GCOV L-band (HH) browse',
     };
-  return { before: shape(before), after: shape(after, quad) };
+  return { before: shape(before, beforeQuad), after: shape(after, afterQuad) };
 }
 
 export async function buildNisarSite(site, { start, end, eventDate }) {

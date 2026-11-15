@@ -10,7 +10,7 @@
  */
 import zlib from 'node:zlib';
 import { fromUrl } from 'geotiff';
-import { buildNisarBrowse, buildNisarSite, comparisonCrops } from './nisar.mjs';
+import { buildNisarBrowse, buildNisarSite, comparisonCrops, cropForWindow } from './nisar.mjs';
 
 const STAC_URL = 'https://earth-search.aws.element84.com/v1/search';
 const COLLECTION = 'sentinel-1-grd';
@@ -947,13 +947,21 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     });
 
     // Crop both comparison images to one geographic window around the site, so
-    // the slider really shows the same place on both sides.
-    if (nisarBrowse?.after?.quad && optical?.bbox) {
-      const crops = comparisonCrops(site, { quad: nisarBrowse.after.quad, imageBbox: optical.bbox });
+    // the slider really shows the same place on both sides. Each NISAR pass has
+    // its own footprint, so the window is mapped onto each browse separately.
+    const anchor = nisarBrowse?.after?.quad ? nisarBrowse.after : nisarBrowse?.before ?? null;
+    if (anchor?.quad && optical?.bbox) {
+      const crops = comparisonCrops(site, { quad: anchor.quad, imageBbox: optical.bbox });
       if (crops) {
-        nisarBrowse.after.imageUrl = nisarBrowse.after.latlonUrl || nisarBrowse.after.imageUrl;
-        nisarBrowse.after.crop = crops.crop;
         optical.crop = crops.opticalCrop;
+        for (const side of ['before', 'after']) {
+          const nisar = nisarBrowse?.[side];
+          if (!nisar) continue;
+          const crop = cropForWindow(nisar.quad, crops.window);
+          if (!crop) continue;
+          nisar.crop = crop;
+          nisar.imageUrl = nisar.latlonUrl || nisar.imageUrl;
+        }
       }
     }
 
@@ -978,9 +986,10 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       before: {
         date: beforeScene.date,
         params: { ...site.states.before.params },
-        imageUrl: `/api/scene-image?site=${site.id}&side=before`,
-        attribution:
-          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
+        imageUrl: beforeScene.quicklook || `/api/scene-image?site=${site.id}&side=before`,
+        attribution: beforeScene.quicklook
+          ? 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook of this pass.'
+          : 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: beforeScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,
@@ -988,9 +997,10 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       after: {
         date: afterScene.date,
         params: { ...site.states.after.params },
-        imageUrl: `/api/scene-image?site=${site.id}&side=after`,
-        attribution:
-          'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
+        imageUrl: afterScene.quicklook || `/api/scene-image?site=${site.id}&side=after`,
+        attribution: afterScene.quicklook
+          ? 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data quicklook of this pass.'
+          : 'Contains modified Copernicus Sentinel-1 data, processed by ESA — AWS Open Data COG, VV cropped to the study window.',
         acquiredAt: afterScene.datetime,
         product: 'Sentinel-1 GRD',
         notSimulated: true,
