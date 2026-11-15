@@ -113,7 +113,7 @@ Sources: [NASA NISAR](https://nisar.jpl.nasa.gov/mission/quick-facts),
 
 ## Team
 
-Frontend & project lead: Abdelrahman Gaballah(gaballahtech) - Backend: Mohamed Khider 
+Frontend & project lead: Abdelrahman Gaballah - Backend: Mohamed Khider 
 Research: Jana Ayman & Nouran Ahmed 
 Visual identity: Ahd Fayez & Mariam Emad
 ## Contributing
