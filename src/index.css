@@ -634,7 +634,11 @@ li,
   line-height: 1.4;
 }
 
-.nav-menu {
+/* Blueprint's dark menu paints its own blue-grey panel, which showed through as a
+   lighter block inside the rail. The menu is a transparent list on the rail. */
+.nav-menu,
+.bp6-light .app-rail .nav-menu,
+.bp6-dark .app-rail .nav-menu {
   background: transparent;
   padding: 2px 0;
 }
