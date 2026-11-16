@@ -1,7 +1,9 @@
 /**
- * “Radar detective” rounds — two real post-launch cases:
+ * “Radar detective” rounds — two real post-launch cases plus one reasoning
+ * check that reuses the existing Vietnam change map (no new acquisition):
  *   - Central Vietnam flood, September 2026
  *   - West Attica (Greece) wildfire, July 2026
+ *   - Bright change ≠ damage (change-only round, no before/after pair)
  * The before/after dates are taken from the live site measurements at render
  * time; evidence chips are derived from the real backscatter series.
  */
@@ -49,6 +51,49 @@ export const detectiveRounds = [
     explanation: {
       en: 'The ground got darker and smoother: VV falls sharply as canopy and litter are removed, and VH — the channel fed by 3-D vegetation — drops wherever the canopy was fully consumed. A flood would leave roofs and banks bright inside the dark water; an earthquake would shift phase, not erase texture.',
       ar: 'صار السطح أغمق وأنعم: ينخفض VV بحدة مع اختفاء المظلة والغطاء الميت، وينخفض VH — قناة النباتات المجسّمة — حيث تُستهلك المظلة بالكامل. الفيضان كان سيُبقي الأسطح والضفاف لامعة داخل الماء الداكن؛ والزلزال كان سيغيّر الطور لا النسيج.',
+    },
+  },
+  {
+    // Judgment round: same Vietnam change map, no new satellite image needed.
+    id: 'bright-change',
+    siteId: 'sundarbans',
+    changeOnly: true,
+    title: { en: 'Bright signal, real disaster?', ar: 'إشارة ساطعة، فهل هي كارثة حقيقية؟' },
+    brief: {
+      en: 'Same Vietnam change map (|after − before|), zoomed on the rice fields and the coast — no new satellite image is needed.',
+      ar: 'نفس خريطة التغيّر في فيتنام (|بعد − قبل|) مع التركيز على الحقول الزراعية والساحل — دون استخدام صورة جديدة من القمر الصناعي.',
+    },
+    question: {
+      en: 'In a radar change map (|after − before|), a wide agricultural area turns bright white, showing a sharp shift in returned energy. Does a bright change signal always confirm severe flood damage?',
+      ar: 'في خريطة كشف التغير الرادارية (|بعد − قبل|)، تحولت منطقة زراعية واسعة إلى اللون الأبيض الساطع مما يدل على تغير حاد في الطاقة المرتدة. هل تؤكد الإشارة الساطعة دائمًا وقوع دمار فيضاني شديد؟',
+    },
+    options: [
+      {
+        id: 'context',
+        label: {
+          en: 'No — routine rice irrigation, soil moisture, or tide shifts can trigger the same bright change',
+          ar: 'لا — فالري الدوري لحقول الأرز، أو رطوبة التربة، أو حركة المد والجزر قد تُحدث نفس التغير الساطع.',
+        },
+      },
+      {
+        id: 'collapse',
+        label: {
+          en: 'Yes — bright white pixels in L-band radar only appear when buildings collapse',
+          ar: 'نعم — البقع البيضاء الساطعة في رادار L-band لا تظهر إلا عند انهيار المباني.',
+        },
+      },
+      {
+        id: 'penetrate',
+        label: {
+          en: 'Yes — because radar pulses cannot penetrate wet soil under any condition',
+          ar: 'نعم — لأن نبضات الرادار لا تستطيع اختراق التربة الرطبة تحت أي ظرف.',
+        },
+      },
+    ],
+    answer: 'context',
+    explanation: {
+      en: 'Radar measures physical change in surface roughness and moisture, not intent or damage. Flooded rice paddies, seasonal irrigation, and tidal shifts all turn smooth and mirror-like, producing a strong change signal that requires local context to interpret.',
+      ar: 'يقيس الرادار التغير الفيزيائي في خشونة السطح ورطوبته، ولا يميز بين السبب الطبيعي والكارثة. فحقول الأرز المغمورة للزراعة، والري الموسمي، وتغيرات المد والجزر تجعل السطح أملس كالمرآة، مما ينتج إشارة تغير قوية تتطلب معرفة السياق المحلي لتفسيرها بدقة.',
     },
   },
 ];

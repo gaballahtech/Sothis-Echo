@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { buildDetectiveEvidence, detectiveRounds } from '../data/quiz';
+import { sceneImageUrl } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
 import { Meter, Panel, SectionHead } from './ui';
 
@@ -50,7 +51,7 @@ export default function Detective() {
   const timerRef = useRef(null);
 
   const L = (value) => localized(value, language);
-  const rounds = detectiveRounds.slice(0, 2);
+  const rounds = detectiveRounds;
   const round = rounds[roundIndex];
   const site = useMemo(() => sites.find((item) => item.id === round?.siteId), [sites, round?.siteId]);
 
@@ -63,7 +64,10 @@ export default function Detective() {
     }
     setShuffled(arr);
   }, [roundIndex, round]);
-  const evidence = useMemo(() => buildDetectiveEvidence(round, site), [round, site]);
+  const evidence = useMemo(
+    () => (round?.changeOnly ? [] : buildDetectiveEvidence(round, site)),
+    [round, site],
+  );
 
   if (!round || !site) return null;
 
@@ -191,7 +195,9 @@ export default function Detective() {
                 <div style={{ maxWidth: 520 }}>
                   <p className="body-copy-muted" style={{ margin: 0 }}>{L(round.brief)}</p>
                   <p className="micro" style={{ margin: '4px 0 0' }}>
-                    Sentinel-1 · {site.measurements?.dateBefore} → {site.measurements?.dateAfter}
+                    {round.changeOnly
+                      ? t('game.changeMeta')
+                      : `Sentinel-1 · ${site.measurements?.dateBefore} → ${site.measurements?.dateAfter}`}
                   </p>
                 </div>
                 <div className="row" style={{ gap: 10, alignItems: 'center' }}>
@@ -232,6 +238,14 @@ export default function Detective() {
                 </div>
               </div>
 
+              {round.changeOnly ? (
+                <Panel title={t('game.changeTitle')} status={t('game.changeStatus')}>
+                  <SceneCanvas
+                    imageUrl={sceneImageUrl(site.id, 'change', site?.states?.after?.nisarImageUrl ? 'nisar' : undefined)}
+                    alt={t('sites.changeAria', { site: L(site.name) })}
+                  />
+                </Panel>
+              ) : (
               <div className="scene-pair">                  {[
                   { key: 'before', label: t('game.before') },
                   { key: 'after', label: t('game.after') },
@@ -254,8 +268,11 @@ export default function Detective() {
                   );
                 })}
               </div>
+              )}
 
-              <h3 style={{ marginBottom: 8, fontSize: 14, fontWeight: 600 }}>{t('game.question')}</h3>
+              <h3 style={{ marginBottom: 8, fontSize: 14, fontWeight: 600 }}>
+                {round.question ? L(round.question) : t('game.question')}
+              </h3>
 
               <div className="option-grid" role="group" aria-label={t('game.select')}>
                 {shuffled.map((option) => {

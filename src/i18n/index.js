@@ -236,7 +236,7 @@ const en = {
   game: {
     title: 'Radar detective',
     subtitle:
-      'Two real post-launch cases. One question each. Read the signal, not the caption. Evidence is revealed only after you answer.',
+      'Two real post-launch cases plus one judgment round on a bright change map. Read the signal, not the caption. Evidence is revealed only after you answer.',
     round: 'ROUND {{current}} / {{total}}',
     score: 'SCORE {{score}}',
     question: 'What changed here?',
@@ -259,11 +259,14 @@ const en = {
     before: 'THEN',
     after: 'NOW',
     start: 'Start the case',
-    startTitle: 'Two cases, two scenes each',
+    startTitle: 'Two scenes, then one judgment round',
     startBody:
-      'The clock starts when you press start. You get {{seconds}} seconds per scene, {{total}} scenes in total. Reading the signal matters more than speed.',
+      'The clock starts when you press start. You get {{seconds}} seconds per round, {{total}} rounds in total. Reading the signal matters more than speed.',
     startHint: 'The timer pauses while the evidence is open.',
     timeLeft: 'TIME',
+    changeTitle: 'Change map · |after − before|',
+    changeStatus: 'NISAR L-band · HH',
+    changeMeta: 'NISAR L-band (HH) · same Vietnam change map, no new acquisition',
   },
   method: {
     title: 'Data we can defend',
@@ -609,7 +612,7 @@ const ar = {
   },
   game: {
     title: 'محقق الرادار',
-    subtitle: 'حالتان حقيقيتان بعد إطلاق نيسار. سؤال لكل حالة. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
+    subtitle: 'حالتان حقيقيتان بعد إطلاق نيسار، وجولة حكم على خريطة تغيّر ساطعة. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
     round: 'الجولة {{current}} / {{total}}',
     score: 'النقاط {{score}}',
     question: 'ماذا تغيّر هنا؟',
@@ -632,11 +635,14 @@ const ar = {
     before: 'سابقًا',
     after: 'الآن',
     start: 'ابدأ القضية',
-    startTitle: 'قضيتان، مشهدان لكل واحدة',
+    startTitle: 'مشهدان، ثم جولة حكم',
     startBody:
-      'العدّاد يبدأ عند ضغطك على «ابدأ». عندك {{seconds}} ثانية لكل مشهد، و{{total}} مشاهد إجمالًا. قراءة الإشارة أهم من السرعة.',
+      'العدّاد يبدأ عند ضغطك على «ابدأ». عندك {{seconds}} ثانية لكل جولة، و{{total}} جولات إجمالًا. قراءة الإشارة أهم من السرعة.',
     startHint: 'المؤقت يتوقف أثناء عرض الأدلة.',
     timeLeft: 'الوقت',
+    changeTitle: 'خريطة التغيّر · |بعد − قبل|',
+    changeStatus: 'NISAR L-band · HH',
+    changeMeta: 'NISAR L-band (HH) · نفس خريطة التغيّر، دون التقاط جديد',
   },
   method: {
     title: 'بيانات قابلة للدفاع',

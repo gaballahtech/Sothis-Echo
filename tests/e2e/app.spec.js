@@ -68,24 +68,26 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('detective game scores two real cases and resets', async ({ page }) => {
+test('detective game scores two real cases plus a judgment round and resets', async ({ page }) => {
   await openApp(page);
   await page.locator('#game').scrollIntoViewIfNeeded();
   await page.getByTestId('detective-start').click();
 
-  const answers = ['flood', 'fire'];
+  const answers = ['flood', 'fire', 'context'];
   for (let index = 0; index < answers.length; index += 1) {
     await page.getByTestId(`detective-option-${answers[index]}`).click();
     const feedback = page.getByTestId('detective-feedback');
     await expect(feedback).toBeVisible();
     await expect(feedback).toContainText(/Correct/i);
-    await expect(feedback).toContainText(/Evidence/i);
+    if (index < answers.length - 1) {
+      await expect(feedback).toContainText(/Evidence/i);
+    }
     await page.getByTestId('detective-next').click();
   }
 
   const result = page.getByTestId('detective-result');
   await expect(result).toBeVisible();
-  await expect(result).toContainText('2 / 2');
+  await expect(result).toContainText('3 / 3');
   await result.getByRole('button', { name: /Play again/i }).click();
   await expect(page.getByTestId('detective-option-flood')).toBeVisible();
 });
