@@ -20,6 +20,8 @@ const en = {
     switchLanguage: 'Switch to Arabic',
     toDark: 'Switch to night mode',
     toLight: 'Switch to day mode',
+    night: 'Night',
+    day: 'Day',
   },
   hero: {
     title: 'Earth is always dancing.',
@@ -389,6 +391,8 @@ const ar = {
     switchLanguage: 'التبديل إلى الإنجليزية',
     toDark: 'التبديل إلى الوضع الليلي',
     toLight: 'التبديل إلى الوضع النهاري',
+    night: 'ليل',
+    day: 'نهار',
   },
   hero: {
     title: 'الأرض ترقص دائمًا.',

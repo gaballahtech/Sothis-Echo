@@ -476,13 +476,19 @@ li,
 
 /* ---------- Header ---------- */
 
-.app-navbar {
+/* The bar and the rail share one flat surface, separated from the page by a
+   single rule. Blueprint's dark navbar ships its own grey and a 1px inset ring,
+   which read as borders on all four sides — both are pinned back here. */
+.app-navbar,
+.bp6-light .app-navbar,
+.bp6-dark .app-navbar {
   position: sticky;
   top: 0;
   z-index: 40;
   min-height: 58px;
   padding: 0 18px;
-  background: color-mix(in srgb, var(--te-bg) 92%, transparent);
+  background: var(--te-bg);
+  border: 0;
   border-bottom: 1px solid var(--te-border);
   box-shadow: none;
   backdrop-filter: blur(14px) saturate(1.05);
@@ -553,13 +559,22 @@ li,
   line-height: 1.1;
 }
 
-.app-navbar .language-toggle {
+.app-navbar .language-toggle,
+.app-navbar .theme-toggle {
   flex: 0 0 auto;
   min-width: 58px;
   min-height: 32px;
   padding: 0 10px;
   font-family: var(--te-body);
   font-size: 12px;
+}
+
+/* Wide, not square: the label states the destination, the arrow its direction.
+   One width for both words, so the bar does not shift when the mode flips. */
+.app-navbar .theme-toggle {
+  min-width: 96px;
+  justify-content: center;
+  gap: 6px;
 }
 
 /* Icon–label breathing room, direction-safe (Blueprint uses physical margins). */
@@ -585,10 +600,10 @@ li,
   height: calc(100vh - 58px);
   padding: 22px 12px 14px;
   overflow-y: auto;
-  background: color-mix(in srgb, var(--te-bg) 88%, transparent);
+  background: var(--te-bg);
+  border: 0;
   border-inline-end: 1px solid var(--te-border);
   box-shadow: none;
-  backdrop-filter: blur(14px);
 }
 
 .rail-kicker {
@@ -2498,6 +2513,11 @@ button,
 
   .app-navbar .language-toggle {
     min-width: 44px;
+    padding: 0 8px;
+    font-size: 11px;
+  }
+
+  .app-navbar .theme-toggle {
     padding: 0 8px;
     font-size: 11px;
   }

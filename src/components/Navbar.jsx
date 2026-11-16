@@ -45,13 +45,16 @@ export default function Navbar() {
         </NavbarGroup>
 
         <NavbarGroup align={Alignment.END} className="navbar-end">
+          {/* An arrow rather than an icon-only square: it points the way the
+              switch goes (forward to night, back to day) and mirrors in RTL. */}
           <Button
             className="theme-toggle"
             variant="outlined"
             small
-            icon={isDark ? 'flash' : 'moon'}
+            icon={isDark ? (language === 'ar' ? 'arrow-right' : 'arrow-left') : language === 'ar' ? 'arrow-left' : 'arrow-right'}
+            text={isDark ? t('navbar.day') : t('navbar.night')}
             onClick={toggleTheme}
-            aria-pressed={isDark}
+            title={isDark ? t('navbar.toLight') : t('navbar.toDark')}
             aria-label={isDark ? t('navbar.toLight') : t('navbar.toDark')}
             data-testid="theme-toggle"
           />
