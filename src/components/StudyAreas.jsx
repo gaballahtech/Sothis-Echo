@@ -316,6 +316,22 @@ export default function StudyAreas() {
                             </p>
                           </div>
                         </div>
+                        {site.measurements?.crossPol ? (
+                          <HTMLTable bordered striped compact className="is-full-width" style={{ marginTop: 12 }}>
+                            <thead>
+                              <tr>
+                                <th>{t('sites.metric')}</th>
+                                <th>{t('sites.beforePass')}</th>
+                                <th>{t('sites.afterPass')}</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              <tr><th scope="row">{coPol}</th><td>{site.measurements.vv?.before ?? '—'}</td><td>{site.measurements.vv?.after ?? '—'}</td></tr>
+                              <tr><th scope="row">{crossPol}</th><td>{site.measurements.vh?.before ?? '—'}</td><td>{site.measurements.vh?.after ?? '—'}</td></tr>
+                              <tr><th scope="row">{t('sites.crossDb')}</th><td>{site.measurements.crossPol.before ?? '—'}</td><td>{site.measurements.crossPol.after ?? '—'}</td></tr>
+                            </tbody>
+                          </HTMLTable>
+                        ) : null}
                       </Panel>
 
                       <Panel title={t('sites.contrastTitle')} bodyClassName="card-pad">

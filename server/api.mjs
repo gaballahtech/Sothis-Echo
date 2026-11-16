@@ -18,6 +18,7 @@
  *   VITE_API_BASE_URL=http://127.0.0.1:3001/api npm run dev
  */
 import http from 'node:http';
+import { timingSafeEqual } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
 import { buildRealSite, clearRealCache, renderChangeCrop, renderSceneCrop } from './sentinel.mjs';
@@ -25,6 +26,7 @@ import {
   clearNisarCache,
   computeNisarChangeStats,
   nisarSnapshot,
+  nisarSnapshotHh,
   nisarSnapshotRgb,
   probeHarmony,
   renderNisarChange,
@@ -422,6 +424,15 @@ export async function handleRequest(req, res) {
     }
 
     if (path === '/api/live/refresh' && method === 'POST') {
+      // Cache invalidation is an operator action, never an anonymous one.
+      const expected = process.env.LIVE_REFRESH_TOKEN;
+      const header = req.headers['x-refresh-token'];
+      const bearer = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+      const supplied = header || bearer;
+      if (!expected || !supplied || supplied.length !== expected.length || !timingSafeEqual(Buffer.from(supplied), Buffer.from(expected))) {
+        sendError(res, 403, 'Forbidden');
+        return;
+      }
       clearRealCache();
       clearNisarCache();
       send(res, 200, { success: true, message: 'Real-data cache cleared' });
@@ -662,6 +673,23 @@ export async function handleRequest(req, res) {
         return;
       }
       const view = url.searchParams.get('view');
+      // The HH browse view and the HH·HV composite are rendered from the same
+      // HDF5 array and window, so toggling between them cannot jump spatially.
+      if (view !== 'rgb' && side !== 'change' && source === 'nisar' && url.searchParams.get('live') !== '1') {
+        const ready = nisarSnapshotHh(siteId, side);
+        if (ready) {
+          res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': ready.length,
+            'Cache-Control': 'public, max-age=300, s-maxage=3600',
+            'Access-Control-Allow-Origin': resolveOrigin(req),
+            'X-Nisar-View': 'hh-calibrated',
+            'X-Nisar-Source': 'snapshot',
+          });
+          res.end(ready);
+          return;
+        }
+      }
       // A bundled composite is answered before any archive/Harmony work.
       if (view === 'rgb' && url.searchParams.get('live') !== '1') {
         const ready = nisarSnapshotRgb(siteId, side === 'before' ? 'before' : 'after');
@@ -669,7 +697,7 @@ export async function handleRequest(req, res) {
           res.writeHead(200, {
             'Content-Type': 'image/png',
             'Content-Length': ready.length,
-            'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+            'Cache-Control': 'public, max-age=300, s-maxage=3600',
             'Access-Control-Allow-Origin': resolveOrigin(req),
             'X-Nisar-View': 'dual-pol-intensity-composite',
             'X-Nisar-Source': 'snapshot',

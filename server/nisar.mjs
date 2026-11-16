@@ -20,6 +20,8 @@ import { sundarbansSnapshot } from './cache/nisar/sundarbans.mjs';
 import { caldorSnapshot } from './cache/nisar/caldor.mjs';
 import { sundarbansRgbBase64 } from './cache/nisar/sundarbans-rgb.mjs';
 import { caldorRgbBase64 } from './cache/nisar/caldor-rgb.mjs';
+import { sundarbansHhBase64 } from './cache/nisar/sundarbans-hh.mjs';
+import { caldorHhBase64 } from './cache/nisar/caldor-hh.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -342,6 +344,7 @@ const SNAPSHOTS = new Map(
   [sundarbansSnapshot, caldorSnapshot].map((snapshot) => [snapshot.site, snapshot])
 );
 const SNAPSHOT_RGB = { sundarbans: sundarbansRgbBase64, caldor: caldorRgbBase64 };
+const SNAPSHOT_HH = { sundarbans: sundarbansHhBase64, caldor: caldorHhBase64 };
 
 /** Bundled GCOV telemetry for a site, or null when none was precomputed. */
 export function nisarSnapshot(siteId) {
@@ -354,6 +357,10 @@ export function nisarSnapshotCapabilities(siteId) {
   return {
     changeStats: Boolean(snapshot?.changeStats),
     rgb: { before: Boolean(snapshot?.rgb?.before), after: Boolean(snapshot?.rgb?.after) },
+    hh: {
+      before: Boolean(SNAPSHOT_HH[siteId]?.before),
+      after: Boolean(SNAPSHOT_HH[siteId]?.after),
+    },
     computedAt: snapshot?.computedAt || null,
   };
 }
@@ -363,6 +370,13 @@ export function nisarSnapshotRgb(siteId, side) {
   const snapshot = nisarSnapshot(siteId);
   if (!snapshot?.rgb?.[side]) return null;
   const encoded = SNAPSHOT_RGB[siteId]?.[side];
+  return encoded ? Buffer.from(encoded, 'base64') : null;
+}
+
+/** Pre-rendered calibrated HH bytes from the same window as the RGB. */
+export function nisarSnapshotHh(siteId, side) {
+  if (!nisarSnapshot(siteId)) return null;
+  const encoded = SNAPSHOT_HH[siteId]?.[side];
   return encoded ? Buffer.from(encoded, 'base64') : null;
 }
 

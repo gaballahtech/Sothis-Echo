@@ -184,6 +184,10 @@ const en = {
       caldor: 'Greece fire',
       label: 'Field',
     },
+    metric: 'Channel',
+    beforePass: 'Before (dB)',
+    afterPass: 'After (dB)',
+    crossDb: 'HH − HV',
     ariaScene: '{{site}} {{state}} radar scene',
     changeTitle: 'CHANGE · {{date}}',
     changeCaption:
@@ -579,6 +583,10 @@ const ar = {
       caldor: 'حريق اليونان',
       label: 'الحقل',
     },
+    metric: 'القناة',
+    beforePass: 'قبل (ديسيبل)',
+    afterPass: 'بعد (ديسيبل)',
+    crossDb: 'HH − HV',
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
     changeTitle: 'الاختلاف · {{date}}',
     changeCaption:

@@ -167,11 +167,11 @@ def composite_limits(windows):
         hv_db.append(db(hv[valid]))
         diff_db.append(hh_db[-1] - hv_db[-1])
     hh_db, hv_db, diff_db = (np.concatenate(part) for part in (hh_db, hv_db, diff_db))
-    return (
-        (js_percentile(hh_db, 2), js_percentile(hh_db, 98)),
-        (js_percentile(hv_db, 2), js_percentile(hv_db, 98)),
-        (js_percentile(diff_db, 2), js_percentile(diff_db, 98)),
-    )
+    return {
+        'hh': (js_percentile(hh_db, 2), js_percentile(hh_db, 98)),
+        'hv': (js_percentile(hv_db, 2), js_percentile(hv_db, 98)),
+        'd': (js_percentile(diff_db, 2), js_percentile(diff_db, 98)),
+    }
 
 
 def composite(window, limits=None):
@@ -187,7 +187,7 @@ def composite(window, limits=None):
         hv_lo, hv_hi = js_percentile(hv_db, 2), js_percentile(hv_db, 98)
         d_lo, d_hi = js_percentile(diff_db, 2), js_percentile(diff_db, 98)
     else:
-        (hh_lo, hh_hi), (hv_lo, hv_hi), (d_lo, d_hi) = limits
+        (hh_lo, hh_hi), (hv_lo, hv_hi), (d_lo, d_hi) = limits['hh'], limits['hv'], limits['d']
 
     height, width = hh.shape
     out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
@@ -201,6 +201,26 @@ def composite(window, limits=None):
             h = db(hh[sy, sx])
             v = db(hv[sy, sx])
             out[y, x] = (stretch(h, hh_lo, hh_hi), stretch(v, hv_lo, hv_hi), stretch(h - v, d_lo, d_hi))
+    buffer = io.BytesIO()
+    Image.fromarray(out, 'RGB').save(buffer, format='PNG', optimize=True)
+    return buffer.getvalue()
+
+
+def composite_hh(window, limits):
+    """Grayscale HH rendered from the same aligned array and window as the RGB."""
+    hh, mask = window['hh'], window['mask']
+    valid = mask & np.isfinite(hh) & (hh > 0)
+    if not valid.any():
+        raise RuntimeError('no valid pixels for HH composite')
+    low, high = limits['hh']
+    height, width = hh.shape
+    out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
+    for y in range(OUT_H):
+        sy = min(height - 1, int(((y + 0.5) / OUT_H) * height))
+        for x in range(OUT_W):
+            sx = min(width - 1, int(((x + 0.5) / OUT_W) * width))
+            value = 8 if not valid[sy, sx] else int(stretch(db(hh[sy, sx]), low, high))
+            out[y, x] = (value, value, value)
     buffer = io.BytesIO()
     Image.fromarray(out, 'RGB').save(buffer, format='PNG', optimize=True)
     return buffer.getvalue()
@@ -309,11 +329,11 @@ def main():
 
     def do_sundarbans(side):
         grid = open_granule(granule_url(catalog['sundarbans'], SITES['sundarbans'][side]))
-        return (side, read_window(grid, calibration_bbox(SITES['sundarbans']), want_hv=True))
+        return ('sundarbans', side, read_window(grid, calibration_bbox(SITES['sundarbans']), want_hv=True))
 
     def do_caldor(side):
         grid = open_granule(granule_url(catalog['caldor'], SITES['caldor'][side]))
-        return (side, read_window(grid, SITES['caldor']['bbox'], want_hv=True))
+        return ('caldor', side, read_window(grid, SITES['caldor']['bbox'], want_hv=True))
 
     with ThreadPoolExecutor(max_workers=4) as pool:
         futures = [
@@ -321,30 +341,33 @@ def main():
             pool.submit(do_caldor, 'before'), pool.submit(do_caldor, 'after'),
         ]
         for future in futures:
-            family, (side, window) = future.result()
+            family, side, window = future.result()
             if family == 'sundarbans':
                 sundarbans_windows[side] = window
             else:
                 caldor_windows[side] = window
-                png = composite(window)
-                write_png(f'caldor-{side}-rgb.png', png)
 
-    sundarbans_limits = composite_limits([sundarbans_windows['before'], sundarbans_windows['after']])
-    for side in ('before', 'after'):
-        write_png(f'sundarbans-{side}-rgb.png', composite(sundarbans_windows[side], sundarbans_limits))
+    # RGB and HH must share the window, so the HH view cannot jump relative to
+    # the dual-pol composite when the user toggles between them.
+    for family, windows in (('sundarbans', sundarbans_windows), ('caldor', caldor_windows)):
+        limits = composite_limits([windows['before'], windows['after']])
+        for side in ('before', 'after'):
+            write_png(f'{family}-{side}-rgb.png', composite(windows[side], limits))
+            write_png(f'{family}-{side}-hh.png', composite_hh(windows[side], limits))
 
-    # Persist caldor composites.
-    caldor_pngs = {}
-    for side in ('before', 'after'):
-        path = os.path.join(CACHE, f'caldor-{side}-rgb.png')
-        caldor_pngs[side] = open(path, 'rb').read()
-
-    sundarbans_pngs = {
-        side: open(os.path.join(CACHE, f'sundarbans-{side}-rgb.png'), 'rb').read()
-        for side in ('before', 'after')
-    }
-    write_rgb_module('sundarbans-rgb.mjs', 'sundarbansRgbBase64', sundarbans_pngs)
-    write_rgb_module('caldor-rgb.mjs', 'caldorRgbBase64', caldor_pngs)
+    # Persist every rendered side: RGB composite and calibrated HH.
+    for family, export in (('sundarbans', 'sundarbansRgbBase64'), ('caldor', 'caldorRgbBase64')):
+        pngs = {
+            side: open(os.path.join(CACHE, f'{family}-{side}-rgb.png'), 'rb').read()
+            for side in ('before', 'after')
+        }
+        write_rgb_module(f'{family}-rgb.mjs', export, pngs)
+    for family, export in (('sundarbans', 'sundarbansHhBase64'), ('caldor', 'caldorHhBase64')):
+        pngs = {
+            side: open(os.path.join(CACHE, f'{family}-{side}-hh.png'), 'rb').read()
+            for side in ('before', 'after')
+        }
+        write_rgb_module(f'{family}-hh.mjs', export, pngs)
 
     stats = change_stats(caldor_windows['before'], caldor_windows['after'])
     bbox = SITES['caldor']['bbox']
