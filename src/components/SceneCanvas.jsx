@@ -1,11 +1,15 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 
 export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop = null, eager = false }) {
   const { t } = useTranslation();
+  // A 409/503 composite (or any dead image URL) should read as unavailable
+  // rather than a broken-image icon.
+  const [failed, setFailed] = useState(false);
+  useEffect(() => setFailed(false), [imageUrl]);
 
-  if (!imageUrl) {
+  if (!imageUrl || failed) {
     return (
       <div className={`scene-wrap ${className}`}>
         <div className="scene-unavailable" role="img" aria-label={alt}>
@@ -32,7 +36,14 @@ export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop
 
   return (
     <div className={`scene-wrap ${className}`}>
-      <img src={imageUrl} alt={alt} loading={eager ? 'eager' : 'lazy'} decoding="async" style={cropStyle} />
+      <img
+        src={imageUrl}
+        alt={alt}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+        style={cropStyle}
+        onError={() => setFailed(true)}
+      />
     </div>
   );
 }

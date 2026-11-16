@@ -155,3 +155,16 @@ test('advanced documentation stays collapsed until opened', async ({ page }) => 
   await researcher.locator('.bp6-section-header').click();
   await expect(page.getByText(/Acquisition & products/i)).toBeVisible();
 });
+
+test('offline fallback hides calibrated-only controls and never claims calibration', async ({ page }) => {
+  await openApp(page);
+  await page.locator('#sites').scrollIntoViewIfNeeded();
+
+  await expect(page.getByTestId('card-view-toggle')).toHaveCount(0);
+  await expect(page.getByTestId('change-stats')).toHaveCount(0);
+  await expect(page.getByTestId('series-source-note')).toHaveCount(0);
+
+  const researcher = page.getByTestId('for-researchers');
+  await researcher.locator('.bp6-section-header').click();
+  await expect(page.getByText(/labelled offline fallback/i).first()).toBeVisible();
+});

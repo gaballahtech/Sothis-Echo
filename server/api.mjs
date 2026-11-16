@@ -21,7 +21,13 @@ import http from 'node:http';
 import { pathToFileURL } from 'node:url';
 import { studyAreas } from '../src/data/sites.js';
 import { buildRealSite, clearRealCache, renderChangeCrop, renderSceneCrop } from './sentinel.mjs';
-import { clearNisarCache, renderNisarChange, renderNisarCrop } from './nisar.mjs';
+import {
+  clearNisarCache,
+  computeNisarChangeStats,
+  renderNisarChange,
+  renderNisarCrop,
+  renderNisarRgb,
+} from './nisar.mjs';
 
 try {
   process.loadEnvFile('.env.local');
@@ -137,13 +143,17 @@ const publicScene = (scene) => {
 };
 
 const fixtures = studyAreas.map((site) => {
-  const vvBefore = round1(site.measurements.vv.before + 1.5);
-  const vvAfter = round1(site.measurements.vv.after + 1.5);
-  const vhBefore = round1(site.measurements.vh.before - 0.5);
-  const vhAfter = round1(site.measurements.vh.after - 0.5);
+  // No cosmetic offsets: a fixture is a copy of the bundled illustrative
+  // record, and it must be labelled as such instead of mimicking a fresh
+  // measurement.
+  const vvBefore = round1(site.measurements.vv.before);
+  const vvAfter = round1(site.measurements.vv.after);
+  const vhBefore = round1(site.measurements.vh.before);
+  const vhAfter = round1(site.measurements.vh.after);
   return {
     id: site.id,
-    source: 'backend',
+    source: 'fixture',
+    degraded: true,
     updatedAt: new Date().toISOString(),
     coords: site.coords,
     wkt: site.wkt,
@@ -157,10 +167,10 @@ const fixtures = studyAreas.map((site) => {
       crossPol: { before: round1(vhBefore - vvBefore), after: round1(vhAfter - vvAfter) },
       dateBefore: site.measurements.dateBefore,
       dateAfter: site.measurements.dateAfter,
-      source: 'backend',
+      source: 'fixture',
     },
-    series: site.series.map((point) => ({ ...point, vv: round1(point.vv + 1.5), vh: round1(point.vh - 0.5) })),
-    pulse: site.pulse.map((value) => round1(clamp01(value * 0.95))),
+    series: site.series.map((point) => ({ ...point })),
+    pulse: site.pulse.map((value) => round1(clamp01(value))),
     stablePulse: site.stablePulse,
     recovery: {
       thresholdDefault: 80,
@@ -175,9 +185,14 @@ const DAY = 86_400_000;
  * Real Sentinel-1 data first; fall back to the labelled fixtures when the
  * public STAC/COG services are unreachable.
  */
+let lastBuild = null;
+
 async function getSites() {
-  if (!REAL_DATA) return fixtures;
-  return Promise.all(
+  if (!REAL_DATA) {
+    lastBuild = { at: Date.now(), sites: fixtures, degraded: true };
+    return fixtures;
+  }
+  const sites = await Promise.all(
     studyAreas.map(async (site) => {
       const fixture = fixtures.find((item) => item.id === site.id);
       const event = new Date(`${site.eventDate}T00:00:00Z`).getTime();
@@ -187,16 +202,31 @@ async function getSites() {
         const real = await buildRealSite(site, { start, end, eventDate: site.eventDate });
         if (!real) {
           console.error('[SOTHIS API] real build empty for', site.id);
-          return fixture;
+          return {...fixture, degradedReason: 'empty real build'};
         }
-        return { ...fixture, ...real };
+        const merged = { ...fixture, ...real };
+        delete merged.degraded;
+        delete merged.degradedReason;
+        return merged;
       } catch (error) {
-        // Silent fallbacks hid a broken deploy; always leave a trace.
+        // Never hide a fallback: the payload says fixture/degraded so the UI
+        // cannot label these numbers as live.
         console.error('[SOTHIS API] real build failed for', site.id, error?.message, error?.stack);
-        return fixture;
+        return {...fixture, degradedReason: error?.message || 'build failed'};
       }
     })
   );
+  lastBuild = { at: Date.now(), sites, degraded: sites.some((site) => site.degraded) };
+  return sites;
+}
+
+/** Window used by every NISAR route, derived from the site's event date. */
+function siteWindow(site) {
+  const event = new Date(`${site.eventDate}T00:00:00Z`).getTime();
+  return {
+    start: new Date(event - 90 * DAY).toISOString().slice(0, 10),
+    end: new Date(event + 120 * DAY).toISOString().slice(0, 10),
+  };
 }
 
 /* ------------------------------------------------------------------ */
@@ -537,15 +567,53 @@ export async function handleRequest(req, res) {
     /* ---------------- Sothis Echo UI contract ---------------- */
 
     if (path === '/api/nisar/status') {
+      const sites = lastBuild?.sites ?? [];
+      const gcov = process.env.NISAR_GCOV === '1';
       send(res, 200, {
         data: {
           operational: true,
           phase: 'backend',
-          products: ['nisar-gcov-l-band', 'sentinel-1-grd'],
-          realData: REAL_DATA,
+          products: sites.length
+            ? [...new Set(sites.map((site) => site.source))]
+            : REAL_DATA
+              ? ['nisar-l-band-browse', 'sentinel-1-cog']
+              : ['fixture'],
+          realData: sites.length ? sites.some((site) => !site.degraded) : REAL_DATA,
+          calibratedBackscatter: gcov,
+          capabilities: { changeStats: gcov, rgbComposite: gcov },
+          fallbackSites: sites.filter((site) => site.degraded).map((site) => site.id),
+          builtAt: lastBuild?.at ? new Date(lastBuild.at).toISOString() : null,
         },
         success: true,
       });
+      return;
+    }
+
+    if (path === '/api/nisar/change-stats') {
+      if (process.env.NISAR_GCOV !== '1') {
+        sendError(res, 409, 'Calibrated NISAR GCOV is disabled (NISAR_GCOV != 1)');
+        return;
+      }
+      const siteId = url.searchParams.get('site');
+      const site = studyAreas.find((item) => item.id === siteId);
+      if (!site) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const threshold = Number(url.searchParams.get('threshold') || 3);
+      const stats = await computeNisarChangeStats(site, {
+        ...siteWindow(site),
+        eventDate: site.eventDate,
+        thresholdDb: Number.isFinite(threshold) ? Math.max(0.5, Math.min(20, threshold)) : 3,
+      }).catch((error) => {
+        console.error('[SOTHIS API] change stats failed', siteId, error?.message);
+        return null;
+      });
+      if (!stats) {
+        sendError(res, 503, 'Calibrated change statistics are not available for this site right now');
+        return;
+      }
+      send(res, 200, { data: stats, success: true });
       return;
     }
 
@@ -569,10 +637,48 @@ export async function handleRequest(req, res) {
         sendError(res, 400, 'site and side=before|after|change are required');
         return;
       }
+      const view = url.searchParams.get('view');
+      if (view === 'rgb' && process.env.NISAR_GCOV !== '1') {
+        sendError(res, 409, 'RGB composite needs calibrated NISAR GCOV (NISAR_GCOV != 1)');
+        return;
+      }
       // Building the site registers the two real passes this image is drawn
       // from; a cold request pays one build, afterwards the crop is cached.
       const sites = await getSites();
       const site = sites.find((item) => item.id === siteId);
+      if (view === 'rgb') {
+        if (!site) {
+          sendError(res, 404, 'Unknown site');
+          return;
+        }
+        const rgbSide = side === 'before' ? 'before' : 'after';
+        const study = studyAreas.find((item) => item.id === siteId);
+        if (!study) {
+          sendError(res, 404, 'Unknown site');
+          return;
+        }
+        const png = await renderNisarRgb(site, {
+          ...siteWindow(study),
+          side: rgbSide,
+          eventDate: study.eventDate,
+        }).catch((error) => {
+          console.error('[SOTHIS API] NISAR RGB failed', siteId, error?.message);
+          return null;
+        });
+        if (!png) {
+          sendError(res, 503, 'RGB composite could not be rendered from calibrated GCOV');
+          return;
+        }
+        res.writeHead(200, {
+          'Content-Type': 'image/png',
+          'Content-Length': png.length,
+          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+          'Access-Control-Allow-Origin': resolveOrigin(req),
+          'X-Nisar-View': 'dual-pol-intensity-composite',
+        });
+        res.end(png);
+        return;
+      }
       let png = null;
       if (source === 'nisar' && site) {
         try {

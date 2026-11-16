@@ -157,7 +157,13 @@ const en = {
         'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve. Change is |ΔVV| against the pre-event pass, scaled so 1.00 = 12 dB.',
     },
     dbNote:
-      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and the change map are real NASA NISAR L-band (HH) browse images; the dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH).',
+      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and the change map are {{cards}}; the dB panel and the time series are {{numbers}}.',
+    provCardsNisar: 'real NASA NISAR L-band ({{polarizations}}) browse images',
+    provCardsSentinel: 'real Sentinel-1 C-band ({{polarizations}}) quicklooks',
+    provNumbersSentinel:
+      'real Sentinel-1 C-band GRD ({{polarizations}}) at relative amplitude — not calibrated σ⁰',
+    provNumbersNisar: 'calibrated NISAR L-band gamma-0 ({{polarizations}})',
+    degraded: 'The live rebuild failed for this site, so the labelled fallback record is shown — not new measurements.',
     dbNoteFallback:
       'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
     forResearchers: 'For Researchers',
@@ -184,8 +190,17 @@ const en = {
       'The difference the eye cannot catch: |after − before| per pixel, on the same window. Bright means the surface gave back a different amount of radar energy. Scale: black 0 dB, white 8 dB and above.',
     changeAria: '{{site}} change map between the two passes',
     changeNote: 'Rain and tide move pixels too — bright is change, not automatically damage.',
-    seriesSourceNote:
-      'Time series and dB measurements are derived from Sentinel-1 C-band (VV/VH) passes; the visual cards show NASA NISAR L-band (HH).',
+    seriesSourceNote: 'Time series and dB measurements: {{numbers}}. Visual cards: {{cards}}.',
+    cardViewAria: 'Radar view',
+    cardViewHh: 'HH browse',
+    cardViewRgb: 'HH·HV composite',
+    cardViewRgbNote:
+      'Dual-pol intensity composite (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition.',
+    changeStatsLabel: 'Calibrated change',
+    changeStatsValue: '{{changed}}% of valid pixels changed · mean ΔHH {{mean}} dB',
+    changeStatsCaveat:
+      '|ΔdB| ≥ {{threshold}} dB on aligned HHHH grids, same track/frame · {{valid}}% valid pixels',
+    changeStatsUnavailable: 'Calibrated change statistics are not available for this site right now.',
   },
   sound: {
     title: 'See and hear the surface dance',
@@ -279,7 +294,8 @@ const en = {
     limitsTitle: 'Known limits',
     limits1: 'Speckle, layover and shadow are part of radar geometry. A single image is not a measurement of extent.',
     limits2: 'A radar signal is not a species count. Recovery of brightness is a structural proxy, not biodiversity.',
-    limits3: 'Values are only as good as the NISAR products the pipeline ingests; terrain correction is mandatory.',
+    limits3:
+      'Values are only as good as the product behind them: relative amplitude is not calibrated σ⁰, and terrain correction is mandatory before comparing dates.',
     refsTitle: 'Sources & further reading',
     downloadJson: 'Download this dataset (JSON)',
     downloadCsv: 'Download time series (CSV)',
@@ -534,7 +550,13 @@ const ar = {
         'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔVV| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
     },
     dbNote:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NISAR L-band (HH)؛ أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD (VV/VH).',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف {{cards}}؛ أما لوحة الديسيبل والسلسلة الزمنية فمن {{numbers}}.',
+    provCardsNisar: 'صور حقيقية من NISAR L-band ({{polarizations}})',
+    provCardsSentinel: 'صور حقيقية من Sentinel-1 C-band ({{polarizations}})',
+    provNumbersSentinel:
+      'Sentinel-1 C-band GRD الحقيقي ({{polarizations}}) بسعة نسبية — وليست σ⁰ مُعايَرة',
+    provNumbersNisar: 'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
+    degraded: 'فشل البناء الحيّ لهذا الموقع، لذا تُعرض السجلات الاحتياطية الموسومة — وليست قياسات جديدة.',
     dbNoteFallback:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
     forResearchers: 'للباحثين',
@@ -561,8 +583,17 @@ const ar = {
       'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لكل بكسل على النافذة نفسها. الأبيض معناه إن السطح رجّع كمية طاقة رادار مختلفة. المقياس: أسود = ٠ ديسيبل، أبيض = ٨ ديسيبل أو أكتر.',
     changeAria: 'خريطة الاختلاف لـ{{site}} بين المرورين',
     changeNote: 'المطر والمد بيحركوا البكسلات كمان — الأبيض تغيّر، مش بالضرورة ضرر.',
-    seriesSourceNote:
-      'السلسلة الزمنية وقياسات الديسيبل مشتقة من مرورات Sentinel-1 C-band (VV/VH)؛ أما البطاقات المصوّرة فمن NASA NISAR L-band (HH).',
+    seriesSourceNote: 'السلسلة الزمنية وقياسات الديسيبل: {{numbers}}. أما البطاقات المصوّرة: {{cards}}.',
+    cardViewAria: 'طريقة العرض الراداري',
+    cardViewHh: 'صورة HH',
+    cardViewRgb: 'تركيب HH·HV',
+    cardViewRgbNote:
+      'تركيب شدة ثنائي الاستقطاب (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي.',
+    changeStatsLabel: 'تغيّر مُعايَر',
+    changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · متوسط ΔHH {{mean}} ديسيبل',
+    changeStatsCaveat:
+      '|ΔdB| ≥ {{threshold}} ديسيبل على شبكات HHHH المتوائمة، المسار والإطار نفسيهما · {{valid}}% بكسلات صالحة',
+    changeStatsUnavailable: 'إحصاءات التغيّر المُعايَرة غير متاحة لهذا الموقع الآن.',
   },
   sound: {
     title: 'شاهد واسمع سطح الأرض يرقص',
@@ -654,7 +685,8 @@ const ar = {
     limitsTitle: 'حدود معروفة',
     limits1: 'التشويش والتراكب والظل جزء من هندسة الرادار. صورة واحدة ليست قياسًا للمدى.',
     limits2: 'إشارة الرادار ليست إحصاءً للأنواع. عودة السطوع مؤشر بنيوي بديل، لا تنوع حيوي.',
-    limits3: 'جودة القيم مرتبطة بمنتجات نيسار التي يستوعبها خط المعالجة، والتصحيح التضاريسي إلزامي.',
+    limits3:
+      'جودة القيم مرتبطة بالمنتج الذي يقف خلفها: السعة النسبية ليست σ⁰ مُعايَرة، والتصحيح التضاريسي إلزامي قبل مقارنة التواريخ.',
     refsTitle: 'المصادر وقراءات إضافية',
     downloadJson: 'تنزيل هذه المجموعة (JSON)',
     downloadCsv: 'تنزيل السلسلة الزمنية (CSV)',

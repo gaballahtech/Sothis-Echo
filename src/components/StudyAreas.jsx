@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { contrastRows } from '../data/sites';
-import { buildSiteCsv, sceneImageUrl } from '../services/sarApi';
+import { buildSiteCsv, loadChangeStats, sceneImageUrl } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
 import { Disclosure, Panel, SectionHead } from './ui';
 import ObservationTable from './ObservationTable';
@@ -48,17 +48,47 @@ export default function StudyAreas() {
   const { language } = useLanguage();
   const { sites, source, loading } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
+  const [cardView, setCardView] = useState('hh');
+  const [changeStats, setChangeStats] = useState(null);
 
   useEffect(() => {
     if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
   }, [sites, activeId]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
+  const provenance = site?.provenance || null;
+  const statsAvailable = source === 'api' && provenance?.cards?.changeStats === true;
+
+  useEffect(() => {
+    setCardView('hh');
+    setChangeStats(null);
+    if (!statsAvailable || !site?.id) return undefined;
+    let cancelled = false;
+    loadChangeStats(site.id).then((stats) => {
+      if (!cancelled && stats) setChangeStats(stats);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [site?.id, statsAvailable]);
+
   if (!site) return null;
   const L = (value) => localized(value, language);
   const nisar = /nisar/i.test(site.source || '') || Boolean(site.states?.after?.nisarImageUrl);
   const coPol = nisar ? 'HH' : 'VV';
   const crossPol = nisar ? 'HV' : 'VH';
+  const rgbAvailable = Boolean(provenance?.cards?.rgbComposite && nisar);
+  const polList = (list) => (Array.isArray(list) ? list.join('/') : '');
+  const cardsText = provenance?.cards
+    ? t(provenance.cards.sensor === 'NISAR' ? 'sites.provCardsNisar' : 'sites.provCardsSentinel', {
+        polarizations: polList(provenance.cards.polarizations),
+      })
+    : null;
+  const numbersText = provenance?.numbers
+    ? t(provenance.numbers.calibrated ? 'sites.provNumbersNisar' : 'sites.provNumbersSentinel', {
+        polarizations: polList(provenance.numbers.polarizations),
+      })
+    : null;
 
   const downloadCsv = () => {
     const blob = new Blob([buildSiteCsv(site)], { type: 'text/csv;charset=utf-8' });
@@ -80,6 +110,11 @@ export default function StudyAreas() {
         {!loading && source !== 'api' ? (
           <p className="micro" role="status" style={{ marginBottom: 12 }}>
             {t('sites.localData')}
+          </p>
+        ) : null}
+        {!loading && site.degraded ? (
+          <p className="micro" role="status" data-testid="degraded-note" style={{ marginBottom: 12 }}>
+            {t('sites.degraded')}
           </p>
         ) : null}
 
@@ -141,17 +176,42 @@ export default function StudyAreas() {
             </div>
           </div>
 
+          {rgbAvailable ? (
+            <div className="row-between card-view-toggle" data-testid="card-view-toggle">
+              <span className="micro">{t('sites.cardViewAria')}</span>
+              <ButtonGroup minimal>
+                <Button
+                  small
+                  active={cardView === 'hh'}
+                  text={t('sites.cardViewHh')}
+                  onClick={() => setCardView('hh')}
+                  data-testid="card-view-hh"
+                />
+                <Button
+                  small
+                  active={cardView === 'rgb'}
+                  text={t('sites.cardViewRgb')}
+                  onClick={() => setCardView('rgb')}
+                  data-testid="card-view-rgb"
+                />
+              </ButtonGroup>
+            </div>
+          ) : null}
+
           <div className="scene-grid">
             {STATE_KEYS.map((stateKey) => {
               const state = site.states[stateKey];
               return (
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
-                  <Panel title={`${L(state.label)} · ${state.date}`} status={sceneProduct(state)}>
+                  <Panel
+                    title={`${L(state.label)} · ${state.date}`}
+                    status={cardView === 'rgb' ? 'NISAR L-band · HH/HV' : sceneProduct(state)}
+                  >
                     <SceneCanvas
                       site={site}
                       params={state.params}
                       channel="radar"
-                      imageUrl={state.imageUrl}
+                      imageUrl={cardView === 'rgb' ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb') : state.imageUrl}
                       alt={t('sites.ariaScene', { site: L(site.name), state: L(state.label) })}
                     />
                     <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
@@ -186,14 +246,36 @@ export default function StudyAreas() {
                 <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
                   {t('sites.changeNote')}
                 </p>
+                {changeStats ? (
+                  <div className="change-stats" data-testid="change-stats">
+                    <span className="micro">{t('sites.changeStatsLabel')}</span>
+                    <p className="body-copy" style={{ margin: '2px 0 0' }}>
+                      {t('sites.changeStatsValue', {
+                        changed: changeStats.changedPct,
+                        mean: changeStats.meanDeltaDb,
+                      })}
+                    </p>
+                    <p className="micro" style={{ margin: '2px 0 0' }}>
+                      {t('sites.changeStatsCaveat', {
+                        threshold: changeStats.thresholdDb,
+                        valid: changeStats.validPct,
+                      })}
+                    </p>
+                  </div>
+                ) : null}
               </div>
+            ) : null}
+            {cardView === 'rgb' ? (
+              <p className="micro" data-testid="rgb-note" style={{ margin: 0 }}>
+                {t('sites.cardViewRgbNote')}
+              </p>
             ) : null}
           </div>
 
           <Panel title={t('sites.measurements')} bodyClassName="card-pad">
-            {source === 'api' && nisar ? (
+            {source === 'api' && nisar && provenance && !site.degraded ? (
               <p className="micro series-source-note" role="note" data-testid="series-source-note">
-                {t('sites.seriesSourceNote')}
+                {t('sites.seriesSourceNote', { cards: cardsText, numbers: numbersText })}
               </p>
             ) : null}
             <div data-testid="deep-dive-tabs">
@@ -274,7 +356,7 @@ export default function StudyAreas() {
                   <div>
                     <h4 className="micro">01 · {t('sites.acquisition')}</h4>
                     <p className="body-copy-muted" style={{ margin: 0 }}>
-                      {source === 'api' ? L(site.researcher.acquisition) : t('sites.acquisitionFallback')}
+                      {source === 'api' && !site.degraded ? L(site.researcher.acquisition) : t('sites.acquisitionFallback')}
                     </p>
                   </div>
                   <div>
@@ -316,7 +398,9 @@ export default function StudyAreas() {
                     </ul>
                   </div>
                   <p className="micro" style={{ margin: 0 }}>
-                    {t(source === 'api' ? 'sites.dbNote' : 'sites.dbNoteFallback')}
+                    {source === 'api' && provenance && !site.degraded
+                      ? t('sites.dbNote', { cards: cardsText, numbers: numbersText })
+                      : t('sites.dbNoteFallback')}
                   </p>
                 </div>
               </div>

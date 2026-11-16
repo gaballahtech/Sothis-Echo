@@ -309,19 +309,108 @@ async function harmonyGeoTiff(granule, bbox, variable) {
   return fs.readFile(file);
 }
 
-async function readStats(buffer) {
+/* ------------------------------------------------------------------ */
+/* Calibrated GCOV rasters: NoData-aware stats + bounded array cache   */
+/* ------------------------------------------------------------------ */
+
+const HH_PATH = '/science/LSAR/GCOV/grids/frequencyA/HHHH';
+const HV_PATH = '/science/LSAR/GCOV/grids/frequencyA/HVHV';
+// A 512×512 float32 window is ~1 MB. Twelve windows is a hard ceiling so a
+// burst of granules can never grow the function's memory without bound.
+const ARRAY_BYTES_LIMIT = Number(process.env.NISAR_ARRAY_CACHE_MB || 96) * 1024 * 1024;
+const arrayCache = new Map();
+let arrayBytes = 0;
+
+function cacheRaster(key, raster) {
+  const bytes = raster.values?.byteLength || 0;
+  const previous = arrayCache.get(key);
+  if (previous) {
+    arrayBytes -= previous.raster.values?.byteLength || 0;
+    arrayCache.delete(key);
+  }
+  arrayCache.set(key, { at: Date.now(), raster });
+  arrayBytes += bytes;
+  // A 2700×2250 calibrated window is ~24 MB, so cap by bytes, not entries.
+  while (arrayBytes > ARRAY_BYTES_LIMIT && arrayCache.size > 1) {
+    const oldest = [...arrayCache.entries()].sort((a, b) => a[1].at - b[1].at)[0];
+    if (!oldest) break;
+    arrayBytes -= oldest[1].raster.values?.byteLength || 0;
+    arrayCache.delete(oldest[0]);
+  }
+}
+
+/** Parse one band of a GeoTIFF subset, honouring GDAL NoData / scale / offset. */
+async function readRaster(buffer) {
   const bytes = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength);
   const tiff = await fromArrayBuffer(bytes);
   const image = await tiff.getImage();
-  const [band] = await image.readRasters({ samples: [0] });
+  const [values] = await image.readRasters({ samples: [0] });
+  let nodata = null;
+  try {
+    const raw = image.getGDALNoData();
+    if (raw !== null && raw !== undefined && raw !== '') {
+      const parsed = Number(raw);
+      if (Number.isFinite(parsed)) nodata = parsed;
+    }
+  } catch {
+    /* no GDAL_NODATA tag in this subset */
+  }
+  // Harmony can return scaled integers; apply GDAL SCALE/OFFSET when present.
+  let scale = 1;
+  let offset = 0;
+  try {
+    const meta = image.getGDALMetadata?.() || {};
+    const items = Array.isArray(meta.Item) ? meta.Item : meta.Item ? [meta.Item] : [];
+    for (const item of items) {
+      const name = String(item?.name || '').toUpperCase();
+      if (name === 'SCALE' && Number.isFinite(Number(item.value))) scale = Number(item.value);
+      if (name === 'OFFSET' && Number.isFinite(Number(item.value))) offset = Number(item.value);
+    }
+  } catch {
+    /* metadata is optional */
+  }
+  let transform = null;
+  try {
+    transform = image.getModelTransformation?.() || image.getGeoTransform?.() || null;
+  } catch {
+    transform = null;
+  }
+  return {
+    values,
+    width: image.getWidth(),
+    height: image.getHeight(),
+    nodata,
+    scale,
+    offset,
+    transform: Array.isArray(transform) ? [...transform] : null,
+  };
+}
+
+/** Physical power for one sample, or null when the sample is NoData. */
+function powerAt(raster, index) {
+  const raw = Number(raster.values[index]);
+  if (!Number.isFinite(raw)) return null;
+  if (raster.nodata != null && raw === raster.nodata) return null;
+  const scaled = raw * raster.scale + raster.offset;
+  return Number.isFinite(scaled) ? scaled : null;
+}
+
+/**
+ * NoData-aware statistics. Dark open water is real data, so a value of zero is
+ * kept (clamped only for the logarithm) instead of being dropped the way the
+ * previous `value <= 0` filter did. `validPct` says how much of the window is
+ * usable, which is the number a reviewer needs next to a mean.
+ */
+function rasterStats(raster) {
+  const total = raster.width * raster.height;
   let min = Infinity;
   let max = -Infinity;
   let sum = 0;
   let count = 0;
-  let low = 0;
-  for (const raw of band) {
-    const value = Number(raw);
-    if (!Number.isFinite(value) || value <= 0) continue;
+  for (let i = 0; i < total; i += 1) {
+    const power = powerAt(raster, i);
+    if (power == null) continue;
+    const value = Math.max(power, 1e-7);
     if (value < min) min = value;
     if (value > max) max = value;
     sum += value;
@@ -330,26 +419,62 @@ async function readStats(buffer) {
   if (!count) return null;
   const mean = sum / count;
   const threshold = min + (max - min) * 0.25;
-  for (const raw of band) {
-    const value = Number(raw);
-    if (Number.isFinite(value) && value > 0 && value <= threshold) low += 1;
+  let low = 0;
+  for (let i = 0; i < total; i += 1) {
+    const power = powerAt(raster, i);
+    if (power == null) continue;
+    if (Math.max(power, 1e-7) <= threshold) low += 1;
   }
   return {
     mean,
     db: 10 * Math.log10(mean),
     lowFraction: low / count,
+    validPct: count / total,
     count,
-    width: image.getWidth(),
-    height: image.getHeight(),
+    width: raster.width,
+    height: raster.height,
   };
 }
 
+function sameGrid(a, b) {
+  if (!a || !b) return false;
+  if (a.width !== b.width || a.height !== b.height) return false;
+  if (!a.transform || !b.transform) return true; // shape match is the best signal available
+  return a.transform.every((value, index) => Math.abs(value - b.transform[index]) < 1e-9);
+}
+
+/** Nearest-neighbour alignment used only when the two subsets differ by a pixel. */
+function alignToRaster(source, target) {
+  if (sameGrid(source, target)) return source;
+  const values = new Float64Array(target.width * target.height);
+  for (let y = 0; y < target.height; y += 1) {
+    const sy = Math.min(source.height - 1, Math.floor((y / target.height) * source.height));
+    for (let x = 0; x < target.width; x += 1) {
+      const sx = Math.min(source.width - 1, Math.floor((x / target.width) * source.width));
+      values[y * target.width + x] = source.values[sy * source.width + sx];
+    }
+  }
+  return { ...source, values, width: target.width, height: target.height, transform: target.transform };
+}
+
+/** Load (and cache) one calibrated 2-D power array for a granule + window. */
+async function loadRaster(granule, bbox, variable) {
+  const key = `${granule.granuleName}:${variable.split('/').pop()}:${bbox.map((n) => n.toFixed(3)).join(',')}`;
+  const cached = arrayCache.get(key);
+  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.raster;
+  const buffer = await harmonyGeoTiff(granule, bbox, variable);
+  const raster = await readRaster(buffer);
+  cacheRaster(key, raster);
+  return raster;
+}
+
 async function readGranule(granule, bbox) {
-  const [hh, hv] = await Promise.all([
-    harmonyGeoTiff(granule, bbox, '/science/LSAR/GCOV/grids/frequencyA/HHHH'),
-    harmonyGeoTiff(granule, bbox, '/science/LSAR/GCOV/grids/frequencyA/HVHV'),
+  const [hhRaster, hvRaster] = await Promise.all([
+    loadRaster(granule, bbox, HH_PATH),
+    loadRaster(granule, bbox, HV_PATH),
   ]);
-  const [hhStats, hvStats] = await Promise.all([readStats(hh), readStats(hv)]);
+  const hhStats = rasterStats(hhRaster);
+  const hvStats = rasterStats(hvRaster);
   if (!hhStats || !hvStats) return null;
   return {
     date: (granule.startTime || '').slice(0, 10),
@@ -358,12 +483,212 @@ async function readGranule(granule, bbox) {
     hvDb: hvStats.db,
     crossDb: hvStats.db - hhStats.db,
     lowFraction: hhStats.lowFraction,
+    validPct: Number((hhStats.validPct * 100).toFixed(1)),
+    aligned: sameGrid(hhRaster, hvRaster),
     imageUrl: browseUrl(granule),
     granuleName: granule.granuleName,
     track: granule.track,
     frame: granule.frameNumber,
     processingLevel: /NISAR_L2_GCOV_V1/i.test(granule.downloadUrl || '') ? 'validated' : 'provisional',
   };
+}
+
+/** Ground area of one pixel, from the GeoTIFF transform (degrees or metres). */
+function pixelAreaM2(raster) {
+  const t = raster.transform;
+  if (!t) return null;
+  // 4×4 model transformation (row-major) or GDAL geotransform (6 values).
+  const a = t.length >= 16 ? t[0] : t.length >= 6 ? t[1] : null;
+  const e = t.length >= 16 ? t[5] : t.length >= 6 ? t[5] : null;
+  if (!Number.isFinite(a) || !Number.isFinite(e)) return null;
+  const area = Math.abs(a * e);
+  if (Math.abs(a) <= 1.5 && Math.abs(e) <= 1.5) {
+    const lat = t.length >= 16 ? t[7] : t.length >= 6 ? t[3] : 0;
+    return area * (111320 * Math.cos((lat * Math.PI) / 180)) * 110540;
+  }
+  return area;
+}
+
+/** Find one ASF granule by name (used by the RGB and stats routes). */
+async function findGranule(site, granuleName, { start, end }) {
+  const granules = await asfSearch({ wkt: site.wkt, start, end });
+  return granules.find((item) => item.granuleName === granuleName) || null;
+}
+
+/** Pure pixel math for the change statistics (unit-testable without Harmony). */
+export function changeStatsFromRasters(beforeRaster, afterRaw, thresholdDb = 3) {
+  const after = alignToRaster(afterRaw, beforeRaster);
+  const total = beforeRaster.width * beforeRaster.height;
+  let valid = 0;
+  let changed = 0;
+  let sum = 0;
+  let sumAbs = 0;
+  for (let i = 0; i < total; i += 1) {
+    const p0 = powerAt(beforeRaster, i);
+    const p1 = powerAt(after, i);
+    if (p0 == null || p1 == null) continue;
+    const delta = 10 * Math.log10(Math.max(p1, 1e-7)) - 10 * Math.log10(Math.max(p0, 1e-7));
+    if (!Number.isFinite(delta)) continue;
+    valid += 1;
+    sum += delta;
+    sumAbs += Math.abs(delta);
+    if (Math.abs(delta) >= thresholdDb) changed += 1;
+  }
+  if (!valid) return null;
+  return {
+    changedPct: Number(((changed / valid) * 100).toFixed(1)),
+    meanDeltaDb: Number((sum / valid).toFixed(2)),
+    meanAbsDeltaDb: Number((sumAbs / valid).toFixed(2)),
+    validPixels: valid,
+    validPct: Number(((valid / total) * 100).toFixed(1)),
+    changedPixels: changed,
+    totalPixels: total,
+    aligned: sameGrid(beforeRaster, afterRaw),
+  };
+}
+
+/**
+ * Pixel-level change between the two NISAR passes around the event.
+ * Sign convention: delta = after − before, threshold on |delta| in dB.
+ */
+export async function computeNisarChangeStats(site, { start, end, eventDate, thresholdDb = 3 }) {
+  const bbox = site.bbox || bboxFromWkt(site.wkt);
+  if (!bbox) return null;
+  const granules = await asfSearch({ wkt: site.wkt, start, end });
+  const picked = pickGranules(granules, eventDate, 2);
+  if (picked.length < 2) return null;
+  const event = new Date(`${eventDate}T00:00:00Z`).getTime();
+  const beforeG = [...picked]
+    .filter((item) => new Date(item.startTime).getTime() <= event)
+    .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))[0];
+  const afterG = [...picked]
+    .filter((item) => new Date(item.startTime).getTime() > event)
+    .sort((a, b) => new Date(a.startTime) - new Date(b.startTime))[0];
+  if (!beforeG || !afterG) return null;
+
+  const [beforeRaw, afterRaw] = await Promise.all([
+    loadRaster(beforeG, bbox, HH_PATH),
+    loadRaster(afterG, bbox, HH_PATH),
+  ]);
+  const stats = changeStatsFromRasters(beforeRaw, afterRaw, thresholdDb);
+  if (!stats) return null;
+
+  let area = pixelAreaM2(beforeRaw);
+  if (!area) {
+    // Harmony subsets carry no geotransform; derive the pixel area from the
+    // requested bbox, which is the geographic window the subset represents.
+    const latSpan = Math.abs(bbox[3] - bbox[1]);
+    const lonSpan = Math.abs(bbox[2] - bbox[0]);
+    const centre = ((bbox[1] + bbox[3]) / 2) * (Math.PI / 180);
+    const widthM = lonSpan * 111320 * Math.cos(centre);
+    const heightM = latSpan * 110540;
+    area = (widthM * heightM) / (beforeRaw.width * beforeRaw.height);
+  }
+  const changedAreaKm2 = area ? (stats.changedPixels * area) / 1e6 : null;
+
+  return {
+    site: site.id,
+    source: 'nisar-gcov-harmony-db',
+    calibrated: true,
+    thresholdDb,
+    changedPct: stats.changedPct,
+    meanDeltaDb: stats.meanDeltaDb,
+    meanAbsDeltaDb: stats.meanAbsDeltaDb,
+    changedAreaKm2: changedAreaKm2 == null ? null : Number(changedAreaKm2.toFixed(2)),
+    validPixels: stats.validPixels,
+    validPct: stats.validPct,
+    grid: { width: beforeRaw.width, height: beforeRaw.height, aligned: stats.aligned },
+    before: { date: (beforeG.startTime || '').slice(0, 10), granule: beforeG.granuleName },
+    after: { date: (afterG.startTime || '').slice(0, 10), granule: afterG.granuleName },
+    note: `Signed HH change, ${thresholdDb} dB absolute threshold, same track/frame, NISAR L-band gamma-0.`,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Dual-pol intensity composite (R=HH, G=HV, B=HH−HV, 2–98% stretch)   */
+/* ------------------------------------------------------------------ */
+
+function percentile(sorted, p) {
+  if (!sorted.length) return 0;
+  const index = Math.min(sorted.length - 1, Math.max(0, Math.round((p / 100) * (sorted.length - 1))));
+  return sorted[index];
+}
+
+function stretch(values, low, high) {
+  const span = high - low || 1;
+  return Math.max(0, Math.min(255, Math.round(((values - low) / span) * 255)));
+}
+
+export async function renderNisarRgb(site, { side = 'after', start, end, eventDate }) {
+  const bbox = site.bbox || bboxFromWkt(site.wkt);
+  const granuleName = site?.states?.[side]?.nisarGranule || null;
+  if (!granuleName) return null;
+  const granule = await findGranule(site, granuleName, { start, end });
+  if (!granule) return null;
+  const key = `rgb:${granule.granuleName}:${bbox.map((n) => n.toFixed(3)).join(',')}`;
+  const cached = browsePngCache.get(key);
+  if (cached && Date.now() - cached.at < BROWSE_TTL) return cached.value;
+
+  const [hhRaster, hvRaster] = await Promise.all([
+    loadRaster(granule, bbox, HH_PATH),
+    loadRaster(granule, bbox, HV_PATH),
+  ]);
+  const hv = alignToRaster(hvRaster, hhRaster);
+
+  const hhDb = [];
+  const hvDb = [];
+  const diff = [];
+  const total = hhRaster.width * hhRaster.height;
+  for (let i = 0; i < total; i += 1) {
+    const p0 = powerAt(hhRaster, i);
+    const p1 = powerAt(hv, i);
+    if (p0 == null || p1 == null) continue;
+    const h = 10 * Math.log10(Math.max(p0, 1e-7));
+    const v = 10 * Math.log10(Math.max(p1, 1e-7));
+    hhDb.push(h);
+    hvDb.push(v);
+    diff.push(h - v);
+  }
+  if (!hhDb.length) return null;
+
+  const stretchFor = (list) => {
+    const sorted = [...list].sort((a, b) => a - b);
+    return [percentile(sorted, 2), percentile(sorted, 98)];
+  };
+  const [hhLow, hhHigh] = stretchFor(hhDb);
+  const [hvLow, hvHigh] = stretchFor(hvDb);
+  const [dLow, dHigh] = stretchFor(diff);
+
+  const out = Buffer.alloc(OUT_WIDTH * OUT_HEIGHT * 3);
+  for (let y = 0; y < OUT_HEIGHT; y += 1) {
+    const sy = Math.min(hhRaster.height - 1, Math.floor(((y + 0.5) / OUT_HEIGHT) * hhRaster.height));
+    for (let x = 0; x < OUT_WIDTH; x += 1) {
+      const sx = Math.min(hhRaster.width - 1, Math.floor(((x + 0.5) / OUT_WIDTH) * hhRaster.width));
+      const sourceIndex = sy * hhRaster.width + sx;
+      const p0 = powerAt(hhRaster, sourceIndex);
+      const p1 = powerAt(hv, sourceIndex);
+      const o = (y * OUT_WIDTH + x) * 3;
+      if (p0 == null || p1 == null) {
+        out[o] = 8;
+        out[o + 1] = 8;
+        out[o + 2] = 8;
+        continue;
+      }
+      const h = 10 * Math.log10(Math.max(p0, 1e-7));
+      const v = 10 * Math.log10(Math.max(p1, 1e-7));
+      out[o] = stretch(h, hhLow, hhHigh);
+      out[o + 1] = stretch(v, hvLow, hvHigh);
+      out[o + 2] = stretch(h - v, dLow, dHigh);
+    }
+  }
+  const png = pngRgb(OUT_WIDTH, OUT_HEIGHT, out);
+  browsePngCache.set(key, { value: png, at: Date.now() });
+  return png;
+}
+
+export function clearNisarArrayCache() {
+  arrayCache.clear();
+  arrayBytes = 0;
 }
 
 function groupKey(granule) {
@@ -500,11 +825,7 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
     const series = unique.map((scene) => ({
       date: scene.date,
       vv: Number(scene.hhDb.toFixed(1)),
-      vh: Number(scene.hvDb.toFixed(1)),
-      ...(site.id === 'sundarbans'
-        ? { water: Number(scene.lowFraction.toFixed(2)) }
-        : { burn: Number(scene.lowFraction.toFixed(2)) }),
-      change: Number(clamp01(Math.abs(scene.hhDb - baseline) / 12).toFixed(2)),
+      vh: Number(scene.hvDb.toFixed(1)),      change: Number(clamp01(Math.abs(scene.hhDb - baseline) / 12).toFixed(2)),
     }));
 
     const recovery = after.map((scene) => ({
@@ -540,6 +861,8 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
           acquiredAt: beforeScene.datetime,
           product: 'NISAR GCOV L-band (HH/HV)',
           notSimulated: true,
+          nisarGranule: beforeScene.granuleName,
+          nisarProduct: 'NISAR GCOV L-band (HH/HV)',
         },
         after: {
           date: afterScene.date,
@@ -554,6 +877,8 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
           acquiredAt: afterScene.datetime,
           product: 'NISAR GCOV L-band (HH/HV)',
           notSimulated: true,
+          nisarGranule: afterScene.granuleName,
+          nisarProduct: 'NISAR GCOV L-band (HH/HV)',
         },
       },
       measurements: {
@@ -567,6 +892,34 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
         dateAfter: afterScene.date,
         source: 'nisar-gcov-harmony-db',
         bands: 'HH/HV',
+        unit: 'gamma0_power_db',
+        calibration: '10·log10(gamma-0 power), Harmony GCOV subset',
+        calibrated: true,
+        validPct: Math.min(beforeScene.validPct ?? 100, afterScene.validPct ?? 100),
+      },
+      provenance: {
+        cards: {
+          sensor: 'NISAR',
+          mission: 'NASA / ISRO',
+          band: 'L',
+          polarizations: ['HH'],
+          product: 'GCOV HH browse (PNG)',
+          calibrated: false,
+          rgbComposite: process.env.NISAR_GCOV === '1',
+          changeStats: process.env.NISAR_GCOV === '1',
+          granules: { before: beforeScene.granuleName, after: afterScene.granuleName },
+        },
+        numbers: {
+          sensor: 'NISAR',
+          mission: 'NASA / ISRO',
+          band: 'L',
+          polarizations: ['HH', 'HV'],
+          product: 'GCOV HHHH/HVHV subset (Harmony)',
+          unit: 'gamma0_power_db',
+          calibration: '10·log10(gamma-0 power) — calibrated gamma-0',
+          calibrated: true,
+          source: 'nisar-gcov-harmony-db',
+        },
       },
       series,
       pulse: resample16(changes),
@@ -597,6 +950,7 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
 export function clearNisarCache() {
   cache.clear();
   browsePngCache.clear();
+  arrayCache.clear();
 }
 
 /* ------------------------------------------------------------------ */

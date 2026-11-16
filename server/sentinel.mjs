@@ -607,6 +607,82 @@ function resample16(values) {
   });
 }
 
+/**
+ * Point the before/after cards at the NISAR browse crop without changing the
+ * numeric provenance. On the calibrated path the dates stay those of the GCOV
+ * scenes; a browse crop is attached only when it comes from the same granule.
+ */
+function attachNisarCards(states, site, browse, { calibrated = false } = {}) {
+  if (!browse) return;
+  for (const side of ['before', 'after']) {
+    const nisar = browse[side];
+    if (!nisar?.imageUrl) continue;
+    const expected = calibrated ? states[side]?.nisarGranule : null;
+    if (expected && nisar.granuleName !== expected) continue;
+    Object.assign(states[side], {
+      sentinelImageUrl: states[side].imageUrl,
+      sentinelDate: states[side].date,
+      ...(calibrated ? {} : { date: (nisar.datetime || states[side].date || '').slice(0, 10) }),
+      imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar`,
+      attribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
+      ...(calibrated ? {} : { acquiredAt: nisar.datetime }),
+      product: nisar.product,
+      notSimulated: true,
+      nisarImageUrl: nisar.imageUrl,
+      nisarCrop: nisar.crop ?? null,
+      nisarDate: nisar.date,
+      nisarAttribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
+      nisarAcquiredAt: nisar.datetime,
+      nisarProduct: nisar.product,
+      nisarGranule: nisar.granuleName,
+    });
+  }
+}
+
+/** Explicit per-panel provenance: which sensor feeds the images vs the numbers. */
+function buildProvenance(states, nisarBrowse) {
+  const gcovOn = process.env.NISAR_GCOV === '1';
+  return {
+    cards: nisarBrowse
+      ? {
+          sensor: 'NISAR',
+          mission: 'NASA / ISRO',
+          band: 'L',
+          polarizations: ['HH'],
+          product: 'GCOV HH browse (PNG)',
+          calibrated: false,
+          rgbComposite: gcovOn,
+          changeStats: gcovOn,
+          granules: {
+            before: states.before?.nisarGranule ?? null,
+            after: states.after?.nisarGranule ?? null,
+          },
+        }
+      : {
+          sensor: 'Sentinel-1',
+          mission: 'ESA / Copernicus',
+          band: 'C',
+          polarizations: ['VV'],
+          product: 'GRD quicklook (PNG)',
+          calibrated: false,
+          rgbComposite: false,
+          changeStats: false,
+          granules: { before: null, after: null },
+        },
+    numbers: {
+      sensor: 'Sentinel-1',
+      mission: 'ESA / Copernicus',
+      band: 'C',
+      polarizations: ['VV', 'VH'],
+      product: 'GRD (AWS COG subset)',
+      unit: 'relative_amplitude_db',
+      calibration: '20·log10(DN / 1000) — relative amplitude, not calibrated σ⁰',
+      calibrated: false,
+      source: 'sentinel-1-cog-relative-db',
+    },
+  };
+}
+
 export async function buildRealSite(site, { start, end, eventDate }) {
   const key = site.id;
   const cached = cache.get(key);
@@ -623,12 +699,19 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       log(site.id, 'nisar browse failed', error?.message);
       return null;
     });
+    // The calibrated path is slower (Harmony queue + subsets). Cap it so a
+    // stuck job cannot eat the whole invocation; the browse/Sentinel record is
+    // still served and provenance says calibrated:false.
+    const budget = Number(process.env.NISAR_GCOV_BUDGET_MS || 150000);
     const nisarCalibrated =
       process.env.NISAR_GCOV === '1'
-        ? await buildNisarSite(site, { start, end, eventDate }).catch((error) => {
-            log(site.id, 'nisar gcov failed', error?.message);
-            return null;
-          })
+        ? await Promise.race([
+            buildNisarSite(site, { start, end, eventDate }).catch((error) => {
+              log(site.id, 'nisar gcov failed', error?.message);
+              return null;
+            }),
+            new Promise((resolve) => setTimeout(() => resolve(null), budget)),
+          ])
         : null;
     if (nisarCalibrated) {
       const afterDate = nisarCalibrated.states.after.date;
@@ -653,6 +736,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
             'Contains modified Copernicus Sentinel-2 data, processed by ESA — AWS Open Data quicklook.',
         });
       }
+      attachNisarCards(nisarCalibrated.states, site, nisarBrowse, { calibrated: true });
       return { ...nisarCalibrated, seriesSource: 'nisar-gcov-l-band' };
     }
 
@@ -1027,37 +1111,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       },
     };
 
-    if (nisarBrowse) {
-      for (const side of ['before', 'after']) {
-        const nisar = nisarBrowse[side];
-        if (!nisar?.imageUrl) continue;
-        // Keep the site-specific Sentinel-1 quicklook in `imageUrl` (it is
-        // reused by the before/after cards and the detective game). NISAR's
-        // full-swath browse is exposed separately for the radar/optical
-        // comparison, where it is shown once.
-        Object.assign(states[side], {
-          // NISAR L-band is the primary card image whenever a granule exists;
-          // Sentinel-1 stays as the secondary fallback. The card date must
-          // follow the image that is actually shown, so the Sentinel-1 pass
-          // date is kept separately for the time series.
-          sentinelImageUrl: states[side].imageUrl,
-          sentinelDate: states[side].date,
-          date: (nisar.datetime || states[side].date || '').slice(0, 10),
-          imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar`,
-          attribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
-          acquiredAt: nisar.datetime,
-          product: nisar.product,
-          notSimulated: true,
-          nisarImageUrl: nisar.imageUrl,
-          nisarCrop: nisar.crop ?? null,
-          nisarDate: nisar.date,
-          nisarAttribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
-          nisarAcquiredAt: nisar.datetime,
-          nisarProduct: nisar.product,
-          nisarGranule: nisar.granuleName,
-        });
-      }
-    }
+    attachNisarCards(states, site, nisarBrowse);
 
     return {
       id: site.id,
@@ -1077,6 +1131,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         dateAfter: afterScene.date,
         source: 'sentinel-1-cog-relative-db',
       },
+      provenance: buildProvenance(states, nisarBrowse),
       series,
       pulse: resample16(changes),
       stablePulse: resample16(stableChanges),

@@ -71,9 +71,10 @@ export function ensureApiBase() {
  * URL of a server-rendered scene image. The path is absolute below /api, while
  * the configured base usually ends in /api itself — keep the origin only.
  */
-export function sceneImageUrl(siteId, side, source) {
+export function sceneImageUrl(siteId, side, source, view) {
   const suffix = source ? `&source=${encodeURIComponent(source)}` : '';
-  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}${suffix}`;
+  const extra = view ? `&view=${encodeURIComponent(view)}` : '';
+  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}${suffix}${extra}`;
 }
 
 export function getApiConfig() {
@@ -187,8 +188,11 @@ function mergeMeasurements(local, remote) {
     const after = toNumber(remote[key]?.after);
     if (before != null && after != null) merged[key] = { before, after };
   }
-  for (const key of ['dateBefore', 'dateAfter', 'source']) {
+  for (const key of ['dateBefore', 'dateAfter', 'source', 'unit', 'calibration', 'bands']) {
     if (typeof remote[key] === 'string') merged[key] = remote[key];
+  }
+  for (const key of ['calibrated', 'validPct']) {
+    if (remote[key] != null) merged[key] = remote[key];
   }
   return merged;
 }
@@ -277,6 +281,10 @@ function mergeSite(local, remote) {
     stablePulse: mergePulse(local.stablePulse, remote.stablePulse),
     recovery: mergeRecovery(local.recovery, remote.recovery),
     updatedAt: typeof remote.updatedAt === 'string' ? remote.updatedAt : null,
+    source: typeof remote.source === 'string' ? remote.source : local.source,
+    provenance: remote.provenance && typeof remote.provenance === 'object' ? remote.provenance : local.provenance,
+    degraded: Boolean(remote.degraded),
+    degradedReason: typeof remote.degradedReason === 'string' ? remote.degradedReason : null,
   };
 }
 
@@ -336,6 +344,20 @@ export async function loadSeries(id, { start, end } = {}) {
     const qs = params.toString();
     const payload = await request(`/sites/${encodeURIComponent(id)}/series${qs ? `?${qs}` : ''}`);
     return Array.isArray(payload) ? payload : payload?.series ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Pixel-level calibrated change stats (NISAR GCOV). */
+export async function loadChangeStats(id, threshold = 3) {
+  if (!studyAreas.some((item) => item.id === id)) return null;
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(
+      `/nisar/change-stats?site=${encodeURIComponent(id)}&threshold=${encodeURIComponent(threshold)}`,
+    );
+    return payload && typeof payload === 'object' ? payload : null;
   } catch {
     return null;
   }
@@ -469,26 +491,59 @@ export async function analyzeScene(id, { prompt, requestedModel = 'auto', point,
   }
 }
 
-/** Build a CSV export of a site's numeric series + recovery table. */
+/**
+ * CSV export of a site's numeric series + recovery table. Every row carries the
+ * sensor, polarisations, unit and calibration context, and the bundled recovery
+ * curve is withheld unless it was actually fitted to API passes.
+ */
 export function buildSiteCsv(site) {
   const localizedName = site.name?.en ?? site.id;
+  const provenance = site.provenance || {};
+  const numbers = provenance.numbers || {};
+  const cards = provenance.cards || {};
+  const source = site.source || numbers.source || '';
+  const sensor = numbers.sensor || (/nisar/i.test(String(site.measurements?.source || '')) ? 'NISAR' : 'Sentinel-1');
+  const polarizations = (numbers.polarizations || (sensor === 'NISAR' ? ['HH', 'HV'] : ['VV', 'VH'])).join('/');
+  const unit = numbers.unit || 'relative_amplitude_db';
+  const calibration = numbers.calibration || 'uncalibrated relative amplitude';
+  const granuleBefore = cards.granules?.before || site.states?.before?.nisarGranule || '';
+  const granuleAfter = cards.granules?.after || site.states?.after?.nisarGranule || '';
+  const recoveryFitted = site.recovery?.fromApi === true;
+
   const rows = [
-    ['site', 'date_or_month', 'vv_db', 'vh_db', 'dark_share', 'change_index', 'recovery_pct', 'projected'],
+    [
+      'site', 'date_or_month', 'vv_db', 'vh_db', 'water_proxy', 'burn_proxy',
+      'change_index', 'recovery_pct', 'projected', 'sensor', 'polarizations',
+      'unit', 'calibration', 'source', 'granule_before', 'granule_after', 'illustrative',
+    ],
   ];
+  const context = [sensor, polarizations, unit, calibration, source, granuleBefore, granuleAfter];
   for (const point of site.series || []) {
     rows.push([
       localizedName,
       point.date,
       point.vv ?? '',
       point.vh ?? '',
-      point.water ?? point.burn ?? '',
+      point.water ?? '',
+      point.burn ?? '',
       point.change ?? '',
       '',
       '',
+      ...context,
+      site.degraded ? 'yes' : 'no',
     ]);
   }
-  for (const point of site.recovery?.points || []) {
-    rows.push([localizedName, `month_${point.month}`, '', '', '', '', '', point.pct, point.projected ? 'yes' : 'no']);
+  if (recoveryFitted) {
+    for (const point of site.recovery?.points || []) {
+      rows.push([
+        localizedName,
+        `month_${point.month}`,
+        '', '', '', '', '', point.pct,
+        point.projected ? 'yes' : 'no',
+        ...context,
+        'no',
+      ]);
+    }
   }
   return rows.map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n');
 }

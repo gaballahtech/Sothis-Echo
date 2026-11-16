@@ -183,8 +183,8 @@ export const studyAreas = [
       ],
       methods: [
         {
-          en: 'On the live record, recovery is the share of the study window that has returned to its pre-flood VV level, measured block by block on same-satellite, same-orbit passes. If no pass sampled the flood peak, the panel reports that instead of drawing a curve.',
-          ar: 'في السجل الحيّ، التعافي هو حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الفيضان، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وإذا لم يرصد أي مرور ذروة الفيضان، تعرض اللوحة ذلك بدل رسم منحنى.',
+          en: 'On the live record, recovery is the share of the study window that has returned to its pre-event level in the primary co-pol channel (VV for Sentinel-1, HH for NISAR), measured block by block on same-satellite, same-orbit passes. If no pass sampled the event peak, the panel reports that instead of drawing a curve.',
+          ar: 'في السجل الحيّ، التعافي هو حصة نافذة الدراسة التي عادت إلى مستواها قبل الحدث في القناة المشتركة الأساسية (VV لسنتينل-1، وHH لنيسار)، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وإذا لم يرصد أي مرور ذروة الحدث، تعرض اللوحة ذلك بدل رسم منحنى.',
         },
       ],
       sources: [
@@ -364,8 +364,8 @@ export const studyAreas = [
       ],
       methods: [
         {
-          en: 'Recovery is the share of the study window that has returned to its pre-fire VV level, measured block by block on same-satellite, same-orbit passes. It is a structural proxy: radar change can fade before the ecosystem recovers.',
-          ar: 'التعافي هو حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الحريق، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وهو مؤشر بنيوي بديل: قد يتلاشى تغيّر الرادار قبل تعافي النظام البيئي.',
+          en: 'Recovery is the share of the study window that has returned to its pre-event level in the primary co-pol channel (VV for Sentinel-1, HH for NISAR), measured block by block on same-satellite, same-orbit passes. It is a structural proxy: radar change can fade before the ecosystem recovers.',
+          ar: 'التعافي هو حصة نافذة الدراسة التي عادت إلى مستواها قبل الحدث في القناة المشتركة الأساسية (VV لسنتينل-1، وHH لنيسار)، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه. وهو مؤشر بنيوي بديل: قد يتلاشى تغيّر الرادار قبل تعافي النظام البيئي.',
         },
       ],
       sources: [
