@@ -78,6 +78,8 @@ export default function StudyAreas() {
   const coPol = nisar ? 'HH' : 'VV';
   const crossPol = nisar ? 'HV' : 'VH';
   const rgbAvailable = Boolean(provenance?.cards?.rgbComposite && nisar);
+  const rgbSides = provenance?.cards?.rgbSides || {};
+  const showComposite = (stateKey) => cardView === 'rgb' && rgbAvailable && rgbSides[stateKey] === true;
   const polList = (list) => (Array.isArray(list) ? list.join('/') : '');
   const cardsText = provenance?.cards
     ? t(provenance.cards.sensor === 'NISAR' ? 'sites.provCardsNisar' : 'sites.provCardsSentinel', {
@@ -205,18 +207,14 @@ export default function StudyAreas() {
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
                   <Panel
                     title={`${L(state.label)} · ${state.date}`}
-                    status={
-                      cardView === 'rgb' && stateKey === 'after'
-                        ? 'NISAR L-band · HH/HV'
-                        : sceneProduct(state)
-                    }
+                    status={showComposite(stateKey) ? 'NISAR L-band · HH/HV' : sceneProduct(state)}
                   >
                     <SceneCanvas
                       site={site}
                       params={state.params}
                       channel="radar"
                       imageUrl={
-                        cardView === 'rgb' && stateKey === 'after'
+                        showComposite(stateKey)
                           ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb')
                           : state.imageUrl
                       }

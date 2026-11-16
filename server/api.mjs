@@ -609,10 +609,6 @@ export async function handleRequest(req, res) {
     }
 
     if (path === '/api/nisar/change-stats') {
-      if (process.env.NISAR_GCOV !== '1') {
-        sendError(res, 409, 'Calibrated NISAR GCOV is disabled (NISAR_GCOV != 1)');
-        return;
-      }
       const siteId = url.searchParams.get('site');
       const site = studyAreas.find((item) => item.id === siteId);
       if (!site) {
@@ -666,10 +662,6 @@ export async function handleRequest(req, res) {
         return;
       }
       const view = url.searchParams.get('view');
-      if (view === 'rgb' && process.env.NISAR_GCOV !== '1') {
-        sendError(res, 409, 'RGB composite needs calibrated NISAR GCOV (NISAR_GCOV != 1)');
-        return;
-      }
       // A bundled composite is answered before any archive/Harmony work.
       if (view === 'rgb' && url.searchParams.get('live') !== '1') {
         const ready = nisarSnapshotRgb(siteId, side === 'before' ? 'before' : 'after');

@@ -1,0 +1,149 @@
+SOTHIS ECHO — CAPABILITIES REPORT
+Generated: 2026-11-16 (UTC)
+Scope: server/api.mjs, server/nisar.mjs, .env.example
+Method: static read of the routes actually registered in server/api.mjs; no
+guesses about endpoints that do not exist.
+
+===========================================================================
+1. HONEST STATUS OF THE ENDPOINTS NAMED IN THE BRIEF
+===========================================================================
+
+/api/search — EXISTS, but it is a demo filter, not a search service
+  Route:    POST /api/search
+  Input:    JSON { wkt: "POLYGON (...)", platform?: "SENTINEL-1" }
+  Behaviour:
+    - Parses the WKT into GeoJSON (wktToGeoJSON). A malformed WKT returns 400.
+    - Then ignores the geometry entirely: it filters the in-memory `scenes`
+      fixture list by platform substring and returns { count, polygon, scenes }.
+    - It performs no ASF/STAC/GeoAI query and returns no acquisition dates for
+      the requested polygon.
+  Consequence: a user who draws a box gets the same fixture scenes regardless
+  of where the box is. This is fine for the guided demo and misleading for a
+  real search. The UI never calls it today.
+  Fix when needed: proxy ASF Search (dataset=NISAR/SENTINEL-1,
+  intersectsWith=<wkt>, start/end) and return real granules; keep the fixture
+  response behind REAL_DATA=0.
+
+/api/scenes — EXISTS (fixtures, not archive listings)
+  GET /api/scenes            → all scenes (publicScene projection)
+  GET /api/scenes/:id        → one scene
+  Scenes are the seeded in-memory records used by the GeoTIFF/analyze demo.
+  They are not fetched from ASF and carry no SAR pixels of their own until a
+  GeoTIFF is uploaded to the same warm function instance.
+
+/api/geotiff — NOT A TOP-LEVEL ROUTE; it is /api/scenes/:id/geotiff
+  Route:    POST /api/scenes/:id/geotiff
+  Input:    multipart/form-data with `vv_file` (required), optional `vh_file`,
+            optional `max_bytes`.
+  Behaviour:
+    - Enforces MAX_GEOTIFF_BYTES (env, default 100 MiB; 422 above budget).
+    - Stores the buffers on the in-memory scene object (`_vvBuffer`, `_vhBuffer`).
+    - Returns the scene with geotiff_size_bytes / within_budget.
+  Limits that matter for production:
+    - State is per serverless instance. A cold start or another lambda loses
+      the upload, so /analyze can return 400 "Call /geotiff/ first" even though
+      the browser uploaded successfully moments earlier.
+    - There is no object storage (S3/R2) or signed upload path; every retry
+      re-uploads the whole file.
+    - The route is POST-only and not listed in Method.jsx, which documents
+      "/geotiff/" without the scene-id prefix.
+
+/api/analyze — NOT A TOP-LEVEL ROUTE; it is /api/scenes/:id/analyze
+  Route:    POST /api/scenes/:id/analyze
+  Input:    JSON { prompt, requested_model?: auto|prithvi|..., point?|box? }
+  Behaviour:
+    - Requires a GeoTIFF uploaded to the same instance (see above).
+    - If GEOAI_BASE_URL is set and a VV buffer exists, calls the Gradio
+      /gradio_api/call/analyze endpoint and streams the result.
+    - Otherwise returns the deterministic `geoaiReport` labelled as a demo
+      report (this is the correct honest fallback, not a fake model result).
+    - Model is constrained to the MODELS set; unknown values → 400.
+  Limits:
+    - GeoAI is a single Hugging Face Space (GEOAI_TIMEOUT default 120 s).
+      A sleeping Space turns every analyze call into a slow 502.
+    - No queueing, retry or job id: the HTTP request is the job.
+    - Reports are kept only in memory on the scene, so they disappear with the
+      instance.
+
+===========================================================================
+2. "EXPLORE CUSTOM LOCATION" MODAL — FEASIBILITY
+===========================================================================
+Verdict: feasible, small-to-medium, but only honest if it is wired to a real
+source; the current /api/search cannot back it.
+
+What already exists and can be reused:
+  - WKT → GeoJSON parsing (wktToGeoJSON) for validating a drawn box.
+  - ASF Search helper in server/nisar.mjs (asfSearch) that already returns
+    NISAR GCOV granules for a WKT and date window, and pickGranules() that
+    selects the track/frame pair around an event date.
+  - Sentinel-1 COG window reader in server/sentinel.mjs for real dB series.
+  - The same calibrationWindow() (±0.025°) used by the bundled snapshots.
+  - scene-image endpoint can already render NISAR browse crops for a site.
+
+Minimum viable modal (roughly one focused day, no new infrastructure):
+  1. UI: polygon/bbox draw + date range, POST to a new /api/search that really
+     queries ASF and returns granule ids, dates, track/frame and browse URLs.
+  2. On selection, build an ephemeral site object (id `custom-<hash>`) and
+     reuse buildNisarBrowse() for the before/after cards.
+  3. Composites/stats for the custom site: on-demand Harmony is currently
+     unusable (see §4), so either (a) show browse cards only with an explicit
+     "composite not precomputed for this area" note, or (b) generate a
+     candidate snapshot server-side and cache it (heavy).
+  4. Do not present UTM/area statistics unless both granules were actually
+     read; a browse-only card must not show calibrated change numbers.
+
+Blockers to be explicit about in the modal:
+  - Harmony on-demand GCOV subsetting returns 0 bytes (see §4), so calibrated
+    composites/statistics cannot be promised for an arbitrary new location.
+  - ASF rate limits and Earthdata token handling must stay server-side.
+
+===========================================================================
+3. UNUSED / UNDER-USED METRICS
+===========================================================================
+crossDb (VV−VH / HH−HV)
+  - Produced in server/nisar.mjs (readGranule, buildNisarSite measurements) and
+    server/sentinel.mjs (measurements.crossDb).
+  - It is bundled in the snapshots (e.g. Sundarbans before −8.2 / after −8.4 dB,
+    Caldor before −6.3 / after −5.8 dB) but no component reads it: grep over
+    src/ finds zero consumers.
+  - It is the most defensible single number for "the cross-pol gap widens over
+    a burn scar". Cheap next step: show it in the measurements table with the
+    same provenance caveat as the other dB values.
+
+NISAR recovery curves
+  - buildNisarSite() emits site.recovery.points when it has ≥2 post-event
+    calibrated passes; Recovery.jsx and ObservationTable.jsx do render
+    site.recovery when present.
+  - In practice the current snapshots have no multi-pass post-event series, so
+    the recovery section falls back to the Sentinel-based/demo curve. The NISAR
+    recovery path is effectively dormant: it needs a real time series, not a
+    before/after pair.
+  - The API also exposes GET /api/sites/:id/recovery, which reads the same
+    dormant object.
+
+Other observations
+  - /api/nisar/diag exists only when DEBUG_REAL=1 and was removed from Vercel
+    production (returns 404), by design.
+  - Method.jsx lists several routes with a leading slash style
+    (GET /sites/:id/recovery) while the server mounts them under /api; the
+    documentation is accurate only relative to the API base. Minor.
+  - `/api/live/refresh` is an unauthenticated POST that clears caches. Fine for
+    a demo, but it lets anyone force costly rebuilds; gate it before any real
+    traffic.
+
+===========================================================================
+4. DATA-PATH NOTE (affects every capability above)
+===========================================================================
+NASA Harmony's GCOV subsetter returned 0 bytes and timed out at 25 s for both
+study sites during this build (ASF search itself returns 22–24 granules and the
+Earthdata token is accepted). Public requests are capped at 12 s and fall back
+to live NISAR browse + Sentinel-1 COG, never to static fixtures.
+
+Because of that outage, the four HH·HV composites and the West Attica change
+statistics in this release were generated by scripts/build-nisar-snapshots.py,
+which reads the calibrated HHHH/HVHV gamma-0 arrays and the granule mask
+directly from the published ASF GCOV HDF5 granules over HTTPS byte ranges
+(25 s per-request cap, three granules in parallel). They are real calibrated
+measurements, not synthesised imagery; provenance strings were changed to
+`nisar-gcov-asf-h5` to say so. When Harmony recovers, the same script can be
+switched back to the subsetter without changing the snapshot format.

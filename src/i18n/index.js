@@ -195,7 +195,7 @@ const en = {
     cardViewHh: 'HH browse',
     cardViewRgb: 'HH·HV composite',
     cardViewRgbNote:
-      'Dual-pol intensity composite of the after pass (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition. The before card stays HH browse.',
+      'Dual-pol intensity composite of each pass (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition.',
     changeStatsLabel: 'Calibrated change',
     changeStatsValue: '{{changed}}% of valid pixels changed · mean ΔHH {{mean}} dB',
     changeStatsCaveat:
@@ -590,7 +590,7 @@ const ar = {
     cardViewHh: 'صورة HH',
     cardViewRgb: 'تركيب HH·HV',
     cardViewRgbNote:
-      'تركيب شدة ثنائي الاستقطاب لمرور ما بعد الحدث (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي. أما بطاقة ما قبل فتبقى صورة HH.',
+      'تركيب شدة ثنائي الاستقطاب لكل مرور (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي.',
     changeStatsLabel: 'تغيّر مُعايَر',
     changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · متوسط ΔHH {{mean}} ديسيبل',
     changeStatsCaveat:

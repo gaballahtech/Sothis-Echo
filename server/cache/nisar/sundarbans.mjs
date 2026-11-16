@@ -48,6 +48,13 @@ export const sundarbansSnapshot = {
     validPct: 97.5,
   },
   rgb: {
+    before: {
+      date: '2026-09-09',
+      granule:
+        'NISAR_L2_PR_GCOV_030_054_A_010_4005_DHDH_A_20260909T222101_20260909T222140_P05023_N_F_J_001',
+      width: 560,
+      height: 370,
+    },
     after: {
       date: '2026-09-21',
       granule:

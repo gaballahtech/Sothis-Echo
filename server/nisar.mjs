@@ -17,7 +17,9 @@ import zlib from 'node:zlib';
 import { spawn } from 'node:child_process';
 import { fromArrayBuffer } from 'geotiff';
 import { sundarbansSnapshot } from './cache/nisar/sundarbans.mjs';
-import { sundarbansAfterRgbBase64 } from './cache/nisar/sundarbans-rgb.mjs';
+import { caldorSnapshot } from './cache/nisar/caldor.mjs';
+import { sundarbansRgbBase64 } from './cache/nisar/sundarbans-rgb.mjs';
+import { caldorRgbBase64 } from './cache/nisar/caldor-rgb.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -336,7 +338,10 @@ async function harmonyGeoTiff(granule, bbox, variable) {
 /* Verified calibration snapshots (server/cache/nisar)                 */
 /* ------------------------------------------------------------------ */
 
-const SNAPSHOTS = new Map([[sundarbansSnapshot.site, sundarbansSnapshot]]);
+const SNAPSHOTS = new Map(
+  [sundarbansSnapshot, caldorSnapshot].map((snapshot) => [snapshot.site, snapshot])
+);
+const SNAPSHOT_RGB = { sundarbans: sundarbansRgbBase64, caldor: caldorRgbBase64 };
 
 /** Bundled GCOV telemetry for a site, or null when none was precomputed. */
 export function nisarSnapshot(siteId) {
@@ -357,8 +362,8 @@ export function nisarSnapshotCapabilities(siteId) {
 export function nisarSnapshotRgb(siteId, side) {
   const snapshot = nisarSnapshot(siteId);
   if (!snapshot?.rgb?.[side]) return null;
-  if (siteId !== 'sundarbans' || side !== 'after') return null;
-  return Buffer.from(sundarbansAfterRgbBase64, 'base64');
+  const encoded = SNAPSHOT_RGB[siteId]?.[side];
+  return encoded ? Buffer.from(encoded, 'base64') : null;
 }
 
 /* ------------------------------------------------------------------ */
