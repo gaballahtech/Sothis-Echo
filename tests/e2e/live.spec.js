@@ -60,10 +60,15 @@ test.describe('live calibrated NISAR contract', () => {
 
     await page.getByTestId('card-view-rgb').click();
     await expect(page.getByTestId('rgb-note')).toBeVisible();
-    const loaded = await page
-      .locator('#sites .scene-grid img')
-      .nth(1)
-      .evaluate((img) => img.complete && img.naturalWidth > 0);
-    expect(loaded).toBe(true);
+    await expect
+      .poll(
+        () =>
+          page
+            .locator('#sites .scene-grid img')
+            .nth(1)
+            .evaluate((img) => img.complete && img.naturalWidth > 0),
+        { timeout: 30_000 },
+      )
+      .toBe(true);
   });
 });
