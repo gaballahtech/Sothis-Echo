@@ -9,7 +9,7 @@ granule, masked by the granule's own `mask` dataset.
 
 Outputs (committed, bundled with the serverless function):
   server/cache/nisar/sundarbans-rgb.mjs   { before, after } base64 PNGs
-  server/cache/nisar/sundarbans-before-rgb.png
+  server/cache/nisar/sundarbans-{before,after}-rgb.png
   server/cache/nisar/caldor.mjs           change stats + measurements
   server/cache/nisar/caldor-rgb.mjs       { before, after } base64 PNGs
   server/cache/nisar/caldor-{before,after}-rgb.png
@@ -281,32 +281,32 @@ def main():
         catalog[site_id] = asf_granules(wkt)
         log(site_id, 'granules', len(catalog[site_id]))
 
-    # Sundarbans: only the before composite is missing; after stays as the
-    # previously verified Harmony-rendered PNG.
-    before_rgb = {}
+    # Both Sundarbans sides must be rendered from the same calibration window:
+    # the old after PNG came from a different crop and showed a different part
+    # of the coast, so the two cards could not be compared.
+    sundarbans_windows = {}
     caldor_windows = {}
 
-    def do_sundarbans_before():
-        grid = open_granule(granule_url(catalog['sundarbans'], SITES['sundarbans']['before']))
-        window = read_window(grid, calibration_bbox(SITES['sundarbans']), want_hv=True)
-        png = composite(window)
-        write_png('sundarbans-before-rgb.png', png)
-        return ('sundarbans', 'before', png)
+    def do_sundarbans(side):
+        grid = open_granule(granule_url(catalog['sundarbans'], SITES['sundarbans'][side]))
+        return (side, read_window(grid, calibration_bbox(SITES['sundarbans']), want_hv=True))
 
     def do_caldor(side):
         grid = open_granule(granule_url(catalog['caldor'], SITES['caldor'][side]))
-        window = read_window(grid, SITES['caldor']['bbox'], want_hv=True)
-        return (side, window)
+        return (side, read_window(grid, SITES['caldor']['bbox'], want_hv=True))
 
-    with ThreadPoolExecutor(max_workers=3) as pool:
-        futures = [pool.submit(do_sundarbans_before), pool.submit(do_caldor, 'before'), pool.submit(do_caldor, 'after')]
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        futures = [
+            pool.submit(do_sundarbans, 'before'), pool.submit(do_sundarbans, 'after'),
+            pool.submit(do_caldor, 'before'), pool.submit(do_caldor, 'after'),
+        ]
         for future in futures:
-            result = future.result()
-            if result[0] == 'sundarbans':
-                _, side, png = result
-                before_rgb[side] = png
+            family, (side, window) = future.result()
+            if family == 'sundarbans':
+                sundarbans_windows[side] = window
+                png = composite(window)
+                write_png(f'sundarbans-{side}-rgb.png', png)
             else:
-                side, window = result
                 caldor_windows[side] = window
                 png = composite(window)
                 write_png(f'caldor-{side}-rgb.png', png)
@@ -317,11 +317,10 @@ def main():
         path = os.path.join(CACHE, f'caldor-{side}-rgb.png')
         caldor_pngs[side] = open(path, 'rb').read()
 
-    existing = open(os.path.join(CACHE, 'sundarbans-rgb.mjs'), encoding='utf-8').read()
-    match = re.search(r"['\"]([A-Za-z0-9+/=]{100,})['\"]", existing)
-    if not match:
-        raise RuntimeError('could not read existing sundarbans after PNG')
-    sundarbans_pngs = {'before': before_rgb['before'], 'after': base64.b64decode(match.group(1))}
+    sundarbans_pngs = {
+        side: open(os.path.join(CACHE, f'sundarbans-{side}-rgb.png'), 'rb').read()
+        for side in ('before', 'after')
+    }
     write_rgb_module('sundarbans-rgb.mjs', 'sundarbansRgbBase64', sundarbans_pngs)
     write_rgb_module('caldor-rgb.mjs', 'caldorRgbBase64', caldor_pngs)
 
