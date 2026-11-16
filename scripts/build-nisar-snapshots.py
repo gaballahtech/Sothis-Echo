@@ -157,17 +157,37 @@ def stretch(value, low, high):
     return np.clip(np.round((value - low) / span * 255.0), 0, 255).astype(np.uint8)
 
 
-def composite(window):
+def composite_limits(windows):
+    """One radiometric stretch shared by every pass of a site."""
+    hh_db, hv_db, diff_db = [], [], []
+    for window in windows:
+        hh, hv, mask = window['hh'], window['hv'], window['mask']
+        valid = mask & np.isfinite(hh) & np.isfinite(hv) & (hh > 0) & (hv > 0)
+        hh_db.append(db(hh[valid]))
+        hv_db.append(db(hv[valid]))
+        diff_db.append(hh_db[-1] - hv_db[-1])
+    hh_db, hv_db, diff_db = (np.concatenate(part) for part in (hh_db, hv_db, diff_db))
+    return (
+        (js_percentile(hh_db, 2), js_percentile(hh_db, 98)),
+        (js_percentile(hv_db, 2), js_percentile(hv_db, 98)),
+        (js_percentile(diff_db, 2), js_percentile(diff_db, 98)),
+    )
+
+
+def composite(window, limits=None):
     hh, hv, mask = window['hh'], window['hv'], window['mask']
     valid = mask & np.isfinite(hh) & np.isfinite(hv) & (hh > 0) & (hv > 0)
     if not valid.any():
         raise RuntimeError('no valid pixels for composite')
-    hh_db = db(hh[valid])
-    hv_db = db(hv[valid])
-    diff_db = hh_db - hv_db
-    hh_lo, hh_hi = js_percentile(hh_db, 2), js_percentile(hh_db, 98)
-    hv_lo, hv_hi = js_percentile(hv_db, 2), js_percentile(hv_db, 98)
-    d_lo, d_hi = js_percentile(diff_db, 2), js_percentile(diff_db, 98)
+    if limits is None:
+        hh_db = db(hh[valid])
+        hv_db = db(hv[valid])
+        diff_db = hh_db - hv_db
+        hh_lo, hh_hi = js_percentile(hh_db, 2), js_percentile(hh_db, 98)
+        hv_lo, hv_hi = js_percentile(hv_db, 2), js_percentile(hv_db, 98)
+        d_lo, d_hi = js_percentile(diff_db, 2), js_percentile(diff_db, 98)
+    else:
+        (hh_lo, hh_hi), (hv_lo, hv_hi), (d_lo, d_hi) = limits
 
     height, width = hh.shape
     out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
@@ -304,12 +324,14 @@ def main():
             family, (side, window) = future.result()
             if family == 'sundarbans':
                 sundarbans_windows[side] = window
-                png = composite(window)
-                write_png(f'sundarbans-{side}-rgb.png', png)
             else:
                 caldor_windows[side] = window
                 png = composite(window)
                 write_png(f'caldor-{side}-rgb.png', png)
+
+    sundarbans_limits = composite_limits([sundarbans_windows['before'], sundarbans_windows['after']])
+    for side in ('before', 'after'):
+        write_png(f'sundarbans-{side}-rgb.png', composite(sundarbans_windows[side], sundarbans_limits))
 
     # Persist caldor composites.
     caldor_pngs = {}
