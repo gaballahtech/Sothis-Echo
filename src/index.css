@@ -1956,7 +1956,8 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   width: min(480px, calc(100vw - 24px));
 }
 
-/* Anchored spotlight tour card — sits beside the target, glides between steps.
+/* Docked spotlight tour card — always in the same place at the bottom of the
+   screen, whatever the step, so it never jumps around while reading.
    The veil is a hole cut over the highlighted control: the shadow dims the rest
    of the page while the target itself stays bright, clickable and keyboard-live. */
 .tour-spot-veil {
@@ -1974,17 +1975,19 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 .tour-spot {
   position: fixed;
   z-index: 60;
-  width: min(340px, calc(100vw - 24px));
+  left: 50%;
+  bottom: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%);
+  width: min(420px, calc(100vw - 24px));
   padding: 0;
-  transition:
-    top 0.42s var(--te-ease),
-    left 0.42s var(--te-ease),
-    opacity 0.2s ease;
-  will-change: top, left;
+  transition: opacity 0.2s ease;
 }
 
 .tour-spot .bp6-card {
   padding: 14px;
+  /* one height for every step, so the dock never nudges as the text changes */
+  min-height: 224px;
   background: var(--te-bg);
   backdrop-filter: blur(14px);
   border: 1px solid var(--te-border);
@@ -1998,7 +2001,6 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tour-spot,
   .tour-spot-veil {
     transition: none;
   }

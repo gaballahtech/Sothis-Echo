@@ -39,48 +39,22 @@ function markSeen() {
   }
 }
 
-const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
-
-const EDGE = 12; // keep the card off the viewport edge
-const GAP = 16; // distance between the highlighted control and the card
+const GAP = 16; // gap between the highlighted control and the docked card
+const TOP_PAD = 12; // keep the control off the top edge of the screen
 const SPOT_PAD = 8; // breathing room around the spotlight
 
-// Place the card beside the target first, then below/above it, so it never
-// covers the control the visitor is being asked to try.
-function computePlacement(el, card) {
-  const r = el.getBoundingClientRect();
-  const cw = card.offsetWidth || 340;
-  const ch = card.offsetHeight || 220;
-  const vw = document.documentElement.clientWidth || window.innerWidth;
+// The card is docked at the bottom for every step, so the only thing that can
+// move is how far the page scrolls: bring the control into the free band above
+// the card, and leave it alone when it is already there.
+function revealAboveDock(el, card) {
   const vh = window.innerHeight;
-  const maxLeft = Math.max(EDGE, vw - cw - EDGE);
-  const maxTop = Math.max(EDGE, vh - ch - EDGE);
-  const midTop = clamp(r.top + r.height / 2 - ch / 2, EDGE, maxTop);
-  const midLeft = clamp(r.left + r.width / 2 - cw / 2, EDGE, maxLeft);
-  const fits = (left, top) =>
-    left >= EDGE && top >= EDGE && left + cw <= vw - EDGE && top + ch <= vh - EDGE;
-
-  const candidates = [
-    { left: r.right + GAP, top: midTop }, // inline-end side
-    { left: r.left - cw - GAP, top: midTop }, // inline-start side
-    { left: midLeft, top: r.bottom + GAP }, // below
-    { left: midLeft, top: r.top - ch - GAP }, // above
-  ];
-  const placed = candidates.find((c) => fits(c.left, c.top));
-  if (placed) return placed;
-
-  // Last resort (a target that fills the viewport): dock in whichever corner
-  // the target leaves free, never centred over its controls.
-  const visible = {
-    left: clamp(r.left, 0, vw),
-    right: clamp(r.right, 0, vw),
-    top: clamp(r.top, 0, vh),
-    bottom: clamp(r.bottom, 0, vh),
-  };
-  return {
-    left: vw - visible.right >= visible.left ? maxLeft : EDGE,
-    top: vh - visible.bottom >= visible.top ? maxTop : EDGE,
-  };
+  const cardH = card?.offsetHeight || 240;
+  const limit = vh - cardH - GAP; // top edge of the docked card
+  const r = el.getBoundingClientRect();
+  if (r.top >= TOP_PAD && r.bottom <= limit) return 0;
+  const band = Math.max(1, limit - TOP_PAD);
+  const desired = TOP_PAD + Math.max(0, (band - r.height) / 2);
+  return Math.round(r.top - Math.min(desired, Math.max(TOP_PAD, limit - r.height)));
 }
 
 function spotRect(el) {
@@ -99,7 +73,6 @@ export default function GuidedTour() {
   const [active, setActive] = useState(false);
   const [prompt, setPrompt] = useState(false);
   const [step, setStep] = useState(0);
-  const [pos, setPos] = useState({ left: -9999, top: -9999 });
   const [spot, setSpot] = useState(null);
   const [ready, setReady] = useState(false);
   const cardRef = useRef(null);
@@ -145,7 +118,7 @@ export default function GuidedTour() {
     start();
   }, [request, start]);
 
-  // spotlight + anchored placement for the current step
+  // spotlight for the current step, with the control scrolled clear of the dock
   useEffect(() => {
     if (!active) return undefined;
     const el = targetEl(step);
@@ -156,26 +129,31 @@ export default function GuidedTour() {
     el.classList.add('tour-spot-highlight');
 
     const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
-    el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
     const place = () => {
-      if (!cardRef.current) return;
       setSpot(spotRect(el));
-      setPos(computePlacement(el, cardRef.current));
       setReady(true);
     };
+    const reveal = () => {
+      const delta = revealAboveDock(el, cardRef.current);
+      if (Math.abs(delta) > 1) {
+        window.scrollBy({ top: delta, behavior: reduce ? 'auto' : 'smooth' });
+      }
+    };
+    reveal();
     place();
-    const timer = setTimeout(place, reduce ? 60 : 420);
+    const timer = setTimeout(() => {
+      reveal();
+      place();
+    }, reduce ? 60 : 420);
     return () => clearTimeout(timer);
   }, [active, step]);
 
-  // keep the card glued to its target while the page scrolls or resizes
+  // keep the spotlight glued to its control while the page scrolls or resizes
   useEffect(() => {
     if (!active) return undefined;
     const reposition = () => {
       const el = targetEl(step);
-      if (!el) return;
-      setSpot(spotRect(el));
-      if (cardRef.current) setPos(computePlacement(el, cardRef.current));
+      if (el) setSpot(spotRect(el));
     };
     window.addEventListener('resize', reposition);
     window.addEventListener('scroll', reposition, { passive: true });
@@ -241,8 +219,6 @@ export default function GuidedTour() {
             role="dialog"
             aria-label={t('tour.stepLabel', { current: step + 1, total: STEPS.length })}
             style={{
-              left: pos.left,
-              top: pos.top,
               opacity: ready ? 1 : 0,
               pointerEvents: ready ? 'auto' : 'none',
             }}
