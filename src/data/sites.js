@@ -82,8 +82,8 @@ export const studyAreas = [
           ar: 'النباتات والمباني تبدد النبضة في اتجاهات كثيرة، فتبدو الأرض لامعة وذات نسيج. أما ماء الأنهار الأملس فداكن.',
         },
         polarization: {
-          en: 'VV: moderate — crops, soil and roofs. VH: higher over vegetation because leaves and branches twist the wave.',
-          ar: 'VV: متوسط — محاصيل وتربة وأسطح. VH: أعلى فوق النباتات لأن الأوراق والأغصان تلفّ الموجة.',
+          en: 'Co-pol: moderate — crops, soil and roofs. Cross-pol: higher over vegetation because leaves and branches twist the wave.',
+          ar: 'القطب المشترك: متوسط — محاصيل وتربة وأسطح. القطب المتقاطع: أعلى فوق النباتات لأن الأوراق والأغصان تلفّ الموجة.',
         },
       },
       after: {
@@ -99,12 +99,12 @@ export const studyAreas = [
           ar: 'خرج ماء الفيضان من القنوات وغمر السهل. غرقت البلدات والطرق وحقول الأرز لأيام.',
         },
         why: {
-          en: 'Open water is a near-perfect mirror at C-band: very dark. Buildings and tree crowns that remain above the surface still return energy, so the flood is a dark sheet with bright islands.',
-          ar: 'الماء المكشوف مرآة شبه تامة في نطاق C: داكن جدًا. أما المباني وتيجان الأشجار الباقية فوق السطح فتعيد الطاقة، فيبدو الفيضان طبقة داكنة ذات جزر لامعة.',
+          en: 'Open water is a near-perfect mirror at both C-band and L-band: very dark. Buildings and tree crowns that remain above the surface still return energy, so the flood is a dark sheet with bright islands.',
+          ar: 'الماء المكشوف مرآة شبه تامة في نطاقي C وL: داكن جدًا. أما المباني وتيجان الأشجار الباقية فوق السطح فتعيد الطاقة، فيبدو الفيضان طبقة داكنة ذات جزر لامعة.',
         },
         polarization: {
-          en: 'VV and VH both fall over open water. VH collapses first because the vegetation volume scattering is gone.',
-          ar: 'ينخفض VV وVH معًا فوق الماء المكشوف، وينهار VH أولًا لأن التشتت الحجمي للنباتات يختفي.',
+          en: 'Co-pol and cross-pol both fall over open water; cross-pol collapses first because the vegetation volume scattering is gone.',
+          ar: 'القطبان المشترك والمتقاطع ينخفضان معًا فوق الماء المكشوف، وينهار المتقاطع أولًا لأن التشتت الحجمي للنباتات يختفي.',
         },
       },
     },
@@ -149,13 +149,13 @@ export const studyAreas = [
     },
     contrast: {
       dominant: { en: 'Surface water + double bounce', ar: 'ماء سطحي + ارتداد مزدوج' },
-      signature: { en: 'Both fall over water; VH collapses', ar: 'ينخفضان فوق الماء، وVH أكثر' },
+      signature: { en: 'Both fall over water; cross-pol collapses', ar: 'ينخفضان فوق الماء، والمتقاطع أكثر' },
       timescale: { en: 'Weeks to months', ar: 'أسابيع إلى أشهر' },
     },
     researcher: {
       acquisition: {
-        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 13 Sep 2026 event for the site cards and time series; the radar/optical comparison uses a real NASA NISAR L-band (HH) browse image.',
-        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حدث 13 سبتمبر 2026 وبعده لبطاقات الموقع والسلسلة الزمنية؛ بينما تستخدم مقارنة الرادار/البصري صورة حقيقية من NASA NISAR L-band (HH).',
+        en: 'The before/after cards and the change map are real NASA NISAR L-band GCOV browse images: an HH browse from a DHDH granule, which carries HH and HV. The dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH), used as the public proxy until NISAR time series are openly available. Each card date is the acquisition date of the image shown.',
+        ar: 'بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NASA NISAR L-band GCOV: صورة HH من جرانول DHDH يحمل HH وHV. أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD الحقيقي (VV/VH)، وتُستخدم كبديل عام حتى تتاح سلاسل نيسار الزمنية. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
       },
       interpretation: [
         {
@@ -253,12 +253,12 @@ export const studyAreas = [
           ar: 'يغطي الصنوبر المتوسطي الناضج والشجيرات المنحدرات. التربة جافة بعد صيف بلا مطر، لكن المظلة سليمة.',
         },
         why: {
-          en: 'Needles, branches and trunks scatter the pulse in many directions. Volume scattering returns a strong, textured signal in both VV and VH.',
-          ar: 'تبدد الإبر والأغصان والجذوع النبضة في اتجاهات كثيرة. يعيد التشتت الحجمي إشارة قوية ذات نسيج في VV وVH معًا.',
+          en: 'Needles, branches and trunks scatter the pulse in many directions. Volume scattering returns a strong, textured signal in both co-pol and cross-pol.',
+          ar: 'تبدد الإبر والأغصان والجذوع النبضة في اتجاهات كثيرة. يعيد التشتت الحجمي إشارة قوية ذات نسيج في القطبين المشترك والمتقاطع معًا.',
         },
         polarization: {
-          en: 'VV: bright. VH: bright for a land surface — foliage twists the wave from vertical to horizontal.',
-          ar: 'VV: لامع. VH: لامع بالنسبة لسطح أرضي — الأوراق تلفّ الموجة من العمودي إلى الأفقي.',
+          en: 'Co-pol: bright. Cross-pol: bright for a land surface — foliage twists the wave from vertical to horizontal.',
+          ar: 'القطب المشترك: لامع. القطب المتقاطع: لامع بالنسبة لسطح أرضي — الأوراق تلفّ الموجة من العمودي إلى الأفقي.',
         },
       },
       after: {
@@ -274,12 +274,12 @@ export const studyAreas = [
           ar: 'أزال حريق التاج والاحتراق الشديد المظلة عبر مساحة الأثر. حلّ الرماد والتربة المكشوفة محل الإبر والأغصان.',
         },
         why: {
-          en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. VV drops hardest over the scorched strip; VH drops wherever the three-dimensional vegetation that twists the wave has actually disappeared.',
-          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. ينخفض VV بحدة فوق الشريط المحترق، وينخفض VH حيث تختفي فعلًا النباتات المجسّمة التي تلفّ الموجة.',
+          en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. Co-pol drops hardest over the scorched strip; cross-pol drops wherever the three-dimensional vegetation that twists the wave has actually disappeared.',
+          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. ينخفض القطب المشترك بحدة فوق الشريط المحترق، وينخفض المتقاطع حيث تختفي فعلًا النباتات المجسّمة التي تلفّ الموجة.',
         },
         polarization: {
-          en: 'VV falls with surface roughness, litter and soil moisture. VH only falls where the canopy itself was consumed — over a partly burned coastal strip it barely moves.',
-          ar: 'ينخفض VV مع خشونة السطح والغطاء الميت ورطوبة التربة. أما VH فلا ينخفض إلا حيث استُهلكت المظلة نفسها — وعلى شريط ساحلي محترق جزئيًا يكاد لا يتغيّر.',
+          en: 'Co-pol falls with surface roughness, litter and soil moisture. Cross-pol only falls where the canopy itself was consumed — over a partly burned coastal strip it barely moves.',
+          ar: 'ينخفض القطب المشترك مع خشونة السطح والغطاء الميت ورطوبة التربة. أما المتقاطع فلا ينخفض إلا حيث استُهلكت المظلة نفسها — وعلى شريط ساحلي محترق جزئيًا يكاد لا يتغيّر.',
         },
       },
     },
@@ -326,17 +326,17 @@ export const studyAreas = [
     },
     contrast: {
       dominant: { en: 'Volume scattering', ar: 'تشتت حجمي' },
-      signature: { en: 'Both channels fall; VV drops hard, VH follows', ar: 'تنخفض القناتان: VV بحدة وVH تبعًا' },
+      signature: { en: 'Both channels fall; co-pol drops hard, cross-pol follows', ar: 'تنخفض القناتان: المشترك بحدة والمتقاطع تبعًا' },
       timescale: { en: 'Years', ar: 'سنوات' },
     },
     researcher: {
       acquisition: {
-        en: 'Real Sentinel-1 C-band GRD (VV/VH) before and after the 31 Jul 2026 fire for the site cards and time series; the radar/optical comparison uses a real NASA NISAR L-band (HH) browse image.',
-        ar: 'بيانات Sentinel-1 C-band GRD الحقيقية (VV/VH) قبل حريق 31 يوليو 2026 وبعده لبطاقات الموقع والسلسلة الزمنية؛ بينما تستخدم مقارنة الرادار/البصري صورة حقيقية من NASA NISAR L-band (HH).',
+        en: 'The before/after cards and the change map are real NASA NISAR L-band GCOV browse images: an HH browse from a DHDH granule, which carries HH and HV. The dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH), used as the public proxy until NISAR time series are openly available. Each card date is the acquisition date of the image shown.',
+        ar: 'بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NASA NISAR L-band GCOV: صورة HH من جرانول DHDH يحمل HH وHV. أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD الحقيقي (VV/VH)، وتُستخدم كبديل عام حتى تتاح سلاسل نيسار الزمنية. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
       },
       interpretation: [
         {
-          en: 'In Mediterranean pine, VH is a more robust burn-severity indicator than VV because VV is contaminated by surface roughness, soil moisture and char. A VH drop of >5 dB is a strong canopy-loss signal.',
+          en: 'In Mediterranean pine, the C-band cross-pol (VH) of the series is a more robust burn-severity indicator than VV because VV is contaminated by surface roughness, soil moisture and char. A VH drop of >5 dB is a strong canopy-loss signal.',
           ar: 'في صنوبر البحر المتوسط، VH مؤشر أقوى لشدة الحرق من VV لأن VV يتأثر بخشونة السطح ورطوبة التربة والفحم. انخفاض VH أكثر من 5 ديسيبل إشارة قوية لفقدان المظلة.',
         },
         {

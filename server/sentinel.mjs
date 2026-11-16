@@ -1037,8 +1037,12 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         // comparison, where it is shown once.
         Object.assign(states[side], {
           // NISAR L-band is the primary card image whenever a granule exists;
-          // Sentinel-1 stays as the secondary fallback.
+          // Sentinel-1 stays as the secondary fallback. The card date must
+          // follow the image that is actually shown, so the Sentinel-1 pass
+          // date is kept separately for the time series.
           sentinelImageUrl: states[side].imageUrl,
+          sentinelDate: states[side].date,
+          date: (nisar.datetime || states[side].date || '').slice(0, 10),
           imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar`,
           attribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
           acquiredAt: nisar.datetime,

@@ -157,11 +157,13 @@ const en = {
         'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve. Change is |ΔVV| against the pre-event pass, scaled so 1.00 = 12 dB.',
     },
     dbNote:
-      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and live values are real Sentinel-1 GRD; the comparison radar layer is a real NASA NISAR L-band browse image.',
+      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and the change map are real NASA NISAR L-band (HH) browse images; the dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH).',
     dbNoteFallback:
       'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
+    acquisitionFallback:
+      'The backend is unreachable, so these scenes are the labelled offline fallback — no satellite acquisition is claimed.',
     interpretation: 'Interpretation',
     limits: 'Limits & failure modes',
     methods: 'Method',
@@ -527,11 +529,13 @@ const ar = {
         'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔVV| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
     },
     dbNote:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد والقيم الحية من Sentinel-1 GRD الحقيقي؛ بينما طبقة الرادار في المقارنة صورة حقيقية من NISAR L-band.',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NISAR L-band (HH)؛ أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD (VV/VH).',
     dbNoteFallback:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
+    acquisitionFallback:
+      'الخادم غير متاح، لذا هذه المشاهد احتياطية موسومة — ولا تُنسب إلى التقاط قمر صناعي.',
     interpretation: 'التفسير',
     limits: 'الحدود وأنماط الفشل',
     methods: 'المنهج',

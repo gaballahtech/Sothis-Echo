@@ -24,6 +24,15 @@ function formatDate(value, language) {
   }).format(date);
 }
 
+/* The tag on each card names the sensor behind that image, so the label, the
+   date and the file shown underneath always describe the same pass. */
+function sceneProduct(state) {
+  const product = state.product || '';
+  if (/nisar/i.test(product)) return 'NISAR L-band · HH';
+  if (/sentinel/i.test(product)) return 'Sentinel-1 C-band · VV';
+  return null;
+}
+
 function Coordinates({ site }) {
   const lat = Math.abs(site.coords.lat).toFixed(2);
   const lng = Math.abs(site.coords.lng).toFixed(2);
@@ -47,6 +56,9 @@ export default function StudyAreas() {
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
   if (!site) return null;
   const L = (value) => localized(value, language);
+  const nisar = /nisar/i.test(site.source || '') || Boolean(site.states?.after?.nisarImageUrl);
+  const coPol = nisar ? 'HH' : 'VV';
+  const crossPol = nisar ? 'HV' : 'VH';
 
   const downloadCsv = () => {
     const blob = new Blob([buildSiteCsv(site)], { type: 'text/csv;charset=utf-8' });
@@ -134,7 +146,7 @@ export default function StudyAreas() {
               const state = site.states[stateKey];
               return (
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
-                  <Panel title={`${L(state.label)} · ${state.date}`}>
+                  <Panel title={`${L(state.label)} · ${state.date}`} status={sceneProduct(state)}>
                     <SceneCanvas
                       site={site}
                       params={state.params}
@@ -190,19 +202,19 @@ export default function StudyAreas() {
                         <p className="body-copy-muted" style={{ margin: 0 }}>{L(site.states.after.polarization)}</p>
                         <div className="grid-2" style={{ marginTop: 12 }}>
                           <div className="stat">
-                            <div className="stat-label">VV</div>
+                            <div className="stat-label">{coPol}</div>
                             <p className="small" style={{ margin: 0 }}>
                               {language === 'ar'
-                                ? 'إرسال عمودي واستقبال عمودي — الماء المفتوح داكن، والأشجار قد تلمع.'
-                                : 'Vertical send, vertical receive — open water is dark, trunks can glow.'}
+                                ? 'القطب المشترك: إرسال واستقبال في الاتجاه نفسه — الماء المفتوح داكن، والجذوع قد تلمع.'
+                                : 'Co-polarised: send and receive in the same direction — open water is dark, trunks can glow.'}
                             </p>
                           </div>
                           <div className="stat">
-                            <div className="stat-label">VH</div>
+                            <div className="stat-label">{crossPol}</div>
                             <p className="small" style={{ margin: 0 }}>
                               {language === 'ar'
-                                ? 'إرسال عمودي واستقبال أفقي — قناة المظلة ثلاثية الأبعاد.'
-                                : 'Vertical send, horizontal receive — the 3-D canopy channel.'}
+                                ? 'القطب المتقاطع: إرسال عمودي واستقبال أفقي — قناة المظلة ثلاثية الأبعاد.'
+                                : 'Cross-polarised: vertical send, horizontal receive — the 3-D canopy channel.'}
                             </p>
                           </div>
                         </div>
@@ -256,7 +268,9 @@ export default function StudyAreas() {
                 <div className="stack">
                   <div>
                     <h4 className="micro">01 · {t('sites.acquisition')}</h4>
-                    <p className="body-copy-muted" style={{ margin: 0 }}>{L(site.researcher.acquisition)}</p>
+                    <p className="body-copy-muted" style={{ margin: 0 }}>
+                      {source === 'api' ? L(site.researcher.acquisition) : t('sites.acquisitionFallback')}
+                    </p>
                   </div>
                   <div>
                     <h4 className="micro">02 · {t('sites.interpretation')}</h4>
