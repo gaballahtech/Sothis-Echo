@@ -195,12 +195,14 @@ const en = {
     cardViewHh: 'HH browse',
     cardViewRgb: 'HH·HV composite',
     cardViewRgbNote:
-      'Dual-pol intensity composite (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition.',
+      'Dual-pol intensity composite of the after pass (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition. The before card stays HH browse.',
     changeStatsLabel: 'Calibrated change',
     changeStatsValue: '{{changed}}% of valid pixels changed · mean ΔHH {{mean}} dB',
     changeStatsCaveat:
       '|ΔdB| ≥ {{threshold}} dB on aligned HHHH grids, same track/frame · {{valid}}% valid pixels',
     changeStatsUnavailable: 'Calibrated change statistics are not available for this site right now.',
+    changeStatsSnapshot:
+      'Precomputed from a verified NISAR GCOV run on {{date}}; Harmony is not queried on this page load.',
   },
   sound: {
     title: 'See and hear the surface dance',
@@ -588,12 +590,14 @@ const ar = {
     cardViewHh: 'صورة HH',
     cardViewRgb: 'تركيب HH·HV',
     cardViewRgbNote:
-      'تركيب شدة ثنائي الاستقطاب (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي.',
+      'تركيب شدة ثنائي الاستقطاب لمرور ما بعد الحدث (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي. أما بطاقة ما قبل فتبقى صورة HH.',
     changeStatsLabel: 'تغيّر مُعايَر',
     changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · متوسط ΔHH {{mean}} ديسيبل',
     changeStatsCaveat:
       '|ΔdB| ≥ {{threshold}} ديسيبل على شبكات HHHH المتوائمة، المسار والإطار نفسيهما · {{valid}}% بكسلات صالحة',
     changeStatsUnavailable: 'إحصاءات التغيّر المُعايَرة غير متاحة لهذا الموقع الآن.',
+    changeStatsSnapshot:
+      'محسوبة مسبقًا من تشغيل NISAR GCOV موثّق بتاريخ {{date}}؛ ولا يُستعلم Harmony عند تحميل الصفحة.',
   },
   sound: {
     title: 'شاهد واسمع سطح الأرض يرقص',

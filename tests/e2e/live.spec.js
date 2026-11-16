@@ -20,7 +20,9 @@ test.describe('live calibrated NISAR contract', () => {
     expect(statusBody.data.calibratedBackscatter).toBe(true);
     expect(statusBody.data.capabilities).toMatchObject({ changeStats: true, rgbComposite: true });
 
-    const stats = await request.get('/api/nisar/change-stats?site=sundarbans', { timeout: 290_000 });
+    const statsStart = Date.now();
+    const stats = await request.get('/api/nisar/change-stats?site=sundarbans', { timeout: 30_000 });
+    expect(Date.now() - statsStart).toBeLessThan(5_000);
     expect(stats.status()).toBe(200);
     const statsBody = await stats.json();
     expect(statsBody.data.calibrated).toBe(true);
@@ -33,10 +35,12 @@ test.describe('live calibrated NISAR contract', () => {
     expect(statsBody.data.before.granule).toContain('GCOV');
     expect(statsBody.data.after.granule).toContain('GCOV');
 
+    const rgbStart = Date.now();
     const rgb = await request.get(
       '/api/scene-image?site=sundarbans&side=after&source=nisar&view=rgb',
-      { timeout: 290_000 },
+      { timeout: 30_000 },
     );
+    expect(Date.now() - rgbStart).toBeLessThan(5_000);
     expect(rgb.status()).toBe(200);
     expect(rgb.headers()['content-type']).toContain('image/png');
     expect((await rgb.body()).length).toBeGreaterThan(10_000);
@@ -58,7 +62,7 @@ test.describe('live calibrated NISAR contract', () => {
     await expect(page.getByTestId('rgb-note')).toBeVisible();
     const loaded = await page
       .locator('#sites .scene-grid img')
-      .first()
+      .nth(1)
       .evaluate((img) => img.complete && img.naturalWidth > 0);
     expect(loaded).toBe(true);
   });

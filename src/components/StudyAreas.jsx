@@ -205,13 +205,21 @@ export default function StudyAreas() {
                 <div key={stateKey} className="stack" style={{ gap: 0 }}>
                   <Panel
                     title={`${L(state.label)} · ${state.date}`}
-                    status={cardView === 'rgb' ? 'NISAR L-band · HH/HV' : sceneProduct(state)}
+                    status={
+                      cardView === 'rgb' && stateKey === 'after'
+                        ? 'NISAR L-band · HH/HV'
+                        : sceneProduct(state)
+                    }
                   >
                     <SceneCanvas
                       site={site}
                       params={state.params}
                       channel="radar"
-                      imageUrl={cardView === 'rgb' ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb') : state.imageUrl}
+                      imageUrl={
+                        cardView === 'rgb' && stateKey === 'after'
+                          ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb')
+                          : state.imageUrl
+                      }
                       alt={t('sites.ariaScene', { site: L(site.name), state: L(state.label) })}
                     />
                     <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
@@ -261,6 +269,11 @@ export default function StudyAreas() {
                         valid: changeStats.validPct,
                       })}
                     </p>
+                    {changeStats.snapshot ? (
+                      <p className="micro" style={{ margin: '2px 0 0' }}>
+                        {t('sites.changeStatsSnapshot', { date: changeStats.computedAt })}
+                      </p>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

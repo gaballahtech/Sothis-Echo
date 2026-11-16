@@ -16,6 +16,8 @@ import path from 'node:path';
 import zlib from 'node:zlib';
 import { spawn } from 'node:child_process';
 import { fromArrayBuffer } from 'geotiff';
+import { sundarbansSnapshot } from './cache/nisar/sundarbans.mjs';
+import { sundarbansAfterRgbBase64 } from './cache/nisar/sundarbans-rgb.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -25,12 +27,31 @@ const PROVISIONAL = 'C2854338529-ASF';
 const CACHE_DIR = path.join(os.tmpdir(), 'nisar');
 const CACHE_TTL = 6 * 60 * 60 * 1000;
 const DEBUG = process.env.DEBUG_REAL === '1';
+// Harmony's NISAR extraction can queue indefinitely. Public requests must never
+// wait on it: 12 s, then fall back to browse + Sentinel.
+const HARMONY_TIMEOUT = Number(process.env.HARMONY_TIMEOUT_SECONDS || 12);
 const log = (...args) => {
   if (DEBUG) console.error('[nisar]', ...args);
 };
 
 const cache = new Map();
 const clamp01 = (value) => Math.max(0, Math.min(1, value));
+
+/**
+ * A ~5.5 km window around the study point. Calibrated Harmony subsets are
+ * computed for this window instead of the full site bbox: gamma-0 arrays for a
+ * 27×22 km box are ~6 M pixels per polarisation and push Harmony past the
+ * serverless time budget, while the cards and the Sentinel series describe the
+ * 5 km window anyway.
+ */
+export function calibrationWindow(site) {
+  const lat = Number(site?.coords?.lat);
+  const lng = Number(site?.coords?.lng);
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return null;
+  const dLat = 0.025;
+  const dLng = 0.025 / Math.max(0.2, Math.cos((lat * Math.PI) / 180));
+  return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
+}
 
 function bboxFromWkt(wkt) {
   const match = String(wkt || '').match(/POLYGON\s*\(\((.*)\)\)/i);
@@ -247,7 +268,9 @@ export function cropForWindow(quad, window) {
 }
 
 async function harmonyGeoTiff(granule, bbox, variable) {
-  const tag = `${granule.granuleName}_${variable.split('/').pop()}`;
+  // The cache key must include the window: a 5 km calibration window and a
+  // whole-footprint subset are different rasters of the same granule.
+  const tag = `${granule.granuleName}_${variable.split('/').pop()}_${bbox.map((n) => n.toFixed(3)).join('_')}`;
   const file = path.join(CACHE_DIR, `${tag}.tif`);
   try {
     return await fs.readFile(file);
@@ -280,7 +303,7 @@ async function harmonyGeoTiff(granule, bbox, variable) {
       '-H',
       `Authorization: Bearer ${token}`,
       '--max-time',
-      '230',
+      String(HARMONY_TIMEOUT),
       '-o',
       temp,
       '-w',
@@ -307,6 +330,35 @@ async function harmonyGeoTiff(granule, bbox, variable) {
   }
   await fs.rename(temp, file);
   return fs.readFile(file);
+}
+
+/* ------------------------------------------------------------------ */
+/* Verified calibration snapshots (server/cache/nisar)                 */
+/* ------------------------------------------------------------------ */
+
+const SNAPSHOTS = new Map([[sundarbansSnapshot.site, sundarbansSnapshot]]);
+
+/** Bundled GCOV telemetry for a site, or null when none was precomputed. */
+export function nisarSnapshot(siteId) {
+  return SNAPSHOTS.get(siteId) || null;
+}
+
+/** Which card sides have a bundled dual-pol composite. */
+export function nisarSnapshotCapabilities(siteId) {
+  const snapshot = nisarSnapshot(siteId);
+  return {
+    changeStats: Boolean(snapshot?.changeStats),
+    rgb: { before: Boolean(snapshot?.rgb?.before), after: Boolean(snapshot?.rgb?.after) },
+    computedAt: snapshot?.computedAt || null,
+  };
+}
+
+/** Pre-rendered HH·HV composite bytes, or null when not bundled. */
+export function nisarSnapshotRgb(siteId, side) {
+  const snapshot = nisarSnapshot(siteId);
+  if (!snapshot?.rgb?.[side]) return null;
+  if (siteId !== 'sundarbans' || side !== 'after') return null;
+  return Buffer.from(sundarbansAfterRgbBase64, 'base64');
 }
 
 /* ------------------------------------------------------------------ */
@@ -552,7 +604,7 @@ export function changeStatsFromRasters(beforeRaster, afterRaw, thresholdDb = 3) 
  * Sign convention: delta = after − before, threshold on |delta| in dB.
  */
 export async function computeNisarChangeStats(site, { start, end, eventDate, thresholdDb = 3 }) {
-  const bbox = site.bbox || bboxFromWkt(site.wkt);
+  const bbox = calibrationWindow(site) || site.bbox || bboxFromWkt(site.wkt);
   if (!bbox) return null;
   const granules = await asfSearch({ wkt: site.wkt, start, end });
   const picked = pickGranules(granules, eventDate, 2);
@@ -620,7 +672,7 @@ function stretch(values, low, high) {
 }
 
 export async function renderNisarRgb(site, { side = 'after', start, end, eventDate }) {
-  const bbox = site.bbox || bboxFromWkt(site.wkt);
+  const bbox = calibrationWindow(site) || site.bbox || bboxFromWkt(site.wkt);
   const granuleName = site?.states?.[side]?.nisarGranule || null;
   if (!granuleName) return null;
   const granule = await findGranule(site, granuleName, { start, end });
@@ -686,6 +738,33 @@ export async function renderNisarRgb(site, { side = 'after', start, end, eventDa
   return png;
 }
 
+/**
+ * Debug-only probe: is the Earthdata token accepted by Harmony, and does one
+ * small HH subset come back? Never exposed unless DEBUG_REAL=1.
+ */
+export async function probeHarmony(site, { start, end, eventDate }) {
+  const started = Date.now();
+  const token = process.env.EARTHDATA_TOKEN;
+  const result = { token: Boolean(token), tokenLength: token ? token.length : 0 };
+  try {
+    const granules = await asfSearch({ wkt: site.wkt, start, end });
+    result.granules = granules.length;
+    const picked = pickGranules(granules, eventDate, 2);
+    result.picked = picked.map((item) => item.granuleName);
+    if (!picked.length) return { ...result, ok: false, error: 'no granule pair' };
+    const bbox = site.bbox || bboxFromWkt(site.wkt);
+    const tiny = [bbox[0], bbox[1], bbox[0] + 0.02, bbox[1] + 0.02];
+    const buffer = await harmonyGeoTiff(picked[0], tiny, HH_PATH);
+    result.bytes = buffer.length;
+    result.ok = true;
+  } catch (error) {
+    result.ok = false;
+    result.error = error?.message || String(error);
+  }
+  result.elapsedMs = Date.now() - started;
+  return result;
+}
+
 export function clearNisarArrayCache() {
   arrayCache.clear();
   arrayBytes = 0;
@@ -723,12 +802,16 @@ function pickGranules(granules, eventDate, max = 4) {
   // Keep the closest pass on each side, then fill evenly up to max.
   const picked = [best.before[best.before.length - 1], best.after[0]];
   const rest = best.sorted.filter((item) => !picked.includes(item));
-  const side = Math.max(1, Math.floor((max - 2) / 2));
-  const extrasBefore = rest
-    .filter((item) => new Date(item.startTime).getTime() <= event)
-    .slice(-side);
-  const extrasAfter = rest.filter((item) => new Date(item.startTime).getTime() > event).slice(0, side);
-  picked.push(...extrasBefore, ...extrasAfter);
+  const side = Math.max(0, Math.floor((max - 2) / 2));
+  if (side > 0) {
+    const extrasBefore = rest
+      .filter((item) => new Date(item.startTime).getTime() <= event)
+      .slice(-side);
+    const extrasAfter = rest
+      .filter((item) => new Date(item.startTime).getTime() > event)
+      .slice(0, side);
+    picked.push(...extrasBefore, ...extrasAfter);
+  }
   return picked
     .filter((item, index, array) => array.indexOf(item) === index)
     .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
@@ -790,7 +873,7 @@ export async function buildNisarSite(site, { start, end, eventDate }) {
   if (cached?.promise) return cached.promise;
 
   const promise = (async () => {
-    const bbox = site.bbox || bboxFromWkt(site.wkt);
+    const bbox = calibrationWindow(site) || site.bbox || bboxFromWkt(site.wkt);
     if (!bbox) return null;
     const granules = await asfSearch({ wkt: site.wkt, start, end });
     const picked = pickGranules(granules, eventDate, Number(process.env.NISAR_MAX_SCENES || 4));

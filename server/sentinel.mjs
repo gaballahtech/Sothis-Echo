@@ -10,7 +10,13 @@
  */
 import zlib from 'node:zlib';
 import { fromUrl } from 'geotiff';
-import { buildNisarBrowse, buildNisarSite, comparisonCrops, cropForWindow } from './nisar.mjs';
+import {
+  buildNisarBrowse,
+  buildNisarSite,
+  comparisonCrops,
+  cropForWindow,
+  nisarSnapshotCapabilities,
+} from './nisar.mjs';
 
 const STAC_URL = 'https://earth-search.aws.element84.com/v1/search';
 const COLLECTION = 'sentinel-1-grd';
@@ -640,8 +646,12 @@ function attachNisarCards(states, site, browse, { calibrated = false } = {}) {
 }
 
 /** Explicit per-panel provenance: which sensor feeds the images vs the numbers. */
-function buildProvenance(states, nisarBrowse) {
+function buildProvenance(site, states, nisarBrowse) {
   const gcovOn = process.env.NISAR_GCOV === '1';
+  // A precomputed GCOV snapshot makes the stats/RGB controls usable even when
+  // the Harmony queue is unavailable, so gate the UI on real data, not the env.
+  const caps = nisarSnapshotCapabilities(site.id);
+  const rgbAvailable = gcovOn && (caps.rgb.after || caps.rgb.before);
   return {
     cards: nisarBrowse
       ? {
@@ -651,8 +661,10 @@ function buildProvenance(states, nisarBrowse) {
           polarizations: ['HH'],
           product: 'GCOV HH browse (PNG)',
           calibrated: false,
-          rgbComposite: gcovOn,
-          changeStats: gcovOn,
+          rgbComposite: rgbAvailable,
+          rgbSides: caps.rgb,
+          changeStats: gcovOn && caps.changeStats,
+          calibrationSnapshot: caps.computedAt,
           granules: {
             before: states.before?.nisarGranule ?? null,
             after: states.after?.nisarGranule ?? null,
@@ -702,7 +714,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     // The calibrated path is slower (Harmony queue + subsets). Cap it so a
     // stuck job cannot eat the whole invocation; the browse/Sentinel record is
     // still served and provenance says calibrated:false.
-    const budget = Number(process.env.NISAR_GCOV_BUDGET_MS || 150000);
+    const budget = Number(process.env.NISAR_GCOV_BUDGET_MS || 15000);
     const nisarCalibrated =
       process.env.NISAR_GCOV === '1'
         ? await Promise.race([
@@ -1131,7 +1143,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         dateAfter: afterScene.date,
         source: 'sentinel-1-cog-relative-db',
       },
-      provenance: buildProvenance(states, nisarBrowse),
+      provenance: buildProvenance(site, states, nisarBrowse),
       series,
       pulse: resample16(changes),
       stablePulse: resample16(stableChanges),

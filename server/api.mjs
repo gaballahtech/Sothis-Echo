@@ -24,6 +24,9 @@ import { buildRealSite, clearRealCache, renderChangeCrop, renderSceneCrop } from
 import {
   clearNisarCache,
   computeNisarChangeStats,
+  nisarSnapshot,
+  nisarSnapshotRgb,
+  probeHarmony,
   renderNisarChange,
   renderNisarCrop,
   renderNisarRgb,
@@ -589,6 +592,22 @@ export async function handleRequest(req, res) {
       return;
     }
 
+    if (path === '/api/nisar/diag') {
+      if (process.env.DEBUG_REAL !== '1') {
+        sendError(res, 404, 'Not found');
+        return;
+      }
+      const siteId = url.searchParams.get('site');
+      const site = studyAreas.find((item) => item.id === siteId);
+      if (!site) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const diag = await probeHarmony(site, { ...siteWindow(site), eventDate: site.eventDate });
+      send(res, 200, { data: { calibratedFlag: process.env.NISAR_GCOV === '1', ...diag }, success: true });
+      return;
+    }
+
     if (path === '/api/nisar/change-stats') {
       if (process.env.NISAR_GCOV !== '1') {
         sendError(res, 409, 'Calibrated NISAR GCOV is disabled (NISAR_GCOV != 1)');
@@ -601,14 +620,23 @@ export async function handleRequest(req, res) {
         return;
       }
       const threshold = Number(url.searchParams.get('threshold') || 3);
-      const stats = await computeNisarChangeStats(site, {
-        ...siteWindow(site),
-        eventDate: site.eventDate,
-        thresholdDb: Number.isFinite(threshold) ? Math.max(0.5, Math.min(20, threshold)) : 3,
-      }).catch((error) => {
-        console.error('[SOTHIS API] change stats failed', siteId, error?.message);
-        return null;
-      });
+      const snapshot = nisarSnapshot(siteId);
+      let stats = null;
+      // The bundled snapshot answers in milliseconds. Live Harmony is opt-in so
+      // a queued job can never stall a page request.
+      if (url.searchParams.get('live') === '1') {
+        stats = await computeNisarChangeStats(site, {
+          ...siteWindow(site),
+          eventDate: site.eventDate,
+          thresholdDb: Number.isFinite(threshold) ? Math.max(0.5, Math.min(20, threshold)) : 3,
+        }).catch((error) => {
+          console.error('[SOTHIS API] change stats failed', siteId, error?.message);
+          return null;
+        });
+      }
+      if (!stats && snapshot?.changeStats) {
+        stats = { ...snapshot.changeStats, snapshot: true, computedAt: snapshot.computedAt };
+      }
       if (!stats) {
         sendError(res, 503, 'Calibrated change statistics are not available for this site right now');
         return;
@@ -642,6 +670,22 @@ export async function handleRequest(req, res) {
         sendError(res, 409, 'RGB composite needs calibrated NISAR GCOV (NISAR_GCOV != 1)');
         return;
       }
+      // A bundled composite is answered before any archive/Harmony work.
+      if (view === 'rgb' && url.searchParams.get('live') !== '1') {
+        const ready = nisarSnapshotRgb(siteId, side === 'before' ? 'before' : 'after');
+        if (ready) {
+          res.writeHead(200, {
+            'Content-Type': 'image/png',
+            'Content-Length': ready.length,
+            'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+            'Access-Control-Allow-Origin': resolveOrigin(req),
+            'X-Nisar-View': 'dual-pol-intensity-composite',
+            'X-Nisar-Source': 'snapshot',
+          });
+          res.end(ready);
+          return;
+        }
+      }
       // Building the site registers the two real passes this image is drawn
       // from; a cold request pays one build, afterwards the crop is cached.
       const sites = await getSites();
@@ -657,14 +701,20 @@ export async function handleRequest(req, res) {
           sendError(res, 404, 'Unknown site');
           return;
         }
-        const png = await renderNisarRgb(site, {
-          ...siteWindow(study),
-          side: rgbSide,
-          eventDate: study.eventDate,
-        }).catch((error) => {
-          console.error('[SOTHIS API] NISAR RGB failed', siteId, error?.message);
-          return null;
-        });
+        let png = null;
+        let source = 'snapshot';
+        if (url.searchParams.get('live') === '1') {
+          png = await renderNisarRgb(site, {
+            ...siteWindow(study),
+            side: rgbSide,
+            eventDate: study.eventDate,
+          }).catch((error) => {
+            console.error('[SOTHIS API] NISAR RGB failed', siteId, error?.message);
+            return null;
+          });
+          source = png ? 'live-gcov' : 'snapshot';
+        }
+        if (!png) png = nisarSnapshotRgb(siteId, rgbSide);
         if (!png) {
           sendError(res, 503, 'RGB composite could not be rendered from calibrated GCOV');
           return;
@@ -675,6 +725,7 @@ export async function handleRequest(req, res) {
           'Cache-Control': 'public, max-age=86400, s-maxage=86400',
           'Access-Control-Allow-Origin': resolveOrigin(req),
           'X-Nisar-View': 'dual-pol-intensity-composite',
+          'X-Nisar-Source': source,
         });
         res.end(png);
         return;
