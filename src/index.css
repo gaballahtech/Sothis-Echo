@@ -10,6 +10,7 @@
 :root {
   color-scheme: light;
   --te-bg: #f7f6f2;
+  --te-bg-rgb: 247 246 242;
   --te-surface: #fbfaf7;
   --te-ink: #1c1c1c;
   --te-ink-soft: #3f3e3a;
@@ -17,6 +18,7 @@
   --te-accent: #3d7068;
   --te-accent-hover: #315c55;
   --te-accent-active: #284d47;
+  --te-accent-ink: #ffffff;
   --te-border: #e5e4de;
   --te-wash: #f1efe9;
   --te-guide: rgba(28, 28, 28, 0.055);
@@ -31,8 +33,26 @@
 
 /* Blueprint surfaces, intent and typography are re-pointed at the same system,
    so portaled components (dialog, drawer, popover, tooltip) stay on-palette. */
+html[data-theme='dark'] {
+  color-scheme: dark;
+  --te-bg: #151513;
+  --te-bg-rgb: 21 21 19;
+  --te-surface: #1c1c19;
+  --te-ink: #f3f0e7;
+  --te-ink-soft: #d8d4c8;
+  --te-muted: #a9a59a;
+  --te-accent: #7ec8b8;
+  --te-accent-hover: #98d7c9;
+  --te-accent-active: #b3e4d8;
+  --te-accent-ink: #10201c;
+  --te-border: #32322c;
+  --te-wash: #232320;
+  --te-guide: rgba(243, 240, 231, 0.06);
+}
+
 :root,
 .bp6-light,
+.bp6-dark,
 body {
   --bp-typography-family-default: var(--te-body);
   --bp-typography-family-mono: var(--te-mono);
@@ -44,10 +64,10 @@ body {
   --bp-intent-primary-rest: var(--te-accent);
   --bp-intent-primary-hover: var(--te-accent-hover);
   --bp-intent-primary-active: var(--te-accent-active);
-  --bp-intent-primary-foreground: #ffffff;
+  --bp-intent-primary-foreground: var(--te-accent-ink);
   --bp-surface-background-color-default-rest: var(--te-surface);
   --bp-surface-background-color-default-hover: var(--te-wash);
-  --bp-surface-background-color-default-active: #e9e6de;
+  --bp-surface-background-color-default-active: var(--te-wash);
   --bp-surface-border-color-default: var(--te-border);
   --bp-surface-border-color-strong: var(--te-border);
   --bp-surface-border-radius: 0;
@@ -133,13 +153,38 @@ a {
   color: var(--te-accent);
 }
 
+/* Keyboard users land here first: the link stays out of the way until focused. */
+.skip-link {
+  position: fixed;
+  top: 8px;
+  inset-inline-start: 8px;
+  z-index: 100;
+  padding: 10px 14px;
+  color: var(--te-accent-ink);
+  background: var(--te-accent);
+  border: 1px solid var(--te-accent-active);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-200%);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+/* One visible ring everywhere, not just on the components that remembered. */
+:focus-visible {
+  outline: 2px solid var(--te-accent);
+  outline-offset: 2px;
+}
+
 a:hover {
   color: var(--te-accent-hover);
 }
 
 ::selection {
   background: var(--te-accent);
-  color: #ffffff;
+  color: var(--te-accent-ink);
 }
 
 .app-shell {
@@ -714,7 +759,7 @@ li,
 }
 
 .site-choice .bp6-button[aria-pressed='true'] {
-  color: #ffffff;
+  color: var(--te-accent-ink);
   background: var(--te-accent);
   border-color: var(--te-accent);
 }
@@ -846,12 +891,12 @@ li,
 /* Scrim that keeps the hero copy legible over the footage, plus a bottom fade
    so the video dissolves into the section below instead of ending on a seam. */
 .hero-media::after {
-  --hero-scrim: linear-gradient(90deg, rgba(247, 246, 242, 0.97) 0%, rgba(247, 246, 242, 0.93) 34%, rgba(247, 246, 242, 0.66) 58%, rgba(247, 246, 242, 0.1) 84%, rgba(247, 246, 242, 0) 100%);
+  --hero-scrim: linear-gradient(90deg, rgb(var(--te-bg-rgb) / 0.97) 0%, rgb(var(--te-bg-rgb) / 0.93) 34%, rgb(var(--te-bg-rgb) / 0.66) 58%, rgb(var(--te-bg-rgb) / 0.1) 84%, rgb(var(--te-bg-rgb) / 0) 100%);
   position: absolute;
   inset: 0;
   content: '';
   background-image:
-    linear-gradient(180deg, rgba(247, 246, 242, 0) 60%, rgba(247, 246, 242, 0.5) 84%, var(--te-bg) 100%),
+    linear-gradient(180deg, rgb(var(--te-bg-rgb) / 0) 60%, rgb(var(--te-bg-rgb) / 0.5) 84%, var(--te-bg) 100%),
     var(--hero-scrim);
 }
 
@@ -865,7 +910,7 @@ li,
 
 /* Arabic mirrors the footage so its motion reads with the right-to-left copy. */
 [dir='rtl'] .hero-media::after {
-  --hero-scrim: linear-gradient(270deg, rgba(247, 246, 242, 0.97) 0%, rgba(247, 246, 242, 0.93) 34%, rgba(247, 246, 242, 0.66) 58%, rgba(247, 246, 242, 0.1) 84%, rgba(247, 246, 242, 0) 100%);
+  --hero-scrim: linear-gradient(270deg, rgb(var(--te-bg-rgb) / 0.97) 0%, rgb(var(--te-bg-rgb) / 0.93) 34%, rgb(var(--te-bg-rgb) / 0.66) 58%, rgb(var(--te-bg-rgb) / 0.1) 84%, rgb(var(--te-bg-rgb) / 0) 100%);
 }
 
 [dir='rtl'] .hero-video {
@@ -1037,7 +1082,7 @@ li,
   justify-content: center;
   width: 34px;
   height: 28px;
-  color: #ffffff;
+  color: var(--te-accent-ink);
   background: var(--te-accent);
   border: 1px solid var(--te-accent-active);
   border-radius: 0;
@@ -1099,18 +1144,18 @@ li,
 }
 
 .site-tabs .bp6-button[aria-selected='true'] {
-  color: #ffffff !important;
+  color: var(--te-accent-ink) !important;
   background: var(--te-accent) !important;
   border: 1px solid var(--te-accent) !important;
 }
 
 .site-tabs .bp6-button[aria-selected='true'] .bp6-icon {
-  color: #ffffff !important;
-  fill: #ffffff !important;
+  color: var(--te-accent-ink) !important;
+  fill: var(--te-accent-ink) !important;
 }
 
 .site-tabs .bp6-button[aria-selected='true'] .site-tab-content span {
-  color: #ffffff !important;
+  color: var(--te-accent-ink) !important;
   opacity: 1 !important;
 }
 
@@ -1527,7 +1572,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   margin-top: 6px;
   overflow: hidden;
   border-block: 1px solid var(--te-border);
-  background: #f2efe9;
+  background: var(--te-wash);
   /* break out of .section-inner to the full width of the page */
   width: calc(100% + 104px);
   margin-inline: -52px;
@@ -2035,7 +2080,7 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
 }
 
 .bp6-button.bp6-intent-primary {
-  color: #ffffff;
+  color: var(--te-accent-ink);
   background-color: var(--te-accent);
   border: 1px solid var(--te-accent);
   box-shadow: none;
@@ -2128,6 +2173,32 @@ table.bp6-html-table.bp6-html-table-striped tbody tr:nth-child(odd) td {
   color: #8e292c !important;
   background: rgba(142, 41, 44, 0.07) !important;
   border-color: rgba(142, 41, 44, 0.26) !important;
+}
+
+/* Intent tags are tuned for paper; on the night palette the same ink values
+   sink into the surface, so each intent gets a lighter twin. */
+html[data-theme='dark'] .bp6-tag.bp6-intent-primary {
+  color: var(--te-accent) !important;
+  background: color-mix(in srgb, var(--te-accent) 12%, transparent) !important;
+  border-color: color-mix(in srgb, var(--te-accent) 34%, transparent) !important;
+}
+
+html[data-theme='dark'] .bp6-tag.bp6-intent-success {
+  color: #86d6a6 !important;
+  background: rgba(134, 214, 166, 0.1) !important;
+  border-color: rgba(134, 214, 166, 0.3) !important;
+}
+
+html[data-theme='dark'] .bp6-tag.bp6-intent-warning {
+  color: #e8bd72 !important;
+  background: rgba(232, 189, 114, 0.12) !important;
+  border-color: rgba(232, 189, 114, 0.32) !important;
+}
+
+html[data-theme='dark'] .bp6-tag.bp6-intent-danger {
+  color: #ef9a96 !important;
+  background: rgba(239, 154, 150, 0.12) !important;
+  border-color: rgba(239, 154, 150, 0.32) !important;
 }
 
 /* ---------- Tabs and disclosure ---------- */
@@ -2375,7 +2446,7 @@ button,
 
 @media (max-width: 900px) {
   .hero-media::after {
-    --hero-scrim: linear-gradient(180deg, rgba(247, 246, 242, 0.96) 0%, rgba(247, 246, 242, 0.86) 50%, rgba(247, 246, 242, 0.52) 100%);
+    --hero-scrim: linear-gradient(180deg, rgb(var(--te-bg-rgb) / 0.96) 0%, rgb(var(--te-bg-rgb) / 0.86) 50%, rgb(var(--te-bg-rgb) / 0.52) 100%);
   }
 
   .hero-video {

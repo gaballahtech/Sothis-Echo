@@ -9,6 +9,7 @@ import {
 } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
+import { useTheme } from '../context/ThemeContext';
 import { useActiveSection } from '../utils/useActiveSection';
 import { NAV_ITEMS } from '../data/navigation';
 import { NavigationMenu } from './NavigationMenu';
@@ -16,6 +17,7 @@ import { NavigationMenu } from './NavigationMenu';
 export default function Navbar() {
   const { t } = useTranslation();
   const { language, toggleLanguage } = useLanguage();
+  const { isDark, toggle: toggleTheme } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
   const active = useActiveSection(NAV_ITEMS.map((item) => item.id));
 
@@ -43,6 +45,16 @@ export default function Navbar() {
         </NavbarGroup>
 
         <NavbarGroup align={Alignment.END} className="navbar-end">
+          <Button
+            className="theme-toggle"
+            variant="outlined"
+            small
+            icon={isDark ? 'flash' : 'moon'}
+            onClick={toggleTheme}
+            aria-pressed={isDark}
+            aria-label={isDark ? t('navbar.toLight') : t('navbar.toDark')}
+            data-testid="theme-toggle"
+          />
           <Button
             className="language-toggle"
             variant="outlined"

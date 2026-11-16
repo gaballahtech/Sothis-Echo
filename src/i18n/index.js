@@ -18,6 +18,8 @@ const en = {
     home: 'Overview',
     team: 'Team',
     switchLanguage: 'Switch to Arabic',
+    toDark: 'Switch to night mode',
+    toLight: 'Switch to day mode',
   },
   hero: {
     title: 'Earth is always dancing.',
@@ -362,6 +364,7 @@ const en = {
     retry: 'Retry',
     checkingLive: 'Reading live Sentinel-1 record…',
     sitePicker: 'Study area',
+    skipToContent: 'Skip to main content',
     demoBanner:
       'Demo mode — the backend is not connected, so the values below are illustrative. Start `npm run api` for real Sentinel-1 data.',
   },
@@ -384,6 +387,8 @@ const ar = {
     home: 'نظرة عامة',
     team: 'الفريق',
     switchLanguage: 'التبديل إلى الإنجليزية',
+    toDark: 'التبديل إلى الوضع الليلي',
+    toLight: 'التبديل إلى الوضع النهاري',
   },
   hero: {
     title: 'الأرض ترقص دائمًا.',
@@ -725,6 +730,7 @@ const ar = {
     retry: 'إعادة المحاولة',
     checkingLive: 'جارٍ قراءة سجل Sentinel-1 الحيّ…',
     sitePicker: 'منطقة الدراسة',
+    skipToContent: 'تخطَّ إلى المحتوى الرئيسي',
     demoBanner:
       'وضع تجريبي — الباك اند غير متصل، والقيم أدناه توضيحية. شغّل `npm run api` لبيانات Sentinel-1 الحقيقية.',
   },

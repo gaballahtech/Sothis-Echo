@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { OverlaysProvider } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
 import { TourProvider } from './context/TourContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -22,6 +23,7 @@ import './index.css';
 
 function AppContent() {
   const { language } = useLanguage();
+  const { isDark } = useTheme();
   const { t } = useTranslation();
   const { source, loading } = useSiteData();
 
@@ -30,7 +32,10 @@ function AppContent() {
   }, [language, t]);
 
   return (
-    <div className="bp6-light app-shell">
+    <div className={`${isDark ? 'bp6-dark' : 'bp6-light'} app-shell`}>
+      <a className="skip-link" href="#main-content">
+        {t('common.skipToContent')}
+      </a>
       <Navbar />
       {!loading && source !== 'api' ? (
         <div className="demo-banner" role="status">
@@ -39,7 +44,7 @@ function AppContent() {
       ) : null}
       <div className="app-frame">
         <Sidebar />
-        <main id="main-content" className="app-main">
+        <main id="main-content" className="app-main" tabIndex={-1}>
           <Hero />
           <Mission />
           <SeeThrough />
@@ -60,15 +65,17 @@ function AppContent() {
 export default function App() {
   return (
     <LanguageProvider>
-      <TourProvider>
-        <SiteDataProvider>
-          <OverlaysProvider>
-            <ErrorBoundary>
-              <AppContent />
-            </ErrorBoundary>
-          </OverlaysProvider>
-        </SiteDataProvider>
-      </TourProvider>
+      <ThemeProvider>
+        <TourProvider>
+          <SiteDataProvider>
+            <OverlaysProvider>
+              <ErrorBoundary>
+                <AppContent />
+              </ErrorBoundary>
+            </OverlaysProvider>
+          </SiteDataProvider>
+        </TourProvider>
+      </ThemeProvider>
     </LanguageProvider>
   );
 }
