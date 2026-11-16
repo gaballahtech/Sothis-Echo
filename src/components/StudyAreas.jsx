@@ -191,6 +191,11 @@ export default function StudyAreas() {
           </div>
 
           <Panel title={t('sites.measurements')} bodyClassName="card-pad">
+            {source === 'api' && nisar ? (
+              <p className="micro series-source-note" role="note" data-testid="series-source-note">
+                {t('sites.seriesSourceNote')}
+              </p>
+            ) : null}
             <div data-testid="deep-dive-tabs">
               <Tabs id="site-data" defaultSelectedTabId="reading" renderActiveTabPanelOnly>
                 <Tab

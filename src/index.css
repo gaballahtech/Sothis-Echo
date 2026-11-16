@@ -1250,6 +1250,14 @@ li,
   margin-bottom: 4px;
 }
 
+/* Which satellite feeds what: the cards are NISAR, the numbers are Sentinel. */
+.series-source-note {
+  margin: 0 0 12px;
+  padding: 8px 10px;
+  border-inline-start: 2px solid var(--te-accent);
+  background: color-mix(in srgb, var(--te-accent) 6%, transparent);
+}
+
 .table-shell {
   height: 404px;
   overflow: hidden;
