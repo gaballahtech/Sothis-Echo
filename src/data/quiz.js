@@ -2,7 +2,7 @@
  * “Radar detective” rounds — two real post-launch cases plus one reasoning
  * check that reuses the existing Vietnam change map (no new acquisition):
  *   - Central Vietnam flood, September 2026
- *   - West Attica (Greece) wildfire, July 2026
+ *   - Big Sur (Greece) wildfire, July 2026
  *   - Bright change ≠ damage (change-only round, no before/after pair)
  * The before/after dates are taken from the live site measurements at render
  * time; evidence chips are derived from the real backscatter series.
@@ -33,11 +33,11 @@ export const detectiveRounds = [
   },
   {
     id: 'greece-fire',
-    siteId: 'caldor',
+    siteId: 'bigsur',
     title: { en: 'The canopy disappears', ar: 'المظلة تختفي' },
     brief: {
-      en: 'Two Sentinel-1 passes over West Attica before and after the July 2026 fire. Read the two polarization channels.',
-      ar: 'مروران لـ Sentinel-1 فوق غرب أتيكا قبل حريق يوليو 2026 وبعده. اقرأ قناتي الاستقطاب.',
+      en: 'Two Sentinel-1 passes over Big Sur before and after the August 2026 megafire. Read the two polarization channels.',
+      ar: 'مروران لـ Sentinel-1 فوق بيغ سور قبل حريق أغسطس 2026 وبعده. اقرأ قناتي الاستقطاب.',
     },
     before: { date: '2026-07-20', params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 } },
     after: { date: '2026-08-10', params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 } },

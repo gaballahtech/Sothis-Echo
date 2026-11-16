@@ -181,7 +181,7 @@ const en = {
     impactDecision: 'Decision it informs',
     comparison: {
       sundarbans: 'Vietnam flood',
-      caldor: 'Greece fire',
+      bigsur: 'Big Sur megafire',
       label: 'Field',
     },
     metric: 'Channel',
@@ -582,7 +582,7 @@ const ar = {
     impactDecision: 'القرار الذي تخدمه',
     comparison: {
       sundarbans: 'فيضان فيتنام',
-      caldor: 'حريق اليونان',
+      bigsur: 'حريق بيغ سور الكبير',
       label: 'الحقل',
     },
     metric: 'القناة',
@@ -743,7 +743,7 @@ const ar = {
       },
       game: {
         title: 'اختبر عينك',
-        body: 'زوجان حقيقيان من Sentinel-1 عام 2026: فيضان فيتنام وحريق اليونان. اختر ثم اقرأ الأدلة.',
+        body: 'زوجان حقيقيان من Sentinel-1 عام 2026: فيضان فيتنام وحريق بيغ سور الكبير. اختر ثم اقرأ الأدلة.',
       },
     },
   },

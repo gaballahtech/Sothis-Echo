@@ -17,13 +17,13 @@ import zlib from 'node:zlib';
 import { spawn } from 'node:child_process';
 import { fromArrayBuffer } from 'geotiff';
 import { sundarbansSnapshot } from './cache/nisar/sundarbans.mjs';
-import { caldorSnapshot } from './cache/nisar/caldor.mjs';
+import { bigsurSnapshot } from './cache/nisar/bigsur.mjs';
 import { sundarbansRgbBase64 } from './cache/nisar/sundarbans-rgb.mjs';
-import { caldorRgbBase64 } from './cache/nisar/caldor-rgb.mjs';
+import { bigsurRgbBase64 } from './cache/nisar/bigsur-rgb.mjs';
 import { sundarbansHhBase64 } from './cache/nisar/sundarbans-hh.mjs';
-import { caldorHhBase64 } from './cache/nisar/caldor-hh.mjs';
+import { bigsurHhBase64 } from './cache/nisar/bigsur-hh.mjs';
 import { sundarbansChangeBase64 } from './cache/nisar/sundarbans-change.mjs';
-import { caldorChangeBase64 } from './cache/nisar/caldor-change.mjs';
+import { bigsurChangeBase64 } from './cache/nisar/bigsur-change.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -343,11 +343,11 @@ async function harmonyGeoTiff(granule, bbox, variable) {
 /* ------------------------------------------------------------------ */
 
 const SNAPSHOTS = new Map(
-  [sundarbansSnapshot, caldorSnapshot].map((snapshot) => [snapshot.site, snapshot])
+  [sundarbansSnapshot, bigsurSnapshot].map((snapshot) => [snapshot.site, snapshot])
 );
-const SNAPSHOT_RGB = { sundarbans: sundarbansRgbBase64, caldor: caldorRgbBase64 };
-const SNAPSHOT_HH = { sundarbans: sundarbansHhBase64, caldor: caldorHhBase64 };
-const SNAPSHOT_CHANGE = { sundarbans: sundarbansChangeBase64, caldor: caldorChangeBase64 };
+const SNAPSHOT_RGB = { sundarbans: sundarbansRgbBase64, bigsur: bigsurRgbBase64 };
+const SNAPSHOT_HH = { sundarbans: sundarbansHhBase64, bigsur: bigsurHhBase64 };
+const SNAPSHOT_CHANGE = { sundarbans: sundarbansChangeBase64, bigsur: bigsurChangeBase64 };
 
 /** Bundled GCOV telemetry for a site, or null when none was precomputed. */
 export function nisarSnapshot(siteId) {

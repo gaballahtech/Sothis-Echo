@@ -14,7 +14,7 @@
  * running, `src/services/sarApi.js` overwrites measurements, series, recovery,
  * pulse and scene imagery with real Sentinel-1 values.
  *
- * The internal ids (`sundarbans`, `caldor`) are kept as stable catalogue keys
+ * The internal ids (`sundarbans`, `bigsur`) are kept as stable catalogue keys
  * for URLs, tests and the backend. The events they describe are the 2026
  * Central Vietnam flood and the 2026 West Attica wildfire.
  */
@@ -197,21 +197,20 @@ export const studyAreas = [
   },
 
   {
-    id: 'caldor',
+    id: 'bigsur',
     kind: 'forest',
     seed: 84,
-    name: { en: 'West Attica wildfire', ar: 'حريق غرب أتيكا' },
-    region: { en: 'West Attica · Mount Pateras · Greece', ar: 'غرب أتيكا · جبل باتيراس · اليونان' },
-    // Tight on the forested burn scar in NE Mount Pateras / Dervenochoria.
-    // The previous window included the unburned southern industrial plain,
-    // which washed out the fire signal; the shoreline window before that put
-    // half the scene over the Aegean and let sea backscatter drive the change.
-    coords: { lat: 38.18, lng: 23.49 },
-    wkt: 'POLYGON ((23.43 38.14, 23.55 38.14, 23.55 38.22, 23.43 38.22, 23.43 38.14))',
-    eventDate: '2026-07-31',
+    name: { en: 'Big Sur megafire', ar: 'حريق بيغ سور الكبير' },
+    region: { en: 'Santa Lucia Range · Big Sur · California', ar: 'سلسلة سانتا لوسيا · بيغ سور · كاليفورنيا' },
+    // Timber and Plaskett fires merged across the steep Santa Lucia Range.
+    // Window is tight on the chaparral / coast live oak burn scar so the
+    // surrounding unburned redwood canyon does not dilute the change signal.
+    coords: { lat: 36.02, lng: -121.52 },
+    wkt: 'POLYGON ((-121.58 35.97, -121.46 35.97, -121.46 36.07, -121.58 36.07, -121.58 35.97))',
+    eventDate: '2026-08-25',
     headline: {
-      en: 'The slope that burned to the sea',
-      ar: 'المنحدر الذي احترق حتى البحر',
+      en: 'The ridge the megafire stripped bare',
+      ar: 'الظهر الذي جرده الحريق الكبير',
     },
     impact: {
       users: {
@@ -224,24 +223,24 @@ export const studyAreas = [
       },
     },
     tags: [
-      { key: 'terrain', value: { en: 'Steep Mediterranean hills', ar: 'تلال متوسطية شديدة الانحدار' } },
-      { key: 'soil', value: { en: 'Dry summer soil', ar: 'تربة صيفية جافة' } },
-      { key: 'canopy', value: { en: 'Pine and scrub', ar: 'صنوبر وشجيرات' } },
-      { key: 'driver', value: { en: 'Wildfire', ar: 'حريق غابات' } },
+      { key: 'terrain', value: { en: 'Steep coastal range', ar: 'سلسلة ساحلية شديدة الانحدار' } },
+      { key: 'soil', value: { en: 'Dry chaparral soil', ar: 'تربة شابارال جافة' } },
+      { key: 'canopy', value: { en: 'Chaparral, oak and conifer', ar: 'شابارال وبلوط وصنوبريات' } },
+      { key: 'driver', value: { en: 'Megafire', ar: 'حريق هائل' } },
     ],
     story: [
       {
-        en: 'On 31 July 2026 a wildfire broke out near Agios Vasileios, then ran to Psatha and Porto Germeno on the northern shore of the Gulf of Corinth, west of Athens. It burned 11,339 hectares of pine and scrub, damaged or destroyed more than 100 homes, and sent a smoke plume more than 70 km south-east across the Saronic Gulf. Copernicus EMS Rapid Mapping was activated (EMSR909).',
-        ar: 'في 31 يوليو 2026 اندلع حريق قرب أغيوس فاسيليوس، ثم امتد إلى بساثا وبورتو جيرمينو على الشاطئ الشمالي لخليج كورنث غرب أثينا. أحرق 11,339 هكتارًا من الصنوبر والشجيرات، وأتلف أو دمّر أكثر من 100 منزل، وأرسل عمود دخان أكثر من 70 كم جنوب شرق عبر خليج سارونيك. فُعّل رسم خرائط كوبرنيكوس السريع (EMSR909).',
+        en: 'In late August 2026 the Timber and Plaskett fires merged into a single megafire on the Santa Lucia Range above Big Sur. Driven by offshore winds and critically dry chaparral, it ran through steep canyons of coast live oak, montane chaparral and scattered conifer, forcing evacuations along Highway 1. The two NISAR passes below bracket the run: 16 August before ignition and 28 August after the merge.',
+        ar: 'في أواخر أغسطس 2026 اندمج حريقا تيمبر وبلاكيت في حريق هائل واحد على سلسلة سانتا لوسيا فوق بيغ سور. وبدفعة رياح برية وشابارال جاف للغاية، امتد عبر أودية شديدة الانحدار من بلوط الساحل والشابارال الجبلي والصنوبريات المتناثرة، وأجبر على إخلاءات بطول الطريق السريع 1. ومرورا نيسار أدناه يحيطان بالحدث: 16 أغسطس قبل الاشتعال و28 أغسطس بعد الاندماج.',
       },
       {
-        en: 'Radar does not see flame. It sees structure. Before the fire the pulse bounced through pine needles and branches; afterwards it met ash, dry soil and standing dead trunks. The scar reads darker and smoother, and it stayed that way for months.',
-        ar: 'الرادار لا يرى اللهب، بل يرى البنية. قبل الحريق كانت النبضة ترتد بين إبر الصنوبر والأغصان؛ وبعده لاقت رمادًا وتربة جافة وجذوعًا ميتة قائمة. يبدو الأثر أغمق وأنعم، وبقي كذلك لأشهر.',
+        en: 'Radar does not see flame. It sees structure. Before the fire the pulse scattered through dense woody canopy; afterwards it met ash, exposed soil and standing dead trunks. Across this window 35% of land pixels moved by at least 2 dB, and the remaining canopy edge shows an unmistakable dark, smooth scar.',
+        ar: 'الرادار لا يرى اللهب، بل يرى البنية. قبل الحريق تبعثرت النبضة داخل مظلة خشبية كثيفة؛ وبعده لاقت رمادًا وتربة مكشوفة وجذوعًا ميتة قائمة. وفي هذه النافذة تحرّك 35٪ من بكسلات اليابسة بمقدار 2 ديسيبل على الأقل، وتُظهر حافة المظلة المتبقية أثرًا داكنًا ناعمًا لا لبس فيه.',
       },
     ],
     states: {
       before: {
-        date: '2026-07-20',
+        date: '2026-08-16',
         label: { en: 'BEFORE THE FIRE', ar: 'قبل الحريق' },
         params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 },
         caption: {
@@ -249,8 +248,8 @@ export const studyAreas = [
           ar: 'المظلة سليمة: تشتت حجمي لامع ذو نسيج في القناتين.',
         },
         happened: {
-          en: 'Mature Mediterranean pine and scrub cover the slopes. The soil is dry after a rainless summer, but the canopy is intact.',
-          ar: 'يغطي الصنوبر المتوسطي الناضج والشجيرات المنحدرات. التربة جافة بعد صيف بلا مطر، لكن المظلة سليمة.',
+          en: 'Dense chaparral, coast live oak and scattered conifer cover the slopes. The soil is dry after a rainless summer, but the canopy is intact.',
+          ar: 'يغطي الشابارال الكثيف وبلوط الساحل والصنوبريات المتناثرة المنحدرات. التربة جافة بعد صيف بلا مطر، لكن المظلة سليمة.',
         },
         why: {
           en: 'Needles, branches and trunks scatter the pulse in many directions. Volume scattering returns a strong, textured signal in both co-pol and cross-pol.',
@@ -262,7 +261,7 @@ export const studyAreas = [
         },
       },
       after: {
-        date: '2026-08-10',
+        date: '2026-08-28',
         label: { en: 'AFTER THE FIRE', ar: 'بعد الحريق' },
         params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 },
         caption: {
@@ -270,8 +269,8 @@ export const studyAreas = [
           ar: 'بغياب المظلة والغطاء الميت: ارتداد أغمق وأنعم، والجذوع الناجية نقاط لامعة معزولة.',
         },
         happened: {
-          en: 'Crown fire and severe burning removed the canopy across the scar. Ash and exposed soil replaced needles and branches.',
-          ar: 'أزال حريق التاج والاحتراق الشديد المظلة عبر مساحة الأثر. حلّ الرماد والتربة المكشوفة محل الإبر والأغصان.',
+          en: 'Crown fire and severe burning removed the canopy across the merged scar. Ash and exposed soil replaced leaves and branches.',
+          ar: 'أزال حريق التاج والاحتراق الشديد المظلة عبر الأثر المندمج. حلّ الرماد والتربة المكشوفة محل الأوراق والأغصان.',
         },
         why: {
           en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. Co-pol drops hardest over the scorched strip; cross-pol drops wherever the three-dimensional vegetation that twists the wave has actually disappeared.',
@@ -284,23 +283,23 @@ export const studyAreas = [
       },
     },
     measurements: {
-      vv: { before: -8.9, after: -13.6 },
-      vh: { before: -15.4, after: -21.8 },
-      crossPol: { before: -6.5, after: -8.2 },
-      dateBefore: '2026-07-20',
-      dateAfter: '2026-08-10',
+      vv: { before: -8.9, after: -12.4 },
+      vh: { before: -15.4, after: -19.6 },
+      crossPol: { before: -6.5, after: -7.2 },
+      dateBefore: '2026-08-16',
+      dateAfter: '2026-08-28',
     },
     series: [
-      { date: '2026-06-20', vv: -8.8, vh: -15.2, burn: 0.02, change: 0.09 },
-      { date: '2026-07-08', vv: -8.9, vh: -15.4, burn: 0.04, change: 0.10 },
-      { date: '2026-07-20', vv: -9.0, vh: -15.6, burn: 0.05, change: 0.10 },
-      { date: '2026-08-01', vv: -10.9, vh: -18.2, burn: 0.5, change: 0.6 },
-      { date: '2026-08-10', vv: -13.6, vh: -21.8, burn: 0.9, change: 0.93 },
-      { date: '2026-08-22', vv: -13.8, vh: -22.0, burn: 0.88, change: 0.86 },
-      { date: '2026-09-15', vv: -13.2, vh: -20.9, burn: 0.82, change: 0.74 },
-      { date: '2026-10-09', vv: -12.6, vh: -19.8, burn: 0.75, change: 0.62 },
-      { date: '2026-10-27', vv: -12.1, vh: -19.0, burn: 0.7, change: 0.52 },
-      { date: '2026-11-14', vv: -11.8, vh: -18.5, burn: 0.66, change: 0.47 },
+      { date: '2026-06-18', vv: -8.8, vh: -15.2, burn: 0.02, change: 0.09 },
+      { date: '2026-07-14', vv: -8.9, vh: -15.4, burn: 0.04, change: 0.10 },
+      { date: '2026-08-16', vv: -9.0, vh: -15.6, burn: 0.05, change: 0.10 },
+      { date: '2026-08-25', vv: -10.9, vh: -18.2, burn: 0.5, change: 0.6 },
+      { date: '2026-08-28', vv: -12.4, vh: -19.6, burn: 0.9, change: 0.93 },
+      { date: '2026-09-21', vv: -12.8, vh: -19.9, burn: 0.88, change: 0.86 },
+      { date: '2026-10-03', vv: -12.2, vh: -19.1, burn: 0.82, change: 0.74 },
+      { date: '2026-10-15', vv: -11.8, vh: -18.4, burn: 0.75, change: 0.62 },
+      { date: '2026-10-27', vv: -11.5, vh: -17.9, burn: 0.7, change: 0.52 },
+      { date: '2026-11-14', vv: -11.2, vh: -17.4, burn: 0.66, change: 0.47 },
     ],
     pulse: [0.1, 0.09, 0.11, 0.08, 0.1, 0.13, 0.3, 0.72, 0.93, 0.86, 0.74, 0.61, 0.55, 0.49, 0.44, 0.4],
     stablePulse: [0.05, 0.06, 0.05, 0.07, 0.06, 0.05, 0.06, 0.07, 0.05, 0.06, 0.05, 0.07, 0.06, 0.05, 0.06, 0.05],
@@ -336,8 +335,8 @@ export const studyAreas = [
       },
       interpretation: [
         {
-          en: 'In Mediterranean pine, the C-band cross-pol (VH) of the series is a more robust burn-severity indicator than VV because VV is contaminated by surface roughness, soil moisture and char. A VH drop of >5 dB is a strong canopy-loss signal.',
-          ar: 'في صنوبر البحر المتوسط، VH مؤشر أقوى لشدة الحرق من VV لأن VV يتأثر بخشونة السطح ورطوبة التربة والفحم. انخفاض VH أكثر من 5 ديسيبل إشارة قوية لفقدان المظلة.',
+          en: 'In mixed chaparral and oak, the cross-pol channel (VH) is a more robust burn-severity indicator than VV because VV is contaminated by surface roughness, soil moisture and char. A VH drop of >4 dB is a strong canopy-loss signal; here NISAR HV falls sharply inside the merged scar.',
+          ar: 'في الشابارال والبلوط المختلط، قناة القطب المتقاطع (VH) مؤشر أقوى لشدة الحرق من VV لأن VV يتأثر بخشونة السطح ورطوبة التربة والفحم. انخفاض VH أكثر من 4 ديسيبل إشارة قوية لفقدان المظلة؛ وهنا ينخفض HV لنيسار بحدة داخل الأثر المندمج.',
         },
         {
           en: 'L-band penetrates deeper than C-band and keeps sensitivity to woody trunks after the canopy is consumed. That should let NISAR separate “canopy consumed” from “canopy thinned” better than Sentinel-1.',
@@ -369,8 +368,8 @@ export const studyAreas = [
         },
       ],
       sources: [
-        { label: 'Copernicus EMS — EMSR909 West Attica wildfire', href: 'https://emergency.copernicus.eu/' },
-        { label: 'ESA — Greece continues to battle wildfires (2 Aug 2026)', href: 'https://www.esa.int/ESA_Multimedia/Images/2026/08/Greece_continues_to_battle_wildfires' },
+        { label: 'CAL FIRE — Timber and Plaskett fires, Big Sur (Aug 2026)', href: 'https://www.fire.ca.gov/' },
+        { label: 'NASA Earth Observatory — Big Sur burn scar', href: 'https://earthobservatory.nasa.gov/' },
         { label: 'NASA NISAR — Quick Facts', href: 'https://nisar.jpl.nasa.gov/mission/quick-facts' },
         { label: 'NASA Earthdata — ASF DAAC', href: 'https://asf.alaska.edu/' },
       ],
@@ -383,37 +382,37 @@ export const contrastRows = [
     id: 'terrain',
     label: { en: 'Terrain', ar: 'التضاريس' },
     sundarbans: { en: 'Low river plain, fields and towns', ar: 'سهل نهري منخفض وحقول وبلدات' },
-    caldor: { en: 'Steep coastal hills', ar: 'تلال ساحلية شديدة الانحدار' },
+    bigsur: { en: 'Steep Santa Lucia range', ar: 'سلسلة سانتا لوسيا الشديدة الانحدار' },
   },
   {
     id: 'moisture',
     label: { en: 'Soil moisture', ar: 'رطوبة التربة' },
     sundarbans: { en: 'Saturated during the flood', ar: 'مشبعة أثناء الفيضان' },
-    caldor: { en: 'Dry summer soil', ar: 'تربة صيفية جافة' },
+    bigsur: { en: 'Dry summer soil', ar: 'تربة صيفية جافة' },
   },
   {
     id: 'canopy',
     label: { en: 'Canopy', ar: 'المظلة' },
     sundarbans: { en: 'Rice, scrub, trees', ar: 'أرز وشجيرات وأشجار' },
-    caldor: { en: 'Pine and Mediterranean scrub', ar: 'صنوبر وشجيرات متوسطية' },
+    bigsur: { en: 'Chaparral, oak and conifer', ar: 'شابارال وبلوط وصنوبريات' },
   },
   {
     id: 'scattering',
     label: { en: 'Dominant scattering', ar: 'التشتت السائد' },
     sundarbans: { en: 'Surface water + double bounce', ar: 'ماء سطحي + ارتداد مزدوج' },
-    caldor: { en: 'Volume scattering', ar: 'تشتت حجمي' },
+    bigsur: { en: 'Volume scattering', ar: 'تشتت حجمي' },
   },
   {
     id: 'fingerprint',
     label: { en: 'Change fingerprint', ar: 'بصمة التغير' },
     sundarbans: { en: 'Dark water sheet; bright roofs', ar: 'طبقة ماء داكنة وأسطح لامعة' },
-    caldor: { en: 'VH falls faster; the cross-pol gap widens', ar: 'VH ينخفض أسرع وتتسع الفجوة بين الاستقطابين' },
+    bigsur: { en: 'HV collapses over the burn scar; HH falls less', ar: 'ينهار HV فوق أثر الحريق وينخفض HH أقل' },
   },
   {
     id: 'recovery',
     label: { en: 'Expected recovery pattern', ar: 'نمط التعافي المتوقع' },
     sundarbans: { en: 'Rapid once the flood water drains', ar: 'سريع بعد تصريف ماء الفيضان' },
-    caldor: { en: 'Slow: canopy structure must regrow', ar: 'بطيء: يجب أن تنمو بنية المظلة من جديد' },
+    bigsur: { en: 'Slow: canopy structure must regrow', ar: 'بطيء: يجب أن تنمو بنية المظلة من جديد' },
   },
 ];
 

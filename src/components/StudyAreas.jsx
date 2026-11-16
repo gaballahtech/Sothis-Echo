@@ -344,7 +344,7 @@ export default function StudyAreas() {
                             <tr>
                               <th>{t('sites.comparison.label')}</th>
                               <th>{t('sites.comparison.sundarbans')}</th>
-                              <th>{t('sites.comparison.caldor')}</th>
+                              <th>{t('sites.comparison.bigsur')}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -352,7 +352,7 @@ export default function StudyAreas() {
                               <tr key={row.id}>
                                 <th scope="row">{L(row.label)}</th>
                                 <td>{L(row.sundarbans)}</td>
-                                <td>{L(row.caldor)}</td>
+                                <td>{L(row.bigsur)}</td>
                               </tr>
                             ))}
                           </tbody>
