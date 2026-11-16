@@ -27,6 +27,7 @@ import {
   computeNisarChangeStats,
   nisarSnapshot,
   nisarSnapshotHh,
+  nisarSnapshotChange,
   nisarSnapshotRgb,
   probeHarmony,
   renderNisarChange,
@@ -675,15 +676,15 @@ export async function handleRequest(req, res) {
       const view = url.searchParams.get('view');
       // The HH browse view and the HH·HV composite are rendered from the same
       // HDF5 array and window, so toggling between them cannot jump spatially.
-      if (view !== 'rgb' && side !== 'change' && source === 'nisar' && url.searchParams.get('live') !== '1') {
-        const ready = nisarSnapshotHh(siteId, side);
+      if (view !== 'rgb' && source === 'nisar' && url.searchParams.get('live') !== '1') {
+        const ready = side === 'change' ? nisarSnapshotChange(siteId) : nisarSnapshotHh(siteId, side);
         if (ready) {
           res.writeHead(200, {
             'Content-Type': 'image/png',
             'Content-Length': ready.length,
             'Cache-Control': 'public, max-age=300, s-maxage=3600',
             'Access-Control-Allow-Origin': resolveOrigin(req),
-            'X-Nisar-View': 'hh-calibrated',
+            'X-Nisar-View': side === 'change' ? 'change-calibrated' : 'hh-calibrated',
             'X-Nisar-Source': 'snapshot',
           });
           res.end(ready);
@@ -742,7 +743,7 @@ export async function handleRequest(req, res) {
         res.writeHead(200, {
           'Content-Type': 'image/png',
           'Content-Length': png.length,
-          'Cache-Control': 'public, max-age=86400, s-maxage=86400',
+          'Cache-Control': 'public, max-age=300, s-maxage=3600',
           'Access-Control-Allow-Origin': resolveOrigin(req),
           'X-Nisar-View': 'dual-pol-intensity-composite',
           'X-Nisar-Source': source,

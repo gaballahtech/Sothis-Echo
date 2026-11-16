@@ -191,7 +191,7 @@ const en = {
     ariaScene: '{{site}} {{state}} radar scene',
     changeTitle: 'CHANGE · {{date}}',
     changeCaption:
-      'The difference the eye cannot catch: |after − before| per pixel, on the same window. Bright means the surface gave back a different amount of radar energy. Scale: black 0 dB, white 8 dB and above.',
+      'The difference the eye cannot catch: |after − before| HH in dB per pixel, on the same window as the cards, with a 3×3 median removing radar speckle. Differences under 2 dB are masked as noise. Scale: black 2 dB, white 8 dB and above.',
     changeAria: '{{site}} change map between the two passes',
     changeNote: 'Rain and tide move pixels too — bright is change, not automatically damage.',
     seriesSourceNote: 'Time series and dB measurements: {{numbers}}. Visual cards: {{cards}}.',
@@ -590,7 +590,7 @@ const ar = {
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
     changeTitle: 'الاختلاف · {{date}}',
     changeCaption:
-      'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لكل بكسل على النافذة نفسها. الأبيض معناه إن السطح رجّع كمية طاقة رادار مختلفة. المقياس: أسود = ٠ ديسيبل، أبيض = ٨ ديسيبل أو أكتر.',
+      'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لـHH بالديسيبل لكل بكسل، على نفس نافذة البطاقات، مع مرشح وسيط ٣×٣ لإزالة التشويش الراداري. الفروق أقل من ٢ ديسيبل تُحجب كضجيج. المقياس: أسود = ٢ ديسيبل، أبيض = ٨ ديسيبل أو أكتر.',
     changeAria: 'خريطة الاختلاف لـ{{site}} بين المرورين',
     changeNote: 'المطر والمد بيحركوا البكسلات كمان — الأبيض تغيّر، مش بالضرورة ضرر.',
     seriesSourceNote: 'السلسلة الزمنية وقياسات الديسيبل: {{numbers}}. أما البطاقات المصوّرة: {{cards}}.',

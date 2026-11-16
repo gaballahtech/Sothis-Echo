@@ -42,6 +42,8 @@ ASF = 'https://api.daac.asf.alaska.edu/services/search/param'
 FETCH_TIMEOUT = 25
 OUT_W, OUT_H = 560, 370
 THRESHOLD_DB = 3.0
+CHANGE_FLOOR_DB = 2.0
+SPECKLE_WINDOW = 3
 
 SITES = {
     'sundarbans': {
@@ -226,6 +228,57 @@ def composite_hh(window, limits):
     return buffer.getvalue()
 
 
+def median_filter(arr, size=SPECKLE_WINDOW):
+    """3x3 median on the dB raster: kills single-look speckle, keeps edges."""
+    pad = size // 2
+    padded = np.pad(arr, pad, mode='edge')
+    windows = np.lib.stride_tricks.sliding_window_view(padded, (size, size))
+    return np.median(windows, axis=(-2, -1))
+
+
+def filtered_db(window):
+    """HH in dB with NaN outside the granule mask, then speckle-filtered."""
+    hh, mask = window['hh'], window['mask']
+    valid = mask & np.isfinite(hh) & (hh > 0)
+    if not valid.any():
+        raise RuntimeError('no valid pixels for change map')
+    values = db(hh[valid])
+    filled = np.where(valid, db(np.where(valid, hh, 1.0)), np.median(values))
+    return median_filter(filled), valid
+
+
+def change_map(before, after):
+    """Absolute HH change in dB on the same aligned window as the cards.
+
+    This is the only change image the app serves: it is derived from the two
+    calibrated rasters, never from an ASF browse crop, so it cannot drift to a
+    different place than the before/after cards. A 3x3 median removes radar
+    speckle before differencing, and differences below 2 dB stay black so the
+    map shows structure instead of noise. Display scale is 0–8 dB.
+    """
+    height = min(before['hh'].shape[0], after['hh'].shape[0])
+    width = min(before['hh'].shape[1], after['hh'].shape[1])
+    db0, valid0 = filtered_db(before)
+    db1, valid1 = filtered_db(after)
+    db0 = db0[:height, :width]
+    db1 = db1[:height, :width]
+    valid = valid0[:height, :width] & valid1[:height, :width]
+    out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
+    for y in range(OUT_H):
+        sy = min(height - 1, int(((y + 0.5) / OUT_H) * height))
+        for x in range(OUT_W):
+            sx = min(width - 1, int(((x + 0.5) / OUT_W) * width))
+            if not valid[sy, sx]:
+                out[y, x] = (8, 8, 8)
+                continue
+            delta = abs(db1[sy, sx] - db0[sy, sx])
+            value = 0 if delta < CHANGE_FLOOR_DB else int(np.clip(delta / 8.0, 0.0, 1.0) * 255)
+            out[y, x] = (value, value, value)
+    buffer = io.BytesIO()
+    Image.fromarray(out, 'RGB').save(buffer, format='PNG', optimize=True)
+    return buffer.getvalue()
+
+
 def change_stats(before, after):
     """Signed HH delta on the shared projected grid (after − before)."""
     height = min(before['hh'].shape[0], after['hh'].shape[0])
@@ -354,6 +407,7 @@ def main():
         for side in ('before', 'after'):
             write_png(f'{family}-{side}-rgb.png', composite(windows[side], limits))
             write_png(f'{family}-{side}-hh.png', composite_hh(windows[side], limits))
+        write_png(f'{family}-change.png', change_map(windows['before'], windows['after']))
 
     # Persist every rendered side: RGB composite and calibrated HH.
     for family, export in (('sundarbans', 'sundarbansRgbBase64'), ('caldor', 'caldorRgbBase64')):
@@ -368,6 +422,9 @@ def main():
             for side in ('before', 'after')
         }
         write_rgb_module(f'{family}-hh.mjs', export, pngs)
+    for family, export in (('sundarbans', 'sundarbansChangeBase64'), ('caldor', 'caldorChangeBase64')):
+        png = open(os.path.join(CACHE, f'{family}-change.png'), 'rb').read()
+        write_rgb_module(f'{family}-change.mjs', export, {'change': png})
 
     stats = change_stats(caldor_windows['before'], caldor_windows['after'])
     bbox = SITES['caldor']['bbox']
