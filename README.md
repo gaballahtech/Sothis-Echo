@@ -81,8 +81,11 @@ npm run api     # http://127.0.0.1:3001
 # then set VITE_API_BASE_URL=http://127.0.0.1:3001/api in .env.local
 ```
 
-With no base URL, the app performs **zero API requests** (the hero video and web
-fonts still load) and shows the labelled local dataset.
+On a host that mounts `server/api.mjs` on its own origin (the Vercel function),
+the app probes `/api/health` and uses `/api` automatically, so deployments and
+previews work without the variable. Locally — and anywhere else with no base
+URL — it performs **zero API requests** (the hero video and web fonts still
+load) and shows the labelled local dataset.
 
 ## Structure
 

@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { studyAreas } from '../data/sites';
-import { getApiConfig, isApiConfigured, loadStudyAreas } from '../services/sarApi';
+import { ensureApiBase, getApiConfig, isApiConfigured, loadStudyAreas } from '../services/sarApi';
 
 /**
  * Single source of truth for study-area data. Starts with the bundled
@@ -16,6 +16,7 @@ export function SiteDataProvider({ children }) {
   const [loading, setLoading] = useState(() => isApiConfigured());
 
   const load = useCallback(async () => {
+    await ensureApiBase();
     if (!isApiConfigured()) {
       setSites(studyAreas);
       setSource('local');
@@ -33,16 +34,19 @@ export function SiteDataProvider({ children }) {
 
   useEffect(() => {
     let cancelled = false;
-    if (!isApiConfigured()) {
-      setLoading(false);
-      return undefined;
-    }
-    loadStudyAreas().then((result) => {
+    ensureApiBase().then(() => {
       if (cancelled) return;
-      setSites(result.sites);
-      setSource(result.source);
-      setError(result.error);
-      setLoading(false);
+      if (!isApiConfigured()) {
+        setLoading(false);
+        return;
+      }
+      loadStudyAreas().then((result) => {
+        if (cancelled) return;
+        setSites(result.sites);
+        setSource(result.source);
+        setError(result.error);
+        setLoading(false);
+      });
     });
     return () => {
       cancelled = true;

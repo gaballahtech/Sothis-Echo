@@ -14,14 +14,58 @@ import { studyAreas, SITE_DATA_VERSION } from '../data/sites.js';
  */
 
 const ENV = import.meta.env || {};
-const RAW_BASE = ENV.VITE_API_BASE_URL || '';
-export const API_BASE = RAW_BASE.replace(/\/+$/, '');
+export let API_BASE = (ENV.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 // The first request after the function idles rebuilds every study area from the
 // archive (~75 s measured), so the client has to outlast that build or the page
 // gives up and shows the bundled figures next to live radar imagery.
 const TIMEOUT_MS = Number(ENV.VITE_API_TIMEOUT || 150000);
 
 export const isApiConfigured = () => Boolean(API_BASE);
+
+const SAME_ORIGIN_API = '/api';
+let probe = null;
+
+function isLocalHost() {
+  const host = window.location.hostname;
+  return (
+    host === 'localhost' ||
+    host === '127.0.0.1' ||
+    host === '[::1]' ||
+    host === '0.0.0.0' ||
+    host.endsWith('.local')
+  );
+}
+
+/**
+ * Resolve the API base once, before the first data request.
+ *
+ * Vercel mounts this repo's router on the site's own origin, so a deployment
+ * needs no build-time URL: probe `/api/health` and use `/api` when it answers.
+ * That keeps production and preview builds working even when the environment
+ * variable is missing. Local development is left untouched — with no
+ * `VITE_API_BASE_URL` it still makes zero requests, by design.
+ */
+export function ensureApiBase() {
+  if (API_BASE) return Promise.resolve(API_BASE);
+  if (typeof window === 'undefined' || isLocalHost()) return Promise.resolve('');
+  if (!probe) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 6000);
+    probe = fetch(`${SAME_ORIGIN_API}/health`, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((payload) => {
+        const health = payload?.data ?? payload;
+        if (health?.status === 'ok') API_BASE = SAME_ORIGIN_API;
+        return API_BASE;
+      })
+      .catch(() => API_BASE)
+      .finally(() => clearTimeout(timer));
+  }
+  return probe;
+}
 
 /**
  * URL of a server-rendered scene image. The path is absolute below /api, while
