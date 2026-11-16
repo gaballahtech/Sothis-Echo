@@ -317,6 +317,7 @@ export default function StudyAreas() {
                           </div>
                         </div>
                         {site.measurements?.crossPol ? (
+                          <>
                           <HTMLTable bordered striped compact className="is-full-width" style={{ marginTop: 12 }}>
                             <thead>
                               <tr>
@@ -331,6 +332,8 @@ export default function StudyAreas() {
                               <tr><th scope="row">{t('sites.crossDb')}</th><td>{site.measurements.crossPol.before ?? '—'}</td><td>{site.measurements.crossPol.after ?? '—'}</td></tr>
                             </tbody>
                           </HTMLTable>
+                          <p className="micro" style={{ margin: '6px 0 0' }}>{t('sites.crossDbNote')}</p>
+                          </>
                         ) : null}
                       </Panel>
 

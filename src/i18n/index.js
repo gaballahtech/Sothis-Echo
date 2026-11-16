@@ -188,10 +188,12 @@ const en = {
     beforePass: 'Before (dB)',
     afterPass: 'After (dB)',
     crossDb: 'HH − HV',
+    crossDbNote:
+      'Before/after means from the Sentinel-1 GRD passes listed above (relative dB), not simulated: HH is the co-pol channel and HH − HV is the cross-pol ratio; a wider gap means more volume scattering from canopy.',
     ariaScene: '{{site}} {{state}} radar scene',
     changeTitle: 'CHANGE · {{date}}',
     changeCaption:
-      'The difference the eye cannot catch: |after − before| HH in dB per pixel, on the same window as the cards, with a 3×3 median removing radar speckle. Differences under 2 dB are masked as noise. Scale: black 2 dB, white 8 dB and above.',
+      'The difference the eye cannot catch: |after − before| HH in dB per pixel, on the same window as the cards, with a 3×3 median removing radar speckle. Differences under 1.5 dB are masked as noise; white is the strongest 2% of change in this window (capped at 8 dB). For wildfires the HV canopy drop is weighted 60/40 over HH.',
     changeAria: '{{site}} change map between the two passes',
     changeNote: 'Rain and tide move pixels too — bright is change, not automatically damage.',
     seriesSourceNote: 'Time series and dB measurements: {{numbers}}. Visual cards: {{cards}}.',
@@ -587,10 +589,12 @@ const ar = {
     beforePass: 'قبل (ديسيبل)',
     afterPass: 'بعد (ديسيبل)',
     crossDb: 'HH − HV',
+    crossDbNote:
+      'القيم قبل/بعد هي متوسطات من مرورات Sentinel-1 GRD المذكورة أعلاه (ديسيبل نسبي)، وليست محاكاة: HH هي القناة المشتركة، وHH − HV هي نسبة الاستقطاب المتقاطع؛ اتساع الفجوة يعني تشتتًا حجميًا أكبر من المظلة.',
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
     changeTitle: 'الاختلاف · {{date}}',
     changeCaption:
-      'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لـHH بالديسيبل لكل بكسل، على نفس نافذة البطاقات، مع مرشح وسيط ٣×٣ لإزالة التشويش الراداري. الفروق أقل من ٢ ديسيبل تُحجب كضجيج. المقياس: أسود = ٢ ديسيبل، أبيض = ٨ ديسيبل أو أكتر.',
+      'الاختلاف اللي العين مش بتشوفه: |بعد − قبل| لـHH بالديسيبل لكل بكسل، على نفس نافذة البطاقات، مع مرشح وسيط ٣×٣ لإزالة التشويش الراداري. الفروق أقل من ١٫٥ ديسيبل تُحجب كضجيج؛ والأبيض هو أقوى ٢٪ من التغيّر داخل النافذة (بحد أقصى ٨ ديسيبل). وفي الحرائق يُرجَّح انخفاض HV للمظلة بنسبة ٦٠/٤٠ على HH.',
     changeAria: 'خريطة الاختلاف لـ{{site}} بين المرورين',
     changeNote: 'المطر والمد بيحركوا البكسلات كمان — الأبيض تغيّر، مش بالضرورة ضرر.',
     seriesSourceNote: 'السلسلة الزمنية وقياسات الديسيبل: {{numbers}}. أما البطاقات المصوّرة: {{cards}}.',

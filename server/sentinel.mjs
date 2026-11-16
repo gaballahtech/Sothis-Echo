@@ -629,7 +629,7 @@ function attachNisarCards(states, site, browse, { calibrated = false } = {}) {
       sentinelImageUrl: states[side].imageUrl,
       sentinelDate: states[side].date,
       ...(calibrated ? {} : { date: (nisar.datetime || states[side].date || '').slice(0, 10) }),
-      imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar&v=20261116c`,
+      imageUrl: `/api/scene-image?site=${site.id}&side=${side}&source=nisar&v=20261116d`,
       attribution: 'NASA NISAR L-band GCOV (HH) browse image — ASF DAAC.',
       ...(calibrated ? {} : { acquiredAt: nisar.datetime }),
       product: nisar.product,

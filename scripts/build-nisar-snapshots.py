@@ -42,7 +42,7 @@ ASF = 'https://api.daac.asf.alaska.edu/services/search/param'
 FETCH_TIMEOUT = 25
 OUT_W, OUT_H = 560, 370
 THRESHOLD_DB = 3.0
-CHANGE_FLOOR_DB = 2.0
+CHANGE_FLOOR_DB = 1.5
 SPECKLE_WINDOW = 3
 
 SITES = {
@@ -54,8 +54,10 @@ SITES = {
         'after': 'NISAR_L2_PR_GCOV_031_054_A_010_4005_DHDH_A_20260921T222101_20260921T222140_P05023_N_F_J_001',
     },
     'caldor': {
-        'coords': (38.15, 23.45),
-        'bbox': (23.35, 38.08, 23.55, 38.22),
+        # Tight on the forested burn scar in NE Mount Pateras /
+        # Dervenochoria; the old window included unburned industrial plain.
+        'coords': (38.18, 23.49),
+        'bbox': (23.43, 38.14, 23.55, 38.22),
         'eventDate': '2026-07-31',
         'before': 'NISAR_L2_PR_GCOV_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001',
@@ -159,10 +161,15 @@ def stretch(value, low, high):
     return np.clip(np.round((value - low) / span * 255.0), 0, 255).astype(np.uint8)
 
 
-def composite_limits(windows):
-    """One radiometric stretch shared by every pass of a site."""
+def composite_limits(windows, anchor_first=False):
+    """One radiometric stretch shared by every pass of a site.
+
+    With anchor_first the limits come only from the before pass, so a real
+    post-event drop in HV is shown, not normalised away by pooling both
+    passes (which would hide the wildfire burn scar).
+    """
     hh_db, hv_db, diff_db = [], [], []
-    for window in windows:
+    for window in (windows[:1] if anchor_first else windows):
         hh, hv, mask = window['hh'], window['hv'], window['mask']
         valid = mask & np.isfinite(hh) & np.isfinite(hv) & (hh > 0) & (hv > 0)
         hh_db.append(db(hh[valid]))
@@ -228,26 +235,26 @@ def composite_hh(window, limits):
     return buffer.getvalue()
 
 
-def median_filter(arr, size=SPECKLE_WINDOW):
-    """3x3 median on the dB raster: kills single-look speckle, keeps edges."""
+def box_filter(arr, size=SPECKLE_WINDOW):
+    """3x3 mean on the dB raster: removes single-look speckle, keeps edges."""
     pad = size // 2
     padded = np.pad(arr, pad, mode='edge')
     windows = np.lib.stride_tricks.sliding_window_view(padded, (size, size))
-    return np.median(windows, axis=(-2, -1))
+    return windows.mean(axis=(-2, -1))
 
 
-def filtered_db(window):
-    """HH in dB with NaN outside the granule mask, then speckle-filtered."""
-    hh, mask = window['hh'], window['mask']
-    valid = mask & np.isfinite(hh) & (hh > 0)
+def filtered_db(window, key='hh'):
+    """One channel in dB, mask-filled, then 3x3 box-smoothed."""
+    band, mask = window[key], window['mask']
+    valid = mask & np.isfinite(band) & (band > 0)
     if not valid.any():
-        raise RuntimeError('no valid pixels for change map')
-    values = db(hh[valid])
-    filled = np.where(valid, db(np.where(valid, hh, 1.0)), np.median(values))
-    return median_filter(filled), valid
+        raise RuntimeError(f'no valid pixels for change map ({key})')
+    values = db(band[valid])
+    filled = np.where(valid, db(np.where(valid, band, 1.0)), np.median(values))
+    return box_filter(filled), valid
 
 
-def change_map(before, after):
+def change_map(before, after, hv_weight=0.0):
     """Absolute HH change in dB on the same aligned window as the cards.
 
     This is the only change image the app serves: it is derived from the two
@@ -258,21 +265,60 @@ def change_map(before, after):
     """
     height = min(before['hh'].shape[0], after['hh'].shape[0])
     width = min(before['hh'].shape[1], after['hh'].shape[1])
-    db0, valid0 = filtered_db(before)
-    db1, valid1 = filtered_db(after)
+    db0, valid0 = filtered_db(before, 'hh')
+    db1, valid1 = filtered_db(after, 'hh')
+    valid = valid0[:height, :width] & valid1[:height, :width]
     db0 = db0[:height, :width]
     db1 = db1[:height, :width]
-    valid = valid0[:height, :width] & valid1[:height, :width]
-    out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
+    if hv_weight > 0:
+        hv0, hv_valid0 = filtered_db(before, 'hv')
+        hv1, hv_valid1 = filtered_db(after, 'hv')
+        valid = valid & hv_valid0[:height, :width] & hv_valid1[:height, :width]
+        hv0 = hv0[:height, :width]
+        hv1 = hv1[:height, :width]
+    # Sample the aligned rasters to the output grid first, then scale the
+    # display to the strongest 2% of real change. A fixed 0-8 dB ramp leaves a
+    # tight wildfire window almost black; anchoring to its own p98 keeps the
+    # scar contiguous and white without inventing pixels.
+    samples = np.zeros((OUT_H, OUT_W), dtype=np.float32)
+    mask_out = np.zeros((OUT_H, OUT_W), dtype=bool)
     for y in range(OUT_H):
         sy = min(height - 1, int(((y + 0.5) / OUT_H) * height))
         for x in range(OUT_W):
             sx = min(width - 1, int(((x + 0.5) / OUT_W) * width))
             if not valid[sy, sx]:
-                out[y, x] = (8, 8, 8)
                 continue
             delta = abs(db1[sy, sx] - db0[sy, sx])
-            value = 0 if delta < CHANGE_FLOOR_DB else int(np.clip(delta / 8.0, 0.0, 1.0) * 255)
+            if hv_weight > 0:
+                # Wildfire: amplify the HV canopy drop but never let it mask a
+                # strong HH change. Averaging would push either channel below
+                # the noise floor when only one of them moves.
+                delta = max(delta, abs(hv1[sy, sx] - hv0[sy, sx]) * (1.0 + hv_weight))
+            samples[y, x] = delta
+            mask_out[y, x] = True
+    if not mask_out.any():
+        raise RuntimeError('change map has no valid output pixels')
+    # A second 3x3 box over the delta ties neighbouring changed pixels into
+    # contiguous patches instead of leaving isolated speckle dots.
+    pad = SPECKLE_WINDOW // 2
+    padded = np.pad(np.where(mask_out, samples, 0.0), pad, mode='constant')
+    padded_mask = np.pad(mask_out.astype(np.float32), pad, mode='constant')
+    sums = np.lib.stride_tricks.sliding_window_view(padded, (SPECKLE_WINDOW, SPECKLE_WINDOW)).sum(axis=(-2, -1))
+    counts = np.lib.stride_tricks.sliding_window_view(padded_mask, (SPECKLE_WINDOW, SPECKLE_WINDOW)).sum(axis=(-2, -1))
+    samples = np.where(counts > 0, sums / np.maximum(counts, 1), 0.0).astype(np.float32)
+    peak = float(np.percentile(samples[mask_out], 98))
+    scale_max = max(CHANGE_FLOOR_DB + 1.0, min(8.0, peak))
+    out = np.zeros((OUT_H, OUT_W, 3), dtype=np.uint8)
+    span = scale_max - CHANGE_FLOOR_DB
+    for y in range(OUT_H):
+        for x in range(OUT_W):
+            if not mask_out[y, x]:
+                out[y, x] = (8, 8, 8)
+                continue
+            delta = float(samples[y, x])
+            if delta < CHANGE_FLOOR_DB:
+                continue
+            value = int(np.clip((delta - CHANGE_FLOOR_DB) / span, 0.0, 1.0) ** 0.8 * 255)
             out[y, x] = (value, value, value)
     buffer = io.BytesIO()
     Image.fromarray(out, 'RGB').save(buffer, format='PNG', optimize=True)
@@ -403,11 +449,17 @@ def main():
     # RGB and HH must share the window, so the HH view cannot jump relative to
     # the dual-pol composite when the user toggles between them.
     for family, windows in (('sundarbans', sundarbans_windows), ('caldor', caldor_windows)):
-        limits = composite_limits([windows['before'], windows['after']])
+        # Wildfire: anchor the stretch to the before pass and weight the HV
+        # canopy drop, so the burn scar reads as a contiguous bright anomaly.
+        wildfire = family == 'caldor'
+        limits = composite_limits([windows['before'], windows['after']], anchor_first=wildfire)
         for side in ('before', 'after'):
             write_png(f'{family}-{side}-rgb.png', composite(windows[side], limits))
             write_png(f'{family}-{side}-hh.png', composite_hh(windows[side], limits))
-        write_png(f'{family}-change.png', change_map(windows['before'], windows['after']))
+        write_png(
+            f'{family}-change.png',
+            change_map(windows['before'], windows['after'], hv_weight=0.6 if wildfire else 0.0),
+        )
 
     # Persist every rendered side: RGB composite and calibrated HH.
     for family, export in (('sundarbans', 'sundarbansRgbBase64'), ('caldor', 'caldorRgbBase64')):

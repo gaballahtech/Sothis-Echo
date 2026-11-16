@@ -17,15 +17,15 @@ export const caldorSnapshot = {
     "source": "nisar-gcov-asf-h5",
     "calibrated": true,
     "thresholdDb": 3.0,
-    "changedPct": 3.3,
-    "meanDeltaDb": 0.45,
-    "meanAbsDeltaDb": 1.05,
-    "changedAreaKm2": 8.91,
-    "validPixels": 684800,
+    "changedPct": 4.3,
+    "meanDeltaDb": 0.46,
+    "meanAbsDeltaDb": 1.13,
+    "changedAreaKm2": 4.02,
+    "validPixels": 235412,
     "validPct": 100.0,
     "grid": {
-      "width": 856,
-      "height": 800,
+      "width": 514,
+      "height": 458,
       "aligned": true
     },
     "before": {
@@ -40,16 +40,16 @@ export const caldorSnapshot = {
   },
   "measurements": {
     "hhDb": {
-      "before": -8.4,
-      "after": -7.9
+      "before": -9.3,
+      "after": -8.8
     },
     "hvDb": {
-      "before": -14.6,
-      "after": -14.7
+      "before": -15.5,
+      "after": -15.6
     },
     "crossDb": {
-      "before": -6.3,
-      "after": -6.8
+      "before": -6.2,
+      "after": -6.7
     },
     "validPct": 100.0
   },

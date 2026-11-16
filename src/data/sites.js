@@ -202,12 +202,12 @@ export const studyAreas = [
     seed: 84,
     name: { en: 'West Attica wildfire', ar: 'حريق غرب أتيكا' },
     region: { en: 'West Attica · Mount Pateras · Greece', ar: 'غرب أتيكا · جبل باتيراس · اليونان' },
-    // Inland forested hills of West Attica (Mount Pateras / Dervenochoria),
-    // entirely on land. The old shoreline window put half of the 512×512
-    // window over the Aegean, and wind-driven sea backscatter swung the VV
-    // level and the VV−VH gap for reasons that had nothing to do with the fire.
-    coords: { lat: 38.15, lng: 23.45 },
-    wkt: 'POLYGON ((23.35 38.08, 23.55 38.08, 23.55 38.22, 23.35 38.22, 23.35 38.08))',
+    // Tight on the forested burn scar in NE Mount Pateras / Dervenochoria.
+    // The previous window included the unburned southern industrial plain,
+    // which washed out the fire signal; the shoreline window before that put
+    // half the scene over the Aegean and let sea backscatter drive the change.
+    coords: { lat: 38.18, lng: 23.49 },
+    wkt: 'POLYGON ((23.43 38.14, 23.55 38.14, 23.55 38.22, 23.43 38.22, 23.43 38.14))',
     eventDate: '2026-07-31',
     headline: {
       en: 'The slope that burned to the sea',

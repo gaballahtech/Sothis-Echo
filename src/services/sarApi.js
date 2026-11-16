@@ -75,7 +75,7 @@ export function sceneImageUrl(siteId, side, source, view) {
   const suffix = source ? `&source=${encodeURIComponent(source)}` : '';
   const extra = view ? `&view=${encodeURIComponent(view)}` : '';
   // Bust stale 24 h browser caches from earlier crops/composites.
-  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}${suffix}${extra}&v=20261116c`;
+  return `${API_BASE.replace(/\/api\/?$/, '')}/api/scene-image?site=${encodeURIComponent(siteId)}&side=${side}${suffix}${extra}&v=20261116d`;
 }
 
 export function getApiConfig() {
