@@ -230,12 +230,12 @@ export const studyAreas = [
     ],
     story: [
       {
-        en: 'In late August 2026 the Timber and Plaskett fires merged into a single megafire on the Santa Lucia Range above Big Sur. Driven by offshore winds and critically dry chaparral, it ran through steep canyons of coast live oak, montane chaparral and scattered conifer, forcing evacuations along Highway 1. The two NISAR passes below bracket the run: 16 August before ignition and 28 August after the merge.',
+        en: 'In late August 2026 the Timber and Plaskett fires merged into a single megafire on the Santa Lucia Range above Big Sur. Driven by offshore winds and critically dry chaparral, it ran through steep canyons of coast live oak, montane chaparral and scattered conifer, forcing evacuations along Highway 1. The two NISAR passes below bracket the run: 16 August before ignition and 9 September after the merge.',
         ar: 'في أواخر أغسطس 2026 اندمج حريقا تيمبر وبلاكيت في حريق هائل واحد على سلسلة سانتا لوسيا فوق بيغ سور. وبدفعة رياح برية وشابارال جاف للغاية، امتد عبر أودية شديدة الانحدار من بلوط الساحل والشابارال الجبلي والصنوبريات المتناثرة، وأجبر على إخلاءات بطول الطريق السريع 1. ومرورا نيسار أدناه يحيطان بالحدث: 16 أغسطس قبل الاشتعال و28 أغسطس بعد الاندماج.',
       },
       {
-        en: 'Radar does not see flame. It sees structure. Before the fire the pulse scattered through dense woody canopy; afterwards it met ash, exposed soil and standing dead trunks. Across this window 35% of land pixels moved by at least 2 dB, and the remaining canopy edge shows an unmistakable dark, smooth scar.',
-        ar: 'الرادار لا يرى اللهب، بل يرى البنية. قبل الحريق تبعثرت النبضة داخل مظلة خشبية كثيفة؛ وبعده لاقت رمادًا وتربة مكشوفة وجذوعًا ميتة قائمة. وفي هذه النافذة تحرّك 35٪ من بكسلات اليابسة بمقدار 2 ديسيبل على الأقل، وتُظهر حافة المظلة المتبقية أثرًا داكنًا ناعمًا لا لبس فيه.',
+        en: 'Radar does not see flame. It sees structure. Between 16 August and 9 September 2026, 20% of the land-masked pixels moved by at least 2 dB. The change is patchy rather than one contiguous scar, so this pair alone does not confirm the reported burn perimeter; it is a candidate window that still needs field or optical validation.',
+        ar: 'الرادار لا يرى اللهب، بل يرى البنية. بين 16 أغسطس و9 سبتمبر 2026 تحرّك 20٪ من بكسلات اليابسة بمقدار 2 ديسيبل على الأقل. التغيّر متفرّق وليس أثرًا متصلًا واحدًا، لذا لا يؤكد هذا الزوج وحده محيط الحريق المبلّغ عنه؛ إنه نافذة مرشحة تحتاج تحققًا ميدانيًا أو بصريًا.',
       },
     ],
     states: {
@@ -261,7 +261,7 @@ export const studyAreas = [
         },
       },
       after: {
-        date: '2026-08-28',
+        date: '2026-09-09',
         label: { en: 'AFTER THE FIRE', ar: 'بعد الحريق' },
         params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 },
         caption: {
@@ -287,14 +287,14 @@ export const studyAreas = [
       vh: { before: -15.4, after: -19.6 },
       crossPol: { before: -6.5, after: -7.2 },
       dateBefore: '2026-08-16',
-      dateAfter: '2026-08-28',
+      dateAfter: '2026-09-09',
     },
     series: [
       { date: '2026-06-18', vv: -8.8, vh: -15.2, burn: 0.02, change: 0.09 },
       { date: '2026-07-14', vv: -8.9, vh: -15.4, burn: 0.04, change: 0.10 },
       { date: '2026-08-16', vv: -9.0, vh: -15.6, burn: 0.05, change: 0.10 },
       { date: '2026-08-25', vv: -10.9, vh: -18.2, burn: 0.5, change: 0.6 },
-      { date: '2026-08-28', vv: -12.4, vh: -19.6, burn: 0.9, change: 0.93 },
+      { date: '2026-09-09', vv: -12.4, vh: -19.6, burn: 0.9, change: 0.93 },
       { date: '2026-09-21', vv: -12.8, vh: -19.9, burn: 0.88, change: 0.86 },
       { date: '2026-10-03', vv: -12.2, vh: -19.1, burn: 0.82, change: 0.74 },
       { date: '2026-10-15', vv: -11.8, vh: -18.4, burn: 0.75, change: 0.62 },
@@ -343,7 +343,7 @@ export const studyAreas = [
           ar: 'ينفذ نطاق L أعمق من نطاق C ويحافظ على حساسية للجذوع الخشبية بعد استهلاك المظلة. وهذا ينبغي أن يمكّن نيسار من التمييز بين «مظلة مستهلكة» و«مظلة مخففة» أفضل من Sentinel-1.',
         },
         {
-          en: 'A 12-day repeat lets NISAR bracket a fire with pre- and post-event acquisitions — the single most valuable thing a radar time series can do for rapid damage assessment.',
+          en: 'A 24-day repeat lets NISAR bracket a fire with pre- and post-event acquisitions — the single most valuable thing a radar time series can do for rapid damage assessment.',
           ar: 'تكرار 12 يومًا يتيح لنيسار تأطير الحريق باقتناءات قبل الحدث وبعده — وهو أثمن ما تقدمه سلسلة زمنية رادارية لتقييم الأضرار السريع.',
         },
       ],

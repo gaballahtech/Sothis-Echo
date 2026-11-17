@@ -42,7 +42,7 @@ ASF = 'https://api.daac.asf.alaska.edu/services/search/param'
 FETCH_TIMEOUT = 25
 OUT_W, OUT_H = 560, 370
 THRESHOLD_DB = 2.0
-WATER_MASK_DB = -18.0
+WATER_MASK_DB = -10.0
 CHANGE_FLOOR_DB = 1.5
 SPECKLE_WINDOW = 3
 
@@ -56,12 +56,12 @@ SITES = {
     },
     'bigsur': {
         # Timber + Plaskett fire scar on the Santa Lucia Range, Big Sur.
-        # Track 42 descending, frame 070: clean 12-day same-track pair.
+        # Track 42 descending, frame 070: clean 24-day same-track pair.
         'coords': (36.02, -121.52),
         'bbox': (-121.58, 35.97, -121.46, 36.07),
         'eventDate': '2026-08-25',
         'before': 'NISAR_L2_PR_GCOV_028_042_D_070_4005_DHDH_A_20260816T025639_20260816T025713_P05023_N_F_J_001',
-        'after': 'NISAR_L2_PR_GCOV_029_042_D_070_4005_DHDH_A_20260828T025638_20260828T025713_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_030_042_D_070_4005_DHDH_A_20260909T025638_20260909T025713_P05023_N_F_J_001',
     },
 }
 
@@ -416,8 +416,11 @@ def granule_url(rows, name):
 def main():
     os.makedirs(CACHE, exist_ok=True)
     started = time.time()
+    only = os.environ.get('NISAR_ONLY')
+    site_ids = [only] if only else list(SITES)
     catalog = {}
-    for site_id, site in SITES.items():
+    for site_id in site_ids:
+        site = SITES[site_id]
         wkt = (
             f'POLYGON (({site["bbox"][0]} {site["bbox"][1]}, {site["bbox"][2]} {site["bbox"][1]}, '
             f'{site["bbox"][2]} {site["bbox"][3]}, {site["bbox"][0]} {site["bbox"][3]}, '
@@ -441,10 +444,11 @@ def main():
         return ('bigsur', side, read_window(grid, SITES['bigsur']['bbox'], want_hv=True))
 
     with ThreadPoolExecutor(max_workers=4) as pool:
-        futures = [
-            pool.submit(do_sundarbans, 'before'), pool.submit(do_sundarbans, 'after'),
-            pool.submit(do_bigsur, 'before'), pool.submit(do_bigsur, 'after'),
-        ]
+        futures = []
+        if 'sundarbans' in site_ids:
+            futures += [pool.submit(do_sundarbans, 'before'), pool.submit(do_sundarbans, 'after')]
+        if 'bigsur' in site_ids:
+            futures += [pool.submit(do_bigsur, 'before'), pool.submit(do_bigsur, 'after')]
         for future in futures:
             family, side, window = future.result()
             if family == 'sundarbans':
@@ -454,7 +458,9 @@ def main():
 
     # RGB and HH must share the window, so the HH view cannot jump relative to
     # the dual-pol composite when the user toggles between them.
-    for family, windows in (('sundarbans', sundarbans_windows), ('bigsur', bigsur_windows)):
+    families = [('sundarbans', sundarbans_windows), ('bigsur', bigsur_windows)]
+    families = [(name, windows) for name, windows in families if windows]
+    for family, windows in families:
         # Wildfire: anchor the stretch to the before pass and weight the HV
         # canopy drop, so the burn scar reads as a contiguous bright anomaly.
         wildfire = family == 'bigsur'
@@ -510,7 +516,7 @@ def main():
             'validPct': stats['validPct'],
             'grid': {'width': stats['width'], 'height': stats['height'], 'aligned': True},
             'before': {'date': '2026-08-16', 'granule': SITES['bigsur']['before']},
-            'after': {'date': '2026-08-28', 'granule': SITES['bigsur']['after']},
+            'after': {'date': '2026-09-09', 'granule': SITES['bigsur']['after']},
             'note': (
                 f'Signed HH change, {int(THRESHOLD_DB)} dB absolute threshold, same track/frame, '
                 'NISAR L-band gamma-0, read directly from the calibrated ASF GCOV HDF5 granules.'
@@ -530,7 +536,7 @@ def main():
                 'height': OUT_H,
             },
             'after': {
-                'date': '2026-08-28',
+                'date': '2026-09-09',
                 'granule': SITES['bigsur']['after'],
                 'width': OUT_W,
                 'height': OUT_H,

@@ -60,7 +60,7 @@ const en = {
           'NASA’s L-band (24 cm) reaches trunks and soil. ISRO’s S-band (9.4 cm) sees finer canopy detail. Together they separate what one sensor would blur.',
       },
       heartbeat: {
-        title: 'A 12-day heartbeat',
+        title: 'A 24-day heartbeat',
         body:
           'The orbit repeats almost exactly, so the same patch is imaged from the same angle every 12 days. The difference between passes is the signal.',
       },
