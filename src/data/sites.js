@@ -16,7 +16,7 @@
  *
  * The internal ids (`sundarbans`, `bigsur`) are kept as stable catalogue keys
  * for URLs, tests and the backend. The events they describe are the 2026
- * Central Vietnam flood and the 2026 West Attica wildfire.
+ * Central Vietnam flood and the 2026 Big Sur (California) megafire.
  */
 
 export const SITE_DATA_VERSION = '2026.11-real.2';
@@ -154,8 +154,8 @@ export const studyAreas = [
     },
     researcher: {
       acquisition: {
-        en: 'The before/after cards and the change map are real NASA NISAR L-band GCOV browse images: an HH browse from a DHDH granule, which carries HH and HV. The dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH), used as the public proxy until NISAR time series are openly available. Each card date is the acquisition date of the image shown.',
-        ar: 'بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NASA NISAR L-band GCOV: صورة HH من جرانول DHDH يحمل HH وHV. أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD الحقيقي (VV/VH)، وتُستخدم كبديل عام حتى تتاح سلاسل نيسار الزمنية. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
+        en: 'The before/after cards, the change map, the dB panel and the time series all come from the same NASA NISAR L-band GCOV product: a calibrated HH/HV gamma-0 series read from the DHDH granules. Each card date is the acquisition date of the image shown.',
+        ar: 'بطاقات قبل/بعد وخريطة الاختلاف ولوحة الديسيبل والسلسلة الزمنية كلها من منتج NASA NISAR L-band GCOV نفسه: سلسلة HH/HV معايرة (غاما-0) مقروءة من جرانولات DHDH. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
       },
       interpretation: [
         {
@@ -203,9 +203,11 @@ export const studyAreas = [
     name: { en: 'Big Sur megafire', ar: 'حريق بيغ سور الكبير' },
     region: { en: 'Santa Lucia Range · Big Sur · California', ar: 'سلسلة سانتا لوسيا · بيغ سور · كاليفورنيا' },
     // Timber and Plaskett fires merged across the steep Santa Lucia Range.
-    // Window is tight on the chaparral / coast live oak burn scar so the
-    // surrounding unburned redwood canyon does not dilute the change signal.
-    coords: { lat: 36.02, lng: -121.52 },
+    // Centred on the burn-scar core: the densest 1.5 km cluster of pixels that
+    // moved by >=2 dB between the 16 Aug and 9 Sep NISAR passes. The old centre
+    // sat on unburned canyon and diluted the signal to ~0.3 dB; the scar core
+    // gives a ~1.6 dB HH drop over the 5.5 km measurement window.
+    coords: { lat: 35.9774, lng: -121.4994 },
     wkt: 'POLYGON ((-121.58 35.97, -121.46 35.97, -121.46 36.07, -121.58 36.07, -121.58 35.97))',
     eventDate: '2026-08-25',
     headline: {
@@ -234,8 +236,8 @@ export const studyAreas = [
         ar: 'في أواخر أغسطس 2026 اندمج حريقا تيمبر وبلاكيت في حريق هائل واحد على سلسلة سانتا لوسيا فوق بيغ سور. وبدفعة رياح برية وشابارال جاف للغاية، امتد عبر أودية شديدة الانحدار من بلوط الساحل والشابارال الجبلي والصنوبريات المتناثرة، وأجبر على إخلاءات بطول الطريق السريع 1. ومرورا نيسار أدناه يحيطان بالحدث: 16 أغسطس قبل الاشتعال و28 أغسطس بعد الاندماج.',
       },
       {
-        en: 'Radar does not see flame. It sees structure. Between 16 August and 9 September 2026, 20% of the land-masked pixels moved by at least 2 dB. The change is patchy rather than one contiguous scar, so this pair alone does not confirm the reported burn perimeter; it is a candidate window that still needs field or optical validation.',
-        ar: 'الرادار لا يرى اللهب، بل يرى البنية. بين 16 أغسطس و9 سبتمبر 2026 تحرّك 20٪ من بكسلات اليابسة بمقدار 2 ديسيبل على الأقل. التغيّر متفرّق وليس أثرًا متصلًا واحدًا، لذا لا يؤكد هذا الزوج وحده محيط الحريق المبلّغ عنه؛ إنه نافذة مرشحة تحتاج تحققًا ميدانيًا أو بصريًا.',
+        en: 'Radar does not see flame. It sees structure. Between 16 August and 9 September 2026, about 20% of the land-masked pixels (≈10.7 km²) moved by at least 2 dB. The measurement window is centred on the densest cluster of that change — the burn-scar core — so the before/after pair reads the strongest signal instead of diluting it across unburned canyon. The scar is still patchy, so this pair is a candidate perimeter that needs field or optical validation.',
+        ar: 'الرادار لا يرى اللهب، بل يرى البنية. بين 16 أغسطس و9 سبتمبر 2026 تحرّك نحو 20٪ من بكسلات اليابسة (نحو 10.7 كم²) بمقدار 2 ديسيبل على الأقل. نافذة القياس متمركزة على أكثف تجمّع لهذا التغيّر — لب ندبة الحرق — لذا يقرأ الزوج قبل/بعد أقوى إشارة بدل تخفيفها على أودية لم تحترق. والندبة لا تزال متفرّقة، لذا هذا الزوج محيط مرشّح يحتاج تحققًا ميدانيًا أو بصريًا.',
       },
     ],
     states: {
@@ -330,8 +332,8 @@ export const studyAreas = [
     },
     researcher: {
       acquisition: {
-        en: 'The before/after cards and the change map are real NASA NISAR L-band GCOV browse images: an HH browse from a DHDH granule, which carries HH and HV. The dB panel and the time series are real Sentinel-1 C-band GRD (VV/VH), used as the public proxy until NISAR time series are openly available. Each card date is the acquisition date of the image shown.',
-        ar: 'بطاقات قبل/بعد وخريطة الاختلاف صور حقيقية من NASA NISAR L-band GCOV: صورة HH من جرانول DHDH يحمل HH وHV. أما لوحة الديسيبل والسلسلة الزمنية فمن Sentinel-1 C-band GRD الحقيقي (VV/VH)، وتُستخدم كبديل عام حتى تتاح سلاسل نيسار الزمنية. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
+        en: 'The before/after cards, the change map, the dB panel and the time series all come from the same NASA NISAR L-band GCOV product: a calibrated HH/HV gamma-0 series read from the DHDH granules. Each card date is the acquisition date of the image shown.',
+        ar: 'بطاقات قبل/بعد وخريطة الاختلاف ولوحة الديسيبل والسلسلة الزمنية كلها من منتج NASA NISAR L-band GCOV نفسه: سلسلة HH/HV معايرة (غاما-0) مقروءة من جرانولات DHDH. وتاريخ كل بطاقة هو تاريخ التقاط الصورة المعروضة نفسها.',
       },
       interpretation: [
         {

@@ -26,6 +26,7 @@ import {
   clearNisarCache,
   computeNisarChangeStats,
   nisarSnapshot,
+  nisarRecoverySnapshot,
   nisarSnapshotHh,
   nisarSnapshotChange,
   nisarSnapshotRgb,
@@ -213,6 +214,40 @@ async function getSites() {
         const merged = { ...fixture, ...real };
         delete merged.degraded;
         delete merged.degradedReason;
+        // Calibrated L-band recovery + measurements + time series from the
+        // bundled NISAR GCOV series. Every number (cards, change map, table,
+        // recovery) then comes from the same sensor and calibration pipeline.
+        const nisarRecovery = nisarRecoverySnapshot(site.id);
+        if (nisarRecovery?.points?.length >= 2) {
+          merged.recovery = {
+            thresholdDefault: nisarRecovery.thresholdDefault ?? 80,
+            points: nisarRecovery.points,
+            fromApi: true,
+            source: nisarRecovery.source,
+            calibrated: nisarRecovery.calibrated,
+            note: nisarRecovery.note,
+          };
+          if (nisarRecovery.measurements) merged.measurements = nisarRecovery.measurements;
+          if (Array.isArray(nisarRecovery.series)) merged.series = nisarRecovery.series;
+          if (Array.isArray(nisarRecovery.pulse)) merged.pulse = nisarRecovery.pulse;
+          if (Array.isArray(nisarRecovery.stablePulse)) merged.stablePulse = nisarRecovery.stablePulse;
+          if (merged.provenance) {
+            merged.provenance = {
+              ...merged.provenance,
+              numbers: {
+                sensor: 'NISAR',
+                mission: 'NASA / ISRO',
+                band: 'L',
+                polarizations: ['HH', 'HV'],
+                product: 'GCOV HHHH/HVHV subset (gamma-0)',
+                unit: 'gamma0_power_db',
+                calibration: '10·log10(gamma-0 power) — calibrated gamma-0',
+                calibrated: true,
+                source: 'nisar-gcov-asf-h5',
+              },
+            };
+          }
+        }
         return merged;
       } catch (error) {
         // Never hide a fallback: the payload says fixture/degraded so the UI
@@ -658,9 +693,14 @@ export async function handleRequest(req, res) {
       // A cold build walks the archive for a minute or more; without an edge
       // cache every visitor after an idle spell waits it out and the page falls
       // back to the bundled figures. Serve the last build instantly and refresh
-      // it in the background instead.
+      // it in the background instead. A degraded (fixture) build is only cached
+      // briefly, so a transient failure self-heals instead of pinning the site
+      // to the labelled fallback for half an hour.
+      const degraded = sites.some((site) => site.degraded);
       send(res, 200, { data: sites, success: true }, {
-        'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+        'Cache-Control': degraded
+          ? 'public, s-maxage=30, stale-while-revalidate=60'
+          : 'public, s-maxage=1800, stale-while-revalidate=86400',
       });
       return;
     }
@@ -798,7 +838,9 @@ export async function handleRequest(req, res) {
       if (!site) sendError(res, 404, 'Unknown site');
       else
         send(res, 200, { data: site, success: true }, {
-          'Cache-Control': 'public, s-maxage=1800, stale-while-revalidate=86400',
+          'Cache-Control': site.degraded
+            ? 'public, s-maxage=30, stale-while-revalidate=60'
+            : 'public, s-maxage=1800, stale-while-revalidate=86400',
         });
       return;
     }

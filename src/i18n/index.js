@@ -29,7 +29,7 @@ const en = {
       'Radar sees through cloud, smoke and darkness. Meet NISAR and learn to read what it finds.',
     ctaSee: 'See what the camera misses',
     ctaListen: 'Hear the surface',
-    liveData: 'Sentinel-1 record · NISAR browse',
+    liveData: 'NISAR L-band record',
     lastPass: 'Last real pass',
     panel: {
       orbit: 'Orbit',
@@ -126,7 +126,7 @@ const en = {
   sites: {
     title: 'One change, two rhythms',
     subtitle:
-      'The same event looks different in a flooded river plain and on a burned Mediterranean hillside. Pick a site, compare before and after, then read why.',
+      'The same event looks different in a flooded river plain and on a burned California hillside. Pick a site, compare before and after, then read why.',
     event: 'Event',
     readPol: 'Read the polarization',
     signalTab: 'Reading the signal',
@@ -139,9 +139,9 @@ const en = {
       subtitle: 'Every pass in the current series, in one auditable table.',
       columnSite: 'Study area',
       columnDate: 'Pass date',
-      columnVv: 'VV (dB)',
-      columnVh: 'VH (dB)',
-      columnCross: 'VH−VV (dB)',
+      columnVv: 'HH (dB)',
+      columnVh: 'HV (dB)',
+      columnCross: 'HV−HH (dB)',
       columnWater: 'Dark share',
       columnChange: 'Change',
       columnRecovery: 'Recovery',
@@ -154,10 +154,10 @@ const en = {
         change: 'Changed',
       },
       note:
-        'Cross-pol is VH minus VV. Recovery is interpolated from the recovery curve. Change is |ΔVV| against the pre-event pass, scaled so 1.00 = 12 dB.',
+        'Cross-pol is HV minus HH. Recovery is interpolated from the recovery curve. Change is |ΔHH| against the pre-event pass, scaled so 1.00 = 12 dB.',
     },
     dbNote:
-      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. Before/after cards and the change map are {{cards}}; the dB panel and the time series are {{numbers}}.',
+      'Lower dB means less energy returned — a darker pixel. HV−HH is the cross-pol ratio. Before/after cards and the change map are {{cards}}; the dB panel and the time series are {{numbers}}.',
     provCardsNisar: 'real NASA NISAR L-band ({{polarizations}}) browse images',
     provCardsSentinel: 'real Sentinel-1 C-band ({{polarizations}}) quicklooks',
     provNumbersSentinel:
@@ -165,7 +165,7 @@ const en = {
     provNumbersNisar: 'calibrated NISAR L-band gamma-0 ({{polarizations}})',
     degraded: 'The live rebuild failed for this site, so the labelled fallback record is shown — not new measurements.',
     dbNoteFallback:
-      'Lower dB means less energy returned — a darker pixel. VH−VV is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
+      'Lower dB means less energy returned — a darker pixel. HV−HH is the cross-pol ratio. The backend is unreachable, so these values and scenes are the labelled offline fallback — not measurements.',
     forResearchers: 'For Researchers',
     acquisition: 'Acquisition & products',
     acquisitionFallback:
@@ -189,7 +189,7 @@ const en = {
     afterPass: 'After (dB)',
     crossDb: 'HH − HV',
     crossDbNote:
-      'Before/after means from the Sentinel-1 GRD passes listed above (relative dB), not simulated: HH is the co-pol channel and HH − HV is the cross-pol ratio; a wider gap means more volume scattering from canopy.',
+      'Before/after means from the satellite passes listed above (calibrated gamma-0 dB), not simulated: {{coPol}} is the co-pol channel and {{crossPol}} − {{coPol}} is the cross-pol ratio; a wider gap means more volume scattering from canopy.',
     ariaScene: '{{site}} {{state}} radar scene',
     changeTitle: 'CHANGE · {{date}}',
     changeCaption:
@@ -203,9 +203,9 @@ const en = {
     cardViewRgbNote:
       'Dual-pol intensity composite of each pass (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition.',
     changeStatsLabel: 'Calibrated change',
-    changeStatsValue: '{{changed}}% of valid pixels changed · mean ΔHH {{mean}} dB',
+    changeStatsValue: '{{changed}}% of valid pixels changed · {{area}} km²',
     changeStatsCaveat:
-      '|ΔdB| ≥ {{threshold}} dB on aligned HHHH grids, same track/frame · {{valid}}% valid pixels',
+      '|ΔdB| ≥ {{threshold}} dB on aligned HHHH grids, same track/frame · mean ΔHH {{mean}} dB · {{valid}}% valid pixels',
     changeStatsUnavailable: 'Calibrated change statistics are not available for this site right now.',
     changeStatsSnapshot:
       'Precomputed from a verified NISAR GCOV run on {{date}}; Harmony is not queried on this page load.',
@@ -220,7 +220,7 @@ const en = {
     changeSub: 'The study-area series. The event is audible before you read the label.',
     play: 'Play',
     stop: 'Stop',
-    sourceLine: 'Real data: {{passes}} Sentinel-1 passes, resampled to 16 steps.',
+    sourceLine: 'Real data: {{passes}} NISAR L-band passes, resampled to 16 steps.',
     scaleNote: 'Bars and pitch are scaled to this record’s peak change ({{peak}}%).',
     mappingTitle: 'How the data becomes sound',
     map1: 'One pulse = one step of the 16-step series',
@@ -344,7 +344,7 @@ const en = {
       },
       game: {
         title: 'Test your eye',
-        body: 'Two real Sentinel-1 pairs from 2026: a Vietnam flood and a Greek wildfire. Choose an answer, then read the evidence.',
+        body: 'Two real NISAR L-band pairs from 2026: a Vietnam flood and the Big Sur megafire. Choose an answer, then read the evidence.',
       },
     },
   },
@@ -395,11 +395,11 @@ const en = {
   common: {
     loading: 'Loading',
     retry: 'Retry',
-    checkingLive: 'Reading live Sentinel-1 record…',
+    checkingLive: 'Reading live NISAR record…',
     sitePicker: 'Study area',
     skipToContent: 'Skip to main content',
     demoBanner:
-      'Demo mode — the backend is not connected, so the values below are illustrative. Start `npm run api` for real Sentinel-1 data.',
+      'Demo mode — the backend is not connected, so the values below are illustrative. Start `npm run api` for real NISAR data.',
   },
 };
 
@@ -431,7 +431,7 @@ const ar = {
       'الرادار يرى عبر الغيوم والدخان والظلام. تعرّف على نيسار وتعلّم قراءة ما يجده.',
     ctaSee: 'شاهد ما تفوته الكاميرا',
     ctaListen: 'اسمع سطح الأرض',
-    liveData: 'سجل Sentinel-1 · صورة NISAR',
+    liveData: 'سجل NISAR L-band',
     lastPass: 'آخر مرور حقيقي',
     panel: {
       orbit: 'المدار',
@@ -527,7 +527,7 @@ const ar = {
   sites: {
     title: 'تغيّر واحد، إيقاعان',
     subtitle:
-      'الحدث نفسه يبدو مختلفًا في سهل نهري غارق وعلى منحدر متوسطي محترق. اختر موقعًا، قارن قبل وبعد، ثم اقرأ السبب.',
+      'الحدث نفسه يبدو مختلفًا في سهل نهري غارق وعلى منحدر ساحلي محترق في كاليفورنيا. اختر موقعًا، قارن قبل وبعد، ثم اقرأ السبب.',
     event: 'الحدث',
     readPol: 'اقرأ الاستقطاب',
     signalTab: 'قراءة الإشارة',
@@ -540,9 +540,9 @@ const ar = {
       subtitle: 'كل مرور في السلسلة الحالية في جدول واحد قابل للتدقيق.',
       columnSite: 'منطقة الدراسة',
       columnDate: 'تاريخ المرور',
-      columnVv: 'VV (ديسيبل)',
-      columnVh: 'VH (ديسيبل)',
-      columnCross: 'VH−VV (ديسيبل)',
+      columnVv: 'HH (ديسيبل)',
+      columnVh: 'HV (ديسيبل)',
+      columnCross: 'HV−HH (ديسيبل)',
       columnWater: 'النسبة الداكنة',
       columnChange: 'التغير',
       columnRecovery: 'التعافي',
@@ -555,10 +555,10 @@ const ar = {
         change: 'متغير',
       },
       note:
-        'الاستقطاب المتقاطع هو VH ناقص VV. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔVV| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
+        'الاستقطاب المتقاطع هو HV ناقص HH. والتعافي مستوفى من منحنى التعافي. والتغير هو |ΔHH| مقابل مرور ما قبل الحدث، مُعيّر بحيث 1.00 = 12 ديسيبل.',
     },
     dbNote:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف {{cards}}؛ أما لوحة الديسيبل والسلسلة الزمنية فمن {{numbers}}.',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. HV−HH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف {{cards}}؛ أما لوحة الديسيبل والسلسلة الزمنية فمن {{numbers}}.',
     provCardsNisar: 'صور حقيقية من NISAR L-band ({{polarizations}})',
     provCardsSentinel: 'صور حقيقية من Sentinel-1 C-band ({{polarizations}})',
     provNumbersSentinel:
@@ -566,7 +566,7 @@ const ar = {
     provNumbersNisar: 'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
     degraded: 'فشل البناء الحيّ لهذا الموقع، لذا تُعرض السجلات الاحتياطية الموسومة — وليست قياسات جديدة.',
     dbNoteFallback:
-      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. VH−VV هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
+      'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. HV−HH هو نسبة الاستقطاب المتقاطع. الخادم غير متاح، لذا هذه القيم والمشاهد احتياطية موسومة وليست قياسات.',
     forResearchers: 'للباحثين',
     acquisition: 'الاقتناء والمنتجات',
     acquisitionFallback:
@@ -590,7 +590,7 @@ const ar = {
     afterPass: 'بعد (ديسيبل)',
     crossDb: 'HH − HV',
     crossDbNote:
-      'القيم قبل/بعد هي متوسطات من مرورات Sentinel-1 GRD المذكورة أعلاه (ديسيبل نسبي)، وليست محاكاة: HH هي القناة المشتركة، وHH − HV هي نسبة الاستقطاب المتقاطع؛ اتساع الفجوة يعني تشتتًا حجميًا أكبر من المظلة.',
+      'القيم قبل/بعد هي متوسطات من مرورات الأقمار المذكورة أعلاه (ديسيبل غاما-0 معايرة)، وليست محاكاة: {{coPol}} هي القناة المشتركة، و{{crossPol}} − {{coPol}} هي نسبة الاستقطاب المتقاطع؛ اتساع الفجوة يعني تشتتًا حجميًا أكبر من المظلة.',
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
     changeTitle: 'الاختلاف · {{date}}',
     changeCaption:
@@ -604,9 +604,9 @@ const ar = {
     cardViewRgbNote:
       'تركيب شدة ثنائي الاستقطاب لكل مرور (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي.',
     changeStatsLabel: 'تغيّر مُعايَر',
-    changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · متوسط ΔHH {{mean}} ديسيبل',
+    changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · {{area}} كم²',
     changeStatsCaveat:
-      '|ΔdB| ≥ {{threshold}} ديسيبل على شبكات HHHH المتوائمة، المسار والإطار نفسيهما · {{valid}}% بكسلات صالحة',
+      '|ΔdB| ≥ {{threshold}} ديسيبل على شبكات HHHH المتوائمة، المسار والإطار نفسيهما · متوسط ΔHH {{mean}} ديسيبل · {{valid}}% بكسلات صالحة',
     changeStatsUnavailable: 'إحصاءات التغيّر المُعايَرة غير متاحة لهذا الموقع الآن.',
     changeStatsSnapshot:
       'محسوبة مسبقًا من تشغيل NISAR GCOV موثّق بتاريخ {{date}}؛ ولا يُستعلم Harmony عند تحميل الصفحة.',
@@ -621,7 +621,7 @@ const ar = {
     changeSub: 'سلسلة منطقة الدراسة. الحدث مسموع قبل أن تقرأ العنوان.',
     play: 'تشغيل',
     stop: 'إيقاف',
-    sourceLine: 'بيانات حقيقية: {{passes}} مرورًا لـ Sentinel-1، أُعيد تشكيلها إلى 16 خطوة.',
+    sourceLine: 'بيانات حقيقية: {{passes}} مرورًا لـ NISAR L-band، أُعيد تشكيلها إلى 16 خطوة.',
     scaleNote: 'الأعمدة والنغمة مُعيّرة على أقوى تغيّر في هذا السجل ({{peak}}%).',
     mappingTitle: 'كيف تتحول البيانات إلى صوت',
     map1: 'نبضة واحدة = خطوة من 16 خطوة في السلسلة',
@@ -743,7 +743,7 @@ const ar = {
       },
       game: {
         title: 'اختبر عينك',
-        body: 'زوجان حقيقيان من Sentinel-1 عام 2026: فيضان فيتنام وحريق بيغ سور الكبير. اختر ثم اقرأ الأدلة.',
+        body: 'زوجان حقيقيان من NISAR L-band عام 2026: فيضان فيتنام وحريق بيغ سور الكبير. اختر ثم اقرأ الأدلة.',
       },
     },
   },
@@ -794,11 +794,11 @@ const ar = {
   common: {
     loading: 'جارٍ التحميل',
     retry: 'إعادة المحاولة',
-    checkingLive: 'جارٍ قراءة سجل Sentinel-1 الحيّ…',
+    checkingLive: 'جارٍ قراءة سجل NISAR الحيّ…',
     sitePicker: 'منطقة الدراسة',
     skipToContent: 'تخطَّ إلى المحتوى الرئيسي',
     demoBanner:
-      'وضع تجريبي — الباك اند غير متصل، والقيم أدناه توضيحية. شغّل `npm run api` لبيانات Sentinel-1 الحقيقية.',
+      'وضع تجريبي — الباك اند غير متصل، والقيم أدناه توضيحية. شغّل `npm run api` لبيانات NISAR الحقيقية.',
   },
 };
 

@@ -5,12 +5,15 @@ import { buildSiteCsv } from '../services/sarApi';
 import { Disclosure, SectionHead, SourceBadge } from './ui';
 
 const ENDPOINTS = [
-  'GET  /study-areas',
-  'GET  /study-areas/:id',
-  'GET  /sites/:id/series?start=&end=',
-  'GET  /sites/:id/recovery?threshold=80',
-  'GET  /sonification/:id',
-  'GET  /nisar/status',
+  'GET  /api/health',
+  'GET  /api/nisar/status',
+  'GET  /api/study-areas',
+  'GET  /api/study-areas/:id',
+  'GET  /api/sites/:id/series?start=&end=',
+  'GET  /api/sites/:id/recovery?threshold=80',
+  'GET  /api/sonification/:id',
+  'GET  /api/scene-image?site=&side=&source=',
+  'GET  /api/attribution/:id',
 ];
 
 const REFERENCES = [

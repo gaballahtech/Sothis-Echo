@@ -47,3 +47,7 @@ playwright-report/
 server/.cache/
 .vercel
 .env*
+
+# Python (NISAR snapshot tooling)
+scripts/__pycache__/
+.venv-nisar/

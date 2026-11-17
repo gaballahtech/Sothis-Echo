@@ -24,6 +24,8 @@ import { sundarbansHhBase64 } from './cache/nisar/sundarbans-hh.mjs';
 import { bigsurHhBase64 } from './cache/nisar/bigsur-hh.mjs';
 import { sundarbansChangeBase64 } from './cache/nisar/sundarbans-change.mjs';
 import { bigsurChangeBase64 } from './cache/nisar/bigsur-change.mjs';
+import { sundarbansRecovery } from './cache/nisar/sundarbans-recovery.mjs';
+import { bigsurRecovery } from './cache/nisar/bigsur-recovery.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -32,6 +34,9 @@ const PROVISIONAL = 'C2854338529-ASF';
 // Only /tmp is writable on Vercel and most serverless runtimes.
 const CACHE_DIR = path.join(os.tmpdir(), 'nisar');
 const CACHE_TTL = 6 * 60 * 60 * 1000;
+// Empty results (Harmony queue timeout, no granule pair) retry sooner than the
+// full TTL so a transient failure cannot disable calibrated cards for hours.
+const EMPTY_TTL = 45 * 1000;
 const DEBUG = process.env.DEBUG_REAL === '1';
 // Harmony's NISAR extraction can queue indefinitely. Public requests must never
 // wait on it: 12 s, then fall back to browse + Sentinel.
@@ -348,6 +353,15 @@ const SNAPSHOTS = new Map(
 const SNAPSHOT_RGB = { sundarbans: sundarbansRgbBase64, bigsur: bigsurRgbBase64 };
 const SNAPSHOT_HH = { sundarbans: sundarbansHhBase64, bigsur: bigsurHhBase64 };
 const SNAPSHOT_CHANGE = { sundarbans: sundarbansChangeBase64, bigsur: bigsurChangeBase64 };
+
+const RECOVERY_SNAPSHOTS = new Map(
+  [sundarbansRecovery, bigsurRecovery].map((snapshot) => [snapshot.site, snapshot])
+);
+
+/** Bundled calibrated L-band recovery series for a site, or null. */
+export function nisarRecoverySnapshot(siteId) {
+  return RECOVERY_SNAPSHOTS.get(siteId) || null;
+}
 
 /** Bundled GCOV telemetry for a site, or null when none was precomputed. */
 export function nisarSnapshot(siteId) {
@@ -902,8 +916,8 @@ export async function buildNisarBrowse(site, { start, end, eventDate }) {
 export async function buildNisarSite(site, { start, end, eventDate }) {
   const key = site.id;
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.value;
   if (cached?.promise) return cached.promise;
+  if (cached && Date.now() - cached.at < (cached.value ? CACHE_TTL : EMPTY_TTL)) return cached.value;
 
   const promise = (async () => {
     const bbox = calibrationWindow(site) || site.bbox || bboxFromWkt(site.wkt);

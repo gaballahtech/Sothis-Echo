@@ -2,7 +2,7 @@
  * “Radar detective” rounds — two real post-launch cases plus one reasoning
  * check that reuses the existing Vietnam change map (no new acquisition):
  *   - Central Vietnam flood, September 2026
- *   - Big Sur (Greece) wildfire, July 2026
+ *   - Big Sur (California) megafire, August 2026
  *   - Bright change ≠ damage (change-only round, no before/after pair)
  * The before/after dates are taken from the live site measurements at render
  * time; evidence chips are derived from the real backscatter series.
@@ -14,8 +14,8 @@ export const detectiveRounds = [
     siteId: 'sundarbans',
     title: { en: 'A river plain disappears', ar: 'سهل نهري يختفي' },
     brief: {
-      en: 'Two Sentinel-1 passes over central Vietnam around the September 2026 storm. Match the signal to the cause.',
-      ar: 'مروران لـ Sentinel-1 فوق وسط فيتنام حول عاصفة سبتمبر 2026. طابق الإشارة مع السبب.',
+      en: 'Two NISAR L-band passes over central Vietnam around the September 2026 storm. Match the signal to the cause.',
+      ar: 'مروران لـ NISAR L-band فوق وسط فيتنام حول عاصفة سبتمبر 2026. طابق الإشارة مع السبب.',
     },
     before: { date: '2026-09-07', params: { water: 0.2, emergent: 0.6, burn: 0, cloud: 0.7 } },
     after: { date: '2026-09-15', params: { water: 0.85, emergent: 0.55, burn: 0, cloud: 0.9 } },
@@ -32,15 +32,15 @@ export const detectiveRounds = [
     },
   },
   {
-    id: 'greece-fire',
+    id: 'bigsur-fire',
     siteId: 'bigsur',
     title: { en: 'The canopy disappears', ar: 'المظلة تختفي' },
     brief: {
-      en: 'Two Sentinel-1 passes over Big Sur before and after the August 2026 megafire. Read the two polarization channels.',
-      ar: 'مروران لـ Sentinel-1 فوق بيغ سور قبل حريق أغسطس 2026 وبعده. اقرأ قناتي الاستقطاب.',
+      en: 'Two NISAR L-band passes over Big Sur before and after the August 2026 megafire. Read the two polarization channels.',
+      ar: 'مروران لـ NISAR L-band فوق بيغ سور قبل حريق أغسطس 2026 وبعده. اقرأ قناتي الاستقطاب.',
     },
-    before: { date: '2026-07-20', params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 } },
-    after: { date: '2026-08-10', params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 } },
+    before: { date: '2026-08-16', params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 } },
+    after: { date: '2026-09-09', params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 } },
     options: [
       { id: 'fire', label: { en: 'Severe wildfire', ar: 'حريق غابات شديد' } },
       { id: 'flood', label: { en: 'Flooding', ar: 'فيضان' } },
@@ -158,16 +158,16 @@ export function buildDetectiveEvidence(round, site) {
   }
 
   const evidence = [
-    { id: 'dvv', label: { en: '\u0394VV', ar: '\u0394VV' }, value: `${signed(after.vv - before.vv, 1)} dB` },
-    { id: 'dvh', label: { en: '\u0394VH', ar: '\u0394VH' }, value: `${signed(after.vh - before.vh, 1)} dB` },
+    { id: 'dhh', label: { en: '\u0394HH', ar: '\u0394HH' }, value: `${signed(after.vv - before.vv, 1)} dB` },
+    { id: 'dhv', label: { en: '\u0394HV', ar: '\u0394HV' }, value: `${signed(after.vh - before.vh, 1)} dB` },
   ];
 
-  // Same convention as the ledger: cross-pol is VH minus VV.
+  // Same convention as the ledger: cross-pol is HV minus HH.
   const gapBefore = before.vh - before.vv;
   const gapAfter = after.vh - after.vv;
   evidence.push({
     id: 'gap',
-    label: { en: 'VH\u2212VV gap', ar: 'فجوة VH\u2212VV' },
+    label: { en: 'HV\u2212HH gap', ar: 'فجوة HV\u2212HH' },
     value: `${signed(gapAfter - gapBefore, 1)} dB`,
   });
 

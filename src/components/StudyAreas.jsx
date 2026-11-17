@@ -75,8 +75,14 @@ export default function StudyAreas() {
   if (!site) return null;
   const L = (value) => localized(value, language);
   const nisar = /nisar/i.test(site.source || '') || Boolean(site.states?.after?.nisarImageUrl);
-  const coPol = nisar ? 'HH' : 'VV';
-  const crossPol = nisar ? 'HV' : 'VH';
+  // Channel names must follow the numbers, not the card imagery. In production
+  // the cards are NISAR L-band HH browse while the dB values are Sentinel-1
+  // C-band VV/VH, so labelling the table HH/HV would credit the wrong sensor.
+  const numbers = provenance?.numbers || null;
+  const numbersNisar = Boolean(numbers?.calibrated) || /nisar/i.test(String(numbers?.sensor || ''));
+  const coPol = numbersNisar ? 'HH' : 'VV';
+  const crossPol = numbersNisar ? 'HV' : 'VH';
+  const crossLabel = `${crossPol} \u2212 ${coPol}`;
   const rgbAvailable = Boolean(provenance?.cards?.rgbComposite && nisar);
   const rgbSides = provenance?.cards?.rgbSides || {};
   const showComposite = (stateKey) => cardView === 'rgb' && rgbAvailable && rgbSides[stateKey] === true;
@@ -258,12 +264,13 @@ export default function StudyAreas() {
                     <p className="body-copy" style={{ margin: '2px 0 0' }}>
                       {t('sites.changeStatsValue', {
                         changed: changeStats.changedPct,
-                        mean: changeStats.meanDeltaDb,
+                        area: changeStats.changedAreaKm2 != null ? Number(changeStats.changedAreaKm2).toFixed(1) : '—',
                       })}
                     </p>
                     <p className="micro" style={{ margin: '2px 0 0' }}>
                       {t('sites.changeStatsCaveat', {
                         threshold: changeStats.thresholdDb,
+                        mean: changeStats.meanDeltaDb,
                         valid: changeStats.validPct,
                       })}
                     </p>
@@ -329,10 +336,10 @@ export default function StudyAreas() {
                             <tbody>
                               <tr><th scope="row">{coPol}</th><td>{site.measurements.vv?.before ?? '—'}</td><td>{site.measurements.vv?.after ?? '—'}</td></tr>
                               <tr><th scope="row">{crossPol}</th><td>{site.measurements.vh?.before ?? '—'}</td><td>{site.measurements.vh?.after ?? '—'}</td></tr>
-                              <tr><th scope="row">{t('sites.crossDb')}</th><td>{site.measurements.crossPol.before ?? '—'}</td><td>{site.measurements.crossPol.after ?? '—'}</td></tr>
+                              <tr><th scope="row">{crossLabel}</th><td>{site.measurements.crossPol.before ?? '—'}</td><td>{site.measurements.crossPol.after ?? '—'}</td></tr>
                             </tbody>
                           </HTMLTable>
-                          <p className="micro" style={{ margin: '6px 0 0' }}>{t('sites.crossDbNote')}</p>
+                          <p className="micro" style={{ margin: '6px 0 0' }}>{t('sites.crossDbNote', { coPol, crossPol })}</p>
                           </>
                         ) : null}
                       </Panel>

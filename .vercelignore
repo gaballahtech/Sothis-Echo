@@ -1,0 +1,5 @@
+.venv-nisar/
+scripts/
+tests/
+audit_report.txt
+*.pdf

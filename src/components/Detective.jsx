@@ -197,7 +197,7 @@ export default function Detective() {
                   <p className="micro" style={{ margin: '4px 0 0' }}>
                     {round.changeOnly
                       ? t('game.changeMeta')
-                      : `Sentinel-1 · ${site.measurements?.dateBefore} → ${site.measurements?.dateAfter}`}
+                      : `NISAR L-band · ${site.measurements?.dateBefore} → ${site.measurements?.dateAfter}`}
                   </p>
                 </div>
                 <div className="row" style={{ gap: 10, alignItems: 'center' }}>

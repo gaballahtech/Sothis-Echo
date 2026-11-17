@@ -22,6 +22,10 @@ const STAC_URL = 'https://earth-search.aws.element84.com/v1/search';
 const COLLECTION = 'sentinel-1-grd';
 const WINDOW = 512;
 const CACHE_TTL = 6 * 60 * 60 * 1000;
+// An empty/failed build must not pin a site to the labelled fixtures for the
+// full TTL: one transient STAC or S3 hiccup would otherwise show the fallback
+// for six hours. Retry empty results after a short cooldown instead.
+const EMPTY_TTL = 45 * 1000;
 const cache = new Map();
 
 /* ------------------------------------------------------------------ */
@@ -698,12 +702,23 @@ function buildProvenance(site, states, nisarBrowse) {
 export async function buildRealSite(site, { start, end, eventDate }) {
   const key = site.id;
   const cached = cache.get(key);
-  if (cached && Date.now() - cached.at < CACHE_TTL) return cached.value;
+  // In-flight build: share the promise. A resolved value is kept for the full
+  // TTL; a null (empty) result only for the short cooldown, so it self-heals.
   if (cached?.promise) return cached.promise;
+  if (cached && Date.now() - cached.at < (cached.value ? CACHE_TTL : EMPTY_TTL)) {
+    return cached.value;
+  }
+
+  // Surface why a build came back empty: without this, the only production
+  // signal is a generic "empty real build" and the cause is unrecoverable.
+  const empty = (reason) => {
+    console.error(`[SOTHIS API] build empty (${site.id}): ${reason}`);
+    return null;
+  };
 
   const promise = (async () => {
     const bbox = site.bbox || bboxFromWkt(site.wkt);
-    if (!bbox) return null;
+    if (!bbox) return empty('no bbox');
 
     // Real NISAR L-band browse images (public, no Harmony queue). The
     // calibrated HH/HV numbers come from the Harmony path when enabled.
@@ -790,7 +805,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       return true;
     });
     log(site.id, 'bbox', bbox, 'items', items.length, 'pre', pre.length, 'post', post.length);
-    if (!items.length) return null;
+    if (!items.length) return empty('no STAC scenes cover the study window');
 
     // The same orbit sometimes publishes two granules on one date: one covers
     // the site, the other is all zeros at this window. Keep the granule whose
@@ -840,7 +855,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       })
       .filter((group) => group.pre.length && group.post.length);
     log(site.id, 'group list', groups.map((group) => `${group.key}:${group.sorted.length}`).join(' '));
-    if (!groups.length) return null;
+    if (!groups.length) return empty('no orbit group has passes on both sides of the event');
 
     // Probe a handful of passes per group (two pre, the first post) and score
     // each group by how far its event pair rises above the group's own
@@ -899,7 +914,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
         (eventChange * 100).toFixed(1) + '%'
       );
     }
-    if (!probes.length) return null;
+    if (!probes.length) return empty('no probe pass could be read from the COG archive');
 
     // Reject a broken granule, not a different imaging geometry. Ascending and
     // descending passes read the same ground several dB apart by design, so a
@@ -937,7 +952,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       )
     ).filter(Boolean);
     log(site.id, 'picked', picked.length, 'scenes', scenes.length);
-    if (scenes.length < 2) return null;
+    if (scenes.length < 2) return empty(`only ${scenes.length} usable pass(es) after reading COGs`);
     const unique = [];
     for (const scene of scenes) {
       if (!unique.some((item) => item.date === scene.date)) unique.push(scene);
@@ -994,7 +1009,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       Math.round((new Date(`${afterScene.date}T00:00:00Z`).getTime() - eventMs) / dayMs)
     );
     const recoveryDenominator = Math.max(0.01, eventChange - preNoise);
-    const recoveryFit =
+    const recoveryEligible =
       after.length >= 2 && eventChange >= 0.15 && eventChange - preNoise >= 0.05;
 
     const series = samples.map((scene) => ({
@@ -1007,28 +1022,42 @@ export async function buildRealSite(site, { start, end, eventDate }) {
       change: Number(clamp01(Math.abs(scene.vvDb - baselineVv) / 12).toFixed(2)),
     }));
 
-    const recoveryPoints = recoveryFit
-      ? after.map((scene) => {
-          const days = Math.max(
-            0,
-            (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / dayMs
-          );
-          const change =
-            beforeGrid && scene.grid ? gridChange(scene.grid, beforeGrid) : eventChange;
-          const pct = clamp01((eventChange - change) / recoveryDenominator) * 100;
-          return {
-            day: Math.round(days),
-            month: Number((days / 30.44).toFixed(2)),
-            pct: Math.round(pct),
-            projected: false,
-          };
-        })
-      : [];
+    // Always derive the per-pass recovery points: even when the curve is not
+    // defensible, the percentages explain the verdict in the UI.
+    const recoveryPoints = after.map((scene) => {
+      const days = Math.max(
+        0,
+        (new Date(`${scene.date}T00:00:00Z`).getTime() - eventMs) / dayMs
+      );
+      const change =
+        beforeGrid && scene.grid ? gridChange(scene.grid, beforeGrid) : eventChange;
+      const pct = clamp01((eventChange - change) / recoveryDenominator) * 100;
+      return {
+        day: Math.round(days),
+        month: Number((days / 30.44).toFixed(2)),
+        pct: Math.round(pct),
+        projected: false,
+      };
+    });
     // Ensure strictly increasing time. Fractional months keep short floods and
     // burns from collapsing onto a single "month 0" point.
     const recovery = recoveryPoints.filter(
       (point, index, list) => index === 0 || point.month > list[index - 1].month
     );
+    // A real recovery fades toward the baseline: the share that returned should
+    // not collapse again later. Reject a curve where any pass drops far below
+    // the running best, because that is pass-to-pass noise wearing a trend line
+    // (the Sentinel flood window does exactly this), not a recovery.
+    let runningMax = -Infinity;
+    let recoveryCoherent = recovery.length >= 3;
+    for (const point of recovery) {
+      if (point.pct < runningMax - 25) {
+        recoveryCoherent = false;
+        break;
+      }
+      if (point.pct > runningMax) runningMax = point.pct;
+    }
+    const recoveryFit = recoveryEligible && recoveryCoherent;
 
     const optical = await findOptical({
       bbox,
@@ -1186,6 +1215,7 @@ export async function buildRealSite(site, { start, end, eventDate }) {
     return value;
   } catch (error) {
     log(site.id, 'build failed', error?.message);
+    console.error(`[SOTHIS API] build failed (${site.id}): ${error?.message || error}`);
     cache.delete(key);
     return null;
   }
