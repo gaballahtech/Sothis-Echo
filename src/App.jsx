@@ -12,6 +12,7 @@ import Hero from './components/Hero';
 import Mission from './components/Mission';
 import SeeThrough from './components/SeeThrough';
 import StudyAreas from './components/StudyAreas';
+import AtlasSection from './components/AtlasSection';
 import Lenses from './components/Lenses';
 import ExplainPanel from './components/ExplainPanel';
 import RapidResponse from './components/RapidResponse';
@@ -52,6 +53,7 @@ function AppContent() {
           <Mission />
           <SeeThrough />
           <StudyAreas />
+          <AtlasSection />
           <Lenses />
           <ExplainPanel />
           <RapidResponse />

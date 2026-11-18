@@ -471,6 +471,19 @@ const en = {
     download: 'Download PNG',
     reportAlt: 'One-page situation report',
   },
+  atlas: {
+    title: 'Global atlas',
+    subtitle:
+      'A curated set of NISAR-relevant change sites across six continents. Sites with real lens data are measured; the rest are honest stories awaiting their first granule.',
+    mapLabel: 'World map of change sites',
+    mapAlt: 'World map with pins for flood, wildfire, glacier, volcano, deforestation, subsidence, oil spill, crop and earthquake sites',
+    lensMark: 'Measured (real lens)',
+    measured: 'Measured',
+    storyOnly: 'Story only',
+    notMeasured: 'Not yet measured — no real granule yet',
+    openStory: 'Open study area',
+    unavailable: 'Atlas data is loading.',
+  },
   common: {
     loading: 'Loading',
     retry: 'Retry',
@@ -948,6 +961,19 @@ const ar = {
     mechStable: 'لا تغيّر قوي',
     download: 'تنزيل PNG',
     reportAlt: 'تقرير موقف من صفحة واحدة',
+  },
+  atlas: {
+    title: 'الأطلس العالمي',
+    subtitle:
+      'مجموعة منتقاة من مواقع التغيّر ذات الصلة بـ NISAR عبر ست قارات. المواقع التي لها بيانات عدسات حقيقية مقيسة؛ والباقي قصص صادقة تنتظر أول جرين لها.',
+    mapLabel: 'خريطة عالمية لمواقع التغيّر',
+    mapAlt: 'خريطة عالمية بعلامات لمواقع فيضان وحريق ونهر جليدي وبركان وإزالة غابات وهبوط وتسرب نفط ومحصول وزلزال',
+    lensMark: 'مقيس (عدسة حقيقية)',
+    measured: 'مقيس',
+    storyOnly: 'قصة فقط',
+    notMeasured: 'غير مقيس بعد — لا يوجد جرين حقيقي',
+    openStory: 'فتح منطقة الدراسة',
+    unavailable: 'بيانات الأطلس تُحمّل.',
   },
   common: {
     loading: 'جارٍ التحميل',

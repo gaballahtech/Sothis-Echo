@@ -786,6 +786,40 @@ export async function handleRequest(req, res) {
       return;
     }
 
+    // On-demand "Explore a place" — featured atlas regions only. A hard area
+    // cap and bbox allowlist keep this serverless-safe; arbitrary pins return
+    // `too_large`. If a featured region already has cached lens data, return
+    // it instantly (`ready`); otherwise `queued` (no live generation here).
+    if (path === '/api/explore' && method === 'POST') {
+      const body = await readJson(req).catch(() => ({}));
+      const lat = Number(body?.lat);
+      const lon = Number(body?.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+        sendError(res, 400, 'lat/lon required');
+        return;
+      }
+      // area cap: ~0.5° box max (~50 km across)
+      const half = 0.25;
+      const bbox = [lon - half, lat - half, lon + half, lat + half];
+      // allowlist: only featured atlas regions
+      const { atlasSites } = await import('../src/data/atlas.js');
+      const featured = atlasSites.find((site) => {
+        const [w, s, e, n] = site.bbox;
+        return lon >= w && lon <= e && lat >= s && lat <= n;
+      });
+      if (!featured) {
+        send(res, 200, { data: { status: 'too_large', message: 'Outside featured regions; try one of the atlas pins.' }, success: true });
+        return;
+      }
+      const lenses = nisarLenses(featured.id);
+      if (lenses) {
+        send(res, 200, { data: { status: 'ready', siteId: featured.id, lenses }, success: true });
+      } else {
+        send(res, 200, { data: { status: 'queued', siteId: featured.id, message: 'No cached lens yet; on-demand generation not available on serverless.' }, success: true });
+      }
+      return;
+    }
+
     if (path === '/api/study-areas') {
       const sites = await getSites();
       // A cold build walks the archive for a minute or more; without an edge

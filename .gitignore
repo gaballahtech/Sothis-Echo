@@ -51,3 +51,8 @@ server/.cache/
 # Python (NISAR snapshot tooling)
 scripts/__pycache__/
 .venv-nisar/
+
+# Local artifacts (not part of the submission)
+audit_report.txt
+server/cache/nisar/*.png
+*.pdf
