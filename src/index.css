@@ -1129,6 +1129,36 @@ li,
   pointer-events: none;
 }
 
+/* Swipe labels: solid dark pills so قبل/بعد stay readable over bright NISAR
+   browse imagery, where the minimal (text-only) tags used to wash out. */
+.swipe-label {
+  display: inline-block;
+  max-width: 48%;
+  padding: 5px 11px;
+  font-family: var(--te-mono);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.25;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  background: rgba(12, 22, 30, 0.88);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-inline-start-width: 4px;
+  border-radius: 0;
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.swipe-label--before {
+  border-inline-start-color: #d9a441;
+}
+
+.swipe-label--after {
+  border-inline-start-color: #4a9d8f;
+}
+
 .compare-help {
   display: flex;
   justify-content: space-between;

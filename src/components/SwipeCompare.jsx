@@ -1,4 +1,4 @@
-import { Icon, Tag } from '@blueprintjs/core';
+import { Icon } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { SceneCanvas } from './SceneCanvas';
 import { useCompareDivider } from './useCompareDivider';
@@ -64,9 +64,9 @@ export function SwipeCompare({
           </span>
         </div>
 
-        <div className="compare-labels">
-          <Tag minimal intent="warning">{beforeText}</Tag>
-          <Tag minimal intent="primary">{afterText}</Tag>
+        <div className="compare-labels swipe-labels">
+          <span className="swipe-label swipe-label--before">{beforeText}</span>
+          <span className="swipe-label swipe-label--after">{afterText}</span>
         </div>
       </div>
 

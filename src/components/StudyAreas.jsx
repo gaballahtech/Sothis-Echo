@@ -50,6 +50,7 @@ export default function StudyAreas() {
   const { sites, source, loading } = useSiteData();
   const [activeId, setActiveId] = useState(() => sites[0]?.id);
   const [cardView, setCardView] = useState('hh');
+  const [swipeMode, setSwipeMode] = useState('hh');
   const [changeStats, setChangeStats] = useState(null);
 
   useEffect(() => {
@@ -62,6 +63,7 @@ export default function StudyAreas() {
 
   useEffect(() => {
     setCardView('hh');
+    setSwipeMode('hh');
     setChangeStats(null);
     if (!statsAvailable || !site?.id) return undefined;
     let cancelled = false;
@@ -87,6 +89,16 @@ export default function StudyAreas() {
   const rgbAvailable = Boolean(provenance?.cards?.rgbComposite && nisar);
   const rgbSides = provenance?.cards?.rgbSides || {};
   const showComposite = (stateKey) => cardView === 'rgb' && rgbAvailable && rgbSides[stateKey] === true;
+  // Inside the swipe view the HH·HV option stays usable: each side shows its RGB
+  // composite when that pass actually has one, otherwise it falls back to HH.
+  const swipeBeforeUrl =
+    swipeMode === 'rgb' && rgbSides.before
+      ? sceneImageUrl(site.id, 'before', 'nisar', 'rgb')
+      : site.states.before.imageUrl;
+  const swipeAfterUrl =
+    swipeMode === 'rgb' && rgbSides.after
+      ? sceneImageUrl(site.id, 'after', 'nisar', 'rgb')
+      : site.states.after.imageUrl;
   const polList = (list) => (Array.isArray(list) ? list.join('/') : '');
   const cardsText = provenance?.cards
     ? t(provenance.cards.sensor === 'NISAR' ? 'sites.provCardsNisar' : 'sites.provCardsSentinel', {
@@ -236,17 +248,17 @@ export default function StudyAreas() {
               <ButtonGroup minimal>
                 <Button
                   small
-                  active={cardView === 'hh'}
+                  active={cardView === 'hh' || (cardView === 'swipe' && swipeMode === 'hh')}
                   text={t('sites.cardViewHh')}
-                  onClick={() => setCardView('hh')}
+                  onClick={() => (cardView === 'swipe' ? setSwipeMode('hh') : setCardView('hh'))}
                   data-testid="card-view-hh"
                 />
                 {rgbAvailable ? (
                   <Button
                     small
-                    active={cardView === 'rgb'}
+                    active={cardView === 'rgb' || (cardView === 'swipe' && swipeMode === 'rgb')}
                     text={t('sites.cardViewRgb')}
-                    onClick={() => setCardView('rgb')}
+                    onClick={() => (cardView === 'swipe' ? setSwipeMode('rgb') : setCardView('rgb'))}
                     data-testid="card-view-rgb"
                   />
                 ) : null}
@@ -255,7 +267,10 @@ export default function StudyAreas() {
                     small
                     active={cardView === 'swipe'}
                     text={t('sites.cardViewSwipe')}
-                    onClick={() => setCardView('swipe')}
+                    onClick={() => {
+                      if (cardView !== 'swipe') setSwipeMode(cardView === 'rgb' ? 'rgb' : 'hh');
+                      setCardView('swipe');
+                    }}
                     data-testid="card-view-swipe"
                   />
                 ) : null}
@@ -266,14 +281,19 @@ export default function StudyAreas() {
           {cardView === 'swipe' && swipeAvailable ? (
             <div className="stack" style={{ gap: 12 }}>
               <SwipeCompare
-                beforeUrl={site.states.before.imageUrl}
-                afterUrl={site.states.after.imageUrl}
+                beforeUrl={swipeBeforeUrl}
+                afterUrl={swipeAfterUrl}
                 beforeLabel={L(site.states.before.label)}
                 afterLabel={L(site.states.after.label)}
                 beforeDate={formatDate(site.states.before.date, language)}
                 afterDate={formatDate(site.states.after.date, language)}
                 alt={t('sites.swipeAria', { site: L(site.name) })}
               />
+              {swipeMode === 'rgb' ? (
+                <p className="micro" data-testid="swipe-rgb-note" style={{ margin: 0 }}>
+                  {t('sites.cardViewRgbNote')}
+                </p>
+              ) : null}
               {changePanel}
             </div>
           ) : (
