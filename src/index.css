@@ -1498,6 +1498,106 @@ li,
   opacity: 0.75;
 }
 
+/* Every curated place as a full story card, so nothing is hidden behind a
+   click. Measured sites carry a real NISAR HH crop; story-only sites use the
+   change-type colour as a quiet visual key. */
+.atlas-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+  margin-top: 16px;
+}
+
+.atlas-card {
+  --atlas-accent: #8a8f98;
+  border: 1px solid var(--bp-surface-border-color-default, #d0d0d0);
+  border-inline-start: 3px solid var(--atlas-accent);
+  border-radius: 6px;
+  background: var(--bp-surface-elevated-color-default, rgba(0, 0, 0, 0.02));
+  cursor: pointer;
+  transition: box-shadow 120ms ease, border-color 120ms ease;
+}
+
+.atlas-card:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+}
+
+.atlas-card.active {
+  border-color: var(--bp-intent-primary-color, #2d72d2);
+  box-shadow: 0 0 0 1px var(--bp-intent-primary-color, #2d72d2);
+}
+
+.atlas-card.is-measured {
+  border-inline-start-color: #1f8a5b;
+}
+
+.atlas-card-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  height: 100%;
+}
+
+.atlas-card-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.atlas-card-head h3 {
+  margin: 0;
+  font-size: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.atlas-card-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--atlas-accent);
+  flex: 0 0 auto;
+}
+
+.atlas-card-meta {
+  margin: 0;
+  opacity: 0.8;
+}
+
+.atlas-card-thumb {
+  width: 100%;
+  height: 132px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--bp-surface-border-color-default, #d0d0d0);
+  display: block;
+  background: #111;
+}
+
+.atlas-card-thumb--story {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--atlas-accent) 22%, transparent), transparent 70%),
+    var(--bp-surface-color-default, rgba(0, 0, 0, 0.03));
+  border-style: dashed;
+}
+
+.atlas-card-thumb-tag {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--atlas-accent);
+  text-transform: capitalize;
+}
+
+.atlas-card-action {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
 .info-list {
   display: grid;
   gap: 0;

@@ -6,16 +6,16 @@ import AtlasMap from './AtlasMap';
 import { useSiteData } from '../context/SiteDataContext';
 
 /**
- * Global Atlas — a real Leaflet/OSM map plus a curated list. Clicking a
- * measured site selects it across the whole page (study area, lenses, explain,
- * rapid response) and scrolls to the story. Story-only sites zoom in and show
- * their narrative, clearly labelled as narrative (not a failure).
+ * Global Atlas — a real Leaflet/OSM map plus a card for every curated site.
+ * All places are shown at once (name, region, change type and the full
+ * what-happened / why-radar / what-NISAR-measures story). Measured sites also
+ * show a real NISAR HH crop and open the study area everywhere; story-only
+ * sites are clearly labelled as narrative, never as a failure.
  */
 export default function AtlasSection() {
   const { t } = useTranslation();
   const { sites, setSelectedSiteId } = useSiteData();
   const [selectedId, setSelectedId] = useState(() => atlasSites[0]?.id);
-  const selected = atlasSites.find((site) => site.id === selectedId) ?? atlasSites[0];
 
   const measuredIds = new Set(sites.map((site) => site.id));
 
@@ -49,7 +49,7 @@ export default function AtlasSection() {
     return found ? localized(found.name, 'en') : ct;
   };
 
-  const isMeasured = selected ? measuredIds.has(selected.id) : false;
+  const swatchFor = (site) => (CHANGE_TYPES.find((c) => c.id === site.changeType) || {}).color || '#888';
 
   return (
     <section id="atlas" className="content-section chapter" aria-labelledby="atlas-title">
@@ -61,60 +61,82 @@ export default function AtlasSection() {
           <AtlasMap selectedId={selectedId} onSelect={choose} />
         </div>
 
-        {selected ? (
-          <div className={`atlas-preview${isMeasured ? ' is-measured' : ''}`} data-testid="atlas-preview">
-            <div className="atlas-preview-main">
-              <h3 style={{ margin: '0 0 4px' }}>{localized(selected.name, 'en')}</h3>
-              <p className="micro" style={{ margin: '0 0 10px' }}>
-                {localized(selected.region, 'en')} · {changeTypeName(selected.changeType)}
-                {' · '}
-                <span className={isMeasured ? 'atlas-badge measured' : 'atlas-badge story'}>
-                  {isMeasured ? t('atlas.measured') : t('atlas.storyOnly')}
-                </span>
-              </p>
-
-              <dl className="atlas-story">
-                <dt>{t('atlas.whatHappened')}</dt>
-                <dd>{localized(selected.summary, 'en')}</dd>
-                <dt>{t('atlas.whyRadar')}</dt>
-                <dd>{localized(selected.radar, 'en')}</dd>
-                <dt>{t('atlas.whatMeasures')}</dt>
-                <dd>{localized(selected.measure, 'en')}</dd>
-              </dl>
-            </div>
-            <div className="atlas-preview-action">
-              {isMeasured ? (
-                <button type="button" className="atlas-open" onClick={() => openStory(selected)} data-testid="atlas-open">
-                  {t('atlas.openStory')} →
-                </button>
-              ) : (
-                <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
-              )}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="atlas-list" data-testid="atlas-list">
+        <div className="atlas-cards" data-testid="atlas-list">
           {atlasSites.map((site) => {
             const measured = measuredIds.has(site.id);
+            const isSelected = site.id === selectedId;
+            const thumb = measured
+              ? sites.find((item) => item.id === site.id)?.states?.after?.imageUrl
+              : null;
+            const color = swatchFor(site);
             return (
-              <button
+              <article
                 key={site.id}
-                type="button"
-                className={`atlas-list-item${site.id === selectedId ? ' active' : ''}${measured ? ' measured' : ''}`}
-                onClick={() => choose(site)}
+                className={`atlas-card${measured ? ' is-measured' : ''}${isSelected ? ' active' : ''}`}
                 data-testid={`atlas-item-${site.id}`}
-                title={measured ? t('atlas.clickToOpen') : localized(site.summary, 'en')}
+                onClick={() => choose(site)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    choose(site);
+                  }
+                }}
+                style={{ '--atlas-accent': color }}
               >
-                <span
-                  className="atlas-list-swatch"
-                  style={{ background: (CHANGE_TYPES.find((c) => c.id === site.changeType) || {}).color || '#888' }}
-                />
-                <span className="atlas-list-name">{localized(site.name, 'en')}</span>
-                <span className="atlas-list-meta micro">
-                  {measured ? t('atlas.measured') : t('atlas.storyOnly')}
-                </span>
-              </button>
+                <div
+                  className="atlas-card-inner"
+                  {...(isSelected ? { 'data-testid': 'atlas-preview' } : {})}
+                >
+                  <div className="atlas-card-head">
+                    <span className="atlas-card-dot" aria-hidden="true" />
+                    <h3>{localized(site.name, 'en')}</h3>
+                    <span className={measured ? 'atlas-badge measured' : 'atlas-badge story'}>
+                      {measured ? t('atlas.measured') : t('atlas.storyOnly')}
+                    </span>
+                  </div>
+                  <p className="micro atlas-card-meta">
+                    {localized(site.region, 'en')} · {changeTypeName(site.changeType)}
+                  </p>
+
+                  {measured && thumb ? (
+                    <img className="atlas-card-thumb" src={thumb} alt="" loading="lazy" />
+                  ) : (
+                    <div className="atlas-card-thumb atlas-card-thumb--story" aria-hidden="true">
+                      <span className="atlas-card-thumb-tag">{changeTypeName(site.changeType)}</span>
+                    </div>
+                  )}
+
+                  <dl className="atlas-story">
+                    <dt>{t('atlas.whatHappened')}</dt>
+                    <dd>{localized(site.summary, 'en')}</dd>
+                    <dt>{t('atlas.whyRadar')}</dt>
+                    <dd>{localized(site.radar, 'en')}</dd>
+                    <dt>{t('atlas.whatMeasures')}</dt>
+                    <dd>{localized(site.measure, 'en')}</dd>
+                  </dl>
+
+                  <div className="atlas-card-action">
+                    {measured ? (
+                      <button
+                        type="button"
+                        className="atlas-open"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          openStory(site);
+                        }}
+                        data-testid={isSelected ? 'atlas-open' : undefined}
+                        title={t('atlas.clickToOpen')}
+                      >
+                        {t('atlas.openStory')} →
+                      </button>
+                    ) : (
+                      <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
+                    )}
+                  </div>
+                </div>
+              </article>
             );
           })}
         </div>

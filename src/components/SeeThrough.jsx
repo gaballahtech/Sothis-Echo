@@ -14,10 +14,12 @@ const LEGEND = [
 export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites } = useSiteData();
+  const { sites, selectedSiteId } = useSiteData();
+  // Follow the shared selection so the comparison always shows the same place
+  // as the study areas, lenses and explain section underneath it.
   const site =
-    sites.find((item) => item.states?.after?.nisarImageUrl && item.states?.after?.opticalUrl) ??
-    sites.find((item) => item.states?.after?.imageUrl && item.states?.after?.opticalUrl) ??
+    sites.find((item) => item.id === selectedSiteId) ??
+    sites.find((item) => (item.states?.after?.imageUrl || item.states?.after?.nisarImageUrl) && item.states?.after?.opticalUrl) ??
     sites.find((item) => item.id === 'sundarbans') ??
     sites[0];
   const state = site?.states?.after;
@@ -26,7 +28,10 @@ export default function SeeThrough() {
 
   const siteName = localized(site.name, language);
   const stateLabel = localized(state.label, language);
-  const radarUrl = state.nisarImageUrl || state.imageUrl;
+  // Prefer the calibrated HH scene crop the study areas render, so the radar
+  // side is the identical product and footprint — not the full swath browse.
+  const radarIsScene = Boolean(state.imageUrl);
+  const radarUrl = radarIsScene ? state.imageUrl : state.nisarImageUrl;
   const radarDate = state.nisarDate || state.date;
   // Every scene in this app is a NISAR L-band HH browse image, so the radar
   // layer is always NISAR; there is no Sentinel fallback branch to mislabel.
@@ -54,12 +59,12 @@ export default function SeeThrough() {
               opticalUrl={state.opticalUrl}
               opticalCrop={state.opticalCrop ?? null}
               radarUrl={radarUrl}
-              radarCrop={state.nisarCrop ?? null}
-              radarFit={state.nisarImageUrl ? 'contain' : 'cover'}
-              radarClassName={state.nisarImageUrl ? 'compare-layer--nisar' : ''}
+              radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
+              radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
+              radarClassName={radarIsScene ? '' : (state.nisarImageUrl ? 'compare-layer--nisar' : '')}
               radarEager
             />
-            {state.nisarImageUrl ? (
+            {state.nisarImageUrl && !radarIsScene ? (
               <p className="micro" style={{ margin: '6px 0 0' }}>
                 {t('seeThrough.nisarSwath')}
               </p>
