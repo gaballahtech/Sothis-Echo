@@ -3,7 +3,115 @@ import { Button, Callout, Spinner } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
+import { localized } from '../data/localized';
 import { loadRapidResponse } from '../services/sarApi';
+
+/**
+ * Draw the one-page situation report onto a <canvas> and return a PNG data URL.
+ * Runs entirely in the browser so the feature works on the deployed serverless
+ * site (no Python venv needed). English/Arabic aware for labels.
+ */
+async function loadImage(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(null);
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = src;
+  });
+}
+
+async function renderReportCanvas(data, site, t, language) {
+  const dir = language === 'ar';
+  const W = 1000;
+  const H = 720;
+  const canvas = document.createElement('canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  ctx.fillStyle = '#0c0e12';
+  ctx.fillRect(0, 0, W, H);
+
+  const label = (text) => (dir ? [...String(text)].reverse().join('') : String(text));
+  const font = (size, weight = '400') => `${weight} ${size}px system-ui, -apple-system, sans-serif`;
+
+  ctx.fillStyle = '#78dcb4';
+  ctx.font = font(20, '700');
+  ctx.fillText(label(t('respond.reportHeader')), 30, 44);
+  ctx.fillStyle = '#c8c8c8';
+  ctx.font = font(13);
+  ctx.fillText(label(`${localized(site.name, language)} · ${data.generatedAt || ''}`), 30, 70);
+
+  let y = 120;
+  const rows = [
+    [t('respond.extent'), data.extentKm2 != null ? `${data.extentKm2} km²` : '—'],
+    [t('respond.extentPct'), data.changedPct != null ? `${data.changedPct}%` : '—'],
+    [t('respond.mechanism'), data.mechanism || '—'],
+    [t('respond.populationExposed'), data.populationExposed != null ? data.populationExposed.toLocaleString() : '—'],
+    [
+      t('respond.populationTotal'),
+      data.population ? `${data.population.total.toLocaleString()} (${data.population.source})` : t('respond.populationUnavailable'),
+    ],
+  ];
+  for (const [k, v] of rows) {
+    ctx.fillStyle = '#8a8f98';
+    ctx.font = font(14);
+    ctx.fillText(label(k), 30, y);
+    ctx.fillStyle = '#f2f2f2';
+    ctx.font = font(18, '600');
+    ctx.fillText(label(String(v)), 380, y);
+    y += 40;
+  }
+
+  if (data.decision) {
+    ctx.fillStyle = '#8a8f98';
+    ctx.font = font(13);
+    ctx.fillText(label(t('respond.decision')), 30, y + 8);
+    ctx.fillStyle = '#ffdc78';
+    ctx.font = font(15, '500');
+    wrapText(ctx, label(data.decision), 380, y + 8, W - 420, 22);
+    y += 60;
+  }
+
+  const keys = ['mechanismBefore', 'mechanismAfter', 'coherence'];
+  const imgs = await Promise.all(keys.map((k) => loadImage(data.images?.[k])));
+  let tx = 30;
+  const ty = Math.min(y + 30, H - 200);
+  for (let i = 0; i < keys.length; i += 1) {
+    const img = imgs[i];
+    if (!img) continue;
+    const tw = 300;
+    const th = 200;
+    ctx.drawImage(img, tx, ty, tw, th);
+    ctx.strokeStyle = '#2a3545';
+    ctx.strokeRect(tx, ty, tw, th);
+    ctx.fillStyle = '#8a8f98';
+    ctx.font = font(12);
+    ctx.fillText(keys[i], tx, ty + th + 16);
+    tx += tw + 20;
+  }
+
+  return canvas.toDataURL('image/png');
+}
+
+function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+  const words = text.split(' ');
+  let line = '';
+  let curY = y;
+  for (const word of words) {
+    const test = line ? `${line} ${word}` : word;
+    if (ctx.measureText(test).width > maxWidth && line) {
+      ctx.fillText(line, x, curY);
+      line = word;
+      curY += lineHeight;
+    } else {
+      line = test;
+    }
+  }
+  if (line) ctx.fillText(line, x, curY);
+}
 
 /**
  * "Rapid Response" — turn the selected site into an actionable situation report:
@@ -59,10 +167,10 @@ export default function RapidResponse() {
   }
 
   const makeReport = async () => {
-    if (!site?.id) return;
+    if (!site?.id || !data) return;
     setRendering(true);
-    const result = await loadRapidResponse(site.id, { report: true });
-    if (result) setData(result);
+    const dataUrl = await renderReportCanvas(data, site, t, language);
+    if (dataUrl) setData((prev) => (prev ? { ...prev, reportImage: dataUrl } : prev));
     setRendering(false);
   };
 

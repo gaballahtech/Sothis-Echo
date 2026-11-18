@@ -470,6 +470,8 @@ const en = {
     mechStable: 'No strong change',
     download: 'Download PNG',
     reportAlt: 'One-page situation report',
+    reportHeader: 'SOTHIS ECHO · RAPID RESPONSE',
+    populationTotal: 'Population (total)',
   },
   atlas: {
     title: 'Global atlas',
@@ -961,6 +963,8 @@ const ar = {
     mechStable: 'لا تغيّر قوي',
     download: 'تنزيل PNG',
     reportAlt: 'تقرير موقف من صفحة واحدة',
+    reportHeader: 'سوثيس إيكو · استجابة سريعة',
+    populationTotal: 'السكان (الإجمالي)',
   },
   atlas: {
     title: 'الأطلس العالمي',

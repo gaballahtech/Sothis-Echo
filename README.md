@@ -1,7 +1,7 @@
 # Sothis Echo
 
 An interactive NISAR story about the changes a camera misses: the 2026 Central
-Vietnam flood and the 2026 West Attica wildfire, read through radar.
+Vietnam flood and the 2026 Big Sur (California) megafire, read through radar.
 
 **Live demo:** https://sothisecho.vercel.app
 
@@ -15,9 +15,25 @@ ISRO; this is an independent, open-source educational prototype.
 - **Camera vs radar slider** — drag a divider between a cloud-blinded optical
   scene and the same place in radar.
 - **Two post-launch study areas** — the September 2026 Central Vietnam flood and
-  the July 2026 West Attica (Greece) wildfire. Both happened after NISAR began
+  the August 2026 Big Sur (California) megafire. Both happened after NISAR began
   returning data. Each has before/after scenes, “what happened / why radar saw
   it / read the polarization” boxes, and a side-by-side comparison.
+- **Three lenses (J1)** — the same pair read three ways: L-band **amplitude**
+  (HH/HV and the change in each), **InSAR coherence** (where the ground stayed
+  the same vs broke up), and a **dual-pol scattering mechanism** decomposition
+  (surface / volume / low-return). Every number is computed from real NISAR
+  granules; where a lens is unavailable it says so instead of faking a value.
+- **Global atlas (J2)** — a curated inline-SVG world map with 11 change sites
+  across six continents, coloured by change type (flood, wildfire, glacier,
+  volcano, deforestation, subsidence, oil spill, crop, earthquake). Sites with
+  real lens data are marked *measured*; the rest are honest stories awaiting
+  their first granule. Honest on-demand *explore* covers featured regions only.
+- **Explain the echo (J3)** — a grounded, numbers-first physical hypothesis for
+  the selected site, plus an **Ask the radar** box. Every claim names the
+  measurement behind it; out-of-scope questions are refused, never invented.
+- **Rapid response (J4)** — an actionable situation report from real change
+  stats: extent (km²), population exposed (WorldPop, labelled an estimate),
+  dominant mechanism, and a one-page shareable PNG drawn client-side.
 - **Sonification** — “hear the dance”: the satellite-pass series resampled to 16
   steps, with pitch and rhythm driven by change, scaled to the record’s peak.
 - **Recovery clock** — choose a target percentage of the pre-event signal and get
@@ -50,19 +66,37 @@ quantitative series remains Sentinel-1 GRD. If no NISAR granule covers a site,
 the cards fall back to the Sentinel-1 quicklook and say so. Without the backend,
 the bundled illustrative dataset is used and labelled as such.
 
-### Why the wildfire window is inland, not on the shore
+### Coherence and scattering mechanism
 
-The wildfire area was first sampled on the shoreline of the Alkyonides Gulf, which
-put roughly half of its 512×512 window (≈5 × 5 km) over open water. Sea
-backscatter is wind-driven, so the absolute VV level and the VV−VH gap followed
-the wind rather than the fire (30 Jul 2026: VV −15.1 dB, VH −29.2 dB; 5 Aug 2026:
-VV −21.5 dB, VH −30.7 dB — a gap that moved by 5 dB for no ground reason).
+The **Three Lenses** panel computes all three lenses from real NISAR granules
+and caches them in `server/cache/nisar/bigsur-lenses.mjs` (built by
+`scripts/build-lenses.py`):
 
-The sample point now sits inland in the West Attica hills (Mount Pateras /
-Dervenochoria), so the window is land only. The polarisation gap is stable across
-passes, so the change that remains is the scar itself rather than wind over water.
+- **Amplitude** — mean HH/HV in dB from the before/after GCOV pair, plus the
+  per-pol change. Big Sur 16→28 Aug 2026: HH −11.6 → −11.9 dB (−0.3), HV
+  −17.2 → −17.1 dB (+0.1) — brightness held, so the surface did not simply go
+  dark.
+- **InSAR coherence** — mean coherence and the share of low-coherence pixels
+  from a curated GUNW/GSLC pair on the same track/frame. Big Sur: mean 0.546,
+  32.7 % of pixels below the low-coherence threshold — a collapse consistent
+  with physical disturbance (the burn scar), even where HH stayed bright.
+- **Dual-pol mechanism** — a surface / volume / low-return decomposition from
+  the HH–HV pair (the only pol available; no quad-pol GCOV exists over these
+  sites). Big Sur 16→28 Aug 2026: low-return rose 4.5 % → 11.6 % and surface
+  scattering fell 43.4 % → 37.0 %, the expected signature of canopy loss.
 
-See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md).
+Where a lens is genuinely unavailable (e.g. no curated coherence pair), the UI
+says **unavailable** rather than substituting a synthetic value.
+
+### Population (Rapid Response)
+
+Population exposed is an **estimate**: the site's changed area (km²) multiplied
+by the **WorldPop Global2 R2025A 100 m** population density for the site's
+bounding box, queried live from the WorldPop API. Totals are rounded and clearly
+labelled; if WorldPop is unreachable the field reads **unavailable**, never a
+guessed number.
+
+See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md) for the full API contract.
 
 ## Run
 
@@ -91,11 +125,19 @@ load) and shows the labelled local dataset.
 
 ```
 src/
-  data/            study areas, quiz rounds, localization helper
+  data/            study areas, global atlas, quiz rounds, localization helper
   services/        scene renderer, sonifier, recovery maths, API adapter
   context/         language, public/researcher mode, site data
   components/      one section per idea + shared terminal UI primitives
   i18n/            English + Arabic UI strings
+server/
+  api.mjs          HTTP router (study areas, lenses, explain, rapid-response, explore)
+  nisar.mjs        NISAR snapshot/lens access
+  explain.mjs      grounded, numbers-first explanation engine
+  rapid.mjs        rapid-response stats + WorldPop population
+  cache/nisar/     committed real-granule snapshots (amplitude, coherence, mechanism)
+scripts/
+  build-lenses.py  GCOV/GSLC lens builder (writes cache/nisar/<site>-lenses.mjs)
 ```
 
 The visual system is a terminal / phosphor monitor aesthetic: monospace,

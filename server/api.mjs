@@ -776,13 +776,17 @@ export async function handleRequest(req, res) {
       const lats = ring.map((point) => point[1]);
       const bbox = lons.length ? [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)] : null;
       const report = await buildRapidResponse({ site, changeStats, lenses, bbox });
-      // Optionally render a shareable PNG (report=1).
+      // Return the raw lens thumbnails so the client can draw a shareable PNG
+      // with Canvas (no server-side Python needed — works on serverless).
+      const images = lenses?.images || null;
+      // Optionally render a server-side PNG (report=1). Locally this uses the
+      // venv; on serverless it returns null and the client falls back to canvas.
       let reportImage = null;
       if (url.searchParams.get('report') === '1' && lenses?.images) {
         const b64 = await renderSituationReport(report, lenses.images);
         if (b64) reportImage = `data:image/png;base64,${b64}`;
       }
-      send(res, 200, { data: { ...report, reportImage }, success: true });
+      send(res, 200, { data: { ...report, images, reportImage }, success: true });
       return;
     }
 
