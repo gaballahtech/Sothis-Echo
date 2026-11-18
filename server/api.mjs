@@ -630,14 +630,15 @@ export async function handleRequest(req, res) {
     /* ---------------- Sothis Echo UI contract ---------------- */
 
     if (path === '/api/nisar/status') {
-      const sites = lastBuild?.sites ?? [];
       // Capabilities come from the verified bundled snapshots (real NISAR GCOV
-      // telemetry), not from the NISAR_GCOV env flag: that flag only opts into
-      // live Harmony queries on top of the snapshots. Report what is actually
-      // served so the UI never hides change stats or RGB behind a flag.
-      const capabilities = sites.reduce(
-        (acc, site) => {
-          const caps = nisarSnapshotCapabilities(site.id);
+      // telemetry), not from the NISAR_GCOV env flag and not from the in-memory
+      // build cache (which is empty on a cold serverless invocation). Report
+      // what the bundled snapshots actually serve so the UI never hides change
+      // stats or RGB behind a flag or a cold start.
+      const siteIds = studyAreas.map((site) => site.id);
+      const capabilities = siteIds.reduce(
+        (acc, id) => {
+          const caps = nisarSnapshotCapabilities(id);
           acc.changeStats = acc.changeStats || Boolean(caps.changeStats);
           acc.rgbComposite =
             acc.rgbComposite || Boolean(caps.rgb?.before || caps.rgb?.after);
@@ -645,9 +646,10 @@ export async function handleRequest(req, res) {
         },
         { changeStats: false, rgbComposite: false },
       );
-      const calibratedBackscatter = sites.some(
-        (site) => Boolean(site.measurements?.calibrated),
+      const calibratedBackscatter = siteIds.some(
+        (id) => Boolean(nisarSnapshotCapabilities(id).changeStats),
       );
+      const sites = lastBuild?.sites ?? [];
       send(res, 200, {
         data: {
           operational: true,
