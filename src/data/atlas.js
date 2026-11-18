@@ -1,14 +1,14 @@
 /**
  * Global Atlas — curated list of NISAR-relevant change sites across continents.
  *
- * Each entry is a story the backend can eventually measure with real NISAR
- * granules. `maturity` is the honesty contract:
+ * Each entry is a story the backend can measure with real NISAR granules.
+ * `maturity` is the honesty contract:
  *   'lens'  — real amplitude/coherence/mechanism computed (Big Sur, Central Vietnam)
- *   'story' — narrative + coords only; the atlas shows it as "not yet measured"
+ *   'story' — narrative + coords; the atlas shows a radar field-guide card, never
+ *             fake numbers. Clicking a 'lens' site opens its full study area.
  *
- * The two 'lens' entries reuse the stable study-area ids so URLs/tests keep
- * working. The 'story' entries are forward-looking: they tell the judge the
- * product scales, without faking numbers that were never computed.
+ * Every entry carries: what happened (summary), why radar sees it (radar), and
+ * what a NISAR pass would measure (measure) — so clicking is always informative.
  */
 
 export const atlasSites = [
@@ -26,6 +26,14 @@ export const atlasSites = [
       en: 'L-band coherence collapsed over burned slopes even where brightness held — the burn scar reads as physical disturbance, not just dark ground.',
       ar: 'انهار الترابط فوق المنحدرات المحروقة حتى حيث بقي السطوع ثابتًا — تظهر ندبة الحريق اضطرابًا فيزيائيًا لا مجرد أرض داكنة.',
     },
+    radar: {
+      en: 'Fire removes canopy and scatters the L-band pulse off bare, rougher ground while the surviving structure breaks phase coherence between passes.',
+      ar: 'تزيل النار المظلة وتشتت نبضة النطاق L على أرض عارية أخشن بينما يكسر البناء المتبقي تماسك الطور بين المرورين.',
+    },
+    measure: {
+      en: 'Amplitude change (HH/HV), coherence collapse (% low-coherence), and a dual-pol shift from volume toward low-return scattering.',
+      ar: 'تغيّر السعة (HH/HV)، وانهيار التماسك (نسبة منخفضة التماسك)، وتحوّل ثنائي الاستقطاب من الحجم نحو الارتداد المنخفض.',
+    },
   },
   {
     id: 'sundarbans',
@@ -41,6 +49,14 @@ export const atlasSites = [
       en: 'Open water scatters the pulse away and turns almost black; comparing before/after passes maps the inundation in one step.',
       ar: 'الماء المكشوف يشتت النبضة بعيدًا ويصير أسود تقريبًا؛ ومقارنة المرورين قبل وبعد ترسم الغمر في خطوة واحدة.',
     },
+    radar: {
+      en: 'Smooth open water behaves like a mirror for L-band, sending the pulse away from the satellite; flooded fields go dark while banks and buildings stay bright.',
+      ar: 'الماء المكشوف اللامع يعمل كمرآة للنطاق L فيعيد النبضة بعيدًا عن القمر؛ فتُظلم الحقول المغمورة بينما تبقى الضفاف والمباني لامعة.',
+    },
+    measure: {
+      en: 'Amplitude change maps bright→dark flooding; the changed-area fraction and extent quantify how much ground the water took.',
+      ar: 'خريطة تغيّر السعة تُظهر الفيضان من لامع إلى داكن؛ ونسبة المساحة المتغيّرة والمدى تحدد كم أرضًا غمرها الماء.',
+    },
   },
   {
     id: 'sundarbans-delta',
@@ -53,8 +69,16 @@ export const atlasSites = [
     continent: 'asia',
     maturity: 'story',
     summary: {
-      en: 'Cyclone surge and monsoon rain push brackish water into the mangrove delta; L-band sees through cloud to map the flooded forest.',
-      ar: 'تدفع أمواج الإعصار وأمطار الرياح الموسمية الماء المالح إلى دلتا المانجروف؛ ويرى نطاق L عبر السحب ليخطّط الغابة التي غمرتها المياه.',
+      en: 'Cyclone surge and monsoon rain push brackish water deep into the mangrove delta, drowning forest edges and farmland.',
+      ar: 'تدفع أمواج الإعصار وأمطار الرياح الموسمية الماء المالح عميقًا في دلتا المانجروف، فتغرق حواف الغابة والأراضي الزراعية.',
+    },
+    radar: {
+      en: 'L-band penetrates cloud and rain to see the water surface; flooded mangrove goes dark under the canopy while raised embankments stay bright.',
+      ar: 'يخترق النطاق L السحاب والمطر ليرى سطح الماء؛ فيُظلم المانجروف المغمور تحت المظلة بينما تبقى السدود المرتفعة لامعة.',
+    },
+    measure: {
+      en: 'A before/after amplitude change map marks the surge extent; coherence drops where water replaces vegetated ground.',
+      ar: 'خريطة تغيّر السعة قبل/بعد تحدد مدى الأمواج؛ وينخفض التماسك حيث يحل الماء محل الأرض النباتية.',
     },
   },
   {
@@ -68,8 +92,16 @@ export const atlasSites = [
     continent: 'north-america',
     maturity: 'story',
     summary: {
-      en: 'Glacier retreat and ice-surface lowering show as slow surface deformation — InSAR stacks the passes to measure millimetres of change.',
-      ar: 'يظهر تراجع النهر الجليدي وانخفاض سطح الجليد كتغيّر سطحي بطيء — وتراكم InSAR المرورات لقياس مليمترات من التغيّر.',
+      en: 'The glacier thins and its terminus retreats, lowering the ice surface and exposing fresh rock and meltwater.',
+      ar: 'يترقق النهر الجليدي ويتراجع طرفه، فينخفض سطح الجليد وينكشف صخر وماء ذوبان جديدان.',
+    },
+    radar: {
+      en: 'Ice and rock have very different L-band returns; snow and meltwater change the surface texture, so amplitude marks the retreating edge.',
+      ar: 'للجليد والصخر عائدان مختلفان جدًا في النطاق L؛ والثلج وماء الذوبان يغيّران نسيج السطح، فتُعلّم السعة الحافة المتراجعة.',
+    },
+    measure: {
+      en: 'Amplitude change along the terminus plus InSAR phase stacks that measure millimetres-to-centimetres of surface lowering.',
+      ar: 'تغيّر السعة على طول الطرف مع تراكم طور InSAR الذي يقيس مليمترات إلى سنتيمترات من انخفاض السطح.',
     },
   },
   {
@@ -83,8 +115,16 @@ export const atlasSites = [
     continent: 'europe',
     maturity: 'story',
     summary: {
-      en: 'Ground inflation before an eruption deforms the surface by centimetres; InSAR interferograms turn the deformation into a fringe pattern.',
-      ar: 'ينتفاخ الأرض قبل الثوران فيغيّر السطح بالسنتيمترات؛ وتحوّل مقابلات InSAR التغيّر إلى نمط أهداب متعرج.',
+      en: 'Magma moving underground inflates the surface before an eruption, then new lava and fissures reshape it.',
+      ar: 'الصهارة المتحركة تحت الأرض تنفخ السطح قبل الثوران، ثم تعيد الحمم والشقوق الجديدة تشكيله.',
+    },
+    radar: {
+      en: 'Inflation tilts the ground by centimetres, which InSAR turns into a fringe pattern; fresh lava changes the amplitude texture sharply.',
+      ar: 'ينتفخ السطح بالسنتيمترات، ويحوّل InSAR ذلك إلى نمط أهداب؛ وتغيّر الحمم الجديدة نسيج السعة بحدة.',
+    },
+    measure: {
+      en: 'InSAR interferogram fringes map the deformation; amplitude change pinpoints new lava and fissures.',
+      ar: 'أهداب مقابلة InSAR ترسم التشكّل؛ وتغيّر السعة يحدد الحمم والشقوق الجديدة.',
     },
   },
   {
@@ -98,8 +138,16 @@ export const atlasSites = [
     continent: 'europe',
     maturity: 'story',
     summary: {
-      en: 'River dikes overtop and flood the floodplain; coherence drops where water and mud replace vegetated ground.',
-      ar: 'تفيض السدود وتغمر السهل الفيضي؛ وينخفض الترابط حيث يحل الماء والطين محل الأرض النباتية.',
+      en: 'River dikes overtop and flood the plain after heavy rain, covering fields, roads and settlements.',
+      ar: 'تفيض السدود وتغمر السهل بعد أمطار غزيرة، فتغطي الحقول والطرق والمستوطنات.',
+    },
+    radar: {
+      en: 'Water and mud replace vegetated ground, so the L-band return drops sharply; coherence collapses where the surface is churned.',
+      ar: 'يحل الماء والطين محل الأرض النباتية، فيهبط عائد النطاق L بحدة؛ وينهار التماسك حيث يُقلَّب السطح.',
+    },
+    measure: {
+      en: 'Amplitude change delineates the flooded plain; low coherence confirms water and mud over formerly vegetated ground.',
+      ar: 'تغيّر السعة يرسم السهل المغمور؛ ويؤكد التماسك المنخفض وجود الماء والطين فوق أرض كانت نباتية.',
     },
   },
   {
@@ -113,8 +161,16 @@ export const atlasSites = [
     continent: 'south-america',
     maturity: 'story',
     summary: {
-      en: 'Canopy removal roughens the surface and brightens HH backscatter; the forest-to-cleared boundary is sharp in radar even under cloud.',
-      ar: 'إزالة المظلة تجعل السطح أخشن وتزيد الارتداد HH؛ وتظهر حدود الغابة إلى الأرض المكشوفة بوضوح في الرادار حتى تحت السحب.',
+      en: 'Clearing removes the forest canopy, exposing soil and leaving sharp straight edges where the forest used to be.',
+      ar: 'تزيل عمليات القطع مظلة الغابة، فتكشف التربة وتترك حواف مستقيمة حادة حيث كانت الغابة.',
+    },
+    radar: {
+      en: 'Canopy volume gives strong cross-pol (HV); cleared ground loses it and roughens co-pol. Cloud never blocks L-band.',
+      ar: 'حجم المظلة يعطي قطبًا متقاطعًا قويًا (HV)؛ والأرض المكشوفة تفقده وتخشّن القطب المشترك. والسحاب لا يحجب النطاق L.',
+    },
+    measure: {
+      en: 'Amplitude change (HH up, HV down) and a volume→surface mechanism shift mark the forest-to-cleared boundary.',
+      ar: 'تغيّر السعة (HH أعلى، HV أدنى) وتحوّل الآلية من الحجم إلى السطح يعلّمان حد الغابة إلى الأرض المكشوفة.',
     },
   },
   {
@@ -128,8 +184,16 @@ export const atlasSites = [
     continent: 'asia',
     maturity: 'story',
     summary: {
-      en: 'Groundwater extraction sinks reclaimed land by millimetres per year; InSAR measures the subsidence bowl without any ground sensor.',
-      ar: 'يؤدي استخراج المياه الجوفية إلى هبوط الأراضي المستصلحة بمليمترات سنويًا؛ ويقيس InSAR حوض الهبوط دون أي مستشعر أرضي.',
+      en: 'Groundwater extraction slowly sinks reclaimed land and dense urban fill by a few millimetres each year.',
+      ar: 'يُغرق استخراج المياه الجوفية الأرض المستصلحة والردم الحضري الكثيف ببطء ببضعة مليمترات كل عام.',
+    },
+    radar: {
+      en: 'The buildings barely change, so amplitude stays put — the story is in the phase, which accumulates tiny vertical shifts over a 12-day repeat.',
+      ar: 'تكاد المباني لا تتغيّر فتبقى السعة ثابتة — والقصة في الطور الذي يراكم إزاحات رأسية صغيرة عبر دورة 12 يومًا.',
+    },
+    measure: {
+      en: 'InSAR time-series (stacked interferograms) measure the subsidence bowl to millimetre-per-year precision.',
+      ar: 'سلاسل زمنية لـ InSAR (مقابلات متراكمة) تقيس حوض الهبوط بدقة المليمتر سنويًا.',
     },
   },
   {
@@ -143,8 +207,16 @@ export const atlasSites = [
     continent: 'africa',
     maturity: 'story',
     summary: {
-      en: 'Oil sheen smooths the water surface and drops backscatter to near-black; the slick edge is visible in a single HH pass.',
-      ar: 'يلطّف لمعان النفط سطح الماء ويخفض الارتداد إلى شبه أسود؛ وتظهر حافة البقعة في مرور HH واحد.',
+      en: 'An oil slick spreads across creeks and wetlands, smoothing the water surface over a wide area.',
+      ar: 'تنتشر بقعة نفط عبر الجداول والأراضي الرطبة، فتلطّف سطح الماء على مساحة واسعة.',
+    },
+    radar: {
+      en: 'A thin oil film damps capillary waves and drops L-band backscatter to near-black — the slick edge is sharp in a single HH pass.',
+      ar: 'الغشاء النفطي الرقيق يخمد الأمواج الشعرية ويخفض عائد النطاق L إلى شبه أسود — وحافة البقعة حادة في مرور HH واحد.',
+    },
+    measure: {
+      en: 'Amplitude change on the water surface isolates the slick extent; the edge is visible within one granule.',
+      ar: 'تغيّر السعة على سطح الماء يعزل مدى البقعة؛ وتظهر الحافة داخل جرين واحد.',
     },
   },
   {
@@ -158,8 +230,16 @@ export const atlasSites = [
     continent: 'oceania',
     maturity: 'story',
     summary: {
-      en: 'A dry season withers the canopy and smooths the soil; the dual-pol HH–HV ratio shifts as volume scattering collapses.',
-      ar: 'يجفف موسم جاف المظلة وينعّم التربة؛ ويتغيرت نسبة HH–HV ثنائية الاستقطاب مع انهيار تشتت الحجم.',
+      en: 'A dry season withers the crop canopy and dries the soil, thinning the vegetation over whole paddocks.',
+      ar: 'يجفف موسم جاف مظلة المحصول والتربة، فيترقق الغطاء النباتي على كامل الحقول.',
+    },
+    radar: {
+      en: 'Healthy canopy gives strong volume (HV) scattering; as it dries, HV falls and the HH–HV gap narrows — visible in amplitude alone.',
+      ar: 'المظلة الصحية تعطي تشتت حجم قويًا (HV)؛ ومع الجفاف يهبط HV وتضيق الفجوة HH–HV — ظاهرة في السعة وحدها.',
+    },
+    measure: {
+      en: 'Amplitude change and the dual-pol volume fraction track how much canopy was lost.',
+      ar: 'تغيّر السعة ونسبة الحجم ثنائية الاستقطاب تتبعان مقدار المظلة المفقودة.',
     },
   },
   {
@@ -173,8 +253,16 @@ export const atlasSites = [
     continent: 'south-america',
     maturity: 'story',
     summary: {
-      en: 'Co-seismic deformation shifts the surface by centimetres; the interferogram fringe count maps the rupture along the fault.',
-      ar: 'يزيح التزيال الزلزالي السطح بالسنتيمترات؛ ويخطّط عدد أهداب المقابلة الصدع على طول الصدع.',
+      en: 'A rupture shifts the ground by centimetres along a fault, cracking roads and toppling weak structures.',
+      ar: 'يزيح التمزق الأرض بالسنتيمترات على طول صدع، فيشقّ الطرق ويُسقط الأبنية الضعيفة.',
+    },
+    radar: {
+      en: 'Co-seismic motion changes the phase but barely the amplitude; InSAR fringes count the displacement across the fault.',
+      ar: 'الحركة الزلزالية تغيّر الطور لكنها تكاد لا تغيّر السعة؛ وأهداب InSAR تحسب الإزاحة عبر الصدع.',
+    },
+    measure: {
+      en: 'Co-seismic interferogram fringes map the rupture and the centimetre-scale offset; amplitude flags collapsed structures.',
+      ar: 'أهداب المقابلة الزلزالية ترسم التمزق والإزاحة السنتيمترية؛ وتعلّم السعة الأبنية المنهارة.',
     },
   },
 ];

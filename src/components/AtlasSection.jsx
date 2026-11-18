@@ -62,25 +62,35 @@ export default function AtlasSection() {
         </div>
 
         {selected ? (
-          <div className="atlas-preview" data-testid="atlas-preview">
-            <div>
+          <div className={`atlas-preview${isMeasured ? ' is-measured' : ''}`} data-testid="atlas-preview">
+            <div className="atlas-preview-main">
               <h3 style={{ margin: '0 0 4px' }}>{localized(selected.name, 'en')}</h3>
-              <p className="micro" style={{ margin: '0 0 6px' }}>
+              <p className="micro" style={{ margin: '0 0 10px' }}>
                 {localized(selected.region, 'en')} · {changeTypeName(selected.changeType)}
                 {' · '}
                 <span className={isMeasured ? 'atlas-badge measured' : 'atlas-badge story'}>
                   {isMeasured ? t('atlas.measured') : t('atlas.storyOnly')}
                 </span>
               </p>
-              <p className="body-copy" style={{ margin: 0 }}>{localized(selected.summary, 'en')}</p>
+
+              <dl className="atlas-story">
+                <dt>{t('atlas.whatHappened')}</dt>
+                <dd>{localized(selected.summary, 'en')}</dd>
+                <dt>{t('atlas.whyRadar')}</dt>
+                <dd>{localized(selected.radar, 'en')}</dd>
+                <dt>{t('atlas.whatMeasures')}</dt>
+                <dd>{localized(selected.measure, 'en')}</dd>
+              </dl>
             </div>
-            {isMeasured ? (
-              <button type="button" className="atlas-open" onClick={() => openStory(selected)} data-testid="atlas-open">
-                {t('atlas.openStory')} →
-              </button>
-            ) : (
-              <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
-            )}
+            <div className="atlas-preview-action">
+              {isMeasured ? (
+                <button type="button" className="atlas-open" onClick={() => openStory(selected)} data-testid="atlas-open">
+                  {t('atlas.openStory')} →
+                </button>
+              ) : (
+                <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
+              )}
+            </div>
           </div>
         ) : null}
 

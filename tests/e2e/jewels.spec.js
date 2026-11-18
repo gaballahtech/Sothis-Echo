@@ -117,3 +117,21 @@ test('Clicking an atlas place loads that study area everywhere', async ({ page }
 
   expect(errors).toEqual([]);
 });
+
+test('Selecting a story-only place shows a full radar story card', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await openApp(page);
+
+  await page.locator('#atlas').scrollIntoViewIfNeeded();
+  await page.getByTestId('atlas-item-peru-earthquake').click();
+
+  const preview = page.getByTestId('atlas-preview');
+  await expect(preview).toContainText('Peru earthquake');
+  await expect(preview).toContainText('Why radar sees it');
+  await expect(preview).toContainText('What NISAR measures');
+  // Story-only places do not open a measured study area, and say so.
+  await expect(preview).toContainText(/Narrative preview/i);
+
+  expect(errors).toEqual([]);
+});

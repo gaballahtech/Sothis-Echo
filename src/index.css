@@ -1384,13 +1384,62 @@ li,
 .atlas-preview {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   gap: 16px;
   margin-top: 16px;
   padding: 14px 16px;
   border: 1px solid var(--bp-surface-border-color-default, #d0d0d0);
+  border-inline-start: 3px solid #8a8f98;
   border-radius: 6px;
   background: var(--bp-surface-elevated-color-default, rgba(0, 0, 0, 0.02));
+}
+
+.atlas-preview.is-measured {
+  border-inline-start-color: #1f8a5b;
+}
+
+.atlas-preview-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.atlas-preview-action {
+  flex: 0 0 auto;
+  align-self: center;
+}
+
+.atlas-story {
+  margin: 0;
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 6px 14px;
+  align-items: start;
+}
+
+.atlas-story dt {
+  font-size: 12px;
+  font-weight: 600;
+  color: #8a8f98;
+  white-space: nowrap;
+  padding-top: 2px;
+}
+
+.atlas-story dd {
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 720px) {
+  .atlas-preview {
+    flex-direction: column;
+  }
+  .atlas-story {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .atlas-story dt {
+    padding-top: 8px;
+  }
 }
 
 .atlas-open {
