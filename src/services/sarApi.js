@@ -22,6 +22,17 @@ const TIMEOUT_MS = Number(ENV.VITE_API_TIMEOUT || 150000);
 
 export const isApiConfigured = () => Boolean(API_BASE);
 
+/**
+ * Pick the default site for a jewel panel: prefer the first site that actually
+ * has real lens data computed, so the "wow" view opens on real numbers instead
+ * of an honest-but-empty "unavailable" state. Falls back to the first site.
+ */
+export function pickDefaultSiteId(sites) {
+  if (!Array.isArray(sites) || !sites.length) return undefined;
+  const withLenses = sites.find((site) => site?.hasLenses === true);
+  return (withLenses || sites[0]).id;
+}
+
 const SAME_ORIGIN_API = '/api';
 let probe = null;
 
@@ -292,6 +303,7 @@ function mergeSite(local, remote) {
     recovery: mergeRecovery(local.recovery, remote.recovery),
     updatedAt: typeof remote.updatedAt === 'string' ? remote.updatedAt : null,
     source: typeof remote.source === 'string' ? remote.source : local.source,
+    hasLenses: remote.hasLenses === true,
     provenance: remote.provenance && typeof remote.provenance === 'object' ? remote.provenance : local.provenance,
     degraded: Boolean(remote.degraded),
     degradedReason: typeof remote.degradedReason === 'string' ? remote.degradedReason : null,

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { loadLenses } from '../services/sarApi';
+import { loadLenses, pickDefaultSiteId } from '../services/sarApi';
 
 /**
  * "Three Lenses" — three independent physical measurements of the same surface
@@ -57,14 +57,25 @@ export default function Lenses() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source } = useSiteData();
-  const [activeId, setActiveId] = useState(() => sites[0]?.id);
+  const [activeId, setActiveId] = useState(() => pickDefaultSiteId(sites));
+  const [picked, setPicked] = useState(false);
   const [tab, setTab] = useState('amplitude');
   const [lenses, setLenses] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
-  }, [sites, activeId]);
+    if (!sites.length) return;
+    if (!sites.some((item) => item.id === activeId)) {
+      setActiveId(pickDefaultSiteId(sites));
+      return;
+    }
+    // When the API announces which sites have real lens data, open on one of
+    // them unless the user has already chosen a site manually.
+    if (!picked) {
+      const preferred = pickDefaultSiteId(sites);
+      if (preferred && preferred !== activeId) setActiveId(preferred);
+    }
+  }, [sites, activeId, picked]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
 
@@ -139,7 +150,10 @@ export default function Lenses() {
                   aria-selected={selected}
                   active={selected}
                   variant={selected ? 'solid' : 'outlined'}
-                  onClick={() => setActiveId(item.id)}
+                  onClick={() => {
+                    setActiveId(item.id);
+                    setPicked(true);
+                  }}
                   data-testid={`lens-site-tab-${item.id}`}
                 >
                   {L(item.name)}

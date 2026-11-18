@@ -260,12 +260,13 @@ async function getSites() {
             };
           }
         }
+        merged.hasLenses = Boolean(nisarLenses(site.id));
         return merged;
       } catch (error) {
         // Never hide a fallback: the payload says fixture/degraded so the UI
         // cannot label these numbers as live.
         console.error('[SOTHIS API] real build failed for', site.id, error?.message, error?.stack);
-        return {...fixture, degradedReason: error?.message || 'build failed'};
+        return {...fixture, hasLenses: Boolean(nisarLenses(site.id)), degradedReason: error?.message || 'build failed'};
       }
     })
   );

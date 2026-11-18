@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { loadRapidResponse } from '../services/sarApi';
+import { loadRapidResponse, pickDefaultSiteId } from '../services/sarApi';
 
 /**
  * Draw the one-page situation report onto a <canvas> and return a PNG data URL.
@@ -123,13 +123,19 @@ export default function RapidResponse() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source } = useSiteData();
-  const [activeId, setActiveId] = useState(() => sites[0]?.id);
+  const [activeId, setActiveId] = useState(() => pickDefaultSiteId(sites));
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
-    if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
+    if (!sites.length) return;
+    if (!sites.some((item) => item.id === activeId)) {
+      setActiveId(pickDefaultSiteId(sites));
+      return;
+    }
+    const preferred = pickDefaultSiteId(sites);
+    if (preferred && preferred !== activeId) setActiveId(preferred);
   }, [sites, activeId]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
