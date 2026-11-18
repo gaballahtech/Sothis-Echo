@@ -373,6 +373,59 @@ export async function loadChangeStats(id, threshold = 3) {
   }
 }
 
+/** "Three Lenses" block: amplitude + InSAR coherence + dual-pol mechanism. */
+export async function loadLenses(id) {
+  if (!studyAreas.some((item) => item.id === id)) return null;
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/nisar/lenses?site=${encodeURIComponent(id)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Grounded physical explanation (headline + numbers + citations). */
+export async function loadExplanation(id, language = 'en') {
+  if (!studyAreas.some((item) => item.id === id)) return null;
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await request(`/explain?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(language)}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Ask the Radar — grounded Q&A over the site's real metrics. */
+export async function askExplain(id, question, language = 'en') {
+  if (!studyAreas.some((item) => item.id === id)) return null;
+  if (!isApiConfigured()) return null;
+  try {
+    const payload = await requestJson(`/explain/ask?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(language)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question }),
+    });
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Rapid-response situation report (extent + population + optional PNG). */
+export async function loadRapidResponse(id, { report = false } = {}) {
+  if (!studyAreas.some((item) => item.id === id)) return null;
+  if (!isApiConfigured()) return null;
+  try {
+    const qs = report ? '?report=1' : '';
+    const payload = await request(`/rapid-response?site=${encodeURIComponent(id)}${qs}`);
+    return payload && typeof payload === 'object' ? payload : null;
+  } catch {
+    return null;
+  }
+}
+
 /** Recovery curve + fit for one site. */
 export async function loadRecovery(id, threshold = 80) {
   if (!isApiConfigured()) return null;

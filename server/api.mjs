@@ -26,6 +26,8 @@ import {
   clearNisarCache,
   computeNisarChangeStats,
   nisarSnapshot,
+  nisarSnapshotCapabilities,
+  nisarLenses,
   nisarRecoverySnapshot,
   nisarSnapshotHh,
   nisarSnapshotChange,
@@ -35,6 +37,8 @@ import {
   renderNisarCrop,
   renderNisarRgb,
 } from './nisar.mjs';
+import { buildExplanation, answerQuestion } from './explain.mjs';
+import { buildRapidResponse, renderSituationReport } from './rapid.mjs';
 
 try {
   process.loadEnvFile('.env.local');
@@ -626,7 +630,23 @@ export async function handleRequest(req, res) {
 
     if (path === '/api/nisar/status') {
       const sites = lastBuild?.sites ?? [];
-      const gcov = process.env.NISAR_GCOV === '1';
+      // Capabilities come from the verified bundled snapshots (real NISAR GCOV
+      // telemetry), not from the NISAR_GCOV env flag: that flag only opts into
+      // live Harmony queries on top of the snapshots. Report what is actually
+      // served so the UI never hides change stats or RGB behind a flag.
+      const capabilities = sites.reduce(
+        (acc, site) => {
+          const caps = nisarSnapshotCapabilities(site.id);
+          acc.changeStats = acc.changeStats || Boolean(caps.changeStats);
+          acc.rgbComposite =
+            acc.rgbComposite || Boolean(caps.rgb?.before || caps.rgb?.after);
+          return acc;
+        },
+        { changeStats: false, rgbComposite: false },
+      );
+      const calibratedBackscatter = sites.some(
+        (site) => Boolean(site.measurements?.calibrated),
+      );
       send(res, 200, {
         data: {
           operational: true,
@@ -637,8 +657,8 @@ export async function handleRequest(req, res) {
               ? ['nisar-l-band-browse', 'sentinel-1-cog']
               : ['fixture'],
           realData: sites.length ? sites.some((site) => !site.degraded) : REAL_DATA,
-          calibratedBackscatter: gcov,
-          capabilities: { changeStats: gcov, rgbComposite: gcov },
+          calibratedBackscatter,
+          capabilities,
           fallbackSites: sites.filter((site) => site.degraded).map((site) => site.id),
           builtAt: lastBuild?.at ? new Date(lastBuild.at).toISOString() : null,
         },
@@ -693,6 +713,76 @@ export async function handleRequest(req, res) {
         return;
       }
       send(res, 200, { data: stats, success: true });
+      return;
+    }
+
+    if (path === '/api/nisar/lenses') {
+      const siteId = url.searchParams.get('site');
+      if (!studyAreas.some((item) => item.id === siteId)) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const lenses = nisarLenses(siteId);
+      if (!lenses) {
+        sendError(res, 404, 'No precomputed lenses for this site');
+        return;
+      }
+      // Images are base64 PNGs already bundled in the snapshot; the client turns
+      // them into data URLs. Everything carries its own granule + date + method.
+      send(res, 200, { data: lenses, success: true });
+      return;
+    }
+
+    if (path === '/api/explain') {
+      const siteId = url.searchParams.get('site');
+      const language = url.searchParams.get('lang') === 'ar' ? 'ar' : 'en';
+      const lenses = nisarLenses(siteId);
+      if (!lenses) {
+        sendError(res, 404, 'No lens data to explain for this site');
+        return;
+      }
+      send(res, 200, { data: buildExplanation(lenses, language), success: true });
+      return;
+    }
+
+    if (path === '/api/explain/ask' && method === 'POST') {
+      const siteId = url.searchParams.get('site');
+      const language = url.searchParams.get('lang') === 'ar' ? 'ar' : 'en';
+      const lenses = nisarLenses(siteId);
+      if (!lenses) {
+        sendError(res, 404, 'No lens data to explain for this site');
+        return;
+      }
+      const body = await readJson(req).catch(() => ({}));
+      const question = typeof body?.question === 'string' ? body.question : '';
+      send(res, 200, { data: answerQuestion(lenses, question, language), success: true });
+      return;
+    }
+
+    if (path === '/api/rapid-response') {
+      const siteId = url.searchParams.get('site');
+      const site = studyAreas.find((item) => item.id === siteId);
+      if (!site) {
+        sendError(res, 404, 'Unknown site');
+        return;
+      }
+      const lenses = nisarLenses(siteId);
+      const snapshot = nisarSnapshot(siteId);
+      const changeStats = snapshot?.changeStats || null;
+      // bbox from the site's own WKT polygon (lon/lat)
+      const geom = wktToGeoJSON(site.wkt);
+      const ring = geom?.coordinates?.[0] || [];
+      const lons = ring.map((point) => point[0]);
+      const lats = ring.map((point) => point[1]);
+      const bbox = lons.length ? [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)] : null;
+      const report = await buildRapidResponse({ site, changeStats, lenses, bbox });
+      // Optionally render a shareable PNG (report=1).
+      let reportImage = null;
+      if (url.searchParams.get('report') === '1' && lenses?.images) {
+        const b64 = await renderSituationReport(report, lenses.images);
+        if (b64) reportImage = `data:image/png;base64,${b64}`;
+      }
+      send(res, 200, { data: { ...report, reportImage }, success: true });
       return;
     }
 

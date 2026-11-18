@@ -651,11 +651,10 @@ function attachNisarCards(states, site, browse, { calibrated = false } = {}) {
 
 /** Explicit per-panel provenance: which sensor feeds the images vs the numbers. */
 function buildProvenance(site, states, nisarBrowse) {
-  const gcovOn = process.env.NISAR_GCOV === '1';
   // A precomputed GCOV snapshot makes the stats/RGB controls usable even when
   // the Harmony queue is unavailable, so gate the UI on real data, not the env.
   const caps = nisarSnapshotCapabilities(site.id);
-  const rgbAvailable = gcovOn && (caps.rgb.after || caps.rgb.before);
+  const rgbAvailable = Boolean(caps.rgb.after || caps.rgb.before);
   return {
     cards: nisarBrowse
       ? {
@@ -667,7 +666,7 @@ function buildProvenance(site, states, nisarBrowse) {
           calibrated: false,
           rgbComposite: rgbAvailable,
           rgbSides: caps.rgb,
-          changeStats: gcovOn && caps.changeStats,
+          changeStats: Boolean(caps.changeStats),
           calibrationSnapshot: caps.computedAt,
           granules: {
             before: states.before?.nisarGranule ?? null,

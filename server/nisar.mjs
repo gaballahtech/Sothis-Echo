@@ -26,6 +26,7 @@ import { sundarbansChangeBase64 } from './cache/nisar/sundarbans-change.mjs';
 import { bigsurChangeBase64 } from './cache/nisar/bigsur-change.mjs';
 import { sundarbansRecovery } from './cache/nisar/sundarbans-recovery.mjs';
 import { bigsurRecovery } from './cache/nisar/bigsur-recovery.mjs';
+import { lensesSnapshot as bigsurLensesSnapshot } from './cache/nisar/bigsur-lenses.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -366,6 +367,19 @@ export function nisarRecoverySnapshot(siteId) {
 /** Bundled GCOV telemetry for a site, or null when none was precomputed. */
 export function nisarSnapshot(siteId) {
   return SNAPSHOTS.get(siteId) || null;
+}
+
+const LENSES_SNAPSHOTS = new Map(
+  [bigsurLensesSnapshot].filter(Boolean).map((snapshot) => [snapshot.site, snapshot])
+);
+
+/**
+ * "Three Lenses" block for a site: real amplitude change + InSAR coherence +
+ * dual-pol scattering mechanism (all from NISAR GCOV/GSLC). Null when the site
+ * has no precomputed lens snapshot.
+ */
+export function nisarLenses(siteId) {
+  return LENSES_SNAPSHOTS.get(siteId) || null;
 }
 
 /** Which card sides have a bundled dual-pol composite. */

@@ -12,6 +12,9 @@ import Hero from './components/Hero';
 import Mission from './components/Mission';
 import SeeThrough from './components/SeeThrough';
 import StudyAreas from './components/StudyAreas';
+import Lenses from './components/Lenses';
+import ExplainPanel from './components/ExplainPanel';
+import RapidResponse from './components/RapidResponse';
 import Sonification from './components/Sonification';
 import Recovery from './components/Recovery';
 import Detective from './components/Detective';
@@ -49,6 +52,9 @@ function AppContent() {
           <Mission />
           <SeeThrough />
           <StudyAreas />
+          <Lenses />
+          <ExplainPanel />
+          <RapidResponse />
           <Sonification />
           <Recovery />
           <Detective />

@@ -1242,6 +1242,46 @@ li,
   gap: 14px;
 }
 
+.lens-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  border: 1px solid var(--bp-surface-border-color-default, #d0d0d0);
+  background: #080808;
+}
+
+.lens-legend .swatch {
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  border-radius: 2px;
+  margin-inline-end: 6px;
+  vertical-align: -1px;
+}
+
+.lens-loading {
+  display: grid;
+  place-items: center;
+}
+
+.explain-headline {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.4;
+  padding: 12px 14px;
+  border-inline-start: 3px solid var(--bp-intent-primary-color, #2d72d2);
+  background: var(--bp-surface-elevated-color-default, rgba(0, 0, 0, 0.03));
+  border-radius: 4px;
+}
+
+.explain-answer {
+  padding: 10px 12px;
+  border: 1px solid var(--bp-surface-border-color-default, #d0d0d0);
+  border-radius: 4px;
+  background: var(--bp-surface-elevated-color-default, rgba(0, 0, 0, 0.02));
+}
+
 .info-list {
   display: grid;
   gap: 0;
