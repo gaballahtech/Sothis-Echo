@@ -512,7 +512,7 @@ export function buildSiteCsv(site) {
   const numbers = provenance.numbers || {};
   const cards = provenance.cards || {};
   const source = site.source || numbers.source || '';
-  const sensor = numbers.sensor || (/nisar/i.test(String(site.measurements?.source || '')) ? 'NISAR' : 'Sentinel-1');
+  const sensor = numbers.sensor || 'NISAR';
   const polarizations = (numbers.polarizations || (sensor === 'NISAR' ? ['HH', 'HV'] : ['VV', 'VH'])).join('/');
   const unit = numbers.unit || 'relative_amplitude_db';
   const calibration = numbers.calibration || 'uncalibrated relative amplitude';
@@ -540,7 +540,7 @@ export function buildSiteCsv(site) {
       '',
       '',
       ...context,
-      site.degraded ? 'yes' : 'no',
+      site.degraded || !site.provenance ? 'yes' : 'no',
     ]);
   }
   if (recoveryFitted) {

@@ -8,7 +8,7 @@
  */
 export const bigsurSnapshot = {
   "site": "bigsur",
-  "computedAt": "2026-11-17",
+  "computedAt": "2026-11-18",
   "source": "nisar-gcov-asf-h5",
   "calibrated": true,
   "thresholdDb": 2.0,
@@ -17,11 +17,11 @@ export const bigsurSnapshot = {
     "source": "nisar-gcov-asf-h5",
     "calibrated": true,
     "thresholdDb": 2.0,
-    "changedPct": 20.3,
-    "meanDeltaDb": -0.24,
-    "meanAbsDeltaDb": 1.28,
-    "changedAreaKm2": 10.69,
-    "validPixels": 529810,
+    "changedPct": 23.7,
+    "meanDeltaDb": -0.2,
+    "meanAbsDeltaDb": 1.38,
+    "changedAreaKm2": 12.5,
+    "validPixels": 529811,
     "validPct": 44.2,
     "grid": {
       "width": 1065,
@@ -33,23 +33,23 @@ export const bigsurSnapshot = {
       "granule": "NISAR_L2_PR_GCOV_028_042_D_070_4005_DHDH_A_20260816T025639_20260816T025713_P05023_N_F_J_001"
     },
     "after": {
-      "date": "2026-09-09",
-      "granule": "NISAR_L2_PR_GCOV_030_042_D_070_4005_DHDH_A_20260909T025638_20260909T025713_P05023_N_F_J_001"
+      "date": "2026-08-28",
+      "granule": "NISAR_L2_PR_GCOV_029_042_D_070_4005_DHDH_A_20260828T025638_20260828T025713_P05023_N_F_J_001"
     },
     "note": "Signed HH change, 2 dB absolute threshold, same track/frame, NISAR L-band gamma-0, read directly from the calibrated ASF GCOV HDF5 granules."
   },
   "measurements": {
     "hhDb": {
       "before": -11.6,
-      "after": -12.0
+      "after": -11.9
     },
     "hvDb": {
       "before": -17.2,
-      "after": -17.3
+      "after": -17.1
     },
     "crossDb": {
       "before": -5.6,
-      "after": -5.3
+      "after": -5.2
     },
     "validPct": 100.0
   },
@@ -61,8 +61,8 @@ export const bigsurSnapshot = {
       "height": 370
     },
     "after": {
-      "date": "2026-09-09",
-      "granule": "NISAR_L2_PR_GCOV_030_042_D_070_4005_DHDH_A_20260909T025638_20260909T025713_P05023_N_F_J_001",
+      "date": "2026-08-28",
+      "granule": "NISAR_L2_PR_GCOV_029_042_D_070_4005_DHDH_A_20260828T025638_20260828T025713_P05023_N_F_J_001",
       "width": 560,
       "height": 370
     }

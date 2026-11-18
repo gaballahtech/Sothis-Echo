@@ -56,12 +56,13 @@ SITES = {
     },
     'bigsur': {
         # Timber + Plaskett fire scar on the Santa Lucia Range, Big Sur.
-        # Track 42 descending, frame 070: clean 24-day same-track pair.
+        # Track 42 descending, frame 070: 12-day same-track pair ending on the
+        # event pass (2026-08-28) so the cards, change map and recovery agree.
         'coords': (36.02, -121.52),
         'bbox': (-121.58, 35.97, -121.46, 36.07),
         'eventDate': '2026-08-25',
         'before': 'NISAR_L2_PR_GCOV_028_042_D_070_4005_DHDH_A_20260816T025639_20260816T025713_P05023_N_F_J_001',
-        'after': 'NISAR_L2_PR_GCOV_030_042_D_070_4005_DHDH_A_20260909T025638_20260909T025713_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_029_042_D_070_4005_DHDH_A_20260828T025638_20260828T025713_P05023_N_F_J_001',
     },
 }
 
@@ -75,6 +76,12 @@ def token():
         if line.startswith('EARTHDATA_TOKEN='):
             return line.split('=', 1)[1].strip()
     raise SystemExit('EARTHDATA_TOKEN missing from .env.local')
+
+
+def granule_date(name):
+    """Calendar date (YYYY-MM-DD) encoded in a NISAR granule name."""
+    dt = name.split('_A_', 1)[1][:8]
+    return f'{dt[0:4]}-{dt[4:6]}-{dt[6:8]}'
 
 
 def asf_granules(wkt):
@@ -515,8 +522,8 @@ def main():
             'validPixels': stats['validPixels'],
             'validPct': stats['validPct'],
             'grid': {'width': stats['width'], 'height': stats['height'], 'aligned': True},
-            'before': {'date': '2026-08-16', 'granule': SITES['bigsur']['before']},
-            'after': {'date': '2026-09-09', 'granule': SITES['bigsur']['after']},
+            'before': {'date': granule_date(SITES['bigsur']['before']), 'granule': SITES['bigsur']['before']},
+            'after': {'date': granule_date(SITES['bigsur']['after']), 'granule': SITES['bigsur']['after']},
             'note': (
                 f'Signed HH change, {int(THRESHOLD_DB)} dB absolute threshold, same track/frame, '
                 'NISAR L-band gamma-0, read directly from the calibrated ASF GCOV HDF5 granules.'
@@ -530,13 +537,13 @@ def main():
         },
         'rgb': {
             'before': {
-                'date': '2026-08-16',
+                'date': granule_date(SITES['bigsur']['before']),
                 'granule': SITES['bigsur']['before'],
                 'width': OUT_W,
                 'height': OUT_H,
             },
             'after': {
-                'date': '2026-09-09',
+                'date': granule_date(SITES['bigsur']['after']),
                 'granule': SITES['bigsur']['after'],
                 'width': OUT_W,
                 'height': OUT_H,

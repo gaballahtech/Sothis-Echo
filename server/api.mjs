@@ -231,6 +231,14 @@ async function getSites() {
           if (Array.isArray(nisarRecovery.series)) merged.series = nisarRecovery.series;
           if (Array.isArray(nisarRecovery.pulse)) merged.pulse = nisarRecovery.pulse;
           if (Array.isArray(nisarRecovery.stablePulse)) merged.stablePulse = nisarRecovery.stablePulse;
+          // Cards and numbers now come from the calibrated NISAR series; keep
+          // _meta honest about sensor, window and calibration instead of the
+          // Sentinel-era defaults still sitting on the merged object.
+          merged._meta = {
+            scenes: nisarRecovery.series?.length ?? nisarRecovery.passes?.length ?? merged._meta?.scenes,
+            window: '2.5 km',
+            note: 'Calibrated gamma-0 power from NISAR GCOV HHHH/HVHV (gamma0_power_db).',
+          };
           if (merged.provenance) {
             merged.provenance = {
               ...merged.provenance,

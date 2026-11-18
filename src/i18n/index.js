@@ -103,7 +103,7 @@ const en = {
       'Drag the line. Two views of the same study area: the clearest optical pass available, and the radar window cut to match it.',
     optical: 'OPTICAL · CLOUDED',
     radar: 'RADAR · L-BAND',
-    radarC: 'RADAR · C-BAND',
+    radarC: 'RADAR · L-BAND',
     dragHint: 'DRAG THE DIVIDER',
     dividerAt: 'Divider at {{value}}% of the frame width',
     keyboardHint: 'or use arrow keys',
@@ -112,7 +112,7 @@ const en = {
     radarCaption:
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
     radarCaptionSentinel:
-      'A real Sentinel-1 C-band scene over the same window. Smooth water is dark; rough canopy and built surfaces return more energy.',
+      'A real NASA NISAR L-band (HH) browse image over the same window. Smooth water is dark; rough canopy and built surfaces return more energy.',
     nisarSwath:
       'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar layer is NASA’s colourised quicklook, not a calibrated image; its tilted orbit and wider swath mean fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
@@ -159,9 +159,9 @@ const en = {
     dbNote:
       'Lower dB means less energy returned — a darker pixel. HV−HH is the cross-pol ratio. Before/after cards and the change map are {{cards}}; the dB panel and the time series are {{numbers}}.',
     provCardsNisar: 'real NASA NISAR L-band ({{polarizations}}) browse images',
-    provCardsSentinel: 'real Sentinel-1 C-band ({{polarizations}}) quicklooks',
+    provCardsSentinel: 'real NASA NISAR L-band ({{polarizations}}) browse images',
     provNumbersSentinel:
-      'real Sentinel-1 C-band GRD ({{polarizations}}) at relative amplitude — not calibrated σ⁰',
+      'calibrated NISAR L-band gamma-0 ({{polarizations}})',
     provNumbersNisar: 'calibrated NISAR L-band gamma-0 ({{polarizations}})',
     degraded: 'The live rebuild failed for this site, so the labelled fallback record is shown — not new measurements.',
     dbNoteFallback:
@@ -227,10 +227,10 @@ const en = {
     changeSub: 'The study-area series. The event is audible before you read the label.',
     play: 'Play',
     stop: 'Stop',
-    sourceLine: 'Real data: {{passes}} NISAR L-band passes, resampled to 16 steps.',
+    sourceLine: 'Real data: change index from {{passes}} NISAR L-band HH (calibrated γ⁰) passes, resampled to 16 steps.',
     scaleNote: 'Bars and pitch are scaled to this record’s peak change ({{peak}}%).',
     mappingTitle: 'How the data becomes sound',
-    map1: 'One pulse = one step of the 16-step series',
+    map1: 'One pulse = one 12-day satellite pass (16-pass series)',
     map2: 'Pitch = amount of change',
     map3: 'Rhythm = speed of change',
     map4: 'Static texture = rough, fragmented change',
@@ -254,13 +254,13 @@ const en = {
       'This is a structural proxy, not full ecological recovery. Radar brightness can return while carbon, species and soil are still rebuilding.',
     methodLabel: 'How this estimate is made',
     methodBody:
-      'Each point is one post-event satellite pass over {{site}}. The percentage is the share of the study window that has returned to its pre-event VV level, measured block by block on same-satellite, same-orbit passes; 100% means the changed area has faded into the window\'s own pass-to-pass noise. The estimate is the first time the curve meets your target. It is a structural proxy, not full ecological recovery.',
+      'Each point is one post-event satellite pass over {{site}}. The percentage is the share of the study window that has returned to its pre-event HH level, measured block by block on same-satellite, same-orbit passes; 100% means the changed area has faded into the window\'s own pass-to-pass noise. The estimate is the first time the curve meets your target. It is a structural proxy, not full ecological recovery.',
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'Finding, not a gap: the event pass changed {{change}}% of this ~5 km window by at least 5 dB, while the same window moves by {{noise}}% between two pre-event passes. That is not enough separation to fit a recovery curve, and plotting one would be noise wearing a trend line.',
+      'Finding, not a gap: the event pass changed {{change}}% of this ~2.5 km window by at least 5 dB, while the same window moves by {{noise}}% between two pre-event passes. That is not enough separation to fit a recovery curve, and plotting one would be noise wearing a trend line.',
     noPeakPassNotice:
-      'No Sentinel-1 pass sampled the flood peak: the first post-event pass came {{gap}} days after the event, and it changed {{change}}% of the window against {{noise}}% pre-event noise. With no peak observation, a recovery curve would be an extrapolation, so it is not drawn.',
+      'No NISAR pass sampled the flood peak: the first post-event pass came {{gap}} days after the event, and it changed {{change}}% of the window against {{noise}}% pre-event noise. With no peak observation, a recovery curve would be an extrapolation, so it is not drawn.',
     signalToday: 'Signal at the end of the record',
   },
   game: {
@@ -284,7 +284,7 @@ const en = {
     tierMedium: 'Solid read. The polarization channels are starting to speak.',
     tierLow: 'Good start. Remember: VH loves 3-D canopy, water is dark and smooth, and flooded trunks can glow.',
     answerWas: 'The answer was: {{answer}}',
-    hint: 'VH is the canopy channel. Open water is dark. Flooded trunks can brighten VV.',
+    hint: 'VH is the canopy channel. Open water is dark. Flooded trunks can brighten HH.',
     progress: 'Case progress',
     before: 'THEN',
     after: 'NOW',
@@ -310,7 +310,7 @@ const en = {
     limits1: 'Speckle, layover and shadow are part of radar geometry. A single image is not a measurement of extent.',
     limits2: 'A radar signal is not a species count. Recovery of brightness is a structural proxy, not biodiversity.',
     limits3:
-      'Values are only as good as the product behind them: relative amplitude is not calibrated σ⁰, and terrain correction is mandatory before comparing dates.',
+      'Values are only as good as the product behind them: the series is calibrated NISAR L-band gamma-0 (10·log10 gamma-0 power, gamma0_power_db), and terrain correction is mandatory before comparing dates.',
     refsTitle: 'Sources & further reading',
     downloadJson: 'Download this dataset (JSON)',
     downloadCsv: 'Download time series (CSV)',
@@ -511,7 +511,7 @@ const ar = {
       'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونافذة الرادار المقصوصة لتطابقها.',
     optical: 'بصري · تحت الغيوم',
     radar: 'رادار · نطاق L',
-    radarC: 'رادار · نطاق C',
+    radarC: 'رادار · نطاق L',
     dragHint: 'اسحب الفاصل',
     dividerAt: 'الفاصل عند {{value}}% من عرض الإطار',
     keyboardHint: 'أو استخدم مفاتيح الأسهم',
@@ -520,7 +520,7 @@ const ar = {
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
     radarCaptionSentinel:
-      'مشهد حقيقي من Sentinel-1 (نطاق C) على النافذة نفسها. الماء الأملس داكن، والمظلة الخشنة والأسطح المبنية تعيد طاقة أكبر.',
+      'صورة حقيقية من NISAR L-band (HH) على النافذة نفسها. الماء الأملس داكن، والمظلة الخشنة والأسطح المبنية تعيد طاقة أكبر.',
     nisarSwath:
       'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. طبقة الرادار صورة سريعة ملوّنة من ناسا وليست صورة معايرة؛ ومدارها المائل ونطاقها الأوسع يجعلان التفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
@@ -567,9 +567,9 @@ const ar = {
     dbNote:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. HV−HH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف {{cards}}؛ أما لوحة الديسيبل والسلسلة الزمنية فمن {{numbers}}.',
     provCardsNisar: 'صور حقيقية من NISAR L-band ({{polarizations}})',
-    provCardsSentinel: 'صور حقيقية من Sentinel-1 C-band ({{polarizations}})',
+    provCardsSentinel: 'صور حقيقية من NISAR L-band ({{polarizations}})',
     provNumbersSentinel:
-      'Sentinel-1 C-band GRD الحقيقي ({{polarizations}}) بسعة نسبية — وليست σ⁰ مُعايَرة',
+      'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
     provNumbersNisar: 'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
     degraded: 'فشل البناء الحيّ لهذا الموقع، لذا تُعرض السجلات الاحتياطية الموسومة — وليست قياسات جديدة.',
     dbNoteFallback:
@@ -635,10 +635,10 @@ const ar = {
     changeSub: 'سلسلة منطقة الدراسة. الحدث مسموع قبل أن تقرأ العنوان.',
     play: 'تشغيل',
     stop: 'إيقاف',
-    sourceLine: 'بيانات حقيقية: {{passes}} مرورًا لـ NISAR L-band، أُعيد تشكيلها إلى 16 خطوة.',
+    sourceLine: 'بيانات حقيقية: مؤشر تغيّر من {{passes}} مرورًا لـ NISAR L-band (HH، غاما-0 مُعايَرة)، أُعيد تشكيلها إلى 16 خطوة.',
     scaleNote: 'الأعمدة والنغمة مُعيّرة على أقوى تغيّر في هذا السجل ({{peak}}%).',
     mappingTitle: 'كيف تتحول البيانات إلى صوت',
-    map1: 'نبضة واحدة = خطوة من 16 خطوة في السلسلة',
+    map1: 'نبضة واحدة = مرور قمر صناعي واحد (كل 12 يومًا، سلسلة 16 مرورًا)',
     map2: 'النغمة = مقدار التغير',
     map3: 'الإيقاع = سرعة التغير',
     map4: 'النسيج المشوّش = تغيّر خشن ومتقطع',
@@ -662,13 +662,13 @@ const ar = {
       'هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا. قد يعود سطوع الرادار بينما الكربون والأنواع والتربة ما زالت تتعافى.',
     methodLabel: 'كيف حُسب هذا التقدير',
     methodBody:
-      'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}. النسبة هي حصة نافذة الدراسة التي عادت إلى مستوى VV قبل الحدث، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه؛ و100% تعني أن مساحة التغيّر ذابت في حدود ضوضاء المرورات. والتقدير هو أول زمن يبلغ فيه المنحنى هدفك. هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا.',
+      'كل نقطة هي مرور واحد للقمر بعد الحدث فوق {{site}}. النسبة هي حصة نافذة الدراسة التي عادت إلى مستوى HH قبل الحدث، مقاسة كتلةً كتلة على مرورات من القمر نفسه والمدار نفسه؛ و100% تعني أن مساحة التغيّر ذابت في حدود ضوضاء المرورات. والتقدير هو أول زمن يبلغ فيه المنحنى هدفك. هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا.',
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'نتيجة، وليست فجوة: غيّر مرور الحدث {{change}}% من نافذة ٥ كم تقريبًا بمقدار ٥ ديسيبل على الأقل، بينما تتحرك النافذة نفسها بنسبة {{noise}}% بين مرورين قبل الحدث. الفصل غير كافٍ لبناء منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه.',
+      'نتيجة، وليست فجوة: غيّر مرور الحدث {{change}}% من نافذة ٢٫٥ كم تقريبًا بمقدار ٥ ديسيبل على الأقل، بينما تتحرك النافذة نفسها بنسبة {{noise}}% بين مرورين قبل الحدث. الفصل غير كافٍ لبناء منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه.',
     noPeakPassNotice:
-      'لم يرصد أي مرور Sentinel-1 ذروة الفيضان: جاء أول مرور بعد الحدث بعد {{gap}} أيام، وغيّر {{change}}% من النافذة مقابل ضوضاء قبل الحدث {{noise}}%. بدون رصد الذروة سيكون منحنى التعافي استقراءً، لذلك لا يُرسم.',
+      'لم يرصد أي مرور NISAR ذروة الفيضان: جاء أول مرور بعد الحدث بعد {{gap}} أيام، وغيّر {{change}}% من النافذة مقابل ضوضاء قبل الحدث {{noise}}%. بدون رصد الذروة سيكون منحنى التعافي استقراءً، لذلك لا يُرسم.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
   game: {
@@ -691,7 +691,7 @@ const ar = {
     tierMedium: 'قراءة جيدة. قنوات الاستقطاب بدأت تتكلم.',
     tierLow: 'بداية جيدة. تذكّر: VH يحب المظلة المجسّمة، والماء داكن أملس، والجذوع المغمورة قد تلمع.',
     answerWas: 'الإجابة كانت: {{answer}}',
-    hint: 'VH قناة المظلة. الماء المكشوف داكن. الجذوع المغمورة قد تلمع في VV.',
+    hint: 'VH قناة المظلة. الماء المكشوف داكن. الجذوع المغمورة قد تلمع في HH.',
     progress: 'تقدم القضية',
     before: 'سابقًا',
     after: 'الآن',
@@ -716,7 +716,7 @@ const ar = {
     limits1: 'التشويش والتراكب والظل جزء من هندسة الرادار. صورة واحدة ليست قياسًا للمدى.',
     limits2: 'إشارة الرادار ليست إحصاءً للأنواع. عودة السطوع مؤشر بنيوي بديل، لا تنوع حيوي.',
     limits3:
-      'جودة القيم مرتبطة بالمنتج الذي يقف خلفها: السعة النسبية ليست σ⁰ مُعايَرة، والتصحيح التضاريسي إلزامي قبل مقارنة التواريخ.',
+      'جودة القيم مرتبطة بالمنتج الذي يقف خلفها: السلسلة معيارية من نيسار نطاق L (جاما-0، gamma0_power_db)، والتصحيح التضاريسي إلزامي قبل مقارنة التواريخ.',
     refsTitle: 'المصادر وقراءات إضافية',
     downloadJson: 'تنزيل هذه المجموعة (JSON)',
     downloadCsv: 'تنزيل السلسلة الزمنية (CSV)',

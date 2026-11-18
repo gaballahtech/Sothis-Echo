@@ -30,7 +30,6 @@ function formatDate(value, language) {
 function sceneProduct(state) {
   const product = state.product || '';
   if (/nisar/i.test(product)) return 'NISAR L-band · HH';
-  if (/sentinel/i.test(product)) return 'Sentinel-1 C-band · VV';
   return null;
 }
 
@@ -78,9 +77,8 @@ export default function StudyAreas() {
   if (!site) return null;
   const L = (value) => localized(value, language);
   const nisar = /nisar/i.test(site.source || '') || Boolean(site.states?.after?.nisarImageUrl);
-  // Channel names must follow the numbers, not the card imagery. In production
-  // the cards are NISAR L-band HH browse while the dB values are Sentinel-1
-  // C-band VV/VH, so labelling the table HH/HV would credit the wrong sensor.
+  // Channel names follow the numbers, which now come from the calibrated NISAR
+  // L-band GCOV series (HH/HV gamma-0), so the table can label them HH/HV.
   const numbers = provenance?.numbers || null;
   const numbersNisar = Boolean(numbers?.calibrated) || /nisar/i.test(String(numbers?.sensor || ''));
   const coPol = numbersNisar ? 'HH' : 'VV';

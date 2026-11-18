@@ -28,10 +28,11 @@ export default function SeeThrough() {
   const stateLabel = localized(state.label, language);
   const radarUrl = state.nisarImageUrl || state.imageUrl;
   const radarDate = state.nisarDate || state.date;
-  const radarPlatform = state.nisarImageUrl ? 'NASA NISAR L-band' : 'Sentinel-1';
-  const radarIsSentinel = !state.nisarImageUrl && Boolean(state.imageUrl);
-  const radarLabel = radarIsSentinel ? t('seeThrough.radarC') : t('seeThrough.radar');
-  const radarCaption = radarIsSentinel ? t('seeThrough.radarCaptionSentinel') : t('seeThrough.radarCaption');
+  // Every scene in this app is a NISAR L-band HH browse image, so the radar
+  // layer is always NISAR; there is no Sentinel fallback branch to mislabel.
+  const radarPlatform = 'NASA NISAR L-band';
+  const radarLabel = t('seeThrough.radar');
+  const radarCaption = t('seeThrough.radarCaption');
 
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
