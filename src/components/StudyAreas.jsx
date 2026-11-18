@@ -7,6 +7,7 @@ import { localized } from '../data/localized';
 import { contrastRows } from '../data/sites';
 import { buildSiteCsv, loadChangeStats, sceneImageUrl } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
+import { SwipeCompare } from './SwipeCompare';
 import { Disclosure, Panel, SectionHead } from './ui';
 import ObservationTable from './ObservationTable';
 
@@ -110,6 +111,51 @@ export default function StudyAreas() {
     URL.revokeObjectURL(url);
   };
 
+  // The swipe divider only makes sense when both passes have a rendered image.
+  const swipeAvailable = Boolean(site.states?.before?.imageUrl && site.states?.after?.imageUrl);
+  const showCardToggle = rgbAvailable || swipeAvailable;
+
+  const changePanel =
+    site?.source?.startsWith('sentinel-1') || site?.source?.startsWith('nisar') || site?.states?.after?.nisarImageUrl ? (
+      <div className="stack" style={{ gap: 0 }}>
+        <Panel title={t('sites.changeTitle', { date: `${site.states.before.date} → ${site.states.after.date}` })}>
+          <SceneCanvas
+            imageUrl={sceneImageUrl(site.id, 'change', site?.states?.after?.nisarImageUrl ? 'nisar' : undefined)}
+            alt={t('sites.changeAria', { site: L(site.name) })}
+          />
+          <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
+            <p className="micro" style={{ margin: 0 }}>{t('sites.changeCaption')}</p>
+          </div>
+        </Panel>
+        <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
+          {t('sites.changeNote')}
+        </p>
+        {changeStats ? (
+          <div className="change-stats" data-testid="change-stats">
+            <span className="micro">{t('sites.changeStatsLabel')}</span>
+            <p className="body-copy" style={{ margin: '2px 0 0' }}>
+              {t('sites.changeStatsValue', {
+                changed: changeStats.changedPct,
+                area: changeStats.changedAreaKm2 != null ? Number(changeStats.changedAreaKm2).toFixed(1) : '—',
+              })}
+            </p>
+            <p className="micro" style={{ margin: '2px 0 0' }}>
+              {t('sites.changeStatsCaveat', {
+                threshold: changeStats.thresholdDb,
+                mean: changeStats.meanDeltaDb,
+                valid: changeStats.validPct,
+              })}
+            </p>
+            {changeStats.snapshot ? (
+              <p className="micro" style={{ margin: '2px 0 0' }}>
+                {t('sites.changeStatsSnapshot', { date: changeStats.computedAt })}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+      </div>
+    ) : null;
+
   return (
     <section id="sites" className="content-section chapter chapter--mint" aria-labelledby="sites-title">
       <div className="section-inner">
@@ -184,7 +230,7 @@ export default function StudyAreas() {
             </div>
           </div>
 
-          {rgbAvailable ? (
+          {showCardToggle ? (
             <div className="row-between card-view-toggle" data-testid="card-view-toggle">
               <span className="micro">{t('sites.cardViewAria')}</span>
               <ButtonGroup minimal>
@@ -195,100 +241,88 @@ export default function StudyAreas() {
                   onClick={() => setCardView('hh')}
                   data-testid="card-view-hh"
                 />
-                <Button
-                  small
-                  active={cardView === 'rgb'}
-                  text={t('sites.cardViewRgb')}
-                  onClick={() => setCardView('rgb')}
-                  data-testid="card-view-rgb"
-                />
+                {rgbAvailable ? (
+                  <Button
+                    small
+                    active={cardView === 'rgb'}
+                    text={t('sites.cardViewRgb')}
+                    onClick={() => setCardView('rgb')}
+                    data-testid="card-view-rgb"
+                  />
+                ) : null}
+                {swipeAvailable ? (
+                  <Button
+                    small
+                    active={cardView === 'swipe'}
+                    text={t('sites.cardViewSwipe')}
+                    onClick={() => setCardView('swipe')}
+                    data-testid="card-view-swipe"
+                  />
+                ) : null}
               </ButtonGroup>
             </div>
           ) : null}
 
-          <div className="scene-grid">
-            {STATE_KEYS.map((stateKey) => {
-              const state = site.states[stateKey];
-              return (
-                <div key={stateKey} className="stack" style={{ gap: 0 }}>
-                  <Panel
-                    title={`${L(state.label)} · ${state.date}`}
-                    status={showComposite(stateKey) ? 'NISAR L-band · HH/HV' : sceneProduct(state)}
-                  >
-                    <SceneCanvas
-                      site={site}
-                      params={state.params}
-                      channel="radar"
-                      imageUrl={
-                        showComposite(stateKey)
-                          ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb')
-                          : state.imageUrl
-                      }
-                      alt={t('sites.ariaScene', { site: L(site.name), state: L(state.label) })}
-                    />
-                    <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
-                      <p className="micro" style={{ margin: 0 }}>{L(state.caption)}</p>
-                    </div>
-                  </Panel>
+          {cardView === 'swipe' && swipeAvailable ? (
+            <div className="stack" style={{ gap: 12 }}>
+              <SwipeCompare
+                beforeUrl={site.states.before.imageUrl}
+                afterUrl={site.states.after.imageUrl}
+                beforeLabel={L(site.states.before.label)}
+                afterLabel={L(site.states.after.label)}
+                beforeDate={formatDate(site.states.before.date, language)}
+                afterDate={formatDate(site.states.after.date, language)}
+                alt={t('sites.swipeAria', { site: L(site.name) })}
+              />
+              {changePanel}
+            </div>
+          ) : (
+            <div className="scene-grid">
+              {STATE_KEYS.map((stateKey) => {
+                const state = site.states[stateKey];
+                return (
+                  <div key={stateKey} className="stack" style={{ gap: 0 }}>
+                    <Panel
+                      title={`${L(state.label)} · ${state.date}`}
+                      status={showComposite(stateKey) ? 'NISAR L-band · HH/HV' : sceneProduct(state)}
+                    >
+                      <SceneCanvas
+                        site={site}
+                        params={state.params}
+                        channel="radar"
+                        imageUrl={
+                          showComposite(stateKey)
+                            ? sceneImageUrl(site.id, stateKey, 'nisar', 'rgb')
+                            : state.imageUrl
+                        }
+                        alt={t('sites.ariaScene', { site: L(site.name), state: L(state.label) })}
+                      />
+                      <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
+                        <p className="micro" style={{ margin: 0 }}>{L(state.caption)}</p>
+                      </div>
+                    </Panel>
 
-                  {state.nisarGranule || state.acquiredAt ? (
-                    <p className="micro" dir="ltr" data-testid={`scene-meta-${stateKey}`} style={{ margin: 0 }}>
-                      {state.nisarGranule ? `${state.nisarGranule} · ` : ''}
-                      {state.nisarAcquiredAt || state.acquiredAt || state.date}
-                    </p>
-                  ) : null}
-
-                  <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
-                    {L(state.happened)} {L(state.why)}
-                  </p>
-                </div>
-              );
-            })}
-            {site?.source?.startsWith('sentinel-1') || site?.source?.startsWith('nisar') || site?.states?.after?.nisarImageUrl ? (
-              <div className="stack" style={{ gap: 0 }}>
-                <Panel title={t('sites.changeTitle', { date: `${site.states.before.date} → ${site.states.after.date}` })}>
-                  <SceneCanvas
-                    imageUrl={sceneImageUrl(site.id, 'change', site?.states?.after?.nisarImageUrl ? 'nisar' : undefined)}
-                    alt={t('sites.changeAria', { site: L(site.name) })}
-                  />
-                  <div className="card-pad" style={{ paddingTop: 10, paddingBottom: 10, borderTop: '1px solid var(--bp-surface-border-color-default)' }}>
-                    <p className="micro" style={{ margin: 0 }}>{t('sites.changeCaption')}</p>
-                  </div>
-                </Panel>
-                <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
-                  {t('sites.changeNote')}
-                </p>
-                {changeStats ? (
-                  <div className="change-stats" data-testid="change-stats">
-                    <span className="micro">{t('sites.changeStatsLabel')}</span>
-                    <p className="body-copy" style={{ margin: '2px 0 0' }}>
-                      {t('sites.changeStatsValue', {
-                        changed: changeStats.changedPct,
-                        area: changeStats.changedAreaKm2 != null ? Number(changeStats.changedAreaKm2).toFixed(1) : '—',
-                      })}
-                    </p>
-                    <p className="micro" style={{ margin: '2px 0 0' }}>
-                      {t('sites.changeStatsCaveat', {
-                        threshold: changeStats.thresholdDb,
-                        mean: changeStats.meanDeltaDb,
-                        valid: changeStats.validPct,
-                      })}
-                    </p>
-                    {changeStats.snapshot ? (
-                      <p className="micro" style={{ margin: '2px 0 0' }}>
-                        {t('sites.changeStatsSnapshot', { date: changeStats.computedAt })}
+                    {state.nisarGranule || state.acquiredAt ? (
+                      <p className="micro" dir="ltr" data-testid={`scene-meta-${stateKey}`} style={{ margin: 0 }}>
+                        {state.nisarGranule ? `${state.nisarGranule} · ` : ''}
+                        {state.nisarAcquiredAt || state.acquiredAt || state.date}
                       </p>
                     ) : null}
+
+                    <p className="body-copy-muted scene-explain" style={{ margin: 0 }}>
+                      {L(state.happened)} {L(state.why)}
+                    </p>
                   </div>
-                ) : null}
-              </div>
-            ) : null}
-            {cardView === 'rgb' ? (
-              <p className="micro" data-testid="rgb-note" style={{ margin: 0 }}>
-                {t('sites.cardViewRgbNote')}
-              </p>
-            ) : null}
-          </div>
+                );
+              })}
+              {changePanel}
+              {cardView === 'rgb' ? (
+                <p className="micro" data-testid="rgb-note" style={{ margin: 0 }}>
+                  {t('sites.cardViewRgbNote')}
+                </p>
+              ) : null}
+            </div>
+          )}
 
           <Panel title={t('sites.measurements')} bodyClassName="card-pad">
             {source === 'api' && nisar && provenance && !site.degraded ? (

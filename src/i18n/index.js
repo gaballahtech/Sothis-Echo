@@ -202,6 +202,13 @@ const en = {
     cardViewRgb: 'HH·HV composite',
     cardViewRgbNote:
       'Dual-pol intensity composite of each pass (R = HH, G = HV, B = HH−HV, 2nd–98th percentile). Not true optical colour, and with no phase there is no Pauli decomposition.',
+    cardViewSwipe: 'Swipe compare',
+    swipeAria: '{{site}} before and after radar swipe comparison',
+    swipeSliderAria: 'Before and after swipe comparison',
+    swipeDragHint: 'Drag to compare before and after',
+    swipeKeyboardHint: 'Arrow keys move the divider',
+    swipeDividerAt: '{{value}}% before',
+    swipeValueText: '{{before}}% before · {{after}}% after',
     changeStatsLabel: 'Calibrated change',
     changeStatsValue: '{{changed}}% of valid pixels changed · {{area}} km²',
     changeStatsCaveat:
@@ -603,6 +610,13 @@ const ar = {
     cardViewRgb: 'تركيب HH·HV',
     cardViewRgbNote:
       'تركيب شدة ثنائي الاستقطاب لكل مرور (أحمر = HH، أخضر = HV، أزرق = HH−HV، تمدد ٢–٩٨٪). ليس لونًا بصريًا حقيقيًا، وبدون الطور لا يوجد تحليل باولي.',
+    cardViewSwipe: 'مقارنة بالسحب',
+    swipeAria: 'مقارنة رادار قبل وبعد لـ{{site}} بالسحب',
+    swipeSliderAria: 'مقارنة قبل وبعد بالسحب',
+    swipeDragHint: 'اسحب للمقارنة بين قبل وبعد',
+    swipeKeyboardHint: 'مفاتيح الأسهم تحرّك الفاصل',
+    swipeDividerAt: '{{value}}% قبل',
+    swipeValueText: '{{before}}% قبل · {{after}}% بعد',
     changeStatsLabel: 'تغيّر مُعايَر',
     changeStatsValue: 'تغيّر {{changed}}% من البكسلات الصالحة · {{area}} كم²',
     changeStatsCaveat:

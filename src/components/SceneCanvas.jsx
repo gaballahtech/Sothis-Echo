@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Icon, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
+import { useCompareDivider } from './useCompareDivider';
 
 export function SceneCanvas({ alt, className = '', imageUrl, fit = 'cover', crop = null, eager = false }) {
   const { t } = useTranslation();
@@ -62,61 +63,14 @@ export function CompareSlider({
   radarCrop = null,
 }) {
   const { t } = useTranslation();
-  const [position, setPosition] = useState(50);
-  const [dragging, setDragging] = useState(false);
-
-  const wrapRef = useRef(null);
-
-  const updateFromClientX = (clientX) => {
-    const rect = wrapRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const next = ((clientX - rect.left) / rect.width) * 100;
-    setPosition(Math.max(0, Math.min(100, next)));
-  };
-
-  const onPointerDown = (event) => {
-    event.preventDefault();
-    setDragging(true);
-    wrapRef.current?.setPointerCapture?.(event.pointerId);
-    updateFromClientX(event.clientX);
-  };
-
-  const onPointerMove = (event) => {
-    if (!dragging) return;
-    updateFromClientX(event.clientX);
-  };
-
-  const onPointerUp = (event) => {
-    setDragging(false);
-    wrapRef.current?.releasePointerCapture?.(event.pointerId);
-  };
-
-  const onKeyDown = (event) => {
-    const step = event.shiftKey ? 10 : 2;
-    if (event.key === 'ArrowLeft') {
-      event.preventDefault();
-      setPosition((value) => Math.max(0, value - step));
-    } else if (event.key === 'ArrowRight') {
-      event.preventDefault();
-      setPosition((value) => Math.min(100, value + step));
-    } else if (event.key === 'Home') {
-      event.preventDefault();
-      setPosition(0);
-    } else if (event.key === 'End') {
-      event.preventDefault();
-      setPosition(100);
-    }
-  };
+  const { position, dragging, wrapRef, handlers } = useCompareDivider();
 
   return (
     <div dir="ltr">
       <div
         ref={wrapRef}
         className="compare-frame"
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        {...handlers}
         role="slider"
         data-testid="compare-slider"
         tabIndex={0}
@@ -125,7 +79,6 @@ export function CompareSlider({
         aria-valuemax={100}
         aria-valuenow={Math.round(position)}
         aria-valuetext={`${Math.round(position)}% ${t('seeThrough.optical')} / ${Math.round(100 - position)}% ${t('seeThrough.radar')}`}
-        onKeyDown={onKeyDown}
         style={{ cursor: dragging ? 'ew-resize' : 'ew-resize' }}
       >
         {radarUrl ? (
