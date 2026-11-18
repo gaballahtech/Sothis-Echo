@@ -1291,6 +1291,47 @@ li,
   background: var(--bp-surface-elevated-color-default, rgba(0, 0, 0, 0.02));
 }
 
+/* Leaflet sits inside a page section: keep its panes/controls below the
+   sticky navbar so the map never covers navigation. */
+.atlas-map .leaflet-container {
+  z-index: 0;
+  font: inherit;
+  background: #0d1117;
+}
+
+.atlas-map .leaflet-pane,
+.atlas-map .leaflet-top,
+.atlas-map .leaflet-bottom {
+  z-index: 1;
+}
+
+.atlas-popup {
+  display: grid;
+  gap: 2px;
+  min-width: 140px;
+  color: #111;
+}
+
+.atlas-badge {
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  border: 1px solid currentColor;
+  white-space: nowrap;
+}
+
+.atlas-badge.measured {
+  color: #1f8a5b;
+}
+
+.atlas-badge.story {
+  color: #8a8f98;
+}
+
+.atlas-list-item.measured .atlas-list-name {
+  color: inherit;
+}
+
 .atlas-legend {
   display: flex;
   flex-wrap: wrap;

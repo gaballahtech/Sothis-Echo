@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { loadRapidResponse, pickDefaultSiteId } from '../services/sarApi';
+import { loadRapidResponse } from '../services/sarApi';
 
 /**
  * Draw the one-page situation report onto a <canvas> and return a PNG data URL.
@@ -122,21 +122,17 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
 export default function RapidResponse() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source } = useSiteData();
-  const [activeId, setActiveId] = useState(() => pickDefaultSiteId(sites));
+  const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
+  const activeId = selectedSiteId;
+  const setActiveId = setSelectedSiteId;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rendering, setRendering] = useState(false);
 
   useEffect(() => {
     if (!sites.length) return;
-    if (!sites.some((item) => item.id === activeId)) {
-      setActiveId(pickDefaultSiteId(sites));
-      return;
-    }
-    const preferred = pickDefaultSiteId(sites);
-    if (preferred && preferred !== activeId) setActiveId(preferred);
-  }, [sites, activeId]);
+    if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
+  }, [sites, activeId, setActiveId]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
 
@@ -198,6 +194,7 @@ export default function RapidResponse() {
       smoothing: t('respond.mechSmoothing'),
       roughening: t('respond.mechRoughening'),
       stable: t('respond.mechStable'),
+      'amplitude-change': t('respond.mechAmplitude'),
     };
     return map[kind] || kind || '—';
   };

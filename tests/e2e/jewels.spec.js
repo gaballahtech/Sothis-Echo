@@ -25,10 +25,11 @@ test('Global Atlas renders the world map, pins and curated list without errors',
   await atlas.scrollIntoViewIfNeeded();
   await expect(page.locator('#atlas-title')).toBeVisible();
 
-  // The inline SVG world map is present with pins.
-  const map = page.locator('.atlas-map svg');
+  // The Leaflet/OpenStreetMap map is present with circle-marker pins.
+  const map = page.locator('.atlas-map .leaflet-container');
   await expect(map).toBeVisible();
-  const pins = page.locator('.atlas-map svg g[role="button"]');
+  const pins = page.locator('.atlas-map path.leaflet-interactive');
+  await expect(pins.first()).toBeVisible({ timeout: 10_000 });
   expect(await pins.count()).toBeGreaterThanOrEqual(6);
 
   // Curated list items are clickable and selectable.
@@ -91,7 +92,28 @@ test('Atlas renders in Arabic without errors', async ({ page }) => {
   const atlas = page.locator('#atlas');
   await atlas.scrollIntoViewIfNeeded();
   await expect(page.locator('#atlas-title')).toBeVisible();
-  await expect(page.locator('.atlas-map svg')).toBeVisible();
+  await expect(page.locator('.atlas-map .leaflet-container')).toBeVisible();
+
+  expect(errors).toEqual([]);
+});
+
+test('Clicking an atlas place loads that study area everywhere', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await openApp(page);
+
+  // Start on the first study area, then choose Big Sur from the atlas.
+  await page.locator('#sites').scrollIntoViewIfNeeded();
+  await page.locator('#atlas').scrollIntoViewIfNeeded();
+  await page.getByTestId('atlas-item-bigsur').click();
+
+  // The study-area tabs must now have Big Sur selected (shared selection).
+  const bigsurTab = page.getByTestId('site-tab-bigsur');
+  await expect(bigsurTab).toHaveAttribute('aria-selected', 'true');
+
+  // The "Open study area" button also selects it and scrolls to the story.
+  await page.getByTestId('atlas-item-sundarbans').click();
+  await expect(page.getByTestId('site-tab-sundarbans')).toHaveAttribute('aria-selected', 'true');
 
   expect(errors).toEqual([]);
 });

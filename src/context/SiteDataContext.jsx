@@ -55,8 +55,19 @@ export function SiteDataProvider({ children }) {
 
   const api = useMemo(() => getApiConfig(), []);
 
+  // Shared "which study area is open" selection, so an atlas click can load the
+  // matching story across every panel instead of only scrolling to it.
+  const [selectedSiteId, setSelectedSiteId] = useState(() => studyAreas[0]?.id);
+  useEffect(() => {
+    if (sites.length && !sites.some((item) => item.id === selectedSiteId)) {
+      setSelectedSiteId(studyAreas[0]?.id);
+    }
+  }, [sites, selectedSiteId]);
+
   return (
-    <SiteDataContext.Provider value={{ sites, source, error, loading, refresh: load, api }}>
+    <SiteDataContext.Provider
+      value={{ sites, source, error, loading, refresh: load, api, selectedSiteId, setSelectedSiteId }}
+    >
       {children}
     </SiteDataContext.Provider>
   );

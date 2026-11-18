@@ -27,6 +27,7 @@ import { bigsurChangeBase64 } from './cache/nisar/bigsur-change.mjs';
 import { sundarbansRecovery } from './cache/nisar/sundarbans-recovery.mjs';
 import { bigsurRecovery } from './cache/nisar/bigsur-recovery.mjs';
 import { lensesSnapshot as bigsurLensesSnapshot } from './cache/nisar/bigsur-lenses.mjs';
+import { lensesSnapshot as sundarbansLensesSnapshot } from './cache/nisar/sundarbans-lenses.mjs';
 
 const ASF_SEARCH = 'https://api.daac.asf.alaska.edu/services/search/param';
 const HARMONY = 'https://harmony.earthdata.nasa.gov';
@@ -370,7 +371,9 @@ export function nisarSnapshot(siteId) {
 }
 
 const LENSES_SNAPSHOTS = new Map(
-  [bigsurLensesSnapshot].filter(Boolean).map((snapshot) => [snapshot.site, snapshot])
+  [bigsurLensesSnapshot, sundarbansLensesSnapshot]
+    .filter(Boolean)
+    .map((snapshot) => [snapshot.site, snapshot])
 );
 
 /**

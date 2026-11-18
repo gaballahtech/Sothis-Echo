@@ -433,6 +433,12 @@ const en = {
     fusionNote:
       'Fusion combines the amplitude, coherence and mechanism lenses; each is computed from its own real granule and carries its own date.',
     computedAt: 'Computed {{date}} from real NISAR granules.',
+    ampChangeAlt: 'NISAR amplitude change map (|after − before|, HH)',
+    ampChangeBody: 'A pixel-level |after − before| change map from the calibrated HH amplitude of the two NISAR passes. Bright pixels changed by more than the threshold.',
+    changedArea: 'Changed area',
+    meanAbsDelta: 'Mean |Δ|',
+    validPct: 'Valid pixels',
+    thresholdDb: '{{db}} dB absolute threshold · same track/frame',
   },
   explain: {
     title: 'Explain the echo',
@@ -468,6 +474,7 @@ const en = {
     mechSmoothing: 'Surface smoothed / wetter',
     mechRoughening: 'Surface roughened',
     mechStable: 'No strong change',
+    mechAmplitude: 'Substantial amplitude change',
     download: 'Download PNG',
     reportAlt: 'One-page situation report',
     reportHeader: 'SOTHIS ECHO · RAPID RESPONSE',
@@ -484,6 +491,8 @@ const en = {
     storyOnly: 'Story only',
     notMeasured: 'Not yet measured — no real granule yet',
     openStory: 'Open study area',
+    clickToOpen: 'Click to open this story',
+    storyNote: 'Narrative preview — a live granule is not yet processed for this place.',
     unavailable: 'Atlas data is loading.',
   },
   common: {
@@ -926,6 +935,12 @@ const ar = {
     fusionNote:
       'الدمج يجمع عدسات السعة والتماسك والآلية؛ كل واحدة محسوبة من جرين الحقيقي وتحمل تاريخها.',
     computedAt: 'حُسبت في {{date}} من جرينات NISAR الحقيقية.',
+    ampChangeAlt: 'خريطة تغيّر السعة من NISAR (|بعد − قبل|، HH)',
+    ampChangeBody: 'خريطة تغيّر على مستوى البكسل |بعد − قبل| من سعة HH المعايَرة للمرورين. البكسلات الساطعة تغيّرت بأكثر من العتبة.',
+    changedArea: 'المساحة المتغيّرة',
+    meanAbsDelta: 'متوسط |Δ|',
+    validPct: 'البكسلات الصالحة',
+    thresholdDb: 'عتبة مطلقة {{db}} dB · نفس المسار/الإطار',
   },
   explain: {
     title: 'اشرح الصدى',
@@ -961,6 +976,7 @@ const ar = {
     mechSmoothing: 'نعومة/رطوبة سطحية',
     mechRoughening: 'خشونة سطحية',
     mechStable: 'لا تغيّر قوي',
+    mechAmplitude: 'تغيّر سعة جوهري',
     download: 'تنزيل PNG',
     reportAlt: 'تقرير موقف من صفحة واحدة',
     reportHeader: 'سوثيس إيكو · استجابة سريعة',
@@ -977,6 +993,8 @@ const ar = {
     storyOnly: 'قصة فقط',
     notMeasured: 'غير مقيس بعد — لا يوجد جرين حقيقي',
     openStory: 'فتح منطقة الدراسة',
+    clickToOpen: 'اضغط لفتح هذه القصة',
+    storyNote: 'معاينة سردية — لم تتم معالجة جرين حقيقي لهذا المكان بعد.',
     unavailable: 'بيانات الأطلس تُحمّل.',
   },
   common: {

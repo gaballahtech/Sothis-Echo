@@ -79,6 +79,12 @@ function explainKind(lenses) {
   const a = lenses?.amplitude || {};
   const m = lenses?.mechanism || {};
   const c = lenses?.coherence || {};
+  const ch = lenses?.change || {};
+  const noPol = !Number.isFinite(a.dHH) && !Number.isFinite(a.dHV) && !Number.isFinite(c.lowCoherencePct);
+  if (noPol) {
+    if (Number.isFinite(ch.changePct) && ch.changePct >= 10) return 'amplitude-change';
+    if (Number.isFinite(ch.changePct)) return 'stable';
+  }
   if (Number.isFinite(a.dHV) && a.dHV > 1 && Number.isFinite(m.after?.low) && Number.isFinite(m.before?.low) && m.after.low > m.before.low + 0.03) return 'flood';
   if (Number.isFinite(a.dHH) && a.dHH < -1 && Number.isFinite(m.after?.volume) && Number.isFinite(m.before?.volume) && m.after.volume < m.before.volume - 0.03) return 'fire';
   if (Number.isFinite(c.lowCoherencePct) && c.lowCoherencePct > 20) return 'disturbance';

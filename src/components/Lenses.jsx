@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { loadLenses, pickDefaultSiteId } from '../services/sarApi';
+import { loadLenses } from '../services/sarApi';
 
 /**
  * "Three Lenses" — three independent physical measurements of the same surface
@@ -56,26 +56,17 @@ function Legend() {
 export default function Lenses() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source } = useSiteData();
-  const [activeId, setActiveId] = useState(() => pickDefaultSiteId(sites));
-  const [picked, setPicked] = useState(false);
+  const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
+  const activeId = selectedSiteId;
+  const setActiveId = setSelectedSiteId;
   const [tab, setTab] = useState('amplitude');
   const [lenses, setLenses] = useState(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!sites.length) return;
-    if (!sites.some((item) => item.id === activeId)) {
-      setActiveId(pickDefaultSiteId(sites));
-      return;
-    }
-    // When the API announces which sites have real lens data, open on one of
-    // them unless the user has already chosen a site manually.
-    if (!picked) {
-      const preferred = pickDefaultSiteId(sites);
-      if (preferred && preferred !== activeId) setActiveId(preferred);
-    }
-  }, [sites, activeId, picked]);
+    if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
+  }, [sites, activeId, setActiveId]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
 
@@ -102,7 +93,27 @@ export default function Lenses() {
   const coherence = lenses?.coherence || {};
   const amplitude = lenses?.amplitude || {};
   const mechanism = lenses?.mechanism || {};
+  const change = lenses?.change || {};
   const hasCoherence = Boolean(imgs.coherence) && coherence.mean != null;
+  const hasAmplitude = Boolean(lenses?.amplitude) && amplitude.hhBeforeDb != null;
+  const hasMechanism = Boolean(imgs.mechanismBefore || imgs.mechanismAfter);
+  const hasMechChange = Boolean(imgs.mechanismChange);
+  const hasAmpChange = Boolean(imgs.change) && change.changePct != null;
+
+  // Show only the lenses that were actually computed for this site, so a flood
+  // site with an amplitude-change map never shows empty coherence tabs.
+  const availableTabs = useMemo(() => {
+    const tabs = [];
+    if (hasAmplitude) tabs.push('amplitude');
+    if (hasCoherence) tabs.push('coherence');
+    if (hasMechanism) tabs.push('mechanism');
+    if (hasMechChange || hasAmpChange) tabs.push('change');
+    return tabs;
+  }, [hasAmplitude, hasCoherence, hasMechanism, hasMechChange, hasAmpChange]);
+
+  useEffect(() => {
+    if (availableTabs.length && !availableTabs.includes(tab)) setTab(availableTabs[0]);
+  }, [availableTabs, tab]);
 
   const amplitudeRows = useMemo(
     () => [
@@ -150,10 +161,7 @@ export default function Lenses() {
                   aria-selected={selected}
                   active={selected}
                   variant={selected ? 'solid' : 'outlined'}
-                  onClick={() => {
-                    setActiveId(item.id);
-                    setPicked(true);
-                  }}
+                  onClick={() => setActiveId(item.id)}
                   data-testid={`lens-site-tab-${item.id}`}
                 >
                   {L(item.name)}
@@ -165,7 +173,7 @@ export default function Lenses() {
 
         <div className="lens-tabs" style={{ marginTop: 14 }}>
           <ButtonGroup minimal>
-            {TABS.map((item) => (
+            {TABS.filter((item) => availableTabs.includes(item.id)).map((item) => (
               <Button
                 key={item.id}
                 small
@@ -258,22 +266,39 @@ export default function Lenses() {
 
             {tab === 'change' ? (
               <div className="stack" style={{ gap: 12 }}>
-                <Legend />
-                <img className="lens-image" src={dataUrl(imgs.mechanismChange)} alt={t('lenses.changeAlt')} />
-                <p className="body-copy-muted" style={{ margin: 0 }}>{t('lenses.changeBody')}</p>
-                {mechanism.changedPct != null ? (
-                  <div className="grid-2">
-                    <Stat label={t('lenses.mechanismChanged')} value={mechanism.changedPct} unit="%" />
-                    <Stat
-                      label={t('lenses.volumeBefore')}
-                      value={mechanism.before?.volume != null ? Math.round(mechanism.before.volume * 100) : '—'}
-                      unit="%"
-                    />
-                  </div>
-                ) : null}
-                <p className="micro" style={{ margin: 0 }}>
-                  {t('lenses.fusionNote')}
-                </p>
+                {hasMechChange ? (
+                  <>
+                    <Legend />
+                    <img className="lens-image" src={dataUrl(imgs.mechanismChange)} alt={t('lenses.changeAlt')} />
+                    <p className="body-copy-muted" style={{ margin: 0 }}>{t('lenses.changeBody')}</p>
+                    {mechanism.changedPct != null ? (
+                      <div className="grid-2">
+                        <Stat label={t('lenses.mechanismChanged')} value={mechanism.changedPct} unit="%" />
+                        <Stat
+                          label={t('lenses.volumeBefore')}
+                          value={mechanism.before?.volume != null ? Math.round(mechanism.before.volume * 100) : '—'}
+                          unit="%"
+                        />
+                      </div>
+                    ) : null}
+                    <p className="micro" style={{ margin: 0 }}>{t('lenses.fusionNote')}</p>
+                  </>
+                ) : (
+                  <>
+                    {/* eslint-disable-next-line jsx-a11y/img-redundant-alt */}
+                    <img className="lens-image" src={dataUrl(imgs.change)} alt={t('lenses.ampChangeAlt')} />
+                    <p className="body-copy-muted" style={{ margin: 0 }}>{t('lenses.ampChangeBody')}</p>
+                    <div className="grid-2">
+                      <Stat label={t('lenses.mechanismChanged')} value={change.changePct} unit="%" />
+                      <Stat label={t('lenses.changedArea')} value={change.changedAreaKm2} unit="km²" />
+                      <Stat label={t('lenses.meanAbsDelta')} value={change.meanAbsDeltaDb} unit="dB" />
+                      <Stat label={t('lenses.validPct')} value={change.validPct} unit="%" />
+                    </div>
+                    <p className="micro" style={{ margin: 0 }} dir="ltr">
+                      {change.beforeDate} → {change.afterDate} · {t('lenses.thresholdDb', { db: change.thresholdDb ?? 3 })}
+                    </p>
+                  </>
+                )}
               </div>
             ) : null}
 

@@ -60,6 +60,14 @@ LENS_SITES = {
         },
         'label': 'Big Sur megafire',
     },
+    'sundarbans': {
+        'bbox': (107.45, 16.45, 107.70, 16.65),
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_030_054_A_010_4005_DHDH_A_20260909T222101_20260909T222140_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GCOV_031_054_A_010_4005_DHDH_A_20260921T222101_20260921T222140_P05023_N_F_J_001',
+        },
+        'label': 'Central Vietnam flood',
+    },
 }
 
 

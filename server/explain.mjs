@@ -16,7 +16,7 @@ const db = (value) => (Number.isFinite(value) ? `${value >= 0 ? '+' : ''}${value
  * Classify the dominant physical story from the measured deltas.
  * Pure, ordered rules — the first matching rule wins, so the result is stable.
  */
-function dominantMechanism({ amplitude, mechanism, coherence }) {
+function dominantMechanism({ amplitude, mechanism, coherence, change }) {
   const dHH = amplitude?.dHH;
   const dHV = amplitude?.dHV;
   const volBefore = mechanism?.before?.volume;
@@ -24,6 +24,14 @@ function dominantMechanism({ amplitude, mechanism, coherence }) {
   const lowBefore = mechanism?.before?.low;
   const lowAfter = mechanism?.after?.low;
   const cohLow = coherence?.lowCoherencePct;
+
+  // Change-only site (e.g. a flood with an amplitude-change map but no
+  // coherence/mechanism): name what was actually measured.
+  if (!Number.isFinite(dHH) && !Number.isFinite(dHV) && !Number.isFinite(cohLow)) {
+    const changedPct = change?.changePct;
+    if (Number.isFinite(changedPct) && changedPct >= 10) return 'amplitude-change';
+    if (Number.isFinite(changedPct)) return 'stable';
+  }
 
   // Flood / inundation: cross-pol rises (volume), low-return (open water) grows.
   if (Number.isFinite(dHV) && dHV > 1 && Number.isFinite(lowAfter) && Number.isFinite(lowBefore) && lowAfter > lowBefore + 0.03) {
@@ -69,6 +77,10 @@ const MECHANISM_TEXT = {
     en: 'no strong physical change stood out above the noise in this pair.',
     ar: 'لم يبرز تغيّر فيزيائي قوي فوق الضجيج في هذا الزوج.',
   },
+  'amplitude-change': {
+    en: 'a large share of the surface changed by more than the amplitude threshold between the two passes — a substantial physical change of the ground.',
+    ar: 'تغيّرت نسبة كبيرة من السطح بأكثر من عتبة السعة بين المرورين — تغيّر فيزيائي جوهري في الأرض.',
+  },
 };
 
 /**
@@ -81,12 +93,25 @@ export function buildExplanation(lenses, language = 'en') {
   const amplitude = lenses?.amplitude || {};
   const mechanism = lenses?.mechanism || {};
   const coherence = lenses?.coherence || {};
-  const kind = dominantMechanism({ amplitude, mechanism, coherence });
+  const change = lenses?.change || {};
+  const kind = dominantMechanism({ amplitude, mechanism, coherence, change });
 
-  const numbers = [
-    { id: 'dHH', label: ar ? 'تغير HH' : 'Δ HH', value: db(amplitude.dHH), source: 'gcoV gamma-0' },
-    { id: 'dHV', label: ar ? 'تغير HV' : 'Δ HV', value: db(amplitude.dHV), source: 'gcoV gamma-0' },
-  ];
+  const numbers = [];
+  if (Number.isFinite(amplitude.dHH)) {
+    numbers.push({ id: 'dHH', label: ar ? 'تغير HH' : 'Δ HH', value: db(amplitude.dHH), source: 'GCOV gamma-0' });
+  }
+  if (Number.isFinite(amplitude.dHV)) {
+    numbers.push({ id: 'dHV', label: ar ? 'تغير HV' : 'Δ HV', value: db(amplitude.dHV), source: 'GCOV gamma-0' });
+  }
+  if (!Number.isFinite(amplitude.dHH) && Number.isFinite(change.changePct)) {
+    numbers.push({ id: 'changedPct', label: ar ? 'نسبة التغيّر' : 'Changed area', value: pct(change.changePct), source: 'GCOV |Δ|' });
+    if (Number.isFinite(change.changedAreaKm2)) {
+      numbers.push({ id: 'changedKm2', label: ar ? 'المساحة المتغيّرة' : 'Changed extent', value: `${change.changedAreaKm2} km²`, source: 'GCOV |Δ|' });
+    }
+    if (Number.isFinite(change.meanAbsDeltaDb)) {
+      numbers.push({ id: 'meanAbs', label: ar ? 'متوسط |Δ|' : 'Mean |Δ|', value: `${change.meanAbsDeltaDb} dB`, source: 'GCOV |Δ|' });
+    }
+  }
   if (Number.isFinite(coherence.mean)) {
     numbers.push({ id: 'coh', label: ar ? 'متوسط التماسك' : 'Mean coherence', value: coherence.mean, source: 'GSLC pair' });
   }
@@ -146,6 +171,15 @@ export function answerQuestion(lenses, question, language = 'en') {
     };
   }
   if (asksAbout('how much', 'كم', 'change', 'delta', 'تغير', 'مقدار')) {
+    if (!Number.isFinite(amplitude.dHH) && Number.isFinite(lenses?.change?.changePct)) {
+      return {
+        answer: ar
+          ? `تغيّرت ${Math.round(lenses.change.changePct)}% من المساحة بمتوسط |Δ| ${lenses.change.meanAbsDeltaDb} dB.`
+          : `${Math.round(lenses.change.changePct)}% of the area changed, with a mean |Δ| of ${lenses.change.meanAbsDeltaDb} dB.`,
+        citations: explanation.citations,
+        confidence: 'grounded',
+      };
+    }
     return {
       answer: ar
         ? ` HH: ${db(amplitude.dHH)} ، HV: ${db(amplitude.dHV)}.`

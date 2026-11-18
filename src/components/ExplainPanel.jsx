@@ -3,7 +3,7 @@ import { Button, Callout, InputGroup, Spinner } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
-import { askExplain, loadExplanation, pickDefaultSiteId } from '../services/sarApi';
+import { askExplain, loadExplanation } from '../services/sarApi';
 
 /**
  * "Explain the Echo" — a grounded, numbers-first physical hypothesis for the
@@ -13,8 +13,9 @@ import { askExplain, loadExplanation, pickDefaultSiteId } from '../services/sarA
 export default function ExplainPanel() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source } = useSiteData();
-  const [activeId, setActiveId] = useState(() => pickDefaultSiteId(sites));
+  const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
+  const activeId = selectedSiteId;
+  const setActiveId = setSelectedSiteId;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [question, setQuestion] = useState('');
@@ -23,13 +24,8 @@ export default function ExplainPanel() {
 
   useEffect(() => {
     if (!sites.length) return;
-    if (!sites.some((item) => item.id === activeId)) {
-      setActiveId(pickDefaultSiteId(sites));
-      return;
-    }
-    const preferred = pickDefaultSiteId(sites);
-    if (preferred && preferred !== activeId) setActiveId(preferred);
-  }, [sites, activeId]);
+    if (!sites.some((item) => item.id === activeId)) setActiveId(sites[0]?.id);
+  }, [sites, activeId, setActiveId]);
 
   const site = sites.find((item) => item.id === activeId) ?? sites[0];
 

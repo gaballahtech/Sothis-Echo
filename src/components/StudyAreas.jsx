@@ -46,8 +46,9 @@ function Coordinates({ site }) {
 export default function StudyAreas() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, source, loading } = useSiteData();
-  const [activeId, setActiveId] = useState(() => sites[0]?.id);
+  const { sites, source, loading, selectedSiteId, setSelectedSiteId } = useSiteData();
+  const activeId = selectedSiteId;
+  const setActiveId = setSelectedSiteId;
   const [cardView, setCardView] = useState('hh');
   const [swipeMode, setSwipeMode] = useState('hh');
   const [changeStats, setChangeStats] = useState(null);
