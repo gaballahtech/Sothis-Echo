@@ -52,7 +52,7 @@ test.describe('live calibrated NISAR contract', () => {
     await page.getByRole('button', { name: /Not now/i }).click().catch(() => {});
     await page.locator('#sites').scrollIntoViewIfNeeded();
 
-    await expect(page.locator('#sites .panel-status').first()).toContainText('NISAR');
+    await expect(page.locator('#sites .panel-status').first()).toContainText('NISAR', { timeout: 240_000 });
     await expect(page.getByTestId('series-source-note')).toBeVisible();
     await expect(page.getByTestId('degraded-note')).toHaveCount(0);
     await expect(page.getByTestId('change-stats')).toBeVisible({ timeout: 240_000 });
