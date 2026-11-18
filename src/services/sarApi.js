@@ -50,7 +50,12 @@ export function ensureApiBase() {
   if (typeof window === 'undefined' || isLocalHost()) return Promise.resolve('');
   if (!probe) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 6000);
+    // A freshly deployed serverless function cold-starts while it imports the
+    // backend (nisar/sentinel + geo deps), which can exceed a few seconds. Give
+    // the probe room so the first visitor after a deploy still resolves the API
+    // and gets real imagery — and the imagery-dependent Swipe toggle — instead
+    // of silently dropping to the bundled local dataset.
+    const timer = setTimeout(() => controller.abort(), 20000);
     probe = fetch(`${SAME_ORIGIN_API}/health`, {
       headers: { Accept: 'application/json' },
       signal: controller.signal,
@@ -61,7 +66,11 @@ export function ensureApiBase() {
         if (health?.status === 'ok') API_BASE = SAME_ORIGIN_API;
         return API_BASE;
       })
-      .catch(() => API_BASE)
+      .catch(() => {
+        // Don't cache a cold-start miss: let a later load()/refresh retry.
+        probe = null;
+        return API_BASE;
+      })
       .finally(() => clearTimeout(timer));
   }
   return probe;
