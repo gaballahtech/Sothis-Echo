@@ -103,6 +103,21 @@ export default function AtlasSection() {
                     <p className="micro atlas-card-meta">
                       {localized(site.region, 'en')} · {changeTypeName(site.changeType)}
                     </p>
+                    <div className="atlas-card-place-row">
+                      <span className="micro atlas-card-coords" dir="ltr">
+                        {site.coords.lat.toFixed(2)}°, {site.coords.lng.toFixed(2)}°
+                      </span>
+                      <button
+                        type="button"
+                        className="atlas-maplink micro"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          choose(site);
+                        }}
+                      >
+                        {t('atlas.viewOnMap')}
+                      </button>
+                    </div>
 
                     <dl className="atlas-story">
                       <dt>{t('atlas.whatHappened')}</dt>

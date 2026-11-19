@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { MapContainer, TileLayer, CircleMarker, Popup, useMap } from 'react-leaflet';
+import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { localized } from '../data/localized';
 import { atlasSites, CHANGE_TYPES } from '../data/atlas';
@@ -10,15 +11,37 @@ import { atlasSites, CHANGE_TYPES } from '../data/atlas';
  * circle marker coloured by change type. Clicking a marker selects that site
  * (the parent loads its story). Measured sites carry a ring; story-only sites
  * are dimmed but still open their narrative.
+ *
+ * The map is a single instance for all six continents: it opens framed on every
+ * marker, never repeats the world horizontally, and only zooms to a place when
+ * the visitor explicitly picks one.
  */
 
-// Keep the map centred when a site is chosen from the list (outside the map).
-function FlyTo({ site }) {
+// Frame all markers once on mount so the first view shows every continent.
+function FitAll({ sites }) {
   const map = useMap();
+  const done = useRef(false);
   useEffect(() => {
-    if (!site?.coords) return;
-    map.flyTo([site.coords.lat, site.coords.lng], Math.max(map.getZoom(), 5), { duration: 0.9 });
-  }, [site, map]);
+    if (done.current || !sites.length) return;
+    done.current = true;
+    const bounds = L.latLngBounds(sites.map((site) => [site.coords.lat, site.coords.lng]));
+    map.fitBounds(bounds, { padding: [26, 26] });
+  }, [map, sites]);
+  return null;
+}
+
+// Keep the map centred when a site is chosen from the list (outside the map).
+// It only flies when the selection actually changes, so the initial all-sites
+// framing is never hijacked by a default highlight.
+function FlyTo({ site, selectedId }) {
+  const map = useMap();
+  const prev = useRef(selectedId);
+  useEffect(() => {
+    if (prev.current !== selectedId && site?.coords) {
+      map.flyTo([site.coords.lat, site.coords.lng], Math.max(map.getZoom(), 5), { duration: 0.9 });
+    }
+    prev.current = selectedId;
+  }, [site, selectedId, map]);
   return null;
 }
 
@@ -44,16 +67,19 @@ export default function AtlasMap({ selectedId, onSelect }) {
         zoom={2}
         minZoom={2}
         maxZoom={12}
+        maxBounds={[[-85, -180], [85, 180]]}
+        maxBoundsViscosity={1}
         scrollWheelZoom={false}
-        worldCopyJump
         style={{ height: 440, width: '100%', borderRadius: 6, zIndex: 0 }}
         attributionControl
       >
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          noWrap
         />
-        <FlyTo site={selected} />
+        <FitAll sites={atlasSites} />
+        <FlyTo site={selected} selectedId={selectedId} />
         {atlasSites.map((site) => {
           const color = colorFor[site.changeType] || '#888';
           const isSelected = site.id === selectedId;

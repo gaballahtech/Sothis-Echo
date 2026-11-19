@@ -508,6 +508,7 @@ const en = {
     whatHappened: 'What happened',
     whyRadar: 'Why radar sees it',
     whatMeasures: 'What NISAR measures',
+    viewOnMap: 'View on map',
     unavailable: 'Atlas data is loading.',
   },
   common: {
@@ -1024,6 +1025,7 @@ radarCaptionSentinel:
     whatHappened: 'ما الذي حدث',
     whyRadar: 'لماذا يراها الرادار',
     whatMeasures: 'ما يقيسه NISAR',
+    viewOnMap: 'اعرض على الخريطة',
     storyNote: 'معاينة سردية — لم تتم معالجة جرين حقيقي لهذا المكان بعد.',
     unavailable: 'بيانات الأطلس تُحمّل.',
   },

@@ -1595,6 +1595,34 @@ li,
   opacity: 0.8;
 }
 
+.atlas-card-place-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 4px 0 2px;
+  border-top: 1px dashed var(--bp-surface-border-color-default, #d0d0d0);
+}
+
+.atlas-card-coords {
+  font-variant-numeric: tabular-nums;
+  opacity: 0.75;
+}
+
+.atlas-maplink {
+  border: 0;
+  background: none;
+  padding: 2px 4px;
+  color: var(--bp-intent-primary-color, #2d72d2);
+  cursor: pointer;
+  white-space: nowrap;
+  border-radius: 4px;
+}
+
+.atlas-maplink:hover {
+  text-decoration: underline;
+}
+
 .atlas-card-action {
   margin-top: 4px;
 }
