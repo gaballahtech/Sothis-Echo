@@ -186,6 +186,10 @@ export default function Lenses() {
           </ButtonGroup>
         </div>
 
+        <p className="micro" style={{ margin: '10px 0 0', opacity: 0.8 }} data-testid="lens-same-window">
+          {t('lenses.sameWindow')}
+        </p>
+
         {loading ? (
           <div className="lens-loading" style={{ padding: '32px 0', textAlign: 'center' }}>
             <Spinner size={28} />

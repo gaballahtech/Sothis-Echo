@@ -89,51 +89,48 @@ export default function AtlasSection() {
                   className="atlas-card-inner"
                   {...(isSelected ? { 'data-testid': 'atlas-preview' } : {})}
                 >
-                  <div className="atlas-card-head">
-                    <span className="atlas-card-dot" aria-hidden="true" />
-                    <h3>{localized(site.name, 'en')}</h3>
-                    <span className={measured ? 'atlas-badge measured' : 'atlas-badge story'}>
-                      {measured ? t('atlas.measured') : t('atlas.storyOnly')}
-                    </span>
-                  </div>
-                  <p className="micro atlas-card-meta">
-                    {localized(site.region, 'en')} · {changeTypeName(site.changeType)}
-                  </p>
-
-                  {measured && thumb ? (
-                    <img className="atlas-card-thumb" src={thumb} alt="" loading="lazy" />
-                  ) : (
-                    <div className="atlas-card-thumb atlas-card-thumb--story" aria-hidden="true">
-                      <span className="atlas-card-thumb-tag">{changeTypeName(site.changeType)}</span>
+                  <div className={`atlas-card-media${measured && thumb ? '' : ' atlas-card-media--story'}`}>
+                    {measured && thumb ? <img src={thumb} alt="" loading="lazy" /> : null}
+                    <div className="atlas-card-media-overlay">
+                      <h3>{localized(site.name, 'en')}</h3>
+                      <span className={measured ? 'atlas-badge measured' : 'atlas-badge story'}>
+                        {measured ? t('atlas.measured') : t('atlas.storyOnly')}
+                      </span>
                     </div>
-                  )}
+                  </div>
 
-                  <dl className="atlas-story">
-                    <dt>{t('atlas.whatHappened')}</dt>
-                    <dd>{localized(site.summary, 'en')}</dd>
-                    <dt>{t('atlas.whyRadar')}</dt>
-                    <dd>{localized(site.radar, 'en')}</dd>
-                    <dt>{t('atlas.whatMeasures')}</dt>
-                    <dd>{localized(site.measure, 'en')}</dd>
-                  </dl>
+                  <div className="atlas-card-body">
+                    <p className="micro atlas-card-meta">
+                      {localized(site.region, 'en')} · {changeTypeName(site.changeType)}
+                    </p>
 
-                  <div className="atlas-card-action">
-                    {measured ? (
-                      <button
-                        type="button"
-                        className="atlas-open"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          openStory(site);
-                        }}
-                        data-testid={isSelected ? 'atlas-open' : undefined}
-                        title={t('atlas.clickToOpen')}
-                      >
-                        {t('atlas.openStory')} →
-                      </button>
-                    ) : (
-                      <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
-                    )}
+                    <dl className="atlas-story">
+                      <dt>{t('atlas.whatHappened')}</dt>
+                      <dd>{localized(site.summary, 'en')}</dd>
+                      <dt>{t('atlas.whyRadar')}</dt>
+                      <dd>{localized(site.radar, 'en')}</dd>
+                      <dt>{t('atlas.whatMeasures')}</dt>
+                      <dd>{localized(site.measure, 'en')}</dd>
+                    </dl>
+
+                    <div className="atlas-card-action">
+                      {measured ? (
+                        <button
+                          type="button"
+                          className="atlas-open"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            openStory(site);
+                          }}
+                          data-testid={isSelected ? 'atlas-open' : undefined}
+                          title={t('atlas.clickToOpen')}
+                        >
+                          {t('atlas.openStory')} →
+                        </button>
+                      ) : (
+                        <span className="atlas-pending micro">{t('atlas.storyNote')}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
               </article>

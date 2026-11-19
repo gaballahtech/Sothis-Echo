@@ -439,6 +439,8 @@ const en = {
     meanAbsDelta: 'Mean |Δ|',
     validPct: 'Valid pixels',
     thresholdDb: '{{db}} dB absolute threshold · same track/frame',
+    sameWindow:
+      'Every lens here and the study-area cards above are drawn from one calibrated window for this site — the same bounding box, the same before/after granules, and the same 560×370 grid, so they show the identical place.',
   },
   explain: {
     title: 'Explain the echo',
@@ -944,6 +946,8 @@ const ar = {
     meanAbsDelta: 'متوسط |Δ|',
     validPct: 'البكسلات الصالحة',
     thresholdDb: 'عتبة مطلقة {{db}} dB · نفس المسار/الإطار',
+    sameWindow:
+      'كل عدسة هنا وبطاقات منطقة الدراسة أعلاه مرسومة من نافذة معايَرة واحدة لهذا الموقع — نفس الحدود الجغرافية، ونفس جريني قبل/بعد، ونفس شبكة 560×370، لذا تُظهر المكان نفسه تمامًا.',
   },
   explain: {
     title: 'اشرح الصدى',
