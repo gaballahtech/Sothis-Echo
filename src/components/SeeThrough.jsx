@@ -11,6 +11,33 @@ const LEGEND = [
   { key: 'legendTrunk', swatch: 'var(--bp-palette-light-gray-2)' },
 ];
 
+/**
+ * Parse a POLYGON WKT into a lon/lat bbox: [west, south, east, north].
+ * Returns null when no coordinates are present.
+ */
+function parseWktBbox(wkt) {
+  if (typeof wkt !== 'string') return null;
+  const coords = [];
+  const regex = /([-+]?\d*\.\d+)\s+([-+]?\d*\.\d+)/g;
+  let match;
+  while ((match = regex.exec(wkt)) !== null) {
+    const x = Number(match[1]);
+    const y = Number(match[2]);
+    if (Number.isFinite(x) && Number.isFinite(y)) coords.push([x, y]);
+  }
+  if (!coords.length) return null;
+  const west = Math.min(...coords.map(([x]) => x));
+  const south = Math.min(...coords.map(([, y]) => y));
+  const east = Math.max(...coords.map(([x]) => x));
+  const north = Math.max(...coords.map(([, y]) => y));
+  return [west, south, east, north];
+}
+
+function esriOpticalURL(bbox) {
+  const [w, s, e, n] = bbox;
+  return `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${w},${s},${e},${n}&bboxSR=4326&imageSR=4326&size=760,500&format=png&f=image`;
+}
+
 export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -39,6 +66,18 @@ export default function SeeThrough() {
   const radarLabel = t('seeThrough.radar');
   const radarCaption = t('seeThrough.radarCaption');
 
+  // The optical side must cover the exact same bbox as the radar, so fetch a
+  // georeferenced Esri World Imagery export over the site bbox and render it
+  // uncropped (crop=null). Never a fractional crop of a whole-tile thumbnail.
+  const wktBbox = parseWktBbox(site.wkt);
+  const esriOptical = Boolean(wktBbox);
+  const opticalUrl = esriOptical ? esriOpticalURL(wktBbox) : null;
+  const opticalPlatform = esriOptical ? 'Esri World Imagery' : (state.opticalPlatform || 'Sentinel-2');
+  const opticalLabel = t('seeThrough.optical');
+  const opticalCaption = esriOptical
+    ? 'Esri World Imagery satellite basemap over the exact study window — north-up, no crop offset.'
+    : t('seeThrough.opticalCaption');
+
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
       <div className="section-inner">
@@ -54,10 +93,10 @@ export default function SeeThrough() {
               params={state.params}
               opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
               radarAlt={`${siteName} — ${radarLabel}`}
-              opticalLabel={t('seeThrough.optical')}
+              opticalLabel={opticalLabel}
               radarLabel={radarLabel}
-              opticalUrl={state.opticalUrl}
-              opticalCrop={state.opticalCrop ?? null}
+              opticalUrl={opticalUrl}
+              opticalCrop={null}
               radarUrl={radarUrl}
               radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
               radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
@@ -70,8 +109,8 @@ export default function SeeThrough() {
               </p>
             ) : null}
             <p className="micro" style={{ margin: '8px 0 0' }}>
-              {state.opticalUrl
-                ? `${state.opticalPlatform || 'Sentinel-2'} · ${state.opticalDate} · ${Math.round(state.opticalCloudCover ?? 0)}% ${language === 'ar' ? 'غيوم' : 'cloud'} — ${radarPlatform} · ${radarDate}`
+              {opticalUrl
+                ? `${opticalPlatform} · ${radarPlatform} · ${radarDate}`
                 : t('seeThrough.noImage')}
             </p>
 
