@@ -123,6 +123,10 @@ export default function SeeThrough() {
                 <h4>{radarLabel}</h4>
                 <p className="body-copy" style={{ margin: 0 }}>{radarCaption}</p>
               </div>
+              <div className="info-block">
+                <h4>{t('seeThrough.temporalNote')}</h4>
+                <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.temporalNoteBody')}</p>
+              </div>
             </div>
 
           </Panel>

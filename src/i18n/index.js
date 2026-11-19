@@ -113,6 +113,10 @@ const en = {
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
     radarCaptionSentinel:
       'A real NASA NISAR L-band (HH) browse image over the same window. Smooth water is dark; rough canopy and built surfaces return more energy.',
+    temporalNote:
+      'Time alignment',
+    temporalNoteBody:
+      'The optical side shows Esri World Imagery over the exact study bbox - not a same-date Sentinel-2 pass, so the two sides do not represent the same moment in time.',
     nisarSwath:
       'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar layer is NASA’s colourised quicklook, not a calibrated image; its tilted orbit and wider swath mean fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
@@ -441,6 +445,12 @@ const en = {
     thresholdDb: '{{db}} dB absolute threshold · same track/frame',
     sameWindow:
       'Every lens here and the study-area cards above are drawn from one calibrated window for this site — the same bounding box, the same before/after granules, and the same 560×370 grid, so they show the identical place.',
+    dualPolNote:
+      'NISAR uses only HH and HV channels (dual-pol). This limits separation into scattering classes: surface/dihedral (red), volume/canopy (green), and low return such as water or shadow (blue). The thresholds (low ≤ {{low}} dB; volume when HV−HH > {{ratio}} dB) are applied uniformly, but HH‑HH alone cannot capture all geophysics.',
+    coherenceBaselineNote:
+      'InSAR coherence from the GSLC pair (granules {{before}} → {{after}}) with a 16‑day temporal baseline, water‑masked. Low values (<0.3) mark rapid decorrelation such as structural change, while stable surfaces stay high.',
+    temporalMismatchNote:
+      'The optical side shows Esri World Imagery basemap for the exact study bbox - not a same-date Sentinel-2 pass, so the two sides do not represent the same moment in time.',
   },
   explain: {
     title: 'Explain the echo',
@@ -620,8 +630,12 @@ const ar = {
       'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
-    radarCaptionSentinel:
-      'صورة حقيقية من NISAR L-band (HH) على النافذة نفسها. الماء الأملس داكن، والمظلة الخشنة والأسطح المبنية تعيد طاقة أكبر.',
+radarCaptionSentinel:
+       'صورة حقيقية من NISAR L-band (HH) على النافذة نفسها. الماء الأملس داكن، والمظلة الخشنة والأسطح المبنية تعيد طاقة أكبر.',
+    temporalNote:
+       'مطابقة زمنية',
+    temporalNoteBody:
+       'الجانب البصري يظهر خريطة Esri World Imagery للحدود الدقيقة للمدرسة — وليس مرور Sentinel-2 بنفس التاريخ، لذا لا يمثل الجانبان نفس اللحظة الزمنية.',
     nisarSwath:
       'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. طبقة الرادار صورة سريعة ملوّنة من ناسا وليست صورة معايرة؛ ومدارها المائل ونطاقها الأوسع يجعلان التفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
@@ -948,6 +962,12 @@ const ar = {
     thresholdDb: 'عتبة مطلقة {{db}} dB · نفس المسار/الإطار',
     sameWindow:
       'كل عدسة هنا وبطاقات منطقة الدراسة أعلاه مرسومة من نافذة معايَرة واحدة لهذا الموقع — نفس الحدود الجغرافية، ونفس جريني قبل/بعد، ونفس شبكة 560×370، لذا تُظهر المكان نفسه تمامًا.',
+    dualPolNote:
+      'NISAR يستخدم قنوات HH و HV فقط (القطب الثنائي). هذا يقيد الفصل إلى فئات التشتت: السطح/الارتداد المزدوج (أحمر)، حجم/مظلة (أخضر)، عائد منخفض مثل الماء أو الظل (أزرق). يتم تطبيق العتبات (العائد المنخفض ≤ {{low}} dB; حجم عند HV−HH > {{ratio}} dB) بالتساوي، لكن HH–HV وحده لا يستطيع التقاط كل الفيزياء.',
+    coherenceBaselineNote:
+      'التماسك من زوج GSLC (قبل → بعد) مع baseline زمني 16 يومًا، وماسكة الماء. القيم المنخفضة (<0.3) تشير إلى تغير بنيوي سريع مثل الحريق أو فيضان، بينما تبقى الأسطح المستقرة عالية.',
+    temporalMismatchNote:
+      'الجانب البصري يظهر خريطة Esri World Imagery للحدود الدقيقة للمدرسة — وليس مرور Sentinel-2 بنفس التاريخ، لذا لا يمثل الجانبان نفس اللحظة الزمنية.',
   },
   explain: {
     title: 'اشرح الصدى',

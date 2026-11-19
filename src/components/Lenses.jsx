@@ -236,6 +236,12 @@ export default function Lenses() {
                     <p className="micro" style={{ margin: 0 }} dir="ltr">
                       {coherence.granuleBefore} · {coherence.granuleAfter}
                     </p>
+                    <p className="micro" style={{ margin: '10px 0 0', opacity: 0.8 }}>
+                      {t('lenses.coherenceBaselineNote', {
+                        before: coherence.granuleBefore || '',
+                        after: coherence.granuleAfter || '',
+                      })}
+                    </p>
                   </>
                 ) : (
                   <Callout intent="primary" data-testid="lens-coherence-unavailable">
@@ -261,6 +267,12 @@ export default function Lenses() {
                 <p className="body-copy-muted" style={{ margin: 0 }}>{t('lenses.mechanismBody')}</p>
                 <p className="micro" style={{ margin: 0 }}>
                   {t('lenses.mechanismThresholds', {
+                    low: lenses.thresholds?.lowDb ?? '−20',
+                    ratio: lenses.thresholds?.volumeRatioDb ?? '−6',
+                  })}
+                </p>
+                <p className="micro" style={{ margin: '10px 0 0', opacity: 0.8 }}>
+                  {t('lenses.dualPolNote', {
                     low: lenses.thresholds?.lowDb ?? '−20',
                     ratio: lenses.thresholds?.volumeRatioDb ?? '−6',
                   })}
