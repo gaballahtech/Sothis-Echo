@@ -245,13 +245,12 @@ export default function RapidResponse() {
   const mechanismKey = data?.mechanism === 'fire' ? 'fire' : data?.mechanism === 'flood' ? 'flood' : 'default';
   const questions = QUESTIONS[mechanismKey][language] || QUESTIONS[mechanismKey].en;
   const actions = ACTIONS[mechanismKey][language] || ACTIONS[mechanismKey].en;
-  const riskScore = data
-    ? Math.min(100, Math.max(0, Math.round(
-        (Math.log10(1 + (data.extentKm2 || 0)) / Math.log10(1001)) * 40 +
-        (Math.log10(1 + (data.populationExposed || 0)) / Math.log10(1000001)) * 40 +
-        (MECHANISM_WEIGHT[data.mechanism] || 0)
-      )))
-    : null;
+  // Risk = Hazard × Exposure × Vulnerability (UNDRR disaster-risk framework).
+  // Hazard = change magnitude; Exposure = population; Vulnerability = mechanism.
+  const hazard = data ? Math.min(1, Math.log10(1 + (data.extentKm2 || 0)) / Math.log10(1001)) : 0;
+  const exposure = data ? Math.min(1, Math.log10(1 + (data.populationExposed || 0)) / Math.log10(1000001)) : 0;
+  const vulnerability = data ? Math.min(1, (MECHANISM_WEIGHT[data.mechanism] || 0) / 20) : 0;
+  const riskScore = data ? Math.min(100, Math.max(0, Math.round((hazard * 0.4 + exposure * 0.4 + vulnerability * 0.2) * 100))) : null;
   const riskLevel = riskScore == null ? null : riskScore < 30 ? 'low' : riskScore < 70 ? 'medium' : 'high';
   const riskLabel = riskLevel === 'low' ? t('respond.riskLow') : riskLevel === 'medium' ? t('respond.riskMedium') : t('respond.riskHigh');
   const whatItMeans = t('respond.whatItMeansBody', {
@@ -322,6 +321,10 @@ export default function RapidResponse() {
                   {riskScore ?? '—'}
                 </p>
                 <div className="micro" style={{ marginTop: 4 }}>{t('respond.riskLevel')}: {riskLabel}</div>
+                <div className="micro" style={{ marginTop: 6, opacity: 0.8 }}>
+                  {t('respond.hazard')}: {Math.round(hazard * 100)}% · {t('respond.exposure')}: {Math.round(exposure * 100)}% · {t('respond.vulnerability')}: {Math.round(vulnerability * 100)}%
+                </div>
+                <div className="micro" style={{ marginTop: 4, opacity: 0.6 }}>{t('respond.frameworkNote')}</div>
               </div>
               <div className="card">
                 <div className="stat-label">{t('respond.whatItMeans')}</div>
