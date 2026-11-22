@@ -5,6 +5,46 @@ import { atlasSites, CHANGE_TYPES } from '../data/atlas';
 import AtlasMap from './AtlasMap';
 import { useSiteData } from '../context/SiteDataContext';
 
+// Rule-based "local impact" — what this change means for people living here.
+const LOCAL_IMPACT = {
+  flood: {
+    en: 'For residents here, this means flood risk. Check drainage, avoid low-lying areas, and prepare an evacuation plan.',
+    ar: 'للسكان هنا، هذا يعني خطر الفيضان. تحقق من الصرف، تجنّب المناطق المنخفضة، وجهّز خطة إخلاء.',
+  },
+  fire: {
+    en: 'For residents here, this means fire risk. Create defensible space, prepare a go-bag, and follow evacuation orders.',
+    ar: 'للسكان هنا، هذا يعني خطر الحريق. أنشئ مساحة دفاعية، جهّز حقيبة طوارئ، واتبع أوامر الإخلاء.',
+  },
+  deforestation: {
+    en: 'For residents here, this means forest loss and its effects on water, soil and livelihoods.',
+    ar: 'للسكان هنا، هذا يعني فقدان الغابات وتأثيرها على الماء والتربة وسبل العيش.',
+  },
+  glacier: {
+    en: 'For residents here, this means changing water supply and long-term landscape change.',
+    ar: 'للسكان هنا، هذا يعني تغيّر إمدادات المياه وتغيّر المشهد على المدى الطويل.',
+  },
+  volcano: {
+    en: 'For residents here, this means volcanic risk and the need for monitoring and evacuation plans.',
+    ar: 'للسكان هنا، هذا يعني خطرًا بركانيًا والحاجة للمراقبة وخطط الإخلاء.',
+  },
+  subsidence: {
+    en: 'For residents here, this means ground sinking that can damage buildings and infrastructure.',
+    ar: 'للسكان هنا، هذا يعني هبوط الأرض الذي قد يلحق أضرارًا بالمباني والبنية التحتية.',
+  },
+  'oil-spill': {
+    en: 'For residents here, this means water contamination and impacts on fishing and ecosystems.',
+    ar: 'للسكان هنا، هذا يعني تلوث المياه وتأثيرات على الصيد والنظم البيئية.',
+  },
+  crop: {
+    en: 'For residents here, this means changes in crop health and food security.',
+    ar: 'للسكان هنا، هذا يعني تغيّرات في صحة المحاصيل والأمن الغذائي.',
+  },
+  earthquake: {
+    en: 'For residents here, this means ground deformation that can damage structures.',
+    ar: 'للسكان هنا، هذا يعني تشوّه الأرض الذي قد يلحق أضرارًا بالمنشآت.',
+  },
+};
+
 /**
  * Global Atlas — a real Leaflet/OSM map plus a card for every curated site.
  * All places are shown at once (name, region, change type and the full
@@ -127,6 +167,8 @@ export default function AtlasSection() {
                       <dd>{localized(site.radar, language)}</dd>
                       <dt>{t('atlas.whatMeasures')}</dt>
                       <dd>{localized(site.measure, language)}</dd>
+                      <dt>{t('atlas.localImpact')}</dt>
+                      <dd>{LOCAL_IMPACT[site.changeType]?.[language] || LOCAL_IMPACT[site.changeType]?.en || '—'}</dd>
                     </dl>
 
                     <div className="atlas-card-action">

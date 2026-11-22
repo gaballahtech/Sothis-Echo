@@ -6,6 +6,41 @@ import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { loadRapidResponse } from '../services/sarApi';
 
+// Rule-based "questions to ask" and "what to do" per dominant mechanism.
+const QUESTIONS = {
+  flood: {
+    en: ['Has this area flooded before?', 'Are there flood defenses?', 'What is the drainage like?'],
+    ar: ['هل غمرت المنطقة سابقًا؟', 'هل توجد دفاعات فيضان؟', 'ما حالة الصرف؟'],
+  },
+  fire: {
+    en: ['Is there defensible space around the property?', 'What is the evacuation route?', 'Are there fire-resistant materials?'],
+    ar: ['هل توجد مساحة دفاعية حول العقار؟', 'ما طريق الإخلاء؟', 'هل توجد مواد مقاومة للحريق؟'],
+  },
+  default: {
+    en: ['What changed here, and when?', 'Is the change ongoing or complete?', 'What is the local context?'],
+    ar: ['ما الذي تغيّر هنا، ومتى؟', 'هل التغيّر مستمر أم مكتمل؟', 'ما السياق المحلي؟'],
+  },
+};
+
+const ACTIONS = {
+  flood: {
+    en: ['Avoid building in the flood zone', 'Check flood insurance', 'Prepare an evacuation plan'],
+    ar: ['تجنّب البناء في منطقة الفيضان', 'تحقق من تأمين الفيضان', 'جهّز خطة إخلاء'],
+  },
+  fire: {
+    en: ['Create defensible space', 'Prepare a go-bag', 'Follow evacuation orders'],
+    ar: ['أنشئ مساحة دفاعية', 'جهّز حقيبة طوارئ', 'اتبع أوامر الإخلاء'],
+  },
+  default: {
+    en: ['Monitor the area for further change', 'Consult local authorities', 'Document the change with dates'],
+    ar: ['راقب المنطقة لأي تغيّر إضافي', 'استشر السلطات المحلية', 'وثّق التغيّر بالتواريخ'],
+  },
+};
+
+const MECHANISM_WEIGHT = {
+  flood: 20, fire: 20, disturbance: 15, 'amplitude-change': 15, smoothing: 10, roughening: 10, stable: 0,
+};
+
 /**
  * Draw the one-page situation report onto a <canvas> and return a PNG data URL.
  * Runs entirely in the browser so the feature works on the deployed serverless
@@ -206,6 +241,25 @@ export default function RapidResponse() {
 
   const decisionText = data?.decision ? (data.decision[language] || data.decision.en || data.decision) : null;
 
+  // Actionable decision brief: risk score + grade + questions + actions.
+  const mechanismKey = data?.mechanism === 'fire' ? 'fire' : data?.mechanism === 'flood' ? 'flood' : 'default';
+  const questions = QUESTIONS[mechanismKey][language] || QUESTIONS[mechanismKey].en;
+  const actions = ACTIONS[mechanismKey][language] || ACTIONS[mechanismKey].en;
+  const riskScore = data
+    ? Math.min(100, Math.max(0, Math.round(
+        (Math.log10(1 + (data.extentKm2 || 0)) / Math.log10(1001)) * 40 +
+        (Math.log10(1 + (data.populationExposed || 0)) / Math.log10(1000001)) * 40 +
+        (MECHANISM_WEIGHT[data.mechanism] || 0)
+      )))
+    : null;
+  const riskLevel = riskScore == null ? null : riskScore < 30 ? 'low' : riskScore < 70 ? 'medium' : 'high';
+  const riskLabel = riskLevel === 'low' ? t('respond.riskLow') : riskLevel === 'medium' ? t('respond.riskMedium') : t('respond.riskHigh');
+  const whatItMeans = t('respond.whatItMeansBody', {
+    mechanism: mechanismLabel(data?.mechanism),
+    extent: data?.extentKm2 ?? '—',
+    population: data?.populationExposed != null ? data.populationExposed.toLocaleString() : '—',
+  });
+
   return (
     <section id="respond" className="content-section chapter" aria-labelledby="respond-title">
       <div className="section-inner">
@@ -259,6 +313,35 @@ export default function RapidResponse() {
                 {decisionText}
               </div>
             ) : null}
+
+            {/* Actionable decision brief: risk score + what it means + questions + actions */}
+            <div className="grid-2" data-testid="respond-brief">
+              <div className="card">
+                <div className="stat-label">{t('respond.riskScore')}</div>
+                <p className="numeric" style={{ margin: 0, fontSize: 34, fontWeight: 700 }}>
+                  {riskScore ?? '—'}
+                </p>
+                <div className="micro" style={{ marginTop: 4 }}>{t('respond.riskLevel')}: {riskLabel}</div>
+              </div>
+              <div className="card">
+                <div className="stat-label">{t('respond.whatItMeans')}</div>
+                <p className="body-copy" style={{ margin: 0 }}>{whatItMeans}</p>
+              </div>
+            </div>
+            <div className="grid-2">
+              <div className="card">
+                <h4 className="micro">{t('respond.questionsTitle')}</h4>
+                <ul className="small" style={{ margin: 0, paddingInlineStart: 18 }}>
+                  {questions.map((q) => <li key={q}>{q}</li>)}
+                </ul>
+              </div>
+              <div className="card">
+                <h4 className="micro">{t('respond.actionsTitle')}</h4>
+                <ul className="small" style={{ margin: 0, paddingInlineStart: 18 }}>
+                  {actions.map((a) => <li key={a}>{a}</li>)}
+                </ul>
+              </div>
+            </div>
 
             {data.reportImage ? (
               <div className="stack" style={{ gap: 8 }}>
