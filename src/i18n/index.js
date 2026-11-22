@@ -116,6 +116,8 @@ const en = {
       'The radar side shows the full NISAR L-band browse (purple, whole swath). The study-area cards and the three lenses zoom into the ~5.5 km site window around the same granule.',
     browseFull: 'Full browse (purple)',
     browseWindow: 'Site window (gray)',
+    view3d: '3D terrain',
+    view2d: '2D compare',
     nisarSwath:
       'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar layer is NASA’s colourised quicklook, not a calibrated image; its tilted orbit and wider swath mean fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
@@ -673,6 +675,8 @@ radarCaptionSentinel:
       'الجانب الراداري يعرض مسح NISAR L-band الكامل (البنفسجي، المساحة الكاملة). بطاقات مناطق الدراسة والعدسات الثلاث تُكبّر على نافذة الموقع (~5.5 كم) حول نفس الجرين.',
     browseFull: 'المسح الكامل (بنفسجي)',
     browseWindow: 'نافذة الموقع (رمادي)',
+    view3d: 'تضاريس 3D',
+    view2d: 'مقارنة 2D',
     nisarSwath:
       'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. طبقة الرادار صورة سريعة ملوّنة من ناسا وليست صورة معايرة؛ ومدارها المائل ونطاقها الأوسع يجعلان التفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',

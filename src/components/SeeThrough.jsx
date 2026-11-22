@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { CompareSlider } from './SceneCanvas';
+import Terrain3D from './Terrain3D';
 import { Panel, SectionHead } from './ui';
 
 const LEGEND = [
@@ -73,6 +74,7 @@ export default function SeeThrough() {
   const { language } = useLanguage();
   const { sites } = useSiteData();
   const [radarView, setRadarView] = useState('browse');
+  const [view3d, setView3d] = useState(false);
   // This comparison is always the Central Vietnam flood scene. It deliberately
   // ignores the shared selection so switching to Big Sur (or any other site)
   // elsewhere on the page never changes what this section shows.
@@ -118,45 +120,58 @@ export default function SeeThrough() {
       <div className="section-inner">
         <SectionHead title={t('seeThrough.title')} subtitle={t('seeThrough.subtitle')} id="see-through-title" />
 
-        {hasBrowse ? (
-          <div className="row" style={{ marginBottom: 12 }}>
-            <ButtonGroup aria-label={t('seeThrough.radar')}>
-              <Button
-                active={radarView === 'browse'}
-                variant={radarView === 'browse' ? 'solid' : 'outlined'}
-                text={t('seeThrough.browseFull')}
-                onClick={() => setRadarView('browse')}
-                aria-pressed={radarView === 'browse'}
-              />
-              <Button
-                active={radarView === 'window'}
-                variant={radarView === 'window' ? 'solid' : 'outlined'}
-                text={t('seeThrough.browseWindow')}
-                onClick={() => setRadarView('window')}
-                aria-pressed={radarView === 'window'}
-              />
-            </ButtonGroup>
-          </div>
-        ) : null}
+        <div className="row" style={{ marginBottom: 12 }}>
+          <ButtonGroup aria-label={t('seeThrough.radar')}>
+            {hasBrowse ? (
+              <>
+                <Button
+                  active={radarView === 'browse'}
+                  variant={radarView === 'browse' ? 'solid' : 'outlined'}
+                  text={t('seeThrough.browseFull')}
+                  onClick={() => setRadarView('browse')}
+                  aria-pressed={radarView === 'browse'}
+                />
+                <Button
+                  active={radarView === 'window'}
+                  variant={radarView === 'window' ? 'solid' : 'outlined'}
+                  text={t('seeThrough.browseWindow')}
+                  onClick={() => setRadarView('window')}
+                  aria-pressed={radarView === 'window'}
+                />
+              </>
+            ) : null}
+            <Button
+              active={view3d}
+              variant={view3d ? 'solid' : 'outlined'}
+              text={t('seeThrough.view3d')}
+              onClick={() => setView3d((v) => !v)}
+              aria-pressed={view3d}
+            />
+          </ButtonGroup>
+        </div>
 
         <div className="split-main">
           <Panel
             title={`${siteName} · ${radarDate} · ${stateLabel}`}
             bodyClassName="card-pad"
           >
-            <CompareSlider
-              opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
-              radarAlt={`${siteName} — ${radarLabel}`}
-              opticalLabel={opticalLabel}
-              radarLabel={radarLabel}
-              opticalUrl={opticalUrl}
-              opticalCrop={null}
-              radarUrl={radarUrl}
-              radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
-              radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
-              radarClassName={radarIsScene ? '' : (state.nisarImageUrl ? 'compare-layer--nisar' : '')}
-              radarEager
-            />
+            {view3d ? (
+              <Terrain3D radarUrl={radarUrl} />
+            ) : (
+              <CompareSlider
+                opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
+                radarAlt={`${siteName} — ${radarLabel}`}
+                opticalLabel={opticalLabel}
+                radarLabel={radarLabel}
+                opticalUrl={opticalUrl}
+                opticalCrop={null}
+                radarUrl={radarUrl}
+                radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
+                radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
+                radarClassName={radarIsScene ? '' : (state.nisarImageUrl ? 'compare-layer--nisar' : '')}
+                radarEager
+              />
+            )}
             {state.nisarImageUrl && !radarIsScene ? (
               <p className="micro" style={{ margin: '6px 0 0' }}>
                 {t('seeThrough.nisarSwath')}
