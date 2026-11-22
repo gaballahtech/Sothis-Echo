@@ -57,6 +57,17 @@ function comparisonWindow(bbox, aspect = 760 / 500) {
   return [centreLng - width / 2, centreLat - height / 2, centreLng + width / 2, centreLat + height / 2];
 }
 
+// The same ~5.5 km window the gray HH snapshot (imageUrl) is rendered over
+// (build-nisar-snapshots.py calibration_bbox), so the gray radar and the green
+// optical show the EXACT same area when the gray toggle is active.
+function calibrationWindow(coords) {
+  const lat = coords.lat;
+  const lng = coords.lng;
+  const dLat = 0.025;
+  const dLng = 0.025 / Math.max(0.2, Math.cos((lat * Math.PI) / 180));
+  return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
+}
+
 export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -92,9 +103,12 @@ export default function SeeThrough() {
   // uncropped (crop=null). Never a fractional crop of a whole-tile thumbnail.
   const wktBbox = parseWktBbox(site.wkt);
   const esriOptical = Boolean(wktBbox);
-  // Use the same aspect-adjusted window as the radar (nisarCrop) so both sides
-  // show the EXACT same geographic area.
-  const opticalBbox = esriOptical ? comparisonWindow(wktBbox) : null;
+  // Match the green optical to the SELECTED radar view: the purple browse uses
+  // the aspect-adjusted comparisonWindow, while the gray HH uses the ~5.5 km
+  // calibrationWindow — so both sides always show the exact same area.
+  const opticalBbox = esriOptical
+    ? (radarView === 'window' && site.coords ? calibrationWindow(site.coords) : comparisonWindow(wktBbox))
+    : null;
   const opticalUrl = opticalBbox ? esriOpticalURL(opticalBbox) : null;
   const opticalPlatform = t('seeThrough.opticalPlatform');
   const opticalLabel = t('seeThrough.optical');
