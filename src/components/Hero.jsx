@@ -40,7 +40,7 @@ export default function Hero() {
     }).format(date);
   };
 
-  const live = Boolean(status?.operational ?? status);
+  const live = Boolean(status);
 
   const latestPass = useMemo(() => {
     if (!live || source !== 'api') return null;
@@ -81,7 +81,7 @@ export default function Hero() {
           {isApiConfigured() ? (
             <div className="hero-status" data-testid="hero-status" style={{ marginTop: 14 }}>
               <span className="micro">
-                {status ? (live ? 'LIVE' : 'LOCAL') : '…'} ·{' '}
+                {status ? (live ? t('hero.statusLive') : t('hero.statusLocal')) : '…'} ·{' '}
                 {latestPass
                   ? `${t('hero.lastPass')}: ${formatDate(latestPass)}`
                   : live

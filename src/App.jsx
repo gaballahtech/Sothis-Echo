@@ -17,6 +17,7 @@ import Lenses from './components/Lenses';
 import ExplainPanel from './components/ExplainPanel';
 import RapidResponse from './components/RapidResponse';
 import Sonification from './components/Sonification';
+import TimeSeries from './components/TimeSeries';
 import Recovery from './components/Recovery';
 import Detective from './components/Detective';
 import Method from './components/Method';
@@ -58,6 +59,7 @@ function AppContent() {
           <ExplainPanel />
           <RapidResponse />
           <Sonification />
+          <TimeSeries />
           <Recovery />
           <Detective />
           <Method />

@@ -24,8 +24,9 @@ test('comparison slider responds to keyboard and pointer', async ({ page }) => {
   const slider = page.getByTestId('compare-slider');
   await slider.scrollIntoViewIfNeeded();
   await expect(slider).toHaveAttribute('aria-valuenow', '50');
-  await expect(slider.getByText('OPTICAL · CLOUDED')).toBeVisible();
+  await expect(slider.getByText('OPTICAL · BASEMAP')).toBeVisible();
   await expect(slider.getByText('RADAR · L-BAND')).toBeVisible();
+  await expect(slider.getByText('CLOUDED')).toHaveCount(0);
 
   await slider.focus();
   await page.keyboard.press('End');
@@ -68,18 +69,25 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('detective game scores two real cases plus a judgment round and resets', async ({ page }) => {
+test('detective game scores five rounds and resets', async ({ page }) => {
   await openApp(page);
   await page.locator('#game').scrollIntoViewIfNeeded();
   await page.getByTestId('detective-start').click();
 
-  const answers = ['flood', 'fire', 'context'];
+  const answers = ['flood', 'fire', 'context', 'coherence', 'specular'];
   for (let index = 0; index < answers.length; index += 1) {
     await page.getByTestId(`detective-option-${answers[index]}`).click();
     const feedback = page.getByTestId('detective-feedback');
     await expect(feedback).toBeVisible();
     await expect(feedback).toContainText(/Correct/i);
-    if (index < answers.length - 1) {
+    if (answers[index] === 'fire') {
+      await expect(feedback).toContainText(/HH/);
+      await expect(feedback).toContainText(/HV/);
+      await expect(feedback).not.toContainText(/VV/);
+      await expect(feedback).not.toContainText(/VH/);
+    }
+    // Evidence chips only exist for the two evidence-based (non-changeOnly) rounds.
+    if (answers[index] === 'flood' || answers[index] === 'fire') {
       await expect(feedback).toContainText(/Evidence/i);
     }
     await page.getByTestId('detective-next').click();
@@ -87,7 +95,7 @@ test('detective game scores two real cases plus a judgment round and resets', as
 
   const result = page.getByTestId('detective-result');
   await expect(result).toBeVisible();
-  await expect(result).toContainText('3 / 3');
+  await expect(result).toContainText('5 / 5');
   await result.getByRole('button', { name: /Play again/i }).click();
   await expect(page.getByTestId('detective-option-flood')).toBeVisible();
 });
@@ -167,4 +175,12 @@ test('offline fallback hides calibrated-only controls and never claims calibrati
   const researcher = page.getByTestId('for-researchers');
   await researcher.locator('.bp6-section-header').click();
   await expect(page.getByText(/labelled offline fallback/i).first()).toBeVisible();
+});
+
+test('SeeThrough explains the full browse vs site window', async ({ page }) => {
+  await openApp(page);
+  const seeThrough = page.locator('#see-through');
+  await seeThrough.scrollIntoViewIfNeeded();
+  await expect(seeThrough.getByText('Full browse vs site window')).toBeVisible();
+  await expect(seeThrough.getByText(/full NISAR L-band browse/i)).toBeVisible();
 });

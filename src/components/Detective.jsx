@@ -51,6 +51,18 @@ export default function Detective() {
   const timerRef = useRef(null);
 
   const L = (value) => localized(value, language);
+
+  const formatDate = (value) => {
+    if (!value) return '—';
+    const date = new Date(`${value}T00:00:00`);
+    if (Number.isNaN(date.getTime())) return value;
+    return new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      numberingSystem: 'latn',
+    }).format(date);
+  };
   const rounds = detectiveRounds;
   const round = rounds[roundIndex];
   const site = useMemo(() => sites.find((item) => item.id === round?.siteId), [sites, round?.siteId]);
@@ -104,11 +116,9 @@ export default function Detective() {
     setRevealed(true);
     if (optionId === round.answer) {
       setScore((value) => value + 1);
-      setStreak((value) => {
-        const next = value + 1;
-        setBestStreak((best) => Math.max(best, next));
-        return next;
-      });
+      const nextStreak = streak + 1;
+      setStreak(nextStreak);
+      setBestStreak((best) => Math.max(best, nextStreak));
       playBeep('correct');
     } else {
       setStreak(0);
@@ -166,7 +176,7 @@ export default function Detective() {
               <p className="game-score" dir="ltr">{score} / {total}</p>
               <p className="body-copy-muted">{t('game.scoreLine', { score, total })}</p>
               {bestStreak > 1 ? (
-                <p className="small muted" style={{ marginBottom: 8 }}>🔥 {bestStreak} streak best</p>
+                <p className="small muted" style={{ marginBottom: 8 }}>{t('game.streakBest', { count: bestStreak })}</p>
               ) : null}
               <div style={{ maxWidth: 260, margin: '0 auto 12px' }}>
                 <Meter value={ratio} label={t('game.score', { score })} />
@@ -197,11 +207,14 @@ export default function Detective() {
                   <p className="micro" style={{ margin: '4px 0 0' }}>
                     {round.changeOnly
                       ? t('game.changeMeta')
-                      : `NISAR L-band · ${site.measurements?.dateBefore} → ${site.measurements?.dateAfter}`}
+                      : t('game.metaDates', {
+                          before: formatDate(site.measurements?.dateBefore),
+                          after: formatDate(site.measurements?.dateAfter),
+                        })}
                   </p>
                 </div>
                 <div className="row" style={{ gap: 10, alignItems: 'center' }}>
-                  <div className="row" style={{ gap: 4 }} aria-label="progress">
+                  <div className="row" style={{ gap: 4 }} aria-label={t('game.progress')}>
                     {rounds.map((_, i) => (
                       <span
                         key={i}

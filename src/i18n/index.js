@@ -31,15 +31,8 @@ const en = {
     ctaListen: 'Hear the surface',
     liveData: 'NISAR L-band record',
     lastPass: 'Last real pass',
-    panel: {
-      orbit: 'Orbit',
-      orbitValue: '747 km, polar',
-      repeat: 'Full coverage',
-      repeatValue: 'every 12 days',
-      resolution: 'Detail',
-      resolutionValue: '3–10 m per pixel',
-    },
-    factsLabel: 'Mission facts',
+    statusLive: 'LIVE',
+    statusLocal: 'LOCAL',
   },
   mission: {
     title: 'Meet NISAR',
@@ -60,7 +53,7 @@ const en = {
           'NASA’s L-band (24 cm) reaches trunks and soil. ISRO’s S-band (9.4 cm) sees finer canopy detail. Together they separate what one sensor would blur.',
       },
       heartbeat: {
-        title: 'A 24-day heartbeat',
+        title: 'A 12-day heartbeat',
         body:
           'The orbit repeats almost exactly, so the same patch is imaged from the same angle every 12 days. The difference between passes is the signal.',
       },
@@ -73,7 +66,6 @@ const en = {
     facts: {
       title: 'Mission card',
       launch: 'Launch',
-      launchValue: '30 Jul 2025 · GSLV-F16',
       orbit: 'Orbit',
       orbitValue: '747 km · 98.4° inclination',
       repeat: 'Repeat',
@@ -100,15 +92,16 @@ const en = {
   seeThrough: {
     title: 'Why the camera misses the story',
     subtitle:
-      'Drag the line. Two views of the same study area: the clearest optical pass available, and the radar window cut to match it.',
-    optical: 'OPTICAL · CLOUDED',
+      'Drag the line. Two views of the same study area: a cloud-free Esri World Imagery basemap over the exact window, and the radar window cut to match it.',
+    optical: 'OPTICAL · BASEMAP',
     radar: 'RADAR · L-BAND',
-    radarC: 'RADAR · L-BAND',
     dragHint: 'DRAG THE DIVIDER',
     dividerAt: 'Divider at {{value}}% of the frame width',
     keyboardHint: 'or use arrow keys',
+    opticalPlatform: 'Esri World Imagery (cloud-free reference basemap)',
+    radarPlatform: 'NASA NISAR L-band (real pass)',
     opticalCaption:
-      'A real Sentinel-2 optical quicklook. Clouds, smoke and darkness still hide the surface.',
+      'A cloud-free Esri World Imagery basemap over the exact study window — north-up, no crop offset. It is a reference basemap, not a same-date Sentinel-2 pass, so clouds may not appear here.',
     radarCaption:
       'A real NASA NISAR L-band (HH) browse image. Smooth water is dark; trunks standing in water can return a bright double bounce.',
     radarCaptionSentinel:
@@ -117,6 +110,12 @@ const en = {
       'Time alignment',
     temporalNoteBody:
       'The optical side shows Esri World Imagery over the exact study bbox - not a same-date Sentinel-2 pass, so the two sides do not represent the same moment in time.',
+    browseNote:
+      'Full browse vs site window',
+    browseNoteBody:
+      'The radar side shows the full NISAR L-band browse (purple, whole swath). The study-area cards and the three lenses zoom into the ~5.5 km site window around the same granule.',
+    browseFull: 'Full browse (purple)',
+    browseWindow: 'Site window (gray)',
     nisarSwath:
       'Both sides show the same window, cropped with the product’s own geolocation file (KML), north-up. The radar layer is NASA’s colourised quicklook, not a calibrated image; its tilted orbit and wider swath mean fine detail differs — the ground area does not.',
     noImage: 'Live imagery unavailable — start the backend to load the real scene.',
@@ -134,6 +133,8 @@ const en = {
     event: 'Event',
     readPol: 'Read the polarization',
     signalTab: 'Reading the signal',
+    coPolDesc: 'Co-polarised: send and receive in the same direction — open water is dark, trunks can glow.',
+    crossPolDesc: 'Cross-polarised: vertical send, horizontal receive — the 3-D canopy channel.',
     deepDive: 'Deep Dive Data',
     measurements: 'Signal measurements',
     localData:
@@ -163,9 +164,9 @@ const en = {
     dbNote:
       'Lower dB means less energy returned — a darker pixel. HV−HH is the cross-pol ratio. Before/after cards and the change map are {{cards}}; the dB panel and the time series are {{numbers}}.',
     provCardsNisar: 'real NASA NISAR L-band ({{polarizations}}) browse images',
-    provCardsSentinel: 'real NASA NISAR L-band ({{polarizations}}) browse images',
+    provCardsSentinel: 'bundled illustrative L-band ({{polarizations}}) browse images',
     provNumbersSentinel:
-      'calibrated NISAR L-band gamma-0 ({{polarizations}})',
+      'calibrated L-band gamma-0 ({{polarizations}})',
     provNumbersNisar: 'calibrated NISAR L-band gamma-0 ({{polarizations}})',
     degraded: 'The live rebuild failed for this site, so the labelled fallback record is shown — not new measurements.',
     dbNoteFallback:
@@ -191,7 +192,6 @@ const en = {
     metric: 'Channel',
     beforePass: 'Before (dB)',
     afterPass: 'After (dB)',
-    crossDb: 'HH − HV',
     crossDbNote:
       'Before/after means from the satellite passes listed above (calibrated gamma-0 dB), not simulated: {{coPol}} is the co-pol channel and {{crossPol}} − {{coPol}} is the cross-pol ratio; a wider gap means more volume scattering from canopy.',
     ariaScene: '{{site}} {{state}} radar scene',
@@ -225,8 +225,6 @@ const en = {
     title: 'See and hear the surface dance',
     subtitle:
       'The record of satellite passes becomes both a wave and a pulse. Watch the trace and listen for the change when a flood or fire hits.',
-    stableTitle: 'A stable surface',
-    stableSub: 'A reference series with almost no change. Same low pitch, slow steady pulse.',
     changeTitle: 'A changing surface',
     changeSub: 'The study-area series. The event is audible before you read the label.',
     play: 'Play',
@@ -254,6 +252,10 @@ const en = {
     chartTitle: 'Normalized radar-structure recovery',
     chartY: 'Signal vs baseline (%)',
     chartX: 'Time since event',
+    chartLabelPass: 'Measured backscatter per pass (dB)',
+    eventLabel: 'event',
+    summaryPasses: 'Measured passes from {{start}} to {{end}}, between {{lo}} and {{hi}} dB.',
+    summaryCurve: 'Recovery curve. Target {{threshold}} percent. {{months}}',
     caveat:
       'This is a structural proxy, not full ecological recovery. Radar brightness can return while carbon, species and soil are still rebuilding.',
     methodLabel: 'How this estimate is made',
@@ -267,10 +269,22 @@ const en = {
       'No NISAR pass sampled the flood peak: the first post-event pass came {{gap}} days after the event, and it changed {{change}}% of the window against {{noise}}% pre-event noise. With no peak observation, a recovery curve would be an extrapolation, so it is not drawn.',
     signalToday: 'Signal at the end of the record',
   },
+  timeSeries: {
+    title: 'The change over time',
+    subtitle: 'Every real NISAR pass, in order. Press play to watch the backscatter and the change metric move through the record.',
+    play: 'Play',
+    pause: 'Pause',
+    backscatter: 'HH backscatter (dB)',
+    changeMetric: 'Change',
+    date: 'Date',
+    pass: 'Pass {{current}} / {{total}}',
+    noData: 'No time series for this area yet.',
+    hint: 'Each point is one real satellite pass. The line is calibrated HH backscatter; the bars are the change metric (0–1).',
+  },
   game: {
     title: 'Radar detective',
     subtitle:
-      'Two real post-launch cases plus one judgment round on a bright change map. Read the signal, not the caption. Evidence is revealed only after you answer.',
+      'Two real post-launch cases plus three reasoning rounds on real change maps. Read the signal, not the caption. Evidence is revealed only after you answer.',
     round: 'ROUND {{current}} / {{total}}',
     score: 'SCORE {{score}}',
     question: 'What changed here?',
@@ -284,6 +298,7 @@ const en = {
     restart: 'Play again',
     finishedTitle: 'Case file closed',
     scoreLine: 'You read {{score}} of {{total}} signatures correctly.',
+    streakBest: '🔥 {{count}} in a row (best)',
     tierHigh: 'Field-ready analyst. You are reading structure, not colour.',
     tierMedium: 'Solid read. The polarization channels are starting to speak.',
     tierLow: 'Good start. Remember: VH loves 3-D canopy, water is dark and smooth, and flooded trunks can glow.',
@@ -293,14 +308,15 @@ const en = {
     before: 'THEN',
     after: 'NOW',
     start: 'Start the case',
-    startTitle: 'Two scenes, then one judgment round',
+    startTitle: 'Two scenes, then three reasoning rounds',
     startBody:
       'The clock starts when you press start. You get {{seconds}} seconds per round, {{total}} rounds in total. Reading the signal matters more than speed.',
     startHint: 'The timer pauses while the evidence is open.',
     timeLeft: 'TIME',
     changeTitle: 'Change map · |after − before|',
     changeStatus: 'NISAR L-band · HH',
-    changeMeta: 'NISAR L-band (HH) · same Vietnam change map, no new acquisition',
+    changeMeta: 'NISAR L-band (HH) · real change map, no new acquisition',
+    metaDates: 'NISAR L-band · {{before}} → {{after}}',
   },
   method: {
     title: 'Data we can defend',
@@ -319,6 +335,10 @@ const en = {
     downloadJson: 'Download this dataset (JSON)',
     downloadCsv: 'Download time series (CSV)',
     versionLabel: 'Dataset version',
+    apiBase: 'API base',
+    policyLabel: 'Policy',
+    policyBackendFirst: 'BACKEND FIRST',
+    policyZeroRequests: 'ZERO REQUESTS',
     disclosure:
       'Built for the NASA Space Apps Challenge. NISAR is a partnership between NASA and ISRO. This is an independent, open-source educational prototype.',
     noBackend: 'No VITE_API_BASE_URL configured — all requests are skipped, by design.',
@@ -413,6 +433,10 @@ const en = {
     tabCoherence: 'Coherence',
     tabMechanism: 'Mechanism',
     tabChange: 'Change',
+    legendSurface: 'surface / double-bounce',
+    legendVolume: 'volume (canopy)',
+    legendLow: 'low return (water / shadow)',
+    legendChange: 'mechanism change',
     amplitudeBody:
       'Calibrated gamma-0 backscatter (HH and HV) before and after. A drop means the surface got smoother or lost its canopy; a rise means it got rougher or wetter.',
     pairNote: 'Pair: {{before}} → {{after}}',
@@ -449,8 +473,6 @@ const en = {
       'NISAR uses only HH and HV channels (dual-pol). This limits separation into scattering classes: surface/dihedral (red), volume/canopy (green), and low return such as water or shadow (blue). The thresholds (low ≤ {{low}} dB; volume when HV−HH > {{ratio}} dB) are applied uniformly, but HH‑HH alone cannot capture all geophysics.',
     coherenceBaselineNote:
       'InSAR coherence from the GSLC pair (granules {{before}} → {{after}}) with a 16‑day temporal baseline, water‑masked. Low values (<0.3) mark rapid decorrelation such as structural change, while stable surfaces stay high.',
-    temporalMismatchNote:
-      'The optical side shows Esri World Imagery basemap for the exact study bbox - not a same-date Sentinel-2 pass, so the two sides do not represent the same moment in time.',
   },
   explain: {
     title: 'Explain the echo',
@@ -476,7 +498,7 @@ const en = {
     extent: 'Extent changed',
     extentPct: 'Changed area',
     populationExposed: 'Population exposed (est.)',
-    populationEstimate: 'WorldPop {{source}} · {{year}}',
+    populationEstimate: '{{source}} · {{year}}',
     populationUnavailable: 'Population unavailable',
     mechanism: 'Dominant mechanism',
     decision: 'Decision',
@@ -497,14 +519,12 @@ const en = {
     subtitle:
       'A curated set of NISAR-relevant change sites across six continents. Sites with real lens data are measured; the rest are honest stories awaiting their first granule.',
     mapLabel: 'World map of change sites',
-    mapAlt: 'World map with pins for flood, wildfire, glacier, volcano, deforestation, subsidence, oil spill, crop and earthquake sites',
     lensMark: 'Measured (real lens)',
     measured: 'Measured',
-    storyOnly: 'Story only',
-    notMeasured: 'Not yet measured — no real granule yet',
+    storyOnly: 'Illustrative scenario',
+    storyNote: 'Illustrative scenario — not a measured event; no real granule yet.',
     openStory: 'Open study area',
     clickToOpen: 'Click to open this story',
-    storyNote: 'Narrative preview — a live granule is not yet processed for this place.',
     whatHappened: 'What happened',
     whyRadar: 'Why radar sees it',
     whatMeasures: 'What NISAR measures',
@@ -513,6 +533,8 @@ const en = {
   },
   common: {
     loading: 'Loading',
+    live: 'LIVE',
+    local: 'LOCAL',
     retry: 'Retry',
     checkingLive: 'Reading live NISAR record…',
     sitePicker: 'Study area',
@@ -552,15 +574,8 @@ const ar = {
     ctaListen: 'اسمع سطح الأرض',
     liveData: 'سجل NISAR L-band',
     lastPass: 'آخر مرور حقيقي',
-    panel: {
-      orbit: 'المدار',
-      orbitValue: '747 كم، قطبي',
-      repeat: 'تغطية الأرض',
-      repeatValue: 'كل 12 يومًا',
-      resolution: 'التفاصيل',
-      resolutionValue: '3–10 أمتار للبكسل',
-    },
-    factsLabel: 'أرقام المهمة',
+    statusLive: 'مباشر',
+    statusLocal: 'محلي',
   },
   mission: {
     title: 'تعرّف على نيسار',
@@ -594,7 +609,6 @@ const ar = {
     facts: {
       title: 'بطاقة المهمة',
       launch: 'الإطلاق',
-      launchValue: '30 يوليو 2025 · GSLV-F16',
       orbit: 'المدار',
       orbitValue: '747 كم · ميل 98.4°',
       repeat: 'التكرار',
@@ -620,15 +634,16 @@ const ar = {
   seeThrough: {
     title: 'لماذا تفوت الكاميرا القصة',
     subtitle:
-      'اسحب الخط. منظوران للمنطقة نفسها: أوضح مرور بصري متاح، ونافذة الرادار المقصوصة لتطابقها.',
-    optical: 'بصري · تحت الغيوم',
+      'اسحب الخط. منظوران للمنطقة نفسها: خريطة أساس Esri خالية من الغيوم فوق النافذة الدقيقة، ونافذة الرادار المقصوصة لتطابقها.',
+    optical: 'بصري · خريطة أساس',
     radar: 'رادار · نطاق L',
-    radarC: 'رادار · نطاق L',
     dragHint: 'اسحب الفاصل',
     dividerAt: 'الفاصل عند {{value}}% من عرض الإطار',
     keyboardHint: 'أو استخدم مفاتيح الأسهم',
+    opticalPlatform: 'خريطة أساس Esri (مرجع خالٍ من الغيوم)',
+    radarPlatform: 'مرور NISAR L-band الحقيقي',
     opticalCaption:
-      'صورة بصرية حقيقية من Sentinel-2. الغيوم والدخان والظلام ما زالت تحجب السطح.',
+      'خريطة أساس Esri World Imagery خالية من الغيوم فوق حدود الدراسة الدقيقة — الشمال لأعلى، بدون تعويض قص. إنها خريطة أساس للمرجع، وليس مرور Sentinel-2 بنفس التاريخ، لذا قد لا تظهر الغيوم هنا.',
     radarCaption:
       'صورة حقيقية من NISAR L-band (HH). الماء الأملس داكن، والجذوع الواقفة في الماء قد تعيد ارتدادًا مزدوجًا لامعًا.',
 radarCaptionSentinel:
@@ -637,6 +652,12 @@ radarCaptionSentinel:
        'مطابقة زمنية',
     temporalNoteBody:
        'الجانب البصري يظهر خريطة Esri World Imagery للحدود الدقيقة للمدرسة — وليس مرور Sentinel-2 بنفس التاريخ، لذا لا يمثل الجانبان نفس اللحظة الزمنية.',
+    browseNote:
+      'المسح الكامل مقابل نافذة الموقع',
+    browseNoteBody:
+      'الجانب الراداري يعرض مسح NISAR L-band الكامل (البنفسجي، المساحة الكاملة). بطاقات مناطق الدراسة والعدسات الثلاث تُكبّر على نافذة الموقع (~5.5 كم) حول نفس الجرين.',
+    browseFull: 'المسح الكامل (بنفسجي)',
+    browseWindow: 'نافذة الموقع (رمادي)',
     nisarSwath:
       'الجانبان يعرضان النافذة نفسها، مقصوصة بملف الإسناد الجغرافي الرسمي للمنتج (KML)، والشمال لأعلى. طبقة الرادار صورة سريعة ملوّنة من ناسا وليست صورة معايرة؛ ومدارها المائل ونطاقها الأوسع يجعلان التفاصيل الدقيقة تختلف — أما مساحة الأرض فهي نفسها.',
     noImage: 'الصورة الحية غير متاحة — شغّل الباك اند لتحميل المشهد الحقيقي.',
@@ -654,6 +675,8 @@ radarCaptionSentinel:
     event: 'الحدث',
     readPol: 'اقرأ الاستقطاب',
     signalTab: 'قراءة الإشارة',
+    coPolDesc: 'القطب المشترك: إرسال واستقبال في الاتجاه نفسه — الماء المفتوح داكن، والجذوع قد تلمع.',
+    crossPolDesc: 'القطب المتقاطع: إرسال عمودي واستقبال أفقي — قناة المظلة ثلاثية الأبعاد.',
     deepDive: 'بيانات الباحثين',
     localData:
       'أرقام احتياطية مرفقة مع الموقع: الباك اند غير متاح، فالقيم أدناه توضيحية وليست قياسات.',
@@ -683,9 +706,9 @@ radarCaptionSentinel:
     dbNote:
       'ديسيبل أقل يعني طاقة عائدة أقل — بكسل أغمق. HV−HH هو نسبة الاستقطاب المتقاطع. بطاقات قبل/بعد وخريطة الاختلاف {{cards}}؛ أما لوحة الديسيبل والسلسلة الزمنية فمن {{numbers}}.',
     provCardsNisar: 'صور حقيقية من NISAR L-band ({{polarizations}})',
-    provCardsSentinel: 'صور حقيقية من NISAR L-band ({{polarizations}})',
+    provCardsSentinel: 'صور توضيحية مرفقة من نطاق L ({{polarizations}})',
     provNumbersSentinel:
-      'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
+      'نطاق L gamma-0 مُعايَرة ({{polarizations}})',
     provNumbersNisar: 'NISAR L-band gamma-0 مُعايَرة ({{polarizations}})',
     degraded: 'فشل البناء الحيّ لهذا الموقع، لذا تُعرض السجلات الاحتياطية الموسومة — وليست قياسات جديدة.',
     dbNoteFallback:
@@ -711,7 +734,6 @@ radarCaptionSentinel:
     metric: 'القناة',
     beforePass: 'قبل (ديسيبل)',
     afterPass: 'بعد (ديسيبل)',
-    crossDb: 'HH − HV',
     crossDbNote:
       'القيم قبل/بعد هي متوسطات من مرورات الأقمار المذكورة أعلاه (ديسيبل غاما-0 معايرة)، وليست محاكاة: {{coPol}} هي القناة المشتركة، و{{crossPol}} − {{coPol}} هي نسبة الاستقطاب المتقاطع؛ اتساع الفجوة يعني تشتتًا حجميًا أكبر من المظلة.',
     ariaScene: 'مشهد رادار لـ{{site}} — {{state}}',
@@ -745,8 +767,6 @@ radarCaptionSentinel:
     title: 'شاهد واسمع سطح الأرض يرقص',
     subtitle:
       'سجل مرورات القمر يصبح موجة ونبضة. شاهد الأثر واسمع التغيّر عندما يضرب الفيضان أو الحريق.',
-    stableTitle: 'سطح مستقر',
-    stableSub: 'سلسلة مرجعية بلا تغيّر تقريبًا. النغمة المنخفضة نفسها والنبض البطيء الثابت.',
     changeTitle: 'سطح متغيّر',
     changeSub: 'سلسلة منطقة الدراسة. الحدث مسموع قبل أن تقرأ العنوان.',
     play: 'تشغيل',
@@ -774,6 +794,10 @@ radarCaptionSentinel:
     chartTitle: 'تعافي البنية الرادارية المُعيَّر',
     chartY: 'الإشارة مقابل الأساس (%)',
     chartX: 'الزمن منذ الحدث',
+    chartLabelPass: 'الاستطاعة الحقيقية لكل مرور (ديسيبل)',
+    eventLabel: 'الحدث',
+    summaryPasses: 'مرورات مقاسة من {{start}} إلى {{end}}، بين {{lo}} و{{hi}} ديسيبل.',
+    summaryCurve: 'منحنى التعافي. الهدف {{threshold}} بالمئة. {{months}}',
     caveat:
       'هذا مؤشر بنيوي بديل، وليس تعافيًا بيئيًا كاملًا. قد يعود سطوع الرادار بينما الكربون والأنواع والتربة ما زالت تتعافى.',
     methodLabel: 'كيف حُسب هذا التقدير',
@@ -787,9 +811,21 @@ radarCaptionSentinel:
       'لم يرصد أي مرور NISAR ذروة الفيضان: جاء أول مرور بعد الحدث بعد {{gap}} أيام، وغيّر {{change}}% من النافذة مقابل ضوضاء قبل الحدث {{noise}}%. بدون رصد الذروة سيكون منحنى التعافي استقراءً، لذلك لا يُرسم.',
     signalToday: 'الإشارة عند نهاية السجل',
   },
+  timeSeries: {
+    title: 'التغيّر عبر الزمن',
+    subtitle: 'كل مرور NISAR حقيقي، بالترتيب. اضغط تشغيل لمشاهدة الارتداد الخلفي ومقياس التغيّر يتحركان عبر السجل.',
+    play: 'تشغيل',
+    pause: 'إيقاف',
+    backscatter: 'الارتداد الخلفي HH (ديسيبل)',
+    changeMetric: 'التغيّر',
+    date: 'التاريخ',
+    pass: 'المرور {{current}} / {{total}}',
+    noData: 'لا توجد سلسلة زمنية لهذه المنطقة بعد.',
+    hint: 'كل نقطة مرور قمر صناعي حقيقي. الخط هو الارتداد الخلفي HH المعاير؛ والأعمدة هي مقياس التغيّر (0–1).',
+  },
   game: {
     title: 'محقق الرادار',
-    subtitle: 'حالتان حقيقيتان بعد إطلاق نيسار، وجولة حكم على خريطة تغيّر ساطعة. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
+    subtitle: 'حالتان حقيقيتان بعد إطلاق نيسار، وثلاث جولات استدلال على خرائط تغيّر حقيقية. اقرأ الإشارة لا العنوان. تُكشف الأدلة بعد إجابتك فقط.',
     round: 'الجولة {{current}} / {{total}}',
     score: 'النقاط {{score}}',
     question: 'ماذا تغيّر هنا؟',
@@ -803,6 +839,7 @@ radarCaptionSentinel:
     restart: 'العب مجددًا',
     finishedTitle: 'أُغلق ملف القضية',
     scoreLine: 'قرأت {{score}} من {{total}} بصمات بشكل صحيح.',
+    streakBest: '🔥 {{count}} على التوالي (الأفضل)',
     tierHigh: 'محلل ميداني جاهز. أنت تقرأ البنية لا اللون.',
     tierMedium: 'قراءة جيدة. قنوات الاستقطاب بدأت تتكلم.',
     tierLow: 'بداية جيدة. تذكّر: VH يحب المظلة المجسّمة، والماء داكن أملس، والجذوع المغمورة قد تلمع.',
@@ -812,7 +849,7 @@ radarCaptionSentinel:
     before: 'سابقًا',
     after: 'الآن',
     start: 'ابدأ القضية',
-    startTitle: 'مشهدان، ثم جولة حكم',
+    startTitle: 'مشهدان، ثم ثلاث جولات استدلال',
     startBody:
       'العدّاد يبدأ عند ضغطك على «ابدأ». عندك {{seconds}} ثانية لكل جولة، و{{total}} جولات إجمالًا. قراءة الإشارة أهم من السرعة.',
     startHint: 'المؤقت يتوقف أثناء عرض الأدلة.',
@@ -820,6 +857,7 @@ radarCaptionSentinel:
     changeTitle: 'خريطة التغيّر · |بعد − قبل|',
     changeStatus: 'NISAR L-band · HH',
     changeMeta: 'NISAR L-band (HH) · نفس خريطة التغيّر، دون التقاط جديد',
+    metaDates: 'NISAR L-band · {{before}} → {{after}}',
   },
   method: {
     title: 'بيانات قابلة للدفاع',
@@ -837,6 +875,10 @@ radarCaptionSentinel:
     downloadJson: 'تنزيل هذه المجموعة (JSON)',
     downloadCsv: 'تنزيل السلسلة الزمنية (CSV)',
     versionLabel: 'نسخة البيانات',
+    apiBase: 'عنوان API',
+    policyLabel: 'السياسة',
+    policyBackendFirst: 'الخادم أولًا',
+    policyZeroRequests: 'صفر طلبات',
     disclosure:
       'بُني لتحدي ناسا لتطبيقات الفضاء. نيسار شراكة بين ناسا وإيسرو. هذا نموذج تعليمي مستقل ومفتوح المصدر.',
     noBackend: 'لم يُضبط VITE_API_BASE_URL — تُتخطى كل الطلبات عمدًا.',
@@ -931,6 +973,10 @@ radarCaptionSentinel:
     tabCoherence: 'التماسك',
     tabMechanism: 'آلية التشتت',
     tabChange: 'التغيّر',
+    legendSurface: 'سطح / ارتداد مزدوج',
+    legendVolume: 'حجم (مظلة)',
+    legendLow: 'عائد منخفض (ماء / ظل)',
+    legendChange: 'تغيّر الآلية',
     amplitudeBody:
       'ارتداد غاما-صفر المعاير (HH و HV) قبل وبعد. الانخفاض يعني أن السطح أصبح أنعم أو فقد مظلته؛ والارتفاع يعني أنه أصبح أخشن أو أكثر رطوبة.',
     pairNote: 'الزوج: {{before}} → {{after}}',
@@ -967,8 +1013,6 @@ radarCaptionSentinel:
       'NISAR يستخدم قنوات HH و HV فقط (القطب الثنائي). هذا يقيد الفصل إلى فئات التشتت: السطح/الارتداد المزدوج (أحمر)، حجم/مظلة (أخضر)، عائد منخفض مثل الماء أو الظل (أزرق). يتم تطبيق العتبات (العائد المنخفض ≤ {{low}} dB; حجم عند HV−HH > {{ratio}} dB) بالتساوي، لكن HH–HV وحده لا يستطيع التقاط كل الفيزياء.',
     coherenceBaselineNote:
       'التماسك من زوج GSLC (قبل → بعد) مع baseline زمني 16 يومًا، وماسكة الماء. القيم المنخفضة (<0.3) تشير إلى تغير بنيوي سريع مثل الحريق أو فيضان، بينما تبقى الأسطح المستقرة عالية.',
-    temporalMismatchNote:
-      'الجانب البصري يظهر خريطة Esri World Imagery للحدود الدقيقة للمدرسة — وليس مرور Sentinel-2 بنفس التاريخ، لذا لا يمثل الجانبان نفس اللحظة الزمنية.',
   },
   explain: {
     title: 'اشرح الصدى',
@@ -994,7 +1038,7 @@ radarCaptionSentinel:
     extent: 'المساحة المتغيّرة',
     extentPct: 'نسبة التغيّر',
     populationExposed: 'السكان المعرّضون (تقدير)',
-    populationEstimate: 'WorldPop {{source}} · {{year}}',
+    populationEstimate: '{{source}} · {{year}}',
     populationUnavailable: 'بيانات السكان غير متاحة',
     mechanism: 'آلية التغيّر السائدة',
     decision: 'القرار',
@@ -1015,22 +1059,22 @@ radarCaptionSentinel:
     subtitle:
       'مجموعة منتقاة من مواقع التغيّر ذات الصلة بـ NISAR عبر ست قارات. المواقع التي لها بيانات عدسات حقيقية مقيسة؛ والباقي قصص صادقة تنتظر أول جرين لها.',
     mapLabel: 'خريطة عالمية لمواقع التغيّر',
-    mapAlt: 'خريطة عالمية بعلامات لمواقع فيضان وحريق ونهر جليدي وبركان وإزالة غابات وهبوط وتسرب نفط ومحصول وزلزال',
     lensMark: 'مقيس (عدسة حقيقية)',
     measured: 'مقيس',
-    storyOnly: 'قصة فقط',
-    notMeasured: 'غير مقيس بعد — لا يوجد جرين حقيقي',
+    storyOnly: 'سيناريو توضيحي',
     openStory: 'فتح منطقة الدراسة',
     clickToOpen: 'اضغط لفتح هذه القصة',
     whatHappened: 'ما الذي حدث',
     whyRadar: 'لماذا يراها الرادار',
     whatMeasures: 'ما يقيسه NISAR',
     viewOnMap: 'اعرض على الخريطة',
-    storyNote: 'معاينة سردية — لم تتم معالجة جرين حقيقي لهذا المكان بعد.',
+    storyNote: 'سيناريو توضيحي — ليس حدثًا مقيسًا؛ لا يوجد جرين حقيقي بعد.',
     unavailable: 'بيانات الأطلس تُحمّل.',
   },
   common: {
     loading: 'جارٍ التحميل',
+    live: 'مباشر',
+    local: 'محلي',
     retry: 'إعادة المحاولة',
     checkingLive: 'جارٍ قراءة سجل NISAR الحيّ…',
     sitePicker: 'منطقة الدراسة',

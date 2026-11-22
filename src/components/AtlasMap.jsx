@@ -46,7 +46,8 @@ function FlyTo({ site, selectedId }) {
 }
 
 export default function AtlasMap({ selectedId, onSelect }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
   const selected = atlasSites.find((site) => site.id === selectedId) || null;
 
   const colorFor = useMemo(() => {
@@ -57,7 +58,7 @@ export default function AtlasMap({ selectedId, onSelect }) {
 
   const typeName = (ct) => {
     const found = CHANGE_TYPES.find((item) => item.id === ct);
-    return found ? localized(found.name, 'en') : ct;
+    return found ? localized(found.name, language) : ct;
   };
 
   return (
@@ -77,6 +78,7 @@ export default function AtlasMap({ selectedId, onSelect }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           noWrap
+          bounds={[[-85, -180], [85, 180]]}
         />
         <FitAll sites={atlasSites} />
         <FlyTo site={selected} selectedId={selectedId} />
@@ -102,8 +104,8 @@ export default function AtlasMap({ selectedId, onSelect }) {
             >
               <Popup>
                 <div className="atlas-popup">
-                  <strong>{localized(site.name, 'en')}</strong>
-                  <div className="micro">{localized(site.region, 'en')}</div>
+                  <strong>{localized(site.name, language)}</strong>
+                  <div className="micro">{localized(site.region, language)}</div>
                   <div className="micro">
                     {typeName(site.changeType)} ·{' '}
                     {measured ? t('atlas.measured') : t('atlas.storyOnly')}
@@ -118,9 +120,9 @@ export default function AtlasMap({ selectedId, onSelect }) {
 
       <div className="atlas-legend">
         {CHANGE_TYPES.map((ct) => (
-          <span key={ct.id} className="atlas-legend-item" title={localized(ct.name, 'en')}>
+          <span key={ct.id} className="atlas-legend-item" title={localized(ct.name, language)}>
             <span className="atlas-legend-swatch" style={{ background: ct.color }} />
-            {localized(ct.name, 'en')}
+            {localized(ct.name, language)}
           </span>
         ))}
         <span className="atlas-legend-item atlas-legend-lens" title={t('atlas.lensMark')}>

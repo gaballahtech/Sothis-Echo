@@ -108,6 +108,8 @@ export const studyAreas = [
         },
       },
     },
+    // NOTE: despite the legacy key names `vv`/`vh`, these hold calibrated NISAR L-band
+    // HH/HV gamma-0 values (see sarApi NISAR merge). `crossPol` is HV − HH.
     measurements: {
       vv: { before: -14.2, after: -10.8 },
       vh: { before: -21.0, after: -25.0 },

@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { Button, ButtonGroup } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -41,28 +43,30 @@ function esriOpticalURL(bbox) {
 export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, selectedSiteId } = useSiteData();
-  // Follow the shared selection so the comparison always shows the same place
-  // as the study areas, lenses and explain section underneath it.
-  const site =
-    sites.find((item) => item.id === selectedSiteId) ??
-    sites.find((item) => (item.states?.after?.imageUrl || item.states?.after?.nisarImageUrl) && item.states?.after?.opticalUrl) ??
-    sites.find((item) => item.id === 'sundarbans') ??
-    sites[0];
+  const { sites } = useSiteData();
+  const [radarView, setRadarView] = useState('browse');
+  // This comparison is always the Central Vietnam flood scene. It deliberately
+  // ignores the shared selection so switching to Big Sur (or any other site)
+  // elsewhere on the page never changes what this section shows.
+  const site = sites.find((item) => item.id === 'sundarbans') ?? sites[0];
   const state = site?.states?.after;
 
   if (!site || !state) return null;
 
   const siteName = localized(site.name, language);
   const stateLabel = localized(state.label, language);
-  // Prefer the calibrated HH scene crop the study areas render, so the radar
-  // side is the identical product and footprint — not the full swath browse.
-  const radarIsScene = Boolean(state.imageUrl);
-  const radarUrl = radarIsScene ? state.imageUrl : state.nisarImageUrl;
+  // Show the real NISAR L-band browse image (the purple HH browse) whenever the
+  // site ships one, so the radar side is the actual NISAR product the visitor
+  // expects. Fall back to the calibrated HH scene crop only when no browse exists.
+  // Toggle between the full NISAR browse (purple) and the calibrated site window
+  // (gray). When no browse exists, both fall back to the calibrated crop.
+  const hasBrowse = Boolean(state.nisarImageUrl);
+  const radarUrl = radarView === 'window' || !hasBrowse ? state.imageUrl : state.nisarImageUrl;
+  const radarIsScene = radarView === 'window' || !hasBrowse;
   const radarDate = state.nisarDate || state.date;
   // Every scene in this app is a NISAR L-band HH browse image, so the radar
   // layer is always NISAR; there is no Sentinel fallback branch to mislabel.
-  const radarPlatform = 'NASA NISAR L-band';
+  const radarPlatform = t('seeThrough.radarPlatform');
   const radarLabel = t('seeThrough.radar');
   const radarCaption = t('seeThrough.radarCaption');
 
@@ -72,16 +76,34 @@ export default function SeeThrough() {
   const wktBbox = parseWktBbox(site.wkt);
   const esriOptical = Boolean(wktBbox);
   const opticalUrl = esriOptical ? esriOpticalURL(wktBbox) : null;
-  const opticalPlatform = esriOptical ? 'Esri World Imagery' : (state.opticalPlatform || 'Sentinel-2');
+  const opticalPlatform = t('seeThrough.opticalPlatform');
   const opticalLabel = t('seeThrough.optical');
-  const opticalCaption = esriOptical
-    ? 'Esri World Imagery satellite basemap over the exact study window — north-up, no crop offset.'
-    : t('seeThrough.opticalCaption');
 
   return (
     <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
       <div className="section-inner">
         <SectionHead title={t('seeThrough.title')} subtitle={t('seeThrough.subtitle')} id="see-through-title" />
+
+        {hasBrowse ? (
+          <div className="row" style={{ marginBottom: 12 }}>
+            <ButtonGroup aria-label={t('seeThrough.radar')}>
+              <Button
+                active={radarView === 'browse'}
+                variant={radarView === 'browse' ? 'solid' : 'outlined'}
+                text={t('seeThrough.browseFull')}
+                onClick={() => setRadarView('browse')}
+                aria-pressed={radarView === 'browse'}
+              />
+              <Button
+                active={radarView === 'window'}
+                variant={radarView === 'window' ? 'solid' : 'outlined'}
+                text={t('seeThrough.browseWindow')}
+                onClick={() => setRadarView('window')}
+                aria-pressed={radarView === 'window'}
+              />
+            </ButtonGroup>
+          </div>
+        ) : null}
 
         <div className="split-main">
           <Panel
@@ -89,8 +111,6 @@ export default function SeeThrough() {
             bodyClassName="card-pad"
           >
             <CompareSlider
-              site={site}
-              params={state.params}
               opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
               radarAlt={`${siteName} — ${radarLabel}`}
               opticalLabel={opticalLabel}
@@ -126,6 +146,10 @@ export default function SeeThrough() {
               <div className="info-block">
                 <h4>{t('seeThrough.temporalNote')}</h4>
                 <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.temporalNoteBody')}</p>
+              </div>
+              <div className="info-block">
+                <h4>{t('seeThrough.browseNote')}</h4>
+                <p className="body-copy-muted" style={{ margin: 0 }}>{t('seeThrough.browseNoteBody')}</p>
               </div>
             </div>
 

@@ -70,7 +70,10 @@ export async function buildRapidResponse({ site, changeStats, lenses, bbox }) {
     bbox,
     generatedAt: new Date().toISOString().slice(0, 10),
     // The decision line is derived from the site's own impact narrative.
-    decision: site?.impact?.decision?.en || null,
+    decision: {
+      en: site?.impact?.decision?.en || null,
+      ar: site?.impact?.decision?.ar || null,
+    },
   };
 }
 

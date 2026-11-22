@@ -1,9 +1,11 @@
 /**
- * “Radar detective” rounds — two real post-launch cases plus one reasoning
- * check that reuses the existing Vietnam change map (no new acquisition):
+ * “Radar detective” rounds — two real post-launch cases plus three reasoning
+ * checks that reuse the existing change maps (no new acquisition):
  *   - Central Vietnam flood, September 2026
  *   - Big Sur (California) megafire, August 2026
  *   - Bright change ≠ damage (change-only round, no before/after pair)
+ *   - Big Sur: coherence as an independent line of evidence (change-only)
+ *   - Vietnam: specular reflection — why water turns dark (change-only)
  * The before/after dates are taken from the live site measurements at render
  * time; evidence chips are derived from the real backscatter series.
  */
@@ -49,8 +51,8 @@ export const detectiveRounds = [
     ],
     answer: 'fire',
     explanation: {
-      en: 'The ground got darker and smoother: VV falls sharply as canopy and litter are removed, and VH — the channel fed by 3-D vegetation — drops wherever the canopy was fully consumed. A flood would leave roofs and banks bright inside the dark water; an earthquake would shift phase, not erase texture.',
-      ar: 'صار السطح أغمق وأنعم: ينخفض VV بحدة مع اختفاء المظلة والغطاء الميت، وينخفض VH — قناة النباتات المجسّمة — حيث تُستهلك المظلة بالكامل. الفيضان كان سيُبقي الأسطح والضفاف لامعة داخل الماء الداكن؛ والزلزال كان سيغيّر الطور لا النسيج.',
+      en: 'The ground got darker and smoother: HH falls sharply as canopy and litter are removed, and HV — the channel fed by 3-D vegetation — drops wherever the canopy was fully consumed. A flood would leave roofs and banks bright inside the dark water; an earthquake would shift phase, not erase texture.',
+      ar: 'صار السطح أغمق وأنعم: ينخفض HH بحدة مع اختفاء المظلة والغطاء الميت، وينخفض HV — قناة النباتات المجسّمة — حيث تُستهلك المظلة بالكامل. الفيضان كان سيُبقي الأسطح والضفاف لامعة داخل الماء الداكن؛ والزلزال كان سيغيّر الطور لا النسيج.',
     },
   },
   {
@@ -94,6 +96,93 @@ export const detectiveRounds = [
     explanation: {
       en: 'Radar measures physical change in surface roughness and moisture, not intent or damage. Flooded rice paddies, seasonal irrigation, and tidal shifts all turn smooth and mirror-like, producing a strong change signal that requires local context to interpret.',
       ar: 'يقيس الرادار التغير الفيزيائي في خشونة السطح ورطوبته، ولا يميز بين السبب الطبيعي والكارثة. فحقول الأرز المغمورة للزراعة، والري الموسمي، وتغيرات المد والجزر تجعل السطح أملس كالمرآة، مما ينتج إشارة تغير قوية تتطلب معرفة السياق المحلي لتفسيرها بدقة.',
+    },
+  },
+  {
+    // Reasoning round from the Big Sur megafire story: coherence is a second,
+    // independent line of evidence beyond the amplitude drop.
+    id: 'bigsur-coherence',
+    siteId: 'bigsur',
+    changeOnly: true,
+    title: { en: 'Coherence tells the deeper story', ar: 'التماسك يحكي القصة الأعمق' },
+    brief: {
+      en: 'This real L-band change map is from the Big Sur megafire (August 2026). The burn scar shows a sharp amplitude drop — but the Big Sur story notes that coherence collapsed even where brightness held.',
+      ar: 'خريطة التغيّر الحقيقية هذه من حريق بيج سور (أغسطس 2026). تُظهر ندبة الحريق انخفاضًا حادًا في السعة — لكن قصة بيج سور تذكر أن التماسك انهار حتى حيث بقي السطوع ثابتًا.',
+    },
+    question: {
+      en: 'Why is InSAR coherence a valuable second line of evidence for the fire, beyond the amplitude drop?',
+      ar: 'لماذا يُعدّ تماسك InSAR دليلًا ثانيًا قيمًا للحريق، إلى جانب انخفاض السعة؟',
+    },
+    options: [
+      {
+        id: 'coherence',
+        label: {
+          en: 'Coherence detects the physical disturbance (canopy/soil change) even where brightness looks stable — an independent signal.',
+          ar: 'يكشف التماسك الاضطراب الفيزيائي (تغيّر المظلة/التربة) حتى حيث يبدو السطوع مستقرًا — إشارة مستقلة.',
+        },
+      },
+      {
+        id: 'amplitudeOnly',
+        label: {
+          en: 'Only amplitude matters; coherence is unaffected by fire.',
+          ar: 'السعة فقط هي المهمة؛ والتماسك لا يتأثر بالحريق.',
+        },
+      },
+      {
+        id: 'phaseOnly',
+        label: {
+          en: 'Coherence only measures how bright the fire is.',
+          ar: 'يقيس التماسك فقط مدى سطوع الحريق.',
+        },
+      },
+    ],
+    answer: 'coherence',
+    explanation: {
+      en: 'Fire removes canopy (amplitude drops) AND breaks phase coherence between passes (InSAR decorrelates). Coherence is an independent physical measurement, so it confirms the disturbance even where a single brightness channel looks stable.',
+      ar: 'الحريق يزيل المظلة (تنخفض السعة) ويكسر تماسك الطور بين المرورين (عدم الترابط). التماسك قياس فيزيائي مستقل، لذا يؤكد الاضطراب حتى حيث تبدو قناة سطوع واحدة مستقرة.',
+    },
+  },
+  {
+    // Reasoning round from the Central Vietnam flood story: specular reflection.
+    id: 'vietnam-specular',
+    siteId: 'sundarbans',
+    changeOnly: true,
+    title: { en: 'Why water turns black', ar: 'لماذا يصير الماء أسود' },
+    brief: {
+      en: 'This real L-band change map is from the Central Vietnam flood (September 2026). The Vietnam story says open water scatters the pulse away and turns almost black, while banks and buildings stay bright.',
+      ar: 'خريطة التغيّر الحقيقية هذه من فيضان وسط فيتنام (سبتمبر 2026). قصة فيتنام تقول إن الماء المكشوف يشتت النبضة ويصير شبه أسود، بينما تبقى الضفاف والمباني لامعة.',
+    },
+    question: {
+      en: 'In the flood change map, why do the flooded fields go dark while the banks and buildings stay bright?',
+      ar: 'في خريطة تغيّر الفيضان، لماذا تُظلم الحقول المغمورة بينما تبقى الضفاف والمباني لامعة؟',
+    },
+    options: [
+      {
+        id: 'specular',
+        label: {
+          en: 'Smooth open water acts like a mirror, sending the L-band pulse away (dark), while rough/built surfaces still return energy (bright).',
+          ar: 'الماء المكشوف الأملس يعمل كمرآة، فيعيد النبضة بعيدًا (داكن)، بينما تعيد الأسطح الخشنة/المبنية الطاقة (لامعة).',
+        },
+      },
+      {
+        id: 'absorb',
+        label: {
+          en: 'Water absorbs all radar energy, so everything goes dark.',
+          ar: 'يمتص الماء كل طاقة الرادار، فيصير كل شيء داكنًا.',
+        },
+      },
+      {
+        id: 'emit',
+        label: {
+          en: 'Buildings emit their own radar signal.',
+          ar: 'تصدر المباني إشارة رادار خاصة بها.',
+        },
+      },
+    ],
+    answer: 'specular',
+    explanation: {
+      en: 'L-band is a microwave: smooth water is a specular reflector that sends the pulse away from the satellite (near-black), while rough vegetated/built surfaces scatter energy back (bright). That is why a flood map shows dark water sheets with bright islands.',
+      ar: 'النطاق L ميكروويف: الماء الأملس عاكس مرآوي يرسل النبضة بعيدًا عن القمر (شبه أسود)، بينما تشتت الأسطح الخشنة/المبنية الطاقة عائدة (لامعة). لذلك تُظهر خريطة الفيضان مسطحات ماء داكنة وجزرًا لامعة.',
     },
   },
 ];

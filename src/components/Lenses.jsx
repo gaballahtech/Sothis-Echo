@@ -43,12 +43,13 @@ function Stat({ label, value, unit }) {
 }
 
 function Legend() {
+  const { t } = useTranslation();
   return (
     <div className="row lens-legend" style={{ gap: 12, flexWrap: 'wrap' }}>
-      <span className="row small"><span className="swatch" style={{ background: 'rgb(220,60,60)' }} />surface / double-bounce</span>
-      <span className="row small"><span className="swatch" style={{ background: 'rgb(60,200,90)' }} />volume (canopy)</span>
-      <span className="row small"><span className="swatch" style={{ background: 'rgb(40,70,200)' }} />low return (water / shadow)</span>
-      <span className="row small"><span className="swatch" style={{ background: 'rgb(255,220,60)' }} />mechanism change</span>
+      <span className="row small"><span className="swatch" style={{ background: 'rgb(220,60,60)' }} />{t('lenses.legendSurface')}</span>
+      <span className="row small"><span className="swatch" style={{ background: 'rgb(60,200,90)' }} />{t('lenses.legendVolume')}</span>
+      <span className="row small"><span className="swatch" style={{ background: 'rgb(40,70,200)' }} />{t('lenses.legendLow')}</span>
+      <span className="row small"><span className="swatch" style={{ background: 'rgb(255,220,60)' }} />{t('lenses.legendChange')}</span>
     </div>
   );
 }

@@ -30,11 +30,15 @@ async function renderReportCanvas(data, site, t, language) {
   canvas.height = H;
   const ctx = canvas.getContext('2d');
   if (!ctx) return null;
+  // Render Arabic with the correct base direction and shaping. Reversing the
+  // characters (the old approach) scrambles the cursive letter forms.
+  ctx.direction = dir ? 'rtl' : 'ltr';
+  ctx.textAlign = 'left';
 
   ctx.fillStyle = '#0c0e12';
   ctx.fillRect(0, 0, W, H);
 
-  const label = (text) => (dir ? [...String(text)].reverse().join('') : String(text));
+  const label = (text) => String(text);
   const font = (size, weight = '400') => `${weight} ${size}px system-ui, -apple-system, sans-serif`;
 
   ctx.fillStyle = '#78dcb4';
@@ -65,13 +69,14 @@ async function renderReportCanvas(data, site, t, language) {
     y += 40;
   }
 
-  if (data.decision) {
+  const decisionText = data?.decision ? (data.decision[language] || data.decision.en || data.decision) : null;
+  if (decisionText) {
     ctx.fillStyle = '#8a8f98';
     ctx.font = font(13);
     ctx.fillText(label(t('respond.decision')), 30, y + 8);
     ctx.fillStyle = '#ffdc78';
     ctx.font = font(15, '500');
-    wrapText(ctx, label(data.decision), 380, y + 8, W - 420, 22);
+    wrapText(ctx, label(decisionText), 380, y + 8, W - 420, 22);
     y += 60;
   }
 
@@ -199,6 +204,8 @@ export default function RapidResponse() {
     return map[kind] || kind || '—';
   };
 
+  const decisionText = data?.decision ? (data.decision[language] || data.decision.en || data.decision) : null;
+
   return (
     <section id="respond" className="content-section chapter" aria-labelledby="respond-title">
       <div className="section-inner">
@@ -246,10 +253,10 @@ export default function RapidResponse() {
               </div>
             </div>
 
-            {data.decision ? (
+            {decisionText ? (
               <div className="explain-headline" data-testid="respond-decision">
                 <span className="micro" style={{ display: 'block', opacity: 0.7, marginBottom: 4 }}>{t('respond.decision')}</span>
-                {data.decision}
+                {decisionText}
               </div>
             ) : null}
 

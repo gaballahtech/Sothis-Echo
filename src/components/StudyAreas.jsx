@@ -172,6 +172,11 @@ export default function StudyAreas() {
       <div className="section-inner">
         <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
 
+        {loading ? (
+          <p className="micro" role="status" style={{ marginBottom: 12 }}>
+            {t('common.checkingLive')}
+          </p>
+        ) : null}
         {!loading && source !== 'api' ? (
           <p className="micro" role="status" style={{ marginBottom: 12 }}>
             {t('sites.localData')}
@@ -361,19 +366,11 @@ export default function StudyAreas() {
                         <div className="grid-2" style={{ marginTop: 12 }}>
                           <div className="stat">
                             <div className="stat-label">{coPol}</div>
-                            <p className="small" style={{ margin: 0 }}>
-                              {language === 'ar'
-                                ? 'القطب المشترك: إرسال واستقبال في الاتجاه نفسه — الماء المفتوح داكن، والجذوع قد تلمع.'
-                                : 'Co-polarised: send and receive in the same direction — open water is dark, trunks can glow.'}
-                            </p>
+                            <p className="small" style={{ margin: 0 }}>{t('sites.coPolDesc')}</p>
                           </div>
                           <div className="stat">
                             <div className="stat-label">{crossPol}</div>
-                            <p className="small" style={{ margin: 0 }}>
-                              {language === 'ar'
-                                ? 'القطب المتقاطع: إرسال عمودي واستقبال أفقي — قناة المظلة ثلاثية الأبعاد.'
-                                : 'Cross-polarised: vertical send, horizontal receive — the 3-D canopy channel.'}
-                            </p>
+                            <p className="small" style={{ margin: 0 }}>{t('sites.crossPolDesc')}</p>
                           </div>
                         </div>
                         {site.measurements?.crossPol ? (

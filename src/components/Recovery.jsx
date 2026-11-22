@@ -13,6 +13,7 @@ const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 4
 // are still real data — plot them directly in dB instead of leaving the panel
 // empty. No fitted trend is drawn, because none is warranted.
 function PassChart({ series, eventDate, language }) {
+  const { t } = useTranslation();
   const points = (series || [])
     .map((pass) => ({
       date: pass?.date,
@@ -38,12 +39,14 @@ function PassChart({ series, eventDate, language }) {
   const x = (at) => pad.left + ((at - first) / Math.max(1, last - first)) * innerW;
   const y = (db) => pad.top + ((hi - db) / span) * innerH;
   const fmt = (at) => new Date(at).toISOString().slice(0, 10);
-  const label = language === 'ar' ? 'الاستطاعة الحقيقية لكل مرور (ديسيبل)' : 'Measured backscatter per pass (dB)';
-  const eventLabel = language === 'ar' ? 'الحدث' : 'event';
-  const summary =
-    language === 'ar'
-      ? `مرورات مقاسة من ${fmt(points[0].at)} إلى ${fmt(points[points.length - 1].at)}، بين ${lo} و${hi} ديسيبل.`
-      : `Measured passes from ${fmt(points[0].at)} to ${fmt(points[points.length - 1].at)}, between ${lo} and ${hi} dB.`;
+  const label = t('recovery.chartLabelPass');
+  const eventLabel = t('recovery.eventLabel');
+  const summary = t('recovery.summaryPasses', {
+    start: fmt(points[0].at),
+    end: fmt(points[points.length - 1].at),
+    lo,
+    hi,
+  });
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="recovery-chart" role="img" aria-label={summary} dir="ltr">
@@ -103,6 +106,7 @@ function PassChart({ series, eventDate, language }) {
 }
 
 function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel, rtl }) {
+  const { t } = useTranslation();
   const maxMonth = Math.max(...points.map((p) => p.month));
   const measured = points.filter((p) => !p.projected);
   const projectedPoints = points.filter((p) => p.projected);
@@ -130,12 +134,15 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
   const crossingX = estimate?.months != null ? x(estimate.months) : null;
   const crossingY = y(threshold);
 
-  const summary =
-    language === 'ar'
-      ? `منحنى التعافي. الهدف ${threshold} بالمئة. ${estimate?.months != null ? `الزمن المقدر ${formatMonths(estimate.months, 'ar')}.` : 'لم يتحقق داخل النافذة.'}`
-      : `Recovery curve. Target ${threshold} percent. ${
-          estimate?.months != null ? `Estimated time ${formatMonths(estimate.months, 'en')}.` : 'Not reached inside the window.'
-        }`;
+  const summary = t('recovery.summaryCurve', {
+    threshold,
+    months:
+      estimate?.months != null
+        ? `${formatMonths(estimate.months, language)}.`
+        : language === 'ar'
+          ? 'لم يتحقق داخل النافذة.'
+          : 'Not reached inside the window.',
+  });
 
   return (
     <svg

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next';
+import { useLanguage } from '../context/LanguageContext';
 import { Disclosure, SectionHead } from './ui';
 
 const CARDS = ['radar', 'bands', 'heartbeat', 'open'];
@@ -9,6 +10,7 @@ const TIMELINE = ['launch', 'commission', 'ops', 'mission'];
 
 export default function Mission() {
   const { t } = useTranslation();
+  const { language } = useLanguage();
 
   return (
     <section id="mission" className="content-section chapter chapter--sky" aria-labelledby="mission-title">
@@ -41,7 +43,14 @@ export default function Mission() {
               <div className="mission-launch">
                 <div>
                   <div className="stat-label">{t('mission.facts.launch')}</div>
-                  <div className="stat-value" style={{ fontSize: 20 }}>30.07.2025</div>
+                  <div className="stat-value" style={{ fontSize: 20 }}>
+                  {new Intl.DateTimeFormat(language === 'ar' ? 'ar-EG' : 'en-GB', {
+                    day: '2-digit',
+                    month: 'short',
+                    year: 'numeric',
+                    numberingSystem: 'latn',
+                  }).format(new Date('2025-07-30'))}
+                </div>
                 </div>
                 <div className="micro" style={{ textAlign: 'end' }}>
                   GSLV-F16

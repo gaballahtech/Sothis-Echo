@@ -38,7 +38,7 @@ import {
   renderNisarRgb,
 } from './nisar.mjs';
 import { buildExplanation, answerQuestion } from './explain.mjs';
-import { buildRapidResponse, renderSituationReport } from './rapid.mjs';
+import { buildRapidResponse } from './rapid.mjs';
 
 try {
   process.loadEnvFile('.env.local');
@@ -780,16 +780,9 @@ export async function handleRequest(req, res) {
       const bbox = lons.length ? [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)] : null;
       const report = await buildRapidResponse({ site, changeStats, lenses, bbox });
       // Return the raw lens thumbnails so the client can draw a shareable PNG
-      // with Canvas (no server-side Python needed — works on serverless).
+      // with Canvas (browser-rendered, translated; works on serverless).
       const images = lenses?.images || null;
-      // Optionally render a server-side PNG (report=1). Locally this uses the
-      // venv; on serverless it returns null and the client falls back to canvas.
-      let reportImage = null;
-      if (url.searchParams.get('report') === '1' && lenses?.images) {
-        const b64 = await renderSituationReport(report, lenses.images);
-        if (b64) reportImage = `data:image/png;base64,${b64}`;
-      }
-      send(res, 200, { data: { ...report, images, reportImage }, success: true });
+      send(res, 200, { data: { ...report, images }, success: true });
       return;
     }
 

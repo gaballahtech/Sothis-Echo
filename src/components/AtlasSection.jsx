@@ -13,7 +13,8 @@ import { useSiteData } from '../context/SiteDataContext';
  * sites are clearly labelled as narrative, never as a failure.
  */
 export default function AtlasSection() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const language = i18n.language;
   const { sites, setSelectedSiteId } = useSiteData();
   const [selectedId, setSelectedId] = useState(() => atlasSites[0]?.id);
 
@@ -46,7 +47,7 @@ export default function AtlasSection() {
 
   const changeTypeName = (ct) => {
     const found = CHANGE_TYPES.find((item) => item.id === ct);
-    return found ? localized(found.name, 'en') : ct;
+    return found ? localized(found.name, language) : ct;
   };
 
   const swatchFor = (site) => (CHANGE_TYPES.find((c) => c.id === site.changeType) || {}).color || '#888';
@@ -92,7 +93,7 @@ export default function AtlasSection() {
                   <div className={`atlas-card-media${measured && thumb ? '' : ' atlas-card-media--story'}`}>
                     {measured && thumb ? <img src={thumb} alt="" loading="lazy" /> : null}
                     <div className="atlas-card-media-overlay">
-                      <h3>{localized(site.name, 'en')}</h3>
+                      <h3>{localized(site.name, language)}</h3>
                       <span className={measured ? 'atlas-badge measured' : 'atlas-badge story'}>
                         {measured ? t('atlas.measured') : t('atlas.storyOnly')}
                       </span>
@@ -101,7 +102,7 @@ export default function AtlasSection() {
 
                   <div className="atlas-card-body">
                     <p className="micro atlas-card-meta">
-                      {localized(site.region, 'en')} · {changeTypeName(site.changeType)}
+                      {localized(site.region, language)} · {changeTypeName(site.changeType)}
                     </p>
                     <div className="atlas-card-place-row">
                       <span className="micro atlas-card-coords" dir="ltr">
@@ -121,11 +122,11 @@ export default function AtlasSection() {
 
                     <dl className="atlas-story">
                       <dt>{t('atlas.whatHappened')}</dt>
-                      <dd>{localized(site.summary, 'en')}</dd>
+                      <dd>{localized(site.summary, language)}</dd>
                       <dt>{t('atlas.whyRadar')}</dt>
-                      <dd>{localized(site.radar, 'en')}</dd>
+                      <dd>{localized(site.radar, language)}</dd>
                       <dt>{t('atlas.whatMeasures')}</dt>
-                      <dd>{localized(site.measure, 'en')}</dd>
+                      <dd>{localized(site.measure, language)}</dd>
                     </dl>
 
                     <div className="atlas-card-action">

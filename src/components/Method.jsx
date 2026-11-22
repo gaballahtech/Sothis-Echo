@@ -82,7 +82,7 @@ export default function Method() {
                     <dd><SourceBadge source={source} error={error} loading={loading} /></dd>
                   </div>
                   <div className="telemetry-row">
-                    <dt>API BASE</dt>
+                    <dt>{t('method.apiBase')}</dt>
                     <dd style={{ maxWidth: '62%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{api.base || '—'}</dd>
                   </div>
                   <div className="telemetry-row">
@@ -90,8 +90,8 @@ export default function Method() {
                     <dd>{api.version}</dd>
                   </div>
                   <div className="telemetry-row">
-                    <dt>POLICY</dt>
-                    <dd>{api.configured ? 'BACKEND FIRST' : 'ZERO REQUESTS'}</dd>
+                    <dt>{t('method.policyLabel')}</dt>
+                    <dd>{api.configured ? t('method.policyBackendFirst') : t('method.policyZeroRequests')}</dd>
                   </div>
                 </dl>
               </div>

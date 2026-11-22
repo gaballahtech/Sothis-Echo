@@ -20,6 +20,7 @@ Run:  .venv-nisar/bin/python scripts/build-lenses.py [site]
 import base64
 import io
 import json
+import math
 import os
 import subprocess
 import sys
@@ -62,6 +63,7 @@ LENS_SITES = {
     },
     'sundarbans': {
         'bbox': (107.45, 16.45, 107.70, 16.65),
+        'coords': (16.55, 107.575),
         'gcov': {
             'before': 'NISAR_L2_PR_GCOV_030_054_A_010_4005_DHDH_A_20260909T222101_20260909T222140_P05023_N_F_J_001',
             'after': 'NISAR_L2_PR_GCOV_031_054_A_010_4005_DHDH_A_20260921T222101_20260921T222140_P05023_N_F_J_001',
@@ -119,6 +121,14 @@ def open_h5(url):
 
 def lonlat_to_xy(proj, lng, lat):
     return Transformer.from_crs(4326, proj, always_xy=True).transform(lng, lat)
+
+
+def calibration_bbox(coords):
+    """The same ~5.5 km window the gray HH snapshots use (build-nisar-snapshots.py)."""
+    lat, lng = coords
+    d_lat = 0.025
+    d_lng = 0.025 / max(0.2, math.cos(math.radians(lat)))
+    return (lng - d_lng, lat - d_lat, lng + d_lng, lat + d_lat)
 
 
 def window_indices(xs, ys, proj, bbox):
@@ -243,7 +253,9 @@ def main():
     if site_id not in LENS_SITES:
         raise SystemExit(f'unknown site {site_id}; have {list(LENS_SITES)}')
     site = LENS_SITES[site_id]
-    bbox = site['bbox']
+    # Match the gray HH window (calibration_bbox) so the lenses align with the
+    # site image; fall back to the full site bbox when no coords are given.
+    bbox = calibration_bbox(site['coords']) if site.get('coords') else site['bbox']
     started = time.time()
     log('site', site_id, site.get('label', ''))
 
@@ -299,7 +311,7 @@ def main():
                 'lowCoherencePct': round(100.0 * float((coh[valid] < 0.4).mean()), 1),
             }
             coh_note = 'Coherence from the real GSLC HH pair.'
-            _coh_b64 = _render_coherence(coh)
+            _coh_b64 = _render_coherence(coh, site_id)
             log('coherence mean', coh_meta['mean'])
         except Exception as exc:  # noqa: BLE001
             _coh_b64 = None
@@ -339,14 +351,14 @@ def main():
     log('wrote', os.path.relpath(path, ROOT), '| done in', round(time.time() - started, 1), 's')
 
 
-def _render_coherence(coh):
+def _render_coherence(coh, site_id='coherence'):
     v = (np.clip(coh, 0, 1) * 255).astype(np.uint8)
     d = downsample(v)
     rgb = np.zeros((*d.shape, 3), dtype=np.uint8)
     rgb[..., 0] = d
     rgb[..., 1] = (d * 0.5).astype(np.uint8)
     rgb[..., 2] = (255 - d).astype(np.uint8)
-    return save_png('coherence.png', rgb)
+    return save_png(f'{site_id}-coherence.png', rgb)
 
 
 def _wkt(bbox):

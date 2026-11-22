@@ -1,4 +1,5 @@
 import { Card, Icon, ProgressBar, Section, SectionCard, Tag } from '@blueprintjs/core';
+import { useTranslation } from 'react-i18next';
 
 /** Blueprint brand mark: restrained, token-coloured, no glow. */
 export function RadarMark({ size = 24, className = '' }) {
@@ -66,6 +67,7 @@ export function Disclosure({
 }
 
 export function SourceBadge({ source, error, loading = false, className = '' }) {
+  const { t } = useTranslation();
   const live = source === 'api';
   return (
     <Tag
@@ -74,7 +76,7 @@ export function SourceBadge({ source, error, loading = false, className = '' }) 
       intent={loading ? 'none' : live ? 'success' : error ? 'warning' : 'none'}
       title={error || undefined}
     >
-      {loading ? '…' : live ? 'LIVE' : 'LOCAL'}
+      {loading ? '…' : live ? t('common.live') : t('common.local')}
     </Tag>
   );
 }
