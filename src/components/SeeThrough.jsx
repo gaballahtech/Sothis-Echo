@@ -40,6 +40,23 @@ function esriOpticalURL(bbox) {
   return `https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${w},${s},${e},${n}&bboxSR=4326&imageSR=4326&size=760,500&format=png&f=image`;
 }
 
+// Replicate the server-side comparisonCrops window so the optical (Esri) export
+// covers the EXACT same geographic window as the radar (nisarCrop) — aspect-
+// adjusted bbox, matching the server's mercSpan + aspect logic.
+const MERC = (lat) => Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360));
+const mercSpanDeg = (s, n) => (MERC(n) - MERC(s)) * (180 / Math.PI);
+
+function comparisonWindow(bbox, aspect = 760 / 500) {
+  const [w, s, e, n] = bbox;
+  const siteWidth = e - w;
+  const siteHeight = mercSpanDeg(s, n);
+  const width = Math.max(siteWidth, siteHeight * aspect);
+  const height = width / aspect;
+  const centreLng = (w + e) / 2;
+  const centreLat = (s + n) / 2;
+  return [centreLng - width / 2, centreLat - height / 2, centreLng + width / 2, centreLat + height / 2];
+}
+
 export default function SeeThrough() {
   const { t } = useTranslation();
   const { language } = useLanguage();
@@ -75,7 +92,10 @@ export default function SeeThrough() {
   // uncropped (crop=null). Never a fractional crop of a whole-tile thumbnail.
   const wktBbox = parseWktBbox(site.wkt);
   const esriOptical = Boolean(wktBbox);
-  const opticalUrl = esriOptical ? esriOpticalURL(wktBbox) : null;
+  // Use the same aspect-adjusted window as the radar (nisarCrop) so both sides
+  // show the EXACT same geographic area.
+  const opticalBbox = esriOptical ? comparisonWindow(wktBbox) : null;
+  const opticalUrl = opticalBbox ? esriOpticalURL(opticalBbox) : null;
   const opticalPlatform = t('seeThrough.opticalPlatform');
   const opticalLabel = t('seeThrough.optical');
 
