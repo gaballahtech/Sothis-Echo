@@ -778,7 +778,7 @@ export async function handleRequest(req, res) {
       const lons = ring.map((point) => point[0]);
       const lats = ring.map((point) => point[1]);
       const bbox = lons.length ? [Math.min(...lons), Math.min(...lats), Math.max(...lons), Math.max(...lats)] : null;
-      const report = await buildRapidResponse({ site, changeStats, lenses, bbox });
+      const report = await buildRapidResponse({ site, changeStats, lenses, bbox, lang: url.searchParams.get('lang') || 'en' });
       // Return the raw lens thumbnails so the client can draw a shareable PNG
       // with Canvas (browser-rendered, translated; works on serverless).
       const images = lenses?.images || null;

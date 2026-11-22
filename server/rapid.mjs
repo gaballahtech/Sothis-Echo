@@ -49,7 +49,7 @@ export async function populationInBbox(bbox, year = 2025) {
 /**
  * Build the rapid-response object from a site's change stats + lenses + bbox.
  */
-export async function buildRapidResponse({ site, changeStats, lenses, bbox }) {
+export async function buildRapidResponse({ site, changeStats, lenses, bbox, lang = 'en' }) {
   const extentKm2 = Number.isFinite(changeStats?.changedAreaKm2) ? changeStats.changedAreaKm2 : null;
   const mechanism = lenses ? explainKind(lenses) : null;
   const population = bbox ? await populationInBbox(bbox) : null;
@@ -57,7 +57,7 @@ export async function buildRapidResponse({ site, changeStats, lenses, bbox }) {
     ? Math.round(population.density * extentKm2)
     : null;
 
-  return {
+  const report = {
     site: site?.id || null,
     extentKm2: extentKm2 != null ? Math.round(extentKm2 * 10) / 10 : null,
     changedPct: changeStats?.changedPct ?? null,
@@ -75,6 +75,41 @@ export async function buildRapidResponse({ site, changeStats, lenses, bbox }) {
       ar: site?.impact?.decision?.ar || null,
     },
   };
+
+  // Plain-language AI explanation (Gemini). Short prompt, low token use; cached
+  // per site+lang. Returns null if the key is missing or the call fails.
+  report.explanation = await generateExplanation(report, lang);
+  return report;
+}
+
+// Cache explanations per site+lang to keep Gemini token use minimal.
+const _explainCache = new Map();
+
+async function generateExplanation(report, lang) {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || !report.mechanism) return null;
+  const cacheKey = `${report.site}:${lang}`;
+  if (_explainCache.has(cacheKey)) return _explainCache.get(cacheKey);
+  const prompt = `Explain in 1-2 plain sentences (in ${lang === 'ar' ? 'Arabic' : 'English'}) what this NISAR radar change means: mechanism=${report.mechanism}, extent=${report.extentKm2} km² (${report.changedPct}% of area), population exposed=${report.populationExposed ?? 'unknown'}. Be concise, no jargon.`;
+  try {
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: prompt }] }],
+          generationConfig: { maxOutputTokens: 300, temperature: 0.3, thinkingConfig: { thinkingBudget: 0 } },
+        }),
+      },
+    );
+    const data = await res.json();
+    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
+    if (text) _explainCache.set(cacheKey, text);
+    return text;
+  } catch {
+    return null;
+  }
 }
 
 /** Minimal dominant-mechanism reuse (kept local to avoid cross-import churn). */

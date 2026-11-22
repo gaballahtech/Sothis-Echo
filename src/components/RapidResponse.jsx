@@ -184,7 +184,7 @@ export default function RapidResponse() {
     let cancelled = false;
     setLoading(true);
     setData(null);
-    loadRapidResponse(site.id).then((result) => {
+    loadRapidResponse(site.id, { lang: language }).then((result) => {
       if (!cancelled) {
         setData(result);
         setLoading(false);
@@ -193,7 +193,7 @@ export default function RapidResponse() {
     return () => {
       cancelled = true;
     };
-  }, [site?.id, source]);
+  }, [site?.id, source, language]);
 
   if (!site) return null;
 
@@ -331,6 +331,12 @@ export default function RapidResponse() {
                 <p className="body-copy" style={{ margin: 0 }}>{whatItMeans}</p>
               </div>
             </div>
+            {data.explanation ? (
+              <div className="card" data-testid="respond-ai-explanation">
+                <div className="stat-label">{t('respond.aiExplanation')}</div>
+                <p className="body-copy" style={{ margin: 0 }}>{data.explanation}</p>
+              </div>
+            ) : null}
             <div className="grid-2">
               <div className="card">
                 <h4 className="micro">{t('respond.questionsTitle')}</h4>

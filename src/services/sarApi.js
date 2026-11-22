@@ -426,12 +426,12 @@ export async function askExplain(id, question, language = 'en') {
 }
 
 /** Rapid-response situation report (extent + population + optional PNG). */
-export async function loadRapidResponse(id, { report = false } = {}) {
+export async function loadRapidResponse(id, { report = false, lang = 'en' } = {}) {
   if (!studyAreas.some((item) => item.id === id)) return null;
   if (!isApiConfigured()) return null;
   try {
-    const qs = report ? '?report=1' : '';
-    const payload = await request(`/rapid-response?site=${encodeURIComponent(id)}${qs}`);
+    const qs = report ? '&report=1' : '';
+    const payload = await request(`/rapid-response?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}${qs}`);
     return payload && typeof payload === 'object' ? payload : null;
   } catch {
     return null;
