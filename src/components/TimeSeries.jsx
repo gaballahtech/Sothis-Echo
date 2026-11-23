@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Button } from '@blueprintjs/core';
+import { Button, ButtonGroup } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
@@ -14,7 +14,7 @@ import { SectionHead } from './ui';
 export default function TimeSeries() {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites, selectedSiteId } = useSiteData();
+  const { sites, selectedSiteId, setSelectedSiteId } = useSiteData();
   const site = sites.find((item) => item.id === selectedSiteId) ?? sites[0];
   const [playing, setPlaying] = useState(false);
   const [index, setIndex] = useState(-1);
@@ -89,6 +89,22 @@ export default function TimeSeries() {
     <section id="timeseries" className="content-section chapter chapter--sky" aria-labelledby="timeseries-title">
       <div className="section-inner">
         <SectionHead title={t('timeSeries.title')} subtitle={t('timeSeries.subtitle')} id="timeseries-title" />
+
+        <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
+          <span className="site-choice-label">{t('common.sitePicker')}</span>
+          <ButtonGroup className="site-choice">
+            {sites.map((item) => (
+              <Button
+                key={item.id}
+                active={item.id === site.id}
+                variant={item.id === site.id ? 'solid' : 'outlined'}
+                text={localized(item.name, language)}
+                onClick={() => setSelectedSiteId(item.id)}
+                aria-pressed={item.id === site.id}
+              />
+            ))}
+          </ButtonGroup>
+        </div>
 
         <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
           <span className="micro">

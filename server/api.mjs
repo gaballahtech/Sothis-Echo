@@ -39,6 +39,7 @@ import {
 } from './nisar.mjs';
 import { buildExplanation, answerQuestion } from './explain.mjs';
 import { buildRapidResponse } from './rapid.mjs';
+import { callAI } from './ai.mjs';
 
 try {
   process.loadEnvFile('.env.local');
@@ -441,6 +442,95 @@ async function callGeoAI({ buffer, filename, contentType, prompt, model, point, 
 /* ------------------------------------------------------------------ */
 
 /**
+ * Build the authoritative grounding block for the AI chat: the selected
+ * site's REAL measurements (NISAR lenses + calibrated series + change stats),
+ * formatted as a compact human-readable string. The model answers ONLY from
+ * this block. Returns a "not measured" note when a site has no lens data.
+ */
+function buildGrounding(siteId, lang) {
+  const ar = lang === 'ar';
+  if (!siteId) {
+    return ar
+      ? 'لا يوجد موقع محدد. أجب عن NISAR والرادار بشكل عام.'
+      : 'No site selected. Answer about NISAR and radar in general.';
+  }
+  const lenses = nisarLenses(siteId);
+  const snapshot = nisarSnapshot(siteId);
+  if (!lenses && !snapshot) {
+    return ar
+      ? 'لا توجد قياسات عدسات محسوبة لهذا الموقع بعد. أجب عن المفاهيم العامة فقط.'
+      : 'No computed lens measurements for this site yet. Answer general concepts only.';
+  }
+  const lines = [];
+  const amp = lenses?.amplitude;
+  const coh = lenses?.coherence;
+  const mech = lenses?.mechanism;
+  const pair = lenses?.pair;
+  const change = snapshot?.changeStats;
+
+  if (amp) {
+    const f = (v) => (Number.isFinite(v) ? `${v} dB` : '—');
+    lines.push(
+      `- ${ar ? 'الارتداد' : 'Backscatter'}: HH ${f(amp.hhBeforeDb)} → ${f(amp.hhAfterDb)} (Δ ${f(amp.dHH)}), HV ${f(amp.hvBeforeDb)} → ${f(amp.hvAfterDb)} (Δ ${f(amp.dHV)})`,
+    );
+  }
+  if (change) {
+    lines.push(
+      `- ${ar ? 'المساحة المتغيّرة' : 'Changed area'}: ${change.changedPct}% (${change.changedAreaKm2} km²), ${ar ? 'متوسط |Δ|' : 'mean |Δ|'} ${change.meanAbsDeltaDb} dB`,
+    );
+  }
+  if (coh) {
+    lines.push(
+      `- ${ar ? 'التماسك' : 'Coherence'}: mean ${coh.mean ?? '—'}, ${ar ? 'منخفض' : 'low'} ${coh.lowCoherencePct ?? '—'}%`,
+    );
+  }
+  if (mech) {
+    const pct = (v) => (Number.isFinite(v) ? `${Math.round(v * 100)}%` : '—');
+    const b = mech.before || {};
+    const a = mech.after || {};
+    lines.push(
+      `- ${ar ? 'آلية التشتت' : 'Scattering mechanism'} (surface/volume/low): ${pct(b.surface)}/${pct(b.volume)}/${pct(b.low)} → ${pct(a.surface)}/${pct(a.volume)}/${pct(a.low)}`,
+    );
+    if (Number.isFinite(mech.changedPct)) {
+      lines.push(`- ${ar ? 'نسبة تغيّر الآلية' : 'Mechanism change'}: ${Math.round(mech.changedPct)}%`);
+    }
+  }
+  if (pair?.before && pair?.after) {
+    lines.push(`- ${ar ? 'الجرين' : 'Granules'}: ${pair.before} (before), ${pair.after} (after)`);
+  }
+  if (lines.length === 0) {
+    return ar ? 'لا توجد قياسات كافية لهذا الموقع.' : 'Not enough measurements for this site.';
+  }
+  return lines.join('\n');
+}
+
+/**
+ * Compact source chips for the UI: the real numbers the answer is grounded in.
+ * Each chip links to the relevant section when clicked.
+ */
+function groundingSources(siteId, lang) {
+  const ar = lang === 'ar';
+  if (!siteId) return [];
+  const lenses = nisarLenses(siteId);
+  const snapshot = nisarSnapshot(siteId);
+  if (!lenses && !snapshot) return [];
+  const sources = [];
+  const amp = lenses?.amplitude;
+  const coh = lenses?.coherence;
+  const change = snapshot?.changeStats;
+  if (amp && Number.isFinite(amp.dHH)) {
+    sources.push({ id: 'amp', label: ar ? `ΔHH ${amp.dHH} dB` : `ΔHH ${amp.dHH} dB`, value: `${amp.dHH} dB` });
+  }
+  if (coh && Number.isFinite(coh.mean)) {
+    sources.push({ id: 'coh', label: ar ? `التماسك ${coh.mean}` : `Coherence ${coh.mean}`, value: `${coh.mean}` });
+  }
+  if (change && Number.isFinite(change.changedPct)) {
+    sources.push({ id: 'change', label: ar ? `تغيّر ${change.changedPct}%` : `Changed ${change.changedPct}%`, value: `${change.changedPct}%` });
+  }
+  return sources;
+}
+
+/**
  * The whole router. Exported so the same code can be mounted as a Vercel
  * serverless function (`api/[...path].mjs`) as well as a local http server.
  */
@@ -817,6 +907,52 @@ export async function handleRequest(req, res) {
       } else {
         send(res, 200, { data: { status: 'queued', siteId: featured.id, message: 'No cached lens yet; on-demand generation not available on serverless.' }, success: true });
       }
+      return;
+    }
+
+    if (path === '/api/ask' && method === 'POST') {
+      const body = await readJson(req).catch(() => ({}));
+      const question = typeof body?.question === 'string' ? body.question.trim() : '';
+      const lang = body?.lang === 'ar' ? 'ar' : 'en';
+      const mode = body?.mode === 'researcher' ? 'researcher' : 'learner';
+      const siteId = typeof body?.site === 'string' ? body.site : null;
+      const history = Array.isArray(body?.history) ? body.history.slice(-6) : [];
+      if (!question) {
+        sendError(res, 400, 'question is required');
+        return;
+      }
+      const site = studyAreas.find((s) => s.id === siteId);
+      const grounding = buildGrounding(siteId, lang);
+      const siteContext = site
+        ? `Current site: ${site.name?.[lang] || site.name?.en || site.id} (${site.id}), bbox: ${JSON.stringify(site.bbox)}, event: ${site.eventName?.[lang] || site.eventName?.en || 'N/A'}.`
+        : '';
+      const modeLine =
+        mode === 'researcher'
+          ? 'The visitor is a researcher: use technical terms, units (dB), thresholds, and exact values. Be precise.'
+          : 'The visitor is a learner: use plain language, one everyday analogy, and avoid jargon dumps. Keep it simple and friendly.';
+      const systemPrompt = `You are Sothis AI, the grounded data guide for Sothis Echo, an interactive website about the NISAR (NASA-ISRO SAR) mission and Synthetic Aperture Radar (SAR). Your job is to explain THE DATA on the current page, grounded in the real measurements below.
+
+${siteContext}
+
+=== REAL MEASUREMENTS FOR THIS SITE (authoritative — answer ONLY from these) ===
+${grounding}
+=== END MEASUREMENTS ===
+
+Rules:
+- Answer ONLY from the measurements above. Every number you cite MUST come from that block.
+- Cite the exact number you used in your answer (e.g., "mean coherence 0.546").
+- If the answer needs data not in the block, say it is "not measured here" — never invent a number.
+- ${modeLine}
+- Answer in ${lang === 'ar' ? 'Arabic' : 'English'}. Be concise (2-4 sentences).
+
+You can also answer general questions about NISAR, SAR, HH/HV polarization, coherence, backscatter, and the Hazard × Exposure × Vulnerability framework.`;
+
+      const chatMessages = [
+        ...history.map((turn) => ({ role: turn.role, text: turn.text })),
+        { role: 'user', text: question },
+      ];
+      const { text: answer } = await callAI({ system: systemPrompt, messages: chatMessages, maxTokens: 800, temperature: 0.5 });
+      send(res, 200, { data: { answer, question, sources: groundingSources(siteId, lang) }, success: true });
       return;
     }
 

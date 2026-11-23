@@ -12,6 +12,7 @@ import { spawn } from 'node:child_process';
 import { writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { callAI } from './ai.mjs';
 
 const WORLD_POP = 'https://api.worldpop.org/v3/population';
 
@@ -82,34 +83,17 @@ export async function buildRapidResponse({ site, changeStats, lenses, bbox, lang
   return report;
 }
 
-// Cache explanations per site+lang to keep Gemini token use minimal.
+// Cache explanations per site+lang to keep token use minimal.
 const _explainCache = new Map();
 
 async function generateExplanation(report, lang) {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey || !report.mechanism) return null;
+  if (!report.mechanism) return null;
   const cacheKey = `${report.site}:${lang}`;
   if (_explainCache.has(cacheKey)) return _explainCache.get(cacheKey);
   const prompt = `Explain in 1-2 plain sentences (in ${lang === 'ar' ? 'Arabic' : 'English'}) what this NISAR radar change means: mechanism=${report.mechanism}, extent=${report.extentKm2} km² (${report.changedPct}% of area), population exposed=${report.populationExposed ?? 'unknown'}. Be concise, no jargon.`;
-  try {
-    const res = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash:generateContent?key=${apiKey}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { maxOutputTokens: 300, temperature: 0.3, thinkingConfig: { thinkingBudget: 0 } },
-        }),
-      },
-    );
-    const data = await res.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-    if (text) _explainCache.set(cacheKey, text);
-    return text;
-  } catch {
-    return null;
-  }
+  const { text } = await callAI({ system: 'You are a concise science communicator.', messages: [{ role: 'user', text: prompt }], maxTokens: 300, temperature: 0.3 });
+  if (text) _explainCache.set(cacheKey, text);
+  return text;
 }
 
 /** Minimal dominant-mechanism reuse (kept local to avoid cross-import churn). */

@@ -23,8 +23,8 @@ export const atlasSites = [
     continent: 'north-america',
     maturity: 'lens',
     summary: {
-      en: 'L-band coherence collapsed over burned slopes even where brightness held — the burn scar reads as physical disturbance, not just dark ground.',
-      ar: 'انهار الترابط فوق المنحدرات المحروقة حتى حيث بقي السطوع ثابتًا — تظهر ندبة الحريق اضطرابًا فيزيائيًا لا مجرد أرض داكنة.',
+      en: 'L-band coherence collapsed over burned slopes even where brightness held — the burn scar reads as physical disturbance rather than dark ground.',
+      ar: 'انهار الترابط فوق المنحدرات المحروقة حتى حيث بقي السطوع ثابتًا — تظهر ندبة الحريق اضطرابًا فيزيائيًا حقيقيًا لا مجرد أرض أغمق.',
     },
     radar: {
       en: 'Fire removes canopy and scatters the L-band pulse off bare, rougher ground while the surviving structure breaks phase coherence between passes.',
@@ -166,7 +166,7 @@ export const atlasSites = [
     },
     radar: {
       en: 'Canopy volume gives strong cross-pol (HV); cleared ground loses it and roughens co-pol. Cloud never blocks L-band.',
-      ar: 'حجم المظلة يعطي قطبًا متقاطعًا قويًا (HV)؛ والأرض المكشوفة تفقده وتخشّن القطب المشترك. والسحاب لا يحجب النطاق L.',
+      ar: 'حجم المظلة يعطي استقطابًا متقاطعًا قويًا (HV)؛ والأرض المكشوفة تفقده وتخشّن الاستقطاب المشترك. والسحاب لا يحجب النطاق L.',
     },
     measure: {
       en: 'Amplitude change (HH up, HV down) and a volume→surface mechanism shift mark the forest-to-cleared boundary.',

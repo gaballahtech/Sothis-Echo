@@ -130,8 +130,8 @@ test('Selecting a story-only place shows a full radar story card', async ({ page
   await expect(preview).toContainText('Peru earthquake');
   await expect(preview).toContainText('Why radar sees it');
   await expect(preview).toContainText('What NISAR measures');
-  // Story-only places do not open a measured study area, and say so.
-  await expect(preview).toContainText(/Illustrative scenario/i);
+  // Field-guide places explain the hazard without claiming a live measurement.
+  await expect(preview).toContainText(/field-guide entry/i);
 
   expect(errors).toEqual([]);
 });

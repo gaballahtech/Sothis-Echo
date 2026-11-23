@@ -83,7 +83,7 @@ export const studyAreas = [
         },
         polarization: {
           en: 'Co-pol: moderate — crops, soil and roofs. Cross-pol: higher over vegetation because leaves and branches twist the wave.',
-          ar: 'القطب المشترك: متوسط — محاصيل وتربة وأسطح. القطب المتقاطع: أعلى فوق النباتات لأن الأوراق والأغصان تلفّ الموجة.',
+          ar: 'الاستقطاب المشترك: متوسط — محاصيل وتربة وأسطح. الاستقطاب المتقاطع: أعلى فوق النباتات لأن الأوراق والأغصان تلفّ الموجة.',
         },
       },
       after: {
@@ -104,7 +104,7 @@ export const studyAreas = [
         },
         polarization: {
           en: 'Co-pol and cross-pol both fall over open water; cross-pol collapses first because the vegetation volume scattering is gone.',
-          ar: 'القطبان المشترك والمتقاطع ينخفضان معًا فوق الماء المكشوف، وينهار المتقاطع أولًا لأن التشتت الحجمي للنباتات يختفي.',
+          ar: 'الاستقطابان المشترك والمتقاطع ينخفضان معًا فوق الماء المكشوف، وينهار المتقاطع أولًا لأن التشتت الحجمي للنباتات يختفي.',
         },
       },
     },
@@ -151,7 +151,7 @@ export const studyAreas = [
     },
     contrast: {
       dominant: { en: 'Surface water + double bounce', ar: 'ماء سطحي + ارتداد مزدوج' },
-      signature: { en: 'Both fall over water; cross-pol collapses', ar: 'ينخفضان فوق الماء، والمتقاطع أكثر' },
+      signature: { en: 'Both fall over water; cross-pol collapses', ar: 'ينخفضان فوق الماء، والاستقطاب المتقاطع ينخفض أكثر' },
       timescale: { en: 'Weeks to months', ar: 'أسابيع إلى أشهر' },
     },
     researcher: {
@@ -162,7 +162,7 @@ export const studyAreas = [
       interpretation: [
         {
           en: 'Open water is the cleanest SAR flood class: both polarizations drop sharply. Threshold VV or VH against a pre-event baseline to map the inundated area.',
-          ar: 'الماء المكشوف أنظف صنف فيضان في الرادار: تنخفض القطبتان بحدة. استخدم عتبة VV أو VH مقابل خط أساس قبل الحدث لرسم المساحة المغمورة.',
+          ar: 'الماء المكشوف أنظف صنف فيضان في الرادار: ينخفض الاستقطابان بحدة. استخدم عتبة VV أو VH مقابل خط أساس قبل الحدث لرسم المساحة المغمورة.',
         },
         {
           en: 'Buildings and tree crowns stay bright inside the flood, so the map is not a single dark polygon. A land-cover mask separates water from bright islands.',
@@ -257,11 +257,11 @@ export const studyAreas = [
         },
         why: {
           en: 'Needles, branches and trunks scatter the pulse in many directions. Volume scattering returns a strong, textured signal in both co-pol and cross-pol.',
-          ar: 'تبدد الإبر والأغصان والجذوع النبضة في اتجاهات كثيرة. يعيد التشتت الحجمي إشارة قوية ذات نسيج في القطبين المشترك والمتقاطع معًا.',
+          ar: 'تبدد الإبر والأغصان والجذوع النبضة في اتجاهات كثيرة. يعيد التشتت الحجمي إشارة قوية ذات نسيج في الاستقطابين المشترك والمتقاطع معًا.',
         },
         polarization: {
           en: 'Co-pol: bright. Cross-pol: bright for a land surface — foliage twists the wave from vertical to horizontal.',
-          ar: 'القطب المشترك: لامع. القطب المتقاطع: لامع بالنسبة لسطح أرضي — الأوراق تلفّ الموجة من العمودي إلى الأفقي.',
+          ar: 'الاستقطاب المشترك: لامع. الاستقطاب المتقاطع: لامع بالنسبة لسطح أرضي — الأوراق تلفّ الموجة من العمودي إلى الأفقي.',
         },
       },
       after: {
@@ -278,11 +278,11 @@ export const studyAreas = [
         },
         why: {
           en: 'With the canopy gone, the pulse hits a smoother, drier surface and bounces away. Co-pol drops hardest over the scorched strip; cross-pol drops wherever the three-dimensional vegetation that twists the wave has actually disappeared.',
-          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. ينخفض القطب المشترك بحدة فوق الشريط المحترق، وينخفض المتقاطع حيث تختفي فعلًا النباتات المجسّمة التي تلفّ الموجة.',
+          ar: 'بغياب المظلة تصطدم النبضة بسطح أنعم وأجف وترتد بعيدًا. ينخفض الاستقطاب المشترك بحدة فوق الشريط المحترق، وينخفض الاستقطاب المتقاطع حيث تختفي فعلًا النباتات المجسّمة التي تلفّ الموجة.',
         },
         polarization: {
           en: 'Co-pol falls with surface roughness, litter and soil moisture. Cross-pol only falls where the canopy itself was consumed — over a partly burned coastal strip it barely moves.',
-          ar: 'ينخفض القطب المشترك مع خشونة السطح والغطاء الميت ورطوبة التربة. أما المتقاطع فلا ينخفض إلا حيث استُهلكت المظلة نفسها — وعلى شريط ساحلي محترق جزئيًا يكاد لا يتغيّر.',
+          ar: 'ينخفض الاستقطاب المشترك مع خشونة السطح والغطاء الميت ورطوبة التربة. أما الاستقطاب المتقاطع فلا ينخفض إلا حيث استُهلكت المظلة نفسها — وعلى شريط ساحلي محترق جزئيًا يكاد لا يتغيّر.',
         },
       },
     },
@@ -329,7 +329,7 @@ export const studyAreas = [
     },
     contrast: {
       dominant: { en: 'Volume scattering', ar: 'تشتت حجمي' },
-      signature: { en: 'Both channels fall; co-pol drops hard, cross-pol follows', ar: 'تنخفض القناتان: المشترك بحدة والمتقاطع تبعًا' },
+      signature: { en: 'Both channels fall; co-pol drops hard, cross-pol follows', ar: 'تنخفض القناتان: الاستقطاب المشترك بحدة والمتقاطع تبعًا' },
       timescale: { en: 'Years', ar: 'سنوات' },
     },
     researcher: {
@@ -340,7 +340,7 @@ export const studyAreas = [
       interpretation: [
         {
           en: 'In mixed chaparral and oak, the cross-pol channel (VH) is a more robust burn-severity indicator than VV because VV is contaminated by surface roughness, soil moisture and char. A VH drop of >4 dB is a strong canopy-loss signal; here NISAR HV falls sharply inside the merged scar.',
-          ar: 'في الشابارال والبلوط المختلط، قناة القطب المتقاطع (VH) مؤشر أقوى لشدة الحرق من VV لأن VV يتأثر بخشونة السطح ورطوبة التربة والفحم. انخفاض VH أكثر من 4 ديسيبل إشارة قوية لفقدان المظلة؛ وهنا ينخفض HV لنيسار بحدة داخل الأثر المندمج.',
+          ar: 'في الشابارال والبلوط المختلط، قناة الاستقطاب المتقاطع (VH) مؤشر أقوى لشدة الحرق من VV لأن VV يتأثر بخشونة السطح ورطوبة التربة والفحم. انخفاض VH أكثر من 4 ديسيبل إشارة قوية لفقدان المظلة؛ وهنا ينخفض HV لنيسار بحدة داخل الأثر المندمج.',
         },
         {
           en: 'L-band penetrates deeper than C-band and keeps sensitivity to woody trunks after the canopy is consumed. That should let NISAR separate “canopy consumed” from “canopy thinned” better than Sentinel-1.',

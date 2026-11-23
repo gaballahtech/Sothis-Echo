@@ -4,11 +4,13 @@ import { useTranslation } from 'react-i18next';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
+import { isApiConfigured } from './services/sarApi';
 import { TourProvider } from './context/TourContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import Navbar from './components/Navbar';
 import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
+import DemoVideo from './components/DemoVideo';
 import Mission from './components/Mission';
 import SeeThrough from './components/SeeThrough';
 import StudyAreas from './components/StudyAreas';
@@ -24,13 +26,14 @@ import Method from './components/Method';
 import Team from './components/Team';
 import Footer from './components/Footer';
 import GuidedTour from './components/GuidedTour';
+import AIChat from './components/AIChat';
 import './index.css';
 
 function AppContent() {
   const { language } = useLanguage();
   const { isDark } = useTheme();
   const { t } = useTranslation();
-  const { source, loading } = useSiteData();
+  const { loading } = useSiteData();
 
   useEffect(() => {
     document.title = `${t('footer.brand')} · ${t('app.tagline')}`;
@@ -42,7 +45,7 @@ function AppContent() {
         {t('common.skipToContent')}
       </a>
       <Navbar />
-      {!loading && source !== 'api' ? (
+      {!isApiConfigured() && !loading ? (
         <div className="demo-banner" role="status">
           {t('common.demoBanner')}
         </div>
@@ -51,6 +54,7 @@ function AppContent() {
         <Sidebar />
         <main id="main-content" className="app-main" tabIndex={-1}>
           <Hero />
+          <DemoVideo />
           <Mission />
           <SeeThrough />
           <StudyAreas />
@@ -68,6 +72,7 @@ function AppContent() {
       </div>
       <Footer />
       <GuidedTour />
+      <AIChat />
     </div>
   );
 }

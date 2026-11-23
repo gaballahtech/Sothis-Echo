@@ -5,7 +5,6 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { CompareSlider } from './SceneCanvas';
-import Terrain3D from './Terrain3D';
 import { Panel, SectionHead } from './ui';
 
 const LEGEND = [
@@ -74,7 +73,6 @@ export default function SeeThrough() {
   const { language } = useLanguage();
   const { sites } = useSiteData();
   const [radarView, setRadarView] = useState('browse');
-  const [view3d, setView3d] = useState(false);
   // This comparison is always the Central Vietnam flood scene. It deliberately
   // ignores the shared selection so switching to Big Sur (or any other site)
   // elsewhere on the page never changes what this section shows.
@@ -140,13 +138,6 @@ export default function SeeThrough() {
                 />
               </>
             ) : null}
-            <Button
-              active={view3d}
-              variant={view3d ? 'solid' : 'outlined'}
-              text={t('seeThrough.view3d')}
-              onClick={() => setView3d((v) => !v)}
-              aria-pressed={view3d}
-            />
           </ButtonGroup>
         </div>
 
@@ -155,23 +146,19 @@ export default function SeeThrough() {
             title={`${siteName} · ${radarDate} · ${stateLabel}`}
             bodyClassName="card-pad"
           >
-            {view3d ? (
-              <Terrain3D radarUrl={radarUrl} />
-            ) : (
-              <CompareSlider
-                opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
-                radarAlt={`${siteName} — ${radarLabel}`}
-                opticalLabel={opticalLabel}
-                radarLabel={radarLabel}
-                opticalUrl={opticalUrl}
-                opticalCrop={null}
-                radarUrl={radarUrl}
-                radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
-                radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
-                radarClassName={radarIsScene ? '' : (state.nisarImageUrl ? 'compare-layer--nisar' : '')}
-                radarEager
-              />
-            )}
+            <CompareSlider
+              opticalAlt={`${siteName} — ${t('seeThrough.optical')}`}
+              radarAlt={`${siteName} — ${radarLabel}`}
+              opticalLabel={opticalLabel}
+              radarLabel={radarLabel}
+              opticalUrl={opticalUrl}
+              opticalCrop={null}
+              radarUrl={radarUrl}
+              radarCrop={radarIsScene ? null : (state.nisarCrop ?? null)}
+              radarFit={radarIsScene ? 'cover' : (state.nisarImageUrl ? 'contain' : 'cover')}
+              radarClassName={radarIsScene ? '' : (state.nisarImageUrl ? 'compare-layer--nisar' : '')}
+              radarEager
+            />
             {state.nisarImageUrl && !radarIsScene ? (
               <p className="micro" style={{ margin: '6px 0 0' }}>
                 {t('seeThrough.nisarSwath')}

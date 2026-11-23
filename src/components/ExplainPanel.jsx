@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Button, Callout, InputGroup, Spinner } from '@blueprintjs/core';
+import { Button, Callout, Spinner } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
-import { askExplain, loadExplanation } from '../services/sarApi';
+import { loadExplanation } from '../services/sarApi';
 
 /**
  * "Explain the Echo" — a grounded, numbers-first physical hypothesis for the
- * selected site, plus an "Ask the Radar" box whose answers come only from the
- * real computed metrics (never invented; unknown questions say so).
+ * selected site. The "Ask" box is now a shortcut into Sothis AI, which answers
+ * from the same real measurements (never invented).
  */
 export default function ExplainPanel() {
   const { t } = useTranslation();
@@ -18,9 +18,6 @@ export default function ExplainPanel() {
   const setActiveId = setSelectedSiteId;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [question, setQuestion] = useState('');
-  const [answer, setAnswer] = useState(null);
-  const [asking, setAsking] = useState(false);
 
   useEffect(() => {
     if (!sites.length) return;
@@ -37,7 +34,6 @@ export default function ExplainPanel() {
     let cancelled = false;
     setLoading(true);
     setData(null);
-    setAnswer(null);
     loadExplanation(site.id, language).then((result) => {
       if (!cancelled) {
         setData(result);
@@ -51,6 +47,10 @@ export default function ExplainPanel() {
 
   if (!site) return null;
 
+  const openChat = () => {
+    window.dispatchEvent(new CustomEvent('sothis:ask', { detail: { question: t('explain.openChatPrompt') } }));
+  };
+
   if (source !== 'api') {
     return (
       <section id="explain" className="content-section chapter" aria-labelledby="explain-title">
@@ -61,14 +61,6 @@ export default function ExplainPanel() {
       </section>
     );
   }
-
-  const ask = async () => {
-    if (!question.trim() || !site?.id) return;
-    setAsking(true);
-    const result = await askExplain(site.id, question.trim(), language);
-    setAnswer(result);
-    setAsking(false);
-  };
 
   return (
     <section id="explain" className="content-section chapter" aria-labelledby="explain-title">
@@ -98,33 +90,7 @@ export default function ExplainPanel() {
 
             <div className="stack" style={{ gap: 8 }}>
               <h3 className="micro" style={{ margin: 0 }}>{t('explain.askTitle')}</h3>
-              <div className="row" style={{ gap: 8 }}>
-                <InputGroup
-                  fill
-                  value={question}
-                  onChange={(event) => setQuestion(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') ask();
-                  }}
-                  placeholder={t('explain.askPlaceholder')}
-                  aria-label={t('explain.askTitle')}
-                  data-testid="explain-ask-input"
-                />
-                <Button intent="primary" onClick={ask} loading={asking} text={t('explain.askButton')} />
-              </div>
-              {answer ? (
-                <div className="explain-answer" data-testid="explain-answer" role="status">
-                  <p className="body-copy" style={{ margin: 0 }}>{answer.answer}</p>
-                  <p className="micro" style={{ margin: '4px 0 0' }}>
-                    {answer.confidence === 'grounded' ? t('explain.grounded') : t('explain.unknown')}
-                  </p>
-                  {answer.citations?.length ? (
-                    <p className="micro" dir="ltr" style={{ margin: '4px 0 0', opacity: 0.8 }}>
-                      {answer.citations.map((citation) => citation.value).join(' · ')}
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
+              <Button intent="primary" onClick={openChat} text={t('explain.openChat')} data-testid="explain-open-chat" />
             </div>
 
             {data.unknowns?.length ? (

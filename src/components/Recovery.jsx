@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { estimateRecovery, formatMonthTick, formatMonths } from '../services/recovery';
+import { estimateRecovery, evalModel, formatMonthTick, formatMonths, recoveryFromModel } from '../services/recovery';
 import { Meter, Panel, SectionHead } from './ui';
 
 const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 40 };
@@ -105,13 +105,26 @@ function PassChart({ series, eventDate, language }) {
   );
 }
 
-function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel, rtl }) {
+function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, targetLabel, rtl, model, sigma }) {
   const { t } = useTranslation();
   const maxMonth = Math.max(...points.map((p) => p.month));
   const measured = points.filter((p) => !p.projected);
   const projectedPoints = points.filter((p) => p.projected);
   const projectedLine = projectedPoints.length ? [measured[measured.length - 1], ...projectedPoints] : [];
   const estimate = estimateRecovery(points, threshold);
+
+  // Fitted parametric curve (sampled) — drawn as a smooth line when a model exists.
+  const modelCurve = (() => {
+    if (!model || !Array.isArray(model.params)) return null;
+    const steps = 40;
+    const pts = [];
+    for (let i = 0; i <= steps; i += 1) {
+      const m = (i / steps) * maxMonth;
+      const v = evalModel(model, m);
+      if (Number.isFinite(v)) pts.push({ month: m, pct: v });
+    }
+    return pts.length ? pts : null;
+  })();
 
   const innerW = CHART.width - CHART.left - CHART.right;
   const innerH = CHART.height - CHART.top - CHART.bottom;
@@ -216,6 +229,9 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
       />
 
       <polyline points={polyline(measured)} fill="none" stroke="var(--bp-intent-primary-rest)" strokeWidth="2" strokeLinejoin="round" />
+      {modelCurve ? (
+        <polyline points={polyline(modelCurve)} fill="none" stroke="var(--bp-intent-success-rest)" strokeWidth="2.4" strokeLinejoin="round" opacity="0.9" />
+      ) : null}
       {projectedLine.length ? (
         <polyline
           points={polyline(projectedLine)}
@@ -228,7 +244,20 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
       ) : null}
 
       {measured.map((point) => (
-        <circle key={`m-${point.month}`} cx={x(point.month)} cy={y(point.pct)} r="2.6" fill="var(--bp-intent-primary-rest)" />
+        <g key={`m-${point.month}`}>
+          {Number.isFinite(sigma) && sigma > 0 ? (
+            <line
+              x1={x(point.month)}
+              x2={x(point.month)}
+              y1={y(Math.min(100, point.pct + sigma))}
+              y2={y(Math.max(0, point.pct - sigma))}
+              stroke="var(--bp-intent-primary-rest)"
+              strokeWidth="1"
+              opacity="0.45"
+            />
+          ) : null}
+          <circle cx={x(point.month)} cy={y(point.pct)} r="2.6" fill="var(--bp-intent-primary-rest)" />
+        </g>
       ))}
       {projectedPoints.map((point) => (
         <circle
@@ -295,6 +324,11 @@ export default function Recovery() {
     () => (site ? estimateRecovery(site.recovery.points, threshold) : null),
     [site, threshold]
   );
+  // Model-based estimate (physics-informed fit) when a parametric model exists.
+  const modelResult = useMemo(
+    () => (site?.recovery?.model ? recoveryFromModel(site.recovery.model, threshold) : null),
+    [site, threshold]
+  );
 
   if (!site || !estimate) return null;
 
@@ -336,10 +370,25 @@ export default function Recovery() {
                 ? t('common.checkingLive')
                 : site.recovery.insufficient
                 ? t('recovery.notMeasured')
-                : estimate.months == null
+                : (modelResult?.months ?? estimate.months) == null
                   ? t('recovery.notReached')
-                  : formatMonths(estimate.months, language)}
+                  : formatMonths(modelResult?.months ?? estimate.months, language)}
             </p>
+
+            {!loading && !site.recovery.insufficient && modelResult?.months != null && modelResult.ci95Days ? (
+              <p className="micro" style={{ marginTop: 2, marginBottom: 0 }}>
+                {t('recovery.ciLabel', { n: modelResult.ci95Days })}
+              </p>
+            ) : null}
+
+            {!loading && !site.recovery.insufficient && site.recovery.model ? (
+              <p className="micro" style={{ marginTop: 2, marginBottom: 0, opacity: 0.8 }}>
+                {t('recovery.modelBadge', {
+                  model: site.recovery.model.name,
+                  r2: site.recovery.model.r2,
+                })}
+              </p>
+            ) : null}
 
             <div
               style={{
@@ -432,8 +481,20 @@ export default function Recovery() {
                 xLabel={t('recovery.chartX')}
                 targetLabel={t('recovery.target')}
                 rtl={language === 'ar'}
+                model={site.recovery.model}
+                sigma={site.recovery.model?.sigma}
               />
             </div>
+
+            {!loading && !site.recovery.insufficient && site.recovery.validation ? (
+              <p className="micro" style={{ marginTop: 10, marginBottom: 0, opacity: 0.85 }}>
+                {t('recovery.validationLine', {
+                  rmse: site.recovery.validation.modelRmsePct,
+                  r: site.recovery.validation.hhHvR,
+                  n: site.recovery.validation.nPasses,
+                })}
+              </p>
+            ) : null}
 
             <div className="recovery-method-block">
               <Button

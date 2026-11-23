@@ -1,0 +1,793 @@
+================================================================================
+SOTHIS ECHO — COMPLETE TECHNICAL WALKTHROUGH FOR JUDGES
+================================================================================
+An interactive, bilingual (English / Arabic) NISAR mission explorer.
+Live: https://sothisecho.vercel.app
+Repository: https://github.com/gaballahtech/Sothis-Echo
+Built for: NASA Space Apps Challenge
+
+This document explains EVERY part of the website — what it is, why it exists,
+what technologies power it, how each piece works internally, and where every
+number comes from. It is written to be a complete, self-contained briefing: a
+judge should be able to understand the entire system from this file alone.
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+ 1. Project identity & the problem it solves
+ 2. Technology stack (every library and why)
+ 3. High-level architecture (how data flows)
+ 4. The data sources (where every number comes from)
+ 5. Section-by-section walkthrough (what/why/how, for all 16 sections)
+ 6. The backend API (every endpoint, in detail)
+ 7. The AI assistant (Sothis AI) — full mechanics
+ 8. Build & data-generation scripts (Python pipelines)
+ 9. Internationalization (English + Arabic, 379 keys, RTL)
+10. Design system (the terminal / phosphor aesthetic)
+11. Testing & quality gates
+12. Deployment (Vercel serverless)
+13. Data honesty & scientific integrity (the core principle)
+14. NISAR mission facts used
+15. Team & acknowledgments
+
+================================================================================
+1. PROJECT IDENTITY & THE PROBLEM IT SOLVES
+================================================================================
+
+WHAT IT IS
+Sothis Echo is a web application that teaches visitors how Synthetic Aperture
+Radar (SAR) — specifically NASA's NISAR mission — sees changes on Earth's surface
+that an optical camera cannot. It follows two real 2026 events (a flood in
+Central Vietnam and a megafire in Big Sur, California) and lets the user explore
+the radar data behind them interactively.
+
+WHY IT EXISTS (the problem)
+- An optical camera (like the human eye or a phone) records reflected sunlight.
+  It is blind at night, and cloud, smoke, haze and darkness block it entirely.
+- Radar is the opposite: it sends its own microwave pulse and times the echo, so
+  it works day or night and sees THROUGH cloud, smoke and darkness. It measures
+  shape, roughness and moisture, not colour.
+- NISAR (NASA–ISRO SAR) launched on 30 July 2025 and now maps nearly all of
+  Earth's land and ice every 12 days, with data free and open. But the raw data
+  is scientifically rich and hard for the public to read.
+- Most people have never been shown HOW to read a radar image. Sothis Echo is
+  the bridge: it takes real NISAR granules and turns them into an interactive,
+  bilingual story a non-expert can follow, while keeping every claim tied to a
+  real measurement.
+
+THE CENTRAL DESIGN PRINCIPLE — DATA HONESTY
+Every quantitative statement on the site is computed from a real satellite
+granule and names the measurement it came from. Where a measurement is genuinely
+unavailable (e.g. no curated coherence pair for a site), the interface says
+"unavailable" rather than inventing a value. The atlas distinguishes two
+"maturities":
+- 'lens'  = real amplitude/coherence/mechanism computed from NISAR granules.
+- 'story' = a field-guide explainer of a hazard type (no fabricated numbers).
+This honesty is enforced in code, not just in copy.
+
+================================================================================
+2. TECHNOLOGY STACK (every library and why)
+================================================================================
+
+FRONTEND
+- React 19            — component-based UI; lets each section be a self-contained,
+                        state-managed unit.
+- Vite 8              — fast dev server (http://localhost:3000) and production
+                        bundler; chosen for instant HMR and small, modern output.
+- React Router (hash) — client-side routing so the single-page app can deep-link
+                        and keep state across "pages".
+- i18next + react-i18next — mature internationalization; English + Arabic with
+                        interpolation, plurals and a persisted language choice.
+- @blueprintjs/core   — accessible React component primitives (Button, ButtonGroup,
+                        Slider, Collapse, Callout, Tabs, etc.) with built-in
+                        keyboard support and ARIA roles. Chosen so every interactive
+                        control is a REAL button/input (not a fake div).
+- Leaflet (via react-leaflet, loaded dynamically) — the only mapping library used,
+                        for the Global Atlas world map. It is lazy-loaded so it does
+                        not weigh down the initial bundle.
+- Web Audio API      — native browser API used for sonification (no audio files).
+- Inline SVG         — the charts, the world map, the radar "scenes" and the
+                        difference maps are all drawn as SVG in the DOM, so they are
+                        crisp at any size and inspectable.
+
+BACKEND
+- Node.js (ES modules, .mjs) — the API server runs on the Node.js runtime.
+- Native fetch        — the server calls NASA ASF, WorldPop and Google Gemini
+                        directly with the built-in fetch (no heavy HTTP client).
+- Deployed as a Vercel serverless function (api/[...path].js) that mounts
+  server/api.mjs; the same server runs locally via `npm run api`.
+
+DATA / PYTHON PIPELINES
+- Python 3            — offline build scripts that fetch, calibrate and cache real
+                        NISAR/Sentinel data into committed .mjs snapshots so the
+                        live site never depends on a slow external API at view time.
+- Terra/AWS Terrain, rasterio / numpy (in the build scripts) — used to read
+                        GeoTIFF/COG windows and compute statistics.
+
+QUALITY
+- Playwright          — end-to-end browser tests (18 scenarios) that drive the real
+                        built app and assert behaviour.
+- A custom Node script (scripts/i18n-parity.mjs) — fails the build if English and
+                        Arabic key sets diverge (they currently match at 379 keys).
+
+================================================================================
+3. HIGH-LEVEL ARCHITECTURE (how data flows)
+================================================================================
+
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                        BROWSER (React SPA)                            │
+  │                                                                       │
+  │  SiteDataContext  ──holds──▶  sites[] (study areas) + selectedSiteId  │
+  │       │                                                               │
+  │       │ on mount, probes /api/health and loads from the API if         │
+  │       │ configured; otherwise uses the bundled dataset.                │
+  │       ▼                                                               │
+  │  Components (TimeSeries, StudyAreas, Lenses, Sonification, Atlas,      │
+  │  SeeThrough, Explain, RapidResponse, AIChat ...) all read the same     │
+  │  context, so a single site selection stays in sync everywhere.         │
+  │                                                                       │
+  │  Services: sarApi (fetch+normalize), scene renderer, sonifier,        │
+  │  recovery maths, CSV builder.                                         │
+  └──────────────────────────────────────────────────────────────────────┘
+                    │  HTTPS (only if VITE_API_BASE_URL is set / same origin)
+                    ▼
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │                 BACKEND  (server/api.mjs on Node / Vercel)           │
+  │                                                                       │
+  │  GET  /api/health          status + version + realData flag           │
+  │  GET  /api/study-areas     sites + calibrated series + provenance     │
+  │  GET  /api/scene-image     NISAR browse PNG cropped to a bbox         │
+  │  POST /api/lenses          amplitude + coherence + mechanism          │
+  │  POST /api/explain         grounded, numbers-first explanation        │
+  │  POST /api/rapid-response  situation report + WorldPop population     │
+  │  POST /api/ask             Sothis AI chat (Google Gemini)             │
+  │                                                                       │
+  │  Helpers: nisar.mjs (granule access), sentinel.mjs (GRD series),     │
+  │  explain.mjs (hypothesis engine), rapid.mjs (stats + WorldPop).      │
+  │  Caches: server/cache/nisar/*.mjs  (committed real-granule snapshots)│
+  └──────────────────────────────────────────────────────────────────────┘
+                    │
+                    ▼
+  Real external data (fetched by the Python build scripts and cached, or
+  queried live at request time where noted):
+   • NASA NISAR L2 GCOV (via NASA ASF DAAC)  — calibrated L-band backscatter
+   • Sentinel-1 GRD (Earth Search / AWS Open Data) — fallback time series
+   • WorldPop Global2 R2025A 100 m            — population estimates
+   • Esri World Imagery                       — cloud-free optical basemap
+   • Google Gemini (gemini-3.1-flash-lite)    — the AI chat
+
+KEY ARCHITECTURAL DECISION — API-FIRST WITH A BUNDLED FALLBACK
+The app is designed so it NEVER breaks:
+- If the API is configured (VITE_API_BASE_URL set, or the Vercel function answers
+  /api/health), it fetches real, server-computed data.
+- If the API is unreachable, it falls back to a bundled dataset that ships in the
+  repo, and the UI labels the fallback honestly (e.g. "live backend unreachable").
+- Locally with no API configured, it performs ZERO network requests for data and
+  shows the labelled bundled dataset. This makes the demo work offline and makes
+  the deployed site resilient.
+
+================================================================================
+4. THE DATA SOURCES (where every number comes from)
+================================================================================
+
+A) NISAR L-band GCOV (the primary, real source)
+- Product: NISAR L2 GCOV (Ground Range Detected, Geocoded Terrain Corrected).
+- Provider: NASA Alaska Satellite Facility (ASF) DAAC.
+- What it gives: calibrated L-band (24 cm) backscatter in HH and HV polarizations,
+  in dB (gamma-0). The site's build scripts read the real granules and cache:
+    • before/after browse PNGs (colourised quicklooks) per site,
+    • the calibrated HH/HV series per pass,
+    • change statistics (changed area in km², mean |Δ| dB, valid-pixel share).
+- The change map is a pixel-level |After − Before| difference of the two calibrated
+  HH images on the same 560×370 grid, with a 3×3 median filter to remove speckle.
+  Differences under 1.5 dB are masked as noise; the strongest 2% of change is shown
+  white (capped at 8 dB). For wildfires the HV canopy drop is weighted 60/40 over HH.
+
+B) Sentinel-1 GRD (the fallback quantitative series)
+- Product: Sentinel-1 Ground Range Detected.
+- Provider: Earth Search + AWS Open Data (a 512×512 COG window around each site).
+- What it gives: acquisition dates and backscatter statistics. Values are RELATIVE
+  dB (from GRD digital numbers), NOT calibrated σ⁰. The UI states this explicitly.
+- Used for the dense time series where NISAR coverage is thinner, and as a labelled
+  fallback when no NISAR granule covers a site.
+
+C) WorldPop Global2 R2025A 100 m (population)
+- Provider: WorldPop API (https://api.worldpop.org/v3/population).
+- What it gives: total population and density inside the site's bounding box, for
+  the requested year. Population exposed = density × changed area (km²), rounded,
+  and labelled an ESTIMATE. If WorldPop is unreachable, the field reads
+  "unavailable" — never a guessed number.
+
+D) Esri World Imagery (optical reference)
+- Provider: Esri World Imagery tiles.
+- Role: the "OPTICAL · BASEMAP" side of the camera-vs-radar slider. It is a
+  cloud-free reference basemap, NOT a same-date optical pass, and the UI says so
+  honestly ("not a same-date Sentinel-2 pass, so clouds may not appear here").
+
+E) Google Gemini (the AI assistant)
+- Model: gemini-3.1-flash-lite (free tier, fast, generous limits).
+- Role: powers "Sothis AI", a chat assistant grounded in NISAR/radar science and
+  the selected site's context. It does NOT do image analysis.
+
+================================================================================
+5. SECTION-BY-SECTION WALKTHROUGH (what / why / how)
+================================================================================
+
+--------------------------------------------------------------------------------
+5.1 HERO  ("Earth is always dancing.")
+--------------------------------------------------------------------------------
+WHAT: The landing section — a headline, a one-line pitch, two call-to-action
+      buttons ("See what the camera misses" → jumps to the slider; "Hear the
+      surface" → jumps to sonification), and a live data chip showing the NISAR
+      L-band record and the last real pass date.
+WHY:  It frames the entire thesis in one breath: the Earth is always changing, and
+      radar is how we see it through cloud and dark.
+HOW:  A background <video> (public/Video.mp4) plays a subtle radar/earth loop. The
+      "live data" chip is fed by the same SiteDataContext as everything else, so it
+      reflects the real NISAR record when the API is connected, and a labelled
+      local record otherwise. Motion respects prefers-reduced-motion.
+
+--------------------------------------------------------------------------------
+5.2 MISSION  ("Meet NISAR")
+--------------------------------------------------------------------------------
+WHAT: An introduction to the NISAR mission: what it is, why radar (not a camera),
+      the two bands (L and S), the 12-day repeat, free-and-open data, plus a mission
+      card (launch, orbit, repeat, bands, swath, resolution, baseline) and a
+      timeline (launch → commissioning → operations).
+WHY:  Gives the visitor the minimum physics and mission context needed to read the
+      rest of the site.
+HOW:  Static, curated content sourced from NASA NISAR Quick Facts and the NISAR
+      Science Users' Handbook (2nd ed., 2025). Numbers are literal facts, each
+      traceable to those sources (cited in the section footer).
+
+--------------------------------------------------------------------------------
+5.3 SEE-THROUGH  ("Why the camera misses the story")
+--------------------------------------------------------------------------------
+WHAT: A draggable before/after comparison slider. Left = a cloud-free Esri optical
+      basemap over the exact study window; right = the real NISAR L-band radar
+      browse of the same window. Dragging the divider reveals how the radar sees a
+      flood that the optical image (in a real cloudy pass) would miss.
+WHY:  This is the single most visceral demonstration of the core idea: "camera vs
+      radar".
+HOW:  A custom CompareSlider component renders two overlaid images clipped by a
+      draggable divider. It is fully keyboard-operable (arrow keys move the
+      divider), exposes ARIA labels, and is touch/pointer friendly. The two images
+      are the real NISAR browse (cropped server-side to the exact bbox via the
+      product's KML geolocation, north-up) and the Esri basemap. The UI is scrupulously
+      honest: it states the optical side is a reference basemap (not a same-date
+      pass) and that the two sides do not represent the same moment in time. A legend
+      explains the radar signatures (open water = dark, canopy = textured, flooded
+      trunks = bright specular).
+
+--------------------------------------------------------------------------------
+5.4 STUDY AREAS  ("One change, two rhythms")
+--------------------------------------------------------------------------------
+WHAT: The core data section for the two measured sites (Central Vietnam flood and
+      Big Sur megafire). It has site tabs, before/after cards, a change map, a dB
+      measurement panel, a swipe comparison, a "reading the signal" explainer, and a
+      full observation ledger table.
+WHY:  Lets the visitor compare how the SAME physical event type looks different in
+      radar across two very different landscapes, and read the actual numbers.
+HOW:
+  - Site tabs call the shared setSelectedSiteId, so switching here updates every
+    other section (Lenses, TimeSeries, RapidResponse, Explain, AIChat).
+  - Before/after cards show the real NISAR HH browse images (or a labelled
+    Sentinel-1 fallback) for each pass, each stamped with its Granule ID and date.
+  - The CHANGE card is the pixel-level |After − Before| difference map described in
+    §4A.
+  - The dB panel and CSV export come from the calibrated HH/HV series.
+  - The observation ledger is a table of every pass in the series with columns:
+    date, HH (dB), HV (dB), HV−HH (dB), dark share, change, recovery, status.
+  - A "swipe" mode lets you drag between before and after inside the card.
+  - Everything degrades honestly: if the live rebuild failed, it shows the labelled
+    fallback and says "not new measurements".
+
+--------------------------------------------------------------------------------
+5.5 LENSES (J1)  ("Three lenses on one change")
+--------------------------------------------------------------------------------
+WHAT: The same before/after pair read three independent ways — Amplitude, InSAR
+      Coherence, and dual-pol Scattering Mechanism — plus a Change view that fuses
+      them.
+WHY:  A single radar image is ambiguous. Three independent physical measurements
+      together say not just THAT the ground changed, but HOW and WHY.
+HOW:  Computed by scripts/build-lenses.py from real NISAR granules and cached in
+      server/cache/nisar/<site>-lenses.mjs:
+  - Amplitude: mean HH and HV in dB before/after, plus the per-pol change. A drop
+    = smoother or lost canopy; a rise = rougher or wetter.
+  - Coherence: from a curated GUNW/GSLC pair (same track/frame), a 16-day temporal
+    baseline, water-masked. Values 0–1; low values (<0.3) mark rapid decorrelation
+    = structural change (e.g. a burn scar) even where brightness held.
+  - Mechanism: a surface / volume / low-return decomposition from the HH–HV pair
+    (the only pol available over these sites — no quad-pol GCOV exists). Thresholds:
+    low return ≤ {low} dB co-pol; volume when HV−HH > {ratio} dB. A wildfire flips
+    canopy volume → surface; a flood flips surface → volume.
+  - Change: pixels whose scattering class changed between the two dates (the fused
+    physical-mechanism change).
+  Each lens carries its own date and granule IDs. Where a lens is unavailable it
+  says so instead of substituting a synthetic value.
+
+--------------------------------------------------------------------------------
+5.6 EXPLAIN  ("Explain the echo")
+--------------------------------------------------------------------------------
+WHAT: A grounded, numbers-first physical hypothesis for the selected site, plus an
+      "Ask the radar" box where the visitor can ask a question and get an answer
+      that stays strictly inside what was actually measured.
+WHY:  Turns the data into understanding without ever over-claiming.
+HOW:  server/explain.mjs builds the hypothesis by naming the specific measurements
+      (e.g. "HH fell X dB while coherence dropped to Y") and their sources. The
+      "Ask" box is grounded: questions outside the site's data are refused
+      ("Not measured — this is outside the site's data"), never answered with
+      invented content.
+
+--------------------------------------------------------------------------------
+5.7 RAPID RESPONSE (J4)
+--------------------------------------------------------------------------------
+WHAT: An actionable situation report generated from the site's real change stats:
+      extent (km²), changed percentage, population exposed (WorldPop estimate),
+      dominant mechanism, a risk score/level (Hazard × Exposure × Vulnerability),
+      "what this means", questions to ask, and actions to take — plus a one-page
+      shareable PNG.
+WHY:  Demonstrates that the data is not just interesting but decision-relevant —
+      the kind of output an emergency manager would want.
+HOW:  server/rapid.mjs (buildRapidResponse) computes extent from the calibrated
+      change stats, derives the dominant mechanism from the lenses, queries WorldPop
+      for population inside the bbox (populationExposed = density × extent, rounded,
+      labelled "estimate"), and assembles a risk score. The one-page PNG is drawn
+      client-side (a canvas/SVG snapshot) so it can be downloaded and shared. If
+      WorldPop is unreachable, population reads "unavailable", never faked.
+
+--------------------------------------------------------------------------------
+5.8 SONIFICATION  ("Hear the dance")
+--------------------------------------------------------------------------------
+WHAT: Turns the satellite-pass series into sound. Each pass becomes a note/noise
+      burst; pitch = amount of change, rhythm = speed of change, static texture =
+      roughness. A visual pulse trace plays alongside.
+WHY:  A second, non-visual way to perceive the data — and a memorable one.
+HOW:  A custom Web Audio sonifier (src/services/sonifier.js) synthesises audio in
+      the browser (no audio files):
+  - The change series (resampled to 16 steps) drives a pentatonic-ish pitch mapping.
+  - Each step = one 12-day pass; the playhead advances every ~620 ms.
+  - A noise burst (filtered white noise) represents surface roughness.
+  - A DynamicsCompressor acts as a limiter so it never clips.
+  - It degrades gracefully: if the Web Audio API is unsupported, it says so and the
+    visual trace still shows the same pattern.
+
+--------------------------------------------------------------------------------
+5.9 TIME SERIES  ("The change over time")
+--------------------------------------------------------------------------------
+WHAT: Every real NISAR pass in order, animated with a moving playhead. The line is
+      calibrated HH backscatter (dB); the bars are the change metric (0–1). It has
+      its OWN site selector and stays in sync with the global selection.
+WHY:  Shows the temporal dimension — how the surface evolved pass by pass, and when
+      the event hit.
+HOW:  A custom inline-SVG chart (src/components/TimeSeries.jsx):
+  - X axis = pass index/date; Y axis = HH backscatter in dB (auto-scaled to the
+    series min/max).
+  - A green line connects the per-pass HH values; dots mark each pass.
+  - Bars (primary colour) encode the change metric (0–1) per pass.
+  - Press Play → a playhead steps through the passes (750 ms per step), highlighting
+    the active point and date.
+  - The site selector (ButtonGroup) calls the shared setSelectedSiteId, so changing
+    it here updates Study Areas and every other section too (verified in tests).
+
+--------------------------------------------------------------------------------
+5.10 RECOVERY  ("When does it come back?")
+--------------------------------------------------------------------------------
+WHAT: Choose a target percentage of the pre-event radar signal; the section
+      estimates how long recovery takes and plots the recovery curve.
+WHY:  Answers the natural next question after "it changed" — "when does it recover?"
+HOW:  src/services/recovery.js (estimateRecovery) finds the first crossing of the
+      target percentage in the measured/projected recovery curve and linearly
+      interpolates between the two bracketing points. The curve is the share of the
+      study window that has returned to its pre-event HH level, measured block by
+      block on same-satellite/same-orbit passes (100% = the changed area has faded
+      into the window's own pass-to-pass noise). It is explicitly a STRUCTURAL proxy,
+      not full ecological recovery, and the UI says so. If the record does not hold
+      enough post-event passes, it shows an honest notice instead of drawing a
+      misleading curve.
+
+--------------------------------------------------------------------------------
+5.11 ATLAS (J2)  ("Global atlas")
+--------------------------------------------------------------------------------
+WHAT: A curated world map (inline SVG, with a Leaflet-powered interactive view) of
+      NISAR-relevant change sites across six continents, coloured by change type
+      (flood, wildfire, glacier, volcano, deforestation, subsidence, oil spill, crop,
+      earthquake). Clicking a place opens its study area or a field-guide card.
+WHY:  Places the two measured sites in a global context and teaches the breadth of
+      what radar can monitor.
+HOW:  The map is inline SVG (no mapping library for the stylised view) plus an
+      optional Leaflet map for pan/zoom. Sites carry a 'maturity':
+  - 'lens'  → measured from real NISAR lenses (Big Sur, Central Vietnam).
+  - 'story' → a field-guide explainer (what happened / why radar sees it / what
+    NISAR measures / local impact), clearly labelled as an explainer, never a
+    fabricated measurement.
+  Clicking a measured site sets the global selectedSiteId and scrolls to its study
+  area; clicking a field-guide site opens its explainer card. This is the honest
+  way to show breadth without inventing data.
+
+--------------------------------------------------------------------------------
+5.12 DETECTIVE  ("Radar detective")
+--------------------------------------------------------------------------------
+WHAT: A timed reasoning game over real change maps: two real post-launch cases plus
+      reasoning rounds. Read the signal (not the caption), choose a cause, then
+      reveal the evidence. Tracks score, streaks and a final rank.
+WHY:  Turns learning into active recall — the visitor practices reading radar
+      signatures.
+HOW:  Each round shows a real change map and asks "what changed here?". The answer
+      options are causes (flood, fire, etc.); the evidence (the actual before/after
+      signature and explanation) is revealed only AFTER answering. A timer runs per
+      round (paused while evidence is open). The score and a best-streak counter are
+      tracked in state. The correct-answer explanations are grounded in the same
+      radar physics used elsewhere.
+
+--------------------------------------------------------------------------------
+5.13 METHOD  ("Data we can defend")
+--------------------------------------------------------------------------------
+WHAT: The methodology and transparency section: known limits, the exact data
+      contract, sources and further reading, dataset version, and downloadable
+      JSON/CSV.
+WHY:  A scientific project must show its work. This is where a judge can verify
+      claims.
+HOW:  Static, curated content that documents:
+  - Known limits (speckle, layover, shadow; radar is not a species count; values
+    are only as good as the product behind them; terrain correction is mandatory).
+  - The API contract (endpoints, version, policy: backend-first, zero-requests
+    fallback).
+  - Sources and further reading (NASA, ISRO, ASF, handbook).
+  - Dataset version and download buttons (JSON of the dataset, CSV of the series).
+
+--------------------------------------------------------------------------------
+5.14 TEAM & FOOTER
+--------------------------------------------------------------------------------
+WHAT: The team (frontend lead, backend, research, visual identity) with portfolio/
+      GitHub/LinkedIn links, and a footer with resources, community links, license
+      and the NASA/ISRO disclosure.
+WHY:  Credits and trust.
+HOW:  Static content; the footer repeats the data sources and the independent-
+      prototype disclaimer.
+
+--------------------------------------------------------------------------------
+5.15 SOTHIS AI  (the chat assistant — see §7 for full detail)
+--------------------------------------------------------------------------------
+WHAT: A floating chat widget ("Sothis AI") that answers questions about NISAR,
+      radar and the page's data, in English or Arabic.
+WHY:  A conversational entry point for curious visitors.
+HOW:  POSTs to /api/ask, which calls Google Gemini (gemini-3.1-flash-lite) with a
+      system prompt grounded in NISAR/radar science and the selected site's context.
+
+--------------------------------------------------------------------------------
+5.16 GUIDED TOUR
+--------------------------------------------------------------------------------
+WHAT: An optional 5-stop, 60-second tour for first-time visitors (the radar trick,
+      the data, the game), remembered via localStorage.
+WHY:  Lowers the barrier to entry.
+HOW:  A small state machine that highlights each section in turn; the "seen" flag is
+      persisted so it only auto-prompts once.
+
+--------------------------------------------------------------------------------
+5.17 NAVIGATION CHROME, SHARED COMPONENTS, CONTEXT & HOOKS
+--------------------------------------------------------------------------------
+These are the frame and reusable pieces every section is built from.
+
+NAVIGATION
+- Navbar (src/components/Navbar.jsx) — the top bar. It uses Blueprint's Navbar +
+  a Drawer for mobile. It shows the brand, the section links (NavigationMenu), a
+  language toggle (English ⇄ العربية) and a day/night theme toggle. It highlights
+  the current section using the useActiveSection hook (scroll-spy).
+- NavigationMenu (src/components/NavigationMenu.jsx) — the shared, data-driven list
+  of section links (from src/data/navigation.js). Rendered both in the top Navbar
+  and in the compact left rail.
+- Sidebar (src/components/Sidebar.jsx) — a left "app-rail" that renders the same
+  NavigationMenu in compact form, so on wide screens the section list is always
+  visible while scrolling.
+- Footer (src/components/Footer.jsx) — the site footer with data resources,
+  community links (GitHub, issues, contribute), the license/copyright and the
+  NASA/ISRO disclosure.
+- useActiveSection (src/utils/useActiveSection.js) — a custom hook that tracks which
+  section is currently in view (via scroll position) so the nav highlights it.
+
+SHARED / REUSABLE COMPONENTS
+- ui.jsx (src/components/ui.jsx) — the shared primitives: SectionHead (section
+  title + subtitle with an anchor id), Panel, and small layout helpers used by
+  every section.
+- SceneCanvas (src/components/SceneCanvas.jsx) — renders a radar/optical scene image
+  with fit ("cover"/"contain") and optional crop, and exports CompareSlider (the
+  draggable before/after divider used by See-Through). It is the single place that
+  knows how to draw a cropped image layer.
+- CompareSlider — the accessible drag divider: pointer + keyboard (arrow keys),
+  ARIA slider semantics, a live percentage readout.
+- SwipeCompare (src/components/SwipeCompare.jsx) — a second, self-contained swipe
+  comparison used inside the Study-Areas cards (before ↔ after), with full ARIA
+  slider semantics (aria-valuenow / aria-valuetext) and a labelled handle.
+- ObservationTable (src/components/ObservationTable.jsx) — the radar observation
+  ledger: an auditable table of every pass in the current series (date, HH dB,
+  HV dB, HV−HH dB, dark share, change, recovery, status), with a note explaining
+  each derived column. It is the tabular, verifiable view of the same series the
+  charts draw.
+- PulseTrace (src/components/PulseTrace.jsx) — the visual companion to sonification:
+  an animated pulse/waveform that plays in sync with the audio so the same pattern
+  is visible for visitors who cannot hear it.
+
+REACT CONTEXT (app-wide state)
+- SiteDataContext (src/context/SiteDataContext.jsx) — the single source of truth for
+  the sites list, the selected site id, and the data source ('api' | 'local'), plus
+  loading state. Every data section reads this, so one selection updates them all.
+  On mount it probes /api/health and loads from the API if configured; otherwise it
+  uses the bundled dataset (and labels the source).
+- LanguageContext (src/context/LanguageContext.jsx) — the active language (en/ar),
+  persisted in localStorage, with dir switching for RTL.
+- ThemeContext (src/context/ThemeContext.jsx) — day/night theme, persisted.
+- Public/Researcher mode context — toggles the depth of the technical detail.
+
+DATA & SERVICE MODULES (the model layer)
+- src/data/sites.js — the two measured study areas: metadata, before/after states,
+  the calibrated series, provenance, and the per-site impact/interpretation text.
+- src/data/atlas.js — the global atlas sites (measured 'lens' + 'story' explainers)
+  with coords, change type, summary, and the what/why-radar/what-NISAR-measures
+  content.
+- src/data/quiz.js — the detective rounds (real change maps + answer options +
+  evidence + explanations).
+- src/data/observations.js — the observation-ledger rows/derived-column helpers.
+- src/data/navigation.js — the section list that drives Navbar + Sidebar.
+- src/data/localized.js — the localized() helper that picks en/ar text for a
+  {en, ar} field (used everywhere).
+- src/services/sarApi.js — the API adapter: probes /api/health, fetches + normalizes
+  study areas / scenes / lenses / explain / rapid-response, builds CSV, and never
+  throws (falls back to bundled data).
+- src/services/recovery.js — the recovery-time estimator (first crossing + linear
+  interpolation).
+- src/services/sonifier.js — the Web Audio sonifier (pitch/noise mapping, limiter).
+
+================================================================================
+6. THE BACKEND API (every endpoint, in detail)
+================================================================================
+
+The server (server/api.mjs) is a dependency-free Node.js HTTP router. It exposes a
+small, documented contract. All JSON responses are wrapped as { success, data } (or
+{ success:false, error }) and carry CORS headers. It reads the real path from
+Vercel's __path when mounted as a serverless function.
+
+GET /api/health
+  Returns { status:'ok', timestamp, version, realData } — used by the frontend to
+  probe whether the API is live before choosing API vs bundled data.
+
+GET /api/study-areas
+  Returns the full site list: for each site, its metadata, the calibrated HH/HV
+  series per pass, before/after card provenance (Granule IDs, dates, polarizations,
+  whether values are calibrated), and change statistics (changed km², mean |Δ| dB,
+  valid-pixel share). This is the backbone every data section reads.
+
+GET /api/scene-image?site=...&side=before|after|change&source=nisar
+  Returns a PNG of the real NISAR browse for the site's window (cropped server-side
+  to the exact bbox using the product's KML geolocation, north-up). Used by the
+  cards, the swipe comparison and the See-Through slider.
+
+POST /api/lenses
+  Body: { site }. Returns the three lenses (amplitude, coherence, mechanism) plus
+  the fused change map, each computed from the cached real granules for that site.
+
+POST /api/explain
+  Body: { site, question? }. Returns a grounded, numbers-first explanation (or an
+  answer to an in-scope question). Out-of-scope questions are refused.
+
+POST /api/rapid-response
+  Body: { site, lang }. Returns the situation report: extent km², changed %,
+  dominant mechanism, population (WorldPop, labelled estimate or unavailable),
+  population exposed, risk score/level, decision line, and the fields needed to
+  draw the shareable PNG.
+
+POST /api/ask
+  Body: { question, lang, site }. Returns { answer } from Google Gemini. This is
+  the Sothis AI endpoint (see §7).
+
+Caching & resilience:
+- Expensive NISAR/Sentinel computations are done OFFLINE by the Python build
+  scripts and committed as .mjs snapshots in server/cache/nisar/. At request time
+  the server reads these snapshots, so it is fast and does not depend on a live,
+  slow external API.
+- Where a live external call is needed (WorldPop, Gemini), the server uses a
+  timeout and fails soft: population → "unavailable", AI → "temporarily
+  unavailable". The site never shows a fabricated value.
+
+================================================================================
+7. THE AI ASSISTANT (SOTHIS AI) — FULL MECHANICS
+================================================================================
+
+WHAT IT IS
+A bilingual (English / Arabic) chat assistant that answers questions about NISAR,
+radar physics, and the data on the page. It is NOT an image-analysis tool — it
+talks about the science and the page content.
+
+WHERE IT LIVES
+- Frontend: src/components/AIChat.jsx — a floating button ("Sothis AI" with a live
+  indicator) that opens a chat panel. It keeps a message history, shows typing
+  dots while waiting, offers 5 suggested questions (per language), and is fully
+  keyboard-accessible (Enter to send, Esc to close).
+- Backend: the /api/ask endpoint in server/api.mjs.
+
+HOW A MESSAGE FLOWS
+1. The user types a question (or taps a suggestion). AIChat POSTs
+   { question, lang, site: selectedSiteId } to /api/ask.
+2. The server builds a SYSTEM PROMPT that:
+   - Establishes the assistant's role (Sothis Echo's guide to NISAR/SAR).
+   - Lists the topics it should help with (what NISAR is, how SAR works, HH/HV
+     polarizations, backscatter, coherence, amplitude, change detection, the study
+     sites, flood/fire/deforestation/deformation, the Hazard × Exposure ×
+     Vulnerability framework).
+   - Injects the CURRENT SITE CONTEXT (site name, id, bounding box, event name) so
+     answers are grounded in what the user is looking at.
+   - Instructs it to answer in the user's language (Arabic or English), concisely
+     (2–4 sentences), accurately, and to NOT invent numbers or data not on the page.
+3. The server calls Google Gemini (gemini-3.1-flash-lite) with the system prompt +
+   the user's question, a max of 800 output tokens, temperature 0.5, and
+   thinkingConfig.thinkingBudget = 0 (to disable hidden "thinking" tokens so the
+   visible answer is not starved).
+4. The answer is returned as { data: { answer, question } } and appended to the chat.
+
+RELIABILITY (why it does not flake)
+- The free Gemini tier intermittently returns transient 429/503 under load (Vercel
+  shares egress IPs). The endpoint therefore RETRIES up to 3 times with a short
+  backoff (600 ms, 1200 ms) and only surfaces the "temporarily unavailable" message
+  if all attempts fail. The client timeout is 60 s to accommodate retries.
+- If GEMINI_API_KEY is not configured, the endpoint returns a graceful
+  "AI key not configured" and the UI shows the fallback message instead of erroring.
+
+WHY gemini-3.1-flash-lite
+- It is fast (~1.7 s), free-tier friendly with generous rate limits, supports
+  system instructions and thinkingConfig, and produces clean, grounded answers.
+
+================================================================================
+8. BUILD & DATA-GENERATION SCRIPTS (Python pipelines)
+================================================================================
+
+These run OFFLINE (not at request time) and commit their output so the live site is
+fast and deterministic. They live in scripts/.
+
+scripts/build-lenses.py
+  - For a site, reads the real NISAR GCOV granules (before/after), computes the
+    amplitude means (HH/HV dB), the InSAR coherence from a curated GUNW/GSLC pair,
+    and the dual-pol mechanism classes, plus the fused change map.
+  - Writes server/cache/nisar/<site>-lenses.mjs.
+
+scripts/build-nisar-snapshots.py
+  - Fetches and crops the real NISAR GCOV browse imagery to each site's bbox
+    (north-up, using the product KML) and writes the committed snapshots used by
+    the cards, the swipe comparison and the See-Through slider.
+
+scripts/build-nisar-recovery.py / finalize-nisar-recovery.py
+  - Fit the recovery curve from the real post-event passes (share of the window
+    returned to its pre-event HH level, block by block), and write the committed
+    recovery snapshot.
+
+scripts/find-scar-center.py
+  - Utility to locate the burn-scar centre used when cropping.
+
+scripts/i18n-parity.mjs
+  - Node script that fails if English and Arabic key sets diverge (currently 379
+    keys each).
+
+Environment: these scripts use a Python virtualenv (.venv-nisar) with rasterio /
+numpy and the NASA Earthdata token (EARTHDATA_TOKEN in .env.local) to download
+granules.
+
+================================================================================
+9. INTERNATIONALIZATION (English + Arabic, 379 keys, RTL)
+================================================================================
+
+- i18next + react-i18next with two resources: en and ar.
+- 379 keys per language, verified identical by scripts/i18n-parity.mjs.
+- The whole layout mirrors for Arabic (dir="rtl"): the layout, the chat bubbles,
+  the site-choice rows and the tables all flip correctly (covered by an e2e test).
+- Numbers use Western digits in both languages for scientific consistency; dates
+  are formatted per locale (ar-EG / en-GB).
+- Terminology is consistent and correct in both languages: polarization =
+  "الاستقطاب" (co-pol "الاستقطاب المشترك", cross-pol "الاستقطاب المتقاطع"); backend
+  = "الخادم"; backscatter = "الارتداد الخلفي"; gamma-0 = "غاما-0"; NISAR = "نيسار";
+  L-band = "نطاق L"; granule = "جرين NISAR".
+- The language choice is persisted in localStorage ("sothis-echo-language").
+- The AI assistant answers in the active language.
+
+================================================================================
+10. DESIGN SYSTEM (the terminal / phosphor aesthetic)
+================================================================================
+
+- Monospace typography, zero-radius panes, bracket-style buttons, ASCII dividers,
+  blinking cursors and a subtle CRT scanline overlay — a deliberate "phosphor
+  monitor" look that fits a satellite/radar mission.
+- Colour is semantic: green = success/backscatter, amber = warning/change,
+  primary = bars/actions, muted = secondary text. Dark and light themes both ship.
+- All charts are inline SVG, so they are crisp at any resolution and inspectable.
+- Motion respects prefers-reduced-motion; the compare slider and every control are
+  keyboard-operable and expose ARIA roles/labels.
+
+================================================================================
+11. TESTING & QUALITY GATES
+================================================================================
+
+- Playwright end-to-end suite (npm run test:e2e): 18 scenarios across
+  app.spec.js, jewels.spec.js, blueprint.spec.js, live.spec.js. They drive the
+  real built app and assert: the compare slider responds to keyboard/pointer; the
+  sonification starts/stops; the detective game scores five rounds and resets; the
+  guided tour prompts/walks/remembers; researcher docs stay collapsed until opened;
+  the offline fallback hides calibrated-only controls and never claims calibration;
+  See-Through explains full-browse vs site-window; the Global Atlas renders the map,
+  pins and list; Lenses/Explain/Rapid-response show honest offline notices; the
+  atlas switches the study area everywhere; the atlas renders in Arabic without
+  errors; Arabic flips the ledger columns and right-aligns headers/cells.
+- i18n parity check (scripts/i18n-parity.mjs): 379 keys match between EN and AR.
+- Production build (vite build) must pass.
+- All of the above run before/at deploy.
+
+================================================================================
+12. DEPLOYMENT (Vercel serverless)
+================================================================================
+
+- The frontend is a static Vite build; the backend is a single serverless function
+  (api/[...path].js) that mounts server/api.mjs.
+- vercel.json rewrites /api/* to the function; the function reads the real path
+  from __path.
+- Environment variables (set in the Vercel project):
+    VITE_API_BASE_URL = /api      (baked into the build; makes the SPA call the API)
+    GEMINI_API_KEY                (secret; powers Sothis AI)
+    GEOAI_BASE_URL                (optional; for image GeoAI — not required for the
+                                    text assistant)
+- Live at https://sothisecho.vercel.app (HTTP 200; /api/health returns ok).
+
+================================================================================
+13. DATA HONESTY & SCIENTIFIC INTEGRITY (the core principle)
+================================================================================
+
+This is the project's spine and the thing to stress to judges:
+
+- EVERY number is computed from a real granule and names its source (Granule ID,
+  acquisition time, product, sensor).
+- The atlas separates measured sites ('lens') from field-guide explainers
+  ('story'); explainers never show fabricated numbers.
+- Where a measurement is unavailable (no coherence pair, no post-event passes,
+  WorldPop unreachable, Gemini down), the UI says "unavailable" / "temporarily
+  unavailable" / "illustrative" — it never invents a value.
+- The See-Through optical side is honestly labelled a cloud-free reference basemap
+  (not a same-date pass); the time-series fallback is labelled relative dB (not
+  calibrated σ⁰); the recovery curve is labelled a structural proxy (not ecological
+  recovery).
+- The server fails soft: timeouts and unreachable externals degrade to labelled
+  fallbacks, never to fabricated data.
+
+================================================================================
+14. NISAR MISSION FACTS USED
+================================================================================
+
+- Launched 30 July 2025 on GSLV-F16.
+- 747 km sun-synchronous orbit, 98.4° inclination.
+- 12-day exact repeat (~6-day revisit with ascending + descending).
+- L-band 24 cm (NASA) + S-band 9.4 cm (ISRO).
+- >240 km swath; 3–10 m resolution (mode dependent).
+- Baseline: 3 years L-band, 5 years S-band.
+- Data free and open (L-band via NASA ASF DAAC, S-band via ISRO Bhoonidhi).
+
+Sources: NASA NISAR Quick Facts, NISAR Science Users' Handbook (2nd ed., 2025),
+ASF DAAC, ISRO Bhoonidhi.
+
+================================================================================
+15. TEAM & ACKNOWLEDGMENTS
+================================================================================
+
+TEAM
+- Frontend & project lead: Abdelrahman Gaballah
+- Backend: Mohamed Khider
+- Research: Jana Ayman, Nouran Ahmed
+- Visual identity: Ahd Fayez, Mariam Emad
+
+BUILT WITH GENEROUS OPEN DATA / TOOLS
+- NASA NISAR & ISRO — the mission and open data.
+- NASA Alaska Satellite Facility (ASF) DAAC — NISAR GCOV browse imagery.
+- Sentinel-1 / Earth Search / AWS Open Data — fallback GRD series.
+- WorldPop — population estimates.
+- Esri World Imagery — cloud-free optical reference basemap.
+- Google Gemini — the Sothis AI chat.
+- React, Vite, Blueprint, Leaflet, i18next, Playwright — the open-source stack.
+- Built for the NASA Space Apps Challenge.
+
+================================================================================
+END OF DOCUMENT
+================================================================================

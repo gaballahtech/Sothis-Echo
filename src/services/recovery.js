@@ -4,6 +4,55 @@
  * recovery curve and interpolates linearly between the two bracketing points.
  */
 
+/**
+ * Evaluate a fitted parametric recovery model at a given month.
+ * model = { name, params } from the recovery snapshot's `model` block.
+ *   exponential: A(1 - e^{-k t})
+ *   logistic:    A / (1 + e^{-k(t - x0)})
+ *   gompertz:    A e^{-e^{-k(t - x0)}}
+ */
+export function evalModel(model, month) {
+  if (!model || !Array.isArray(model.params)) return null;
+  const [A, k, x0] = model.params;
+  const t = Number(month) || 0;
+  switch (model.name) {
+    case 'exponential':
+      return A * (1 - Math.exp(-k * t));
+    case 'logistic':
+      return A / (1 + Math.exp(-k * (t - (x0 || 0))));
+    case 'gompertz':
+      return A * Math.exp(-Math.exp(-k * (t - (x0 || 0))));
+    default:
+      return null;
+  }
+}
+
+/**
+ * Solve a fitted model for the month at which it crosses `threshold` %.
+ * Returns { months, ci95Days } or null if it never crosses.
+ */
+export function recoveryFromModel(model, threshold) {
+  if (!model || !Array.isArray(model.params)) return null;
+  // If the precomputed default matches, reuse it (already solved offline).
+  if (model.target === threshold && Number.isFinite(model.recoveryMonth)) {
+    return { months: model.recoveryMonth, ci95Days: model.ci95Days ?? null };
+  }
+  // Otherwise solve numerically by bisection over [0, 60] months.
+  let lo = 0;
+  let hi = 60;
+  const flo = evalModel(model, lo);
+  const fhi = evalModel(model, hi);
+  if (flo == null || fhi == null) return null;
+  if (flo >= threshold) return { months: 0, ci95Days: null };
+  if (fhi < threshold) return null;
+  for (let i = 0; i < 60; i += 1) {
+    const mid = (lo + hi) / 2;
+    if (evalModel(model, mid) < threshold) lo = mid;
+    else hi = mid;
+  }
+  return { months: (lo + hi) / 2, ci95Days: null };
+}
+
 export function estimateRecovery(points, threshold) {
   if (!Array.isArray(points) || points.length < 2) return null;
   const sorted = [...points]
