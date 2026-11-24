@@ -3919,6 +3919,25 @@ html[data-theme='dark'] .ai-chat-panel {
   .ai-chat-caret { animation: none; opacity: 1; }
 }
 
+/* Inline glossary term + popover */
+.term {
+  display: inline;
+  border: none;
+  background: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: help;
+  border-bottom: 1px dotted currentColor;
+}
+.term:hover { color: var(--te-accent, #2b6cb0); }
+.term-pop { max-width: 300px; padding: 4px 2px; }
+.term-pop-name { font-weight: 700; margin-bottom: 4px; }
+.term-pop-def { margin: 0 0 8px; font-size: 12.5px; line-height: 1.5; }
+.term-pop-google { font-size: 12px; text-decoration: none; color: var(--te-accent, #2b6cb0); white-space: nowrap; }
+.term-pop-google:hover { text-decoration: underline; }
+
 /* Single-site view */
 .casefile-single { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .casefile-single-head {

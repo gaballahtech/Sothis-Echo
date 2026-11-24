@@ -26,7 +26,7 @@ const en = {
     day: 'Day',
   },
   hero: {
-    title: 'Earth is always dancing.',
+    title: 'Radar sees what a camera can\'t.',
     subtitle:
       'Radar sees through cloud, smoke and darkness. Meet NISAR and learn to read what it finds.',
     ctaSee: 'See what the camera misses',
@@ -596,6 +596,10 @@ const en = {
     demoBanner:
       'Previewing the bundled NISAR snapshot — the live backend is not connected in this build.',
   },
+  glossary: {
+    translate: 'Translate with Google',
+    about: 'About',
+  },
   casefile: {
     open: 'Open case file',
     close: 'Close',
@@ -649,7 +653,7 @@ const ar = {
     day: 'نهار',
   },
   hero: {
-    title: 'الأرض ترقص دائمًا.',
+    title: 'الرادار يرى ما لا تراه الكاميرا.',
     subtitle:
       'الرادار يرى عبر الغيوم والدخان والظلام. تعرّف على نيسار وتعلّم قراءة ما يجده.',
     ctaSee: 'شاهد ما تفوته الكاميرا',
@@ -1215,6 +1219,10 @@ radarCaptionSentinel:
     skipToContent: 'تخطَّ إلى المحتوى الرئيسي',
     demoBanner:
       'معاينة لقطة نيسار المجمّعة — الخادم الحيّ غير متصل في هذا الإصدار.',
+  },
+  glossary: {
+    translate: 'ترجمة بـ Google',
+    about: 'عن',
   },
   casefile: {
     open: 'افتح ملف الموقع',

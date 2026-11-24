@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { loadMissionStatus, isApiConfigured } from '../services/sarApi';
+import GlossaryText from './GlossaryText';
 
 export default function Hero() {
   const { t } = useTranslation();
@@ -71,7 +72,9 @@ export default function Hero() {
           <h1 id="home-title" className="hero-title">
             {t('hero.title')}
           </h1>
-          <p className="hero-copy">{t('hero.subtitle')}</p>
+          <p className="hero-copy">
+            <GlossaryText text={t('hero.subtitle')} />
+          </p>
 
           <div className="hero-actions">
             <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />

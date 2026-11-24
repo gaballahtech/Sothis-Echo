@@ -9,6 +9,7 @@ import { buildSiteCsv, loadChangeStats, sceneImageUrl } from '../services/sarApi
 import { SceneCanvas } from './SceneCanvas';
 import { SwipeCompare } from './SwipeCompare';
 import { Disclosure, FacetShell, Panel, SectionHead } from './ui';
+import GlossaryText from './GlossaryText';
 import ObservationTable from './ObservationTable';
 
 const STATE_KEYS = ['before', 'after'];
@@ -215,7 +216,7 @@ export default function StudyAreas({ embedded = false, siteId }) {
         <div role="tabpanel" aria-label={L(site.name)} className="stack" style={{ marginTop: 14 }}>
           <div className="stack" style={{ gap: 10 }}>
             <h3 style={{ margin: 0, fontSize: 22, fontWeight: 600, lineHeight: 1.25 }} dir="auto">
-              {L(site.headline)}
+              <GlossaryText text={L(site.headline)} />
             </h3>
             <div className="row small muted">
               <span>
@@ -227,7 +228,7 @@ export default function StudyAreas({ embedded = false, siteId }) {
             </div>
             <div className="stack site-story" style={{ gap: 8 }}>
               {site.story.map((paragraph, index) => (
-                <p key={index} className="body-copy-muted" style={{ margin: 0 }}>{L(paragraph)}</p>
+                <p key={index} className="body-copy-muted" style={{ margin: 0 }}><GlossaryText text={L(paragraph)} /></p>
               ))}
             </div>
             {site.impact ? (

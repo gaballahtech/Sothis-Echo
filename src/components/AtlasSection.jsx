@@ -5,6 +5,7 @@ import { atlasSites, CHANGE_TYPES } from '../data/atlas';
 import AtlasMap from './AtlasMap';
 import { useSiteData } from '../context/SiteDataContext';
 import { useCaseFile } from '../context/CaseFileContext';
+import GlossaryText from './GlossaryText';
 
 // Rule-based "local impact" — what this change means for people living here.
 const LOCAL_IMPACT = {
@@ -160,11 +161,11 @@ export default function AtlasSection() {
 
                     <dl className="atlas-story">
                       <dt>{t('atlas.whatHappened')}</dt>
-                      <dd>{localized(site.summary, language)}</dd>
+                      <dd><GlossaryText text={localized(site.summary, language)} /></dd>
                       <dt>{t('atlas.whyRadar')}</dt>
-                      <dd>{localized(site.radar, language)}</dd>
+                      <dd><GlossaryText text={localized(site.radar, language)} /></dd>
                       <dt>{t('atlas.whatMeasures')}</dt>
-                      <dd>{localized(site.measure, language)}</dd>
+                      <dd><GlossaryText text={localized(site.measure, language)} /></dd>
                       <dt>{t('atlas.localImpact')}</dt>
                       <dd>{LOCAL_IMPACT[site.changeType]?.[language] || LOCAL_IMPACT[site.changeType]?.en || '—'}</dd>
                     </dl>
