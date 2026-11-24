@@ -3892,6 +3892,7 @@ html[data-theme='dark'] .ai-chat-panel {
 }
 .casefile-toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .casefile-compare-label { font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
+.casefile-compare-hint { font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
 
 /* Single-site view */
 .casefile-single { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }

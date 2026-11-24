@@ -152,9 +152,13 @@ function Workspace() {
       <div className="casefile-main">
         <div className="casefile-toolbar">
           <div className="casefile-toolbar-group">
+            {!isComparing ? (
+              <span className="casefile-compare-hint">{t('casefile.compareHint')}</span>
+            ) : null}
             <Button
               small
-              minimal
+              outlined
+              intent={isComparing ? 'none' : 'primary'}
               icon={isComparing ? 'cross' : 'layers'}
               active={isComparing}
               text={isComparing ? t('casefile.clearCompare') : t('casefile.compare')}
