@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
+import { useCaseFile } from '../context/CaseFileContext';
 import { useActiveSection } from '../utils/useActiveSection';
 import { localized } from '../data/localized';
 import { API_BASE } from '../services/sarApi';
@@ -81,6 +82,7 @@ export default function AIChat() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { selectedSiteId, sites } = useSiteData();
+  const { open: openCaseFile, setActiveSection } = useCaseFile();
   const activeSection = useActiveSection(SECTION_IDS);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -159,8 +161,16 @@ export default function AIChat() {
   };
 
   const jumpTo = (sectionId) => {
+    // Landing sections still scroll; per-site sections now live in the case file.
     const el = document.getElementById(sectionId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    if (selectedSiteId) {
+      openCaseFile(selectedSiteId);
+      setActiveSection(sectionId === 'recovery' || sectionId === 'timeseries' || sectionId === 'sound' ? sectionId : 'lenses');
+    }
   };
 
   const sourceSection = (id) => {
