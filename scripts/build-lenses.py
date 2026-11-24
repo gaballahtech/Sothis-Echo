@@ -91,6 +91,21 @@ LENS_SITES = {
         },
         'label': 'Attica megafire',
     },
+    'limpopo': {
+        # Limpopo River floods (Mozambique / South Africa), Jan 2026. Track 042
+        # ascending, frame 165; pre/post pair (2026-01-12 -> 2026-01-24), DHDH.
+        'bbox': (31.4, -25.6, 33.6, -22.3),
+        'coords': (-25.15, 31.22),
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_010_042_A_165_2005_DHDH_A_20260112T035042_20260112T035113_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GCOV_011_042_A_165_2005_DHDH_A_20260124T035042_20260124T035114_P05023_N_F_J_001',
+        },
+        'gslc': {
+            'before': 'NISAR_L2_PR_GSLC_010_042_A_165_2005_DHDH_A_20260112T035042_20260112T035113_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GSLC_011_042_A_165_2005_DHDH_A_20260124T035042_20260124T035114_P05023_N_F_J_001',
+        },
+        'label': 'Limpopo floods',
+    },
 }
 
 
@@ -108,7 +123,7 @@ def token():
 def search(level, wkt, start='2026-01-01T00:00:00Z', end='2026-12-31T23:59:59Z'):
     q = urlencode({
         'dataset': 'NISAR', 'processingLevel': level, 'intersectsWith': wkt,
-        'start': start, 'end': end, 'output': 'json', 'maxResults': 100,
+        'start': start, 'end': end, 'output': 'json', 'maxResults': 5000,
     })
     out = subprocess.run(['curl', '-sS', '-m', str(FETCH_TIMEOUT), f'{ASF}?{q}'],
                          capture_output=True, text=True, timeout=FETCH_TIMEOUT + 10)

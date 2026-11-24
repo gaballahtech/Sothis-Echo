@@ -82,6 +82,29 @@ export const atlasSites = [
     },
   },
   {
+    id: 'limpopo',
+    name: { en: 'Limpopo floods', ar: 'فيضانات ليمبوبو' },
+    region: { en: 'Limpopo · Mpumalanga · Southern Africa', ar: 'ليمبوبو · مبومالانجا · جنوب أفريقيا' },
+    changeType: 'flood',
+    coords: { lat: -25.15, lng: 31.22 },
+    bbox: [30.6, -25.7, 31.9, -24.6],
+    eventDate: '2026-01-19',
+    continent: 'africa',
+    maturity: 'lens',
+    summary: {
+      en: 'January 2026 torrential rains swelled the Limpopo basin across Mozambique, South Africa and Zimbabwe; a national disaster was declared in South Africa. Radar shows the swollen river and flooded low ground as a dark, smooth sheet.',
+      ar: 'أمطار غزيرة في يناير 2026 فجّرت حوض نهر ليمبوبو عبر موزمبيق وجنوب أفريقيا وزمبابوي؛ وأُعلنت حالة طوارئ وطنية في جنوب أفريقيا. يُظهر الرادار النهر المنتفخ والأراضي المنخفضة الغارقة كطبقة داكنة أملس.',
+    },
+    radar: {
+      en: 'L-band is a microwave: smooth floodwater is a specular reflector that sends the pulse away from the satellite, so inundated ground goes dark while rough vegetated/built surfaces stay bright.',
+      ar: 'النطاق L ميكروويف: ماء الفيضان الأملس عاكس مرآوي يرسل النبضة بعيدًا عن القمر، فتصبح الأرض الغارقة داكنة بينما تبقى الأسطح الخشنة/المبنية لامعة.',
+    },
+    measure: {
+      en: 'Amplitude change maps bright→dark flooding; the changed-area fraction and extent quantify how much ground the water took.',
+      ar: 'خريطة تغيّر السعة تُظهر الفيضان من لامع إلى داكن؛ ونسبة المساحة المتغيّرة والمدى تحدد كم أرضًا غمرها الماء.',
+    },
+  },
+  {
     id: 'sundarbans-delta',
     name: { en: 'Sundarbans delta', ar: 'دلتا سونداربانس' },
     region: { en: 'Bangladesh · India', ar: 'بنغلاديش · الهند' },

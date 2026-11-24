@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useSiteData } from './SiteDataContext';
 
 /**
@@ -7,10 +7,9 @@ import { useSiteData } from './SiteDataContext';
  * case file can be opened/closed and compared without touching the landing
  * page's shared selection.
  *
- * - openSiteId: the site whose case file is open (null = closed)
- * - compareSiteId: an optional second site pinned for side-by-side comparison
- * - layout: 'side' (side-by-side) | 'stacked' (top/bottom)
- * - activeSection: which facet is shown (synced across both panes in compare)
+ * The state is mirrored to the URL query string so a case file / comparison is
+ * shareable and survives a refresh:
+ *   ?case=<siteId>&compare=<siteId>&layout=side|stacked&section=<facet>
  */
 const CaseFileContext = createContext(null);
 
@@ -25,12 +24,32 @@ export const CASE_SECTIONS = [
   { id: 'explain', key: 'casefile.section.explain' },
 ];
 
+const SECTION_IDS = new Set(CASE_SECTIONS.map((section) => section.id));
+
+function readParams() {
+  if (typeof window === 'undefined') return {};
+  const query = new URLSearchParams(window.location.search);
+  return {
+    case: query.get('case'),
+    compare: query.get('compare'),
+    layout: query.get('layout'),
+    section: query.get('section'),
+  };
+}
+
 export function CaseFileProvider({ children }) {
   const { sites } = useSiteData();
-  const [openSiteId, setOpenSiteId] = useState(null);
-  const [compareSiteId, setCompareSiteId] = useState(null);
-  const [layout, setLayout] = useState('side');
-  const [activeSection, setActiveSection] = useState('overview');
+  const initial = useMemo(readParams, []);
+  const validSite = (id) => Boolean(id) && sites.some((site) => site.id === id);
+
+  const [openSiteId, setOpenSiteId] = useState(() => (validSite(initial.case) ? initial.case : null));
+  const [compareSiteId, setCompareSiteId] = useState(() =>
+    validSite(initial.compare) && initial.compare !== initial.case ? initial.compare : null,
+  );
+  const [layout, setLayout] = useState(initial.layout === 'stacked' ? 'stacked' : 'side');
+  const [activeSection, setActiveSection] = useState(() =>
+    SECTION_IDS.has(initial.section) ? initial.section : 'overview',
+  );
 
   const open = useCallback((siteId) => {
     setOpenSiteId(siteId);
@@ -54,6 +73,26 @@ export function CaseFileProvider({ children }) {
       return other?.id ?? null;
     });
   }, [sites, openSiteId]);
+
+  // Mirror state → URL (shareable, refresh-persistent) without adding history entries.
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const query = new URLSearchParams(window.location.search);
+    if (openSiteId) query.set('case', openSiteId);
+    else query.delete('case');
+    if (compareSiteId) {
+      query.set('compare', compareSiteId);
+      query.set('layout', layout);
+    } else {
+      query.delete('compare');
+      query.delete('layout');
+    }
+    if (activeSection && activeSection !== 'overview') query.set('section', activeSection);
+    else query.delete('section');
+    const qs = query.toString();
+    const next = qs ? `${window.location.pathname}?${qs}` : window.location.pathname;
+    window.history.replaceState(null, '', next);
+  }, [openSiteId, compareSiteId, layout, activeSection]);
 
   const value = useMemo(
     () => ({

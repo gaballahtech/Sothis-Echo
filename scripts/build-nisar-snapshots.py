@@ -86,6 +86,20 @@ SITES = {
         'before': 'NISAR_L2_PR_GCOV_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001',
     },
+    'limpopo': {
+        # Limpopo River floods (Gaza Province, Mozambique / Limpopo, South Africa),
+        # January 2026 (GDACS: ~610k affected). Track 042 ascending, frame 165:
+        # same-track pre/post pair bracketing the 19 Jan 2026 flood
+        # (2026-01-12 -> 2026-01-24). Both granules are DHDH (full HH+HV).
+        'kind': 'wetland',
+        'label': 'Limpopo floods',
+        'coords': (-25.15, 31.22),
+        'bbox': (31.4, -25.6, 33.6, -22.3),
+        'window': 'calibration',
+        'eventDate': '2026-01-19',
+        'before': 'NISAR_L2_PR_GCOV_010_042_A_165_2005_DHDH_A_20260112T035042_20260112T035113_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_011_042_A_165_2005_DHDH_A_20260124T035042_20260124T035114_P05023_N_F_J_001',
+    },
 }
 
 
@@ -122,7 +136,7 @@ def asf_granules(wkt):
         'start': '2026-01-01T00:00:00Z',
         'end': '2026-12-31T23:59:59Z',
         'output': 'json',
-        'maxResults': 100,
+        'maxResults': 5000,
     })
     url = f'{ASF}?{query}'
     out = subprocess.run(['curl', '-sS', '-m', str(FETCH_TIMEOUT), url], capture_output=True, text=True)

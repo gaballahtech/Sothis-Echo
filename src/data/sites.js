@@ -563,6 +563,182 @@ export const studyAreas = [
       ],
     },
   },
+  {
+    // Fourth site: Limpopo River floods (Southern Africa, Jan 2026). Real NISAR
+    // L-band GCOV/GSLC, track 042 frame 165 (2026-01-12 -> 2026-01-24). A flood
+    // signal: HH and HV both drop ~1 dB (smooth water), 34.8% changed. The HH
+    // series keeps declining through March (no return to baseline), so no
+    // recovery curve can be fitted — the panel honestly reports insufficient.
+    id: 'limpopo',
+    kind: 'wetland',
+    seed: 202601,
+    name: { en: 'Limpopo floods', ar: 'فيضانات ليمبوبو' },
+    region: {
+      en: 'Limpopo · Mpumalanga · Southern Africa',
+      ar: 'ليمبوبو · مبومالانجا · جنوب أفريقيا',
+    },
+    coords: { lat: -25.15, lng: 31.22 },
+    wkt: 'POLYGON ((30.6 -25.7, 31.9 -25.7, 31.9 -24.6, 30.6 -24.6, 30.6 -25.7))',
+    eventDate: '2026-01-19',
+    headline: {
+      en: 'A river in flood: the water goes dark, the ground disappears',
+      ar: 'نهر في فيضان: الماء يصبح داكنًا والأرض تختفي',
+    },
+    impact: {
+      users: {
+        en: 'Civil protection · disaster agencies · insurers',
+        ar: 'الحماية المدنية · وكالات الكوارث · شركات التأمين',
+      },
+      decision: {
+        en: 'Where the floodwater spread and how much land and population it affected',
+        ar: 'أين انتشر ماء الفيضان وكم أرضًا وسكانًا تأثروا',
+      },
+    },
+    tags: [
+      { en: 'Flood', ar: 'فيضان' },
+      { en: 'Southern Africa', ar: 'جنوب أفريقيا' },
+      { en: 'Limpopo basin', ar: 'حوض ليمبوبو' },
+    ],
+    story: [
+      {
+        en: 'In January 2026, weeks of torrential rain — amplified by La Niña and climate change — swelled the Limpopo River across Mozambique, South Africa and Zimbabwe. South Africa declared a national state of disaster on 17 January; the floods killed more than 140 people and affected over half a million (GDACS/ReliefWeb). This window sits on the South African side of the basin, in Limpopo/Mpumalanga.',
+        ar: 'في يناير 2026، أدّت أسابيع من الأمطار الغزيرة — عزّزتها ظاهرة النينيا وتغيّر المناخ — إلى تضخّم نهر ليمبوبو عبر موزمبيق وجنوب أفريقيا وزمبابوي. أعلنت جنوب أفريقيا حالة طوارئ وطنية في 17 يناير؛ وأودى الفيضان بحياة أكثر من 140 شخصًا وأثّر على أكثر من نصف مليون (GDACS/ReliefWeb). تقع هذه النافذة على الجانب الجنوب أفريقي من الحوض، في ليمبوبو/مبومالانجا.',
+      },
+      {
+        en: 'NISAR L-band saw the flood as a dark sheet: smooth water is a specular reflector that sends the pulse away, so both HH and HV drop about 1 dB and 34.8% of the window changes. The dual-pol mechanism shifts toward surface scattering. Unlike a fire that scars and then slowly regrows, this flood signal keeps evolving through March, so no clean recovery curve can be fitted — the panel says so honestly.',
+        ar: 'رأى رادار NISAR بموجة L الفيضان كطبقة داكنة: الماء الأملس عاكس مرآوي يرسل النبضة بعيدًا، فيهبط HH وHV نحو 1 ديسيبل ويتغيّر 34.8% من النافذة. تتحوّل الآلية ثنائية الاستقطاب نحو السطح. وعلى غير الحريق الذي يترك ندبة ثم تنمو ببطء، تستمر إشارة الفيضان في التطور حتى مارس، فلا يمكن ملاءمة منحنى تعافٍ نظيف — واللوحة تقول ذلك بصدق.',
+      },
+    ],
+    states: {
+      before: {
+        date: '2026-01-12',
+        label: { en: 'Before the Limpopo floods', ar: 'قبل فيضانات ليمبوبو' },
+        params: { water: 0.05, emergent: 0.85, burn: 0.05, cloud: 0.1 },
+        caption: {
+          en: 'Dry-to-normal bushveld and the Limpopo channel before the January 2026 rains.',
+          ar: 'أدغال جافة إلى طبيعية وقناة نهر ليمبوبو قبل أمطار يناير 2026.',
+        },
+        happened: {
+          en: 'HH ≈ -7.6 dB and HV ≈ -14.6 dB — a rough, vegetated surface with volume scattering.',
+          ar: 'HH ≈ -7.6 ديسيبل وHV ≈ -14.6 ديسيبل — سطح خشن نباتي بتشتت حجمي.',
+        },
+        why: {
+          en: 'Normal river level; the flood has not arrived yet.',
+          ar: 'مستوى نهر طبيعي؛ لم يصل الفيضان بعد.',
+        },
+        polarization: {
+          en: 'Dual-pol HH + HV, so the mechanism can be read, not just brightness.',
+          ar: 'استقطاب مزدوج HH + HV، فتُقرأ الآلية لا السطوع فقط.',
+        },
+      },
+      after: {
+        date: '2026-01-24',
+        label: { en: 'After the Limpopo floods', ar: 'بعد فيضانات ليمبوبو' },
+        params: { water: 0.6, emergent: 0.3, burn: 0.05, cloud: 0.15 },
+        caption: {
+          en: 'Five days after the peak: swollen river and flooded low ground, seen as a dark sheet.',
+          ar: 'بعد خمسة أيام من الذروة: نهر منتفخ وأراضٍ منخفضة غارقة، تُرى كطبقة داكنة.',
+        },
+        happened: {
+          en: 'HH falls to ≈ -8.5 dB and HV to ≈ -15.9 dB; 34.8% of the window changes — smooth water returns little backscatter.',
+          ar: 'يهبط HH إلى ≈ -8.5 ديسيبل وHV إلى ≈ -15.9 ديسيبل؛ ويتغيّر 34.8% من النافذة — الماء الأملس يعيد ارتدادًا ضئيلًا.',
+        },
+        why: {
+          en: 'Smooth floodwater is a specular reflector, so the pulse bounces away and the inundated ground goes dark.',
+          ar: 'ماء الفيضان الأملس عاكس مرآوي، فترتدّ النبضة بعيدًا وتصبح الأرض الغارقة داكنة.',
+        },
+        polarization: {
+          en: 'Both HH and HV drop together — the signature of a specular water surface.',
+          ar: 'يهبط HH وHV معًا — بصمة سطح مائي مرآوي.',
+        },
+      },
+    },
+    measurements: {
+      vv: { before: -7.6, after: -8.5 },
+      vh: { before: -14.6, after: -15.9 },
+      crossPol: { before: -7.0, after: -7.3 },
+      dateBefore: '2026-01-12',
+      dateAfter: '2026-01-24',
+    },
+    series: [
+      { date: '2026-01-12', vv: -7.6, vh: -14.6, change: 0.0 },
+      { date: '2026-01-24', vv: -8.5, vh: -15.9, change: 0.075 },
+      { date: '2026-02-05', vv: -10.3, vh: -16.8, change: 0.225 },
+      { date: '2026-02-17', vv: -10.0, vh: -16.7, change: 0.2 },
+      { date: '2026-03-01', vv: -10.9, vh: -17.1, change: 0.275 },
+      { date: '2026-03-13', vv: -8.6, vh: -15.1, change: 0.083 },
+      { date: '2026-03-25', vv: -9.6, vh: -16.1, change: 0.167 },
+      { date: '2026-04-06', vv: -10.1, vh: -16.3, change: 0.208 },
+      { date: '2026-04-18', vv: -8.9, vh: -15.6, change: 0.108 },
+    ],
+    pulse: [0.0, 0.04, 0.085, 0.165, 0.222, 0.208, 0.215, 0.255, 0.224, 0.121, 0.111, 0.156, 0.183, 0.205, 0.161, 0.108],
+    stablePulse: [0.0, 0.015, 0.03, 0.045, 0.06, 0.075, 0.105, 0.135, 0.165, 0.195, 0.225, 0.22, 0.215, 0.21, 0.205, 0.2],
+    // The HH series keeps declining through March (no return to baseline), so no
+    // recovery curve can be fitted. The two points are a non-null placeholder;
+    // the Recovery panel detects `insufficient` and shows the real per-pass series.
+    recovery: {
+      insufficient: true,
+      noPeakPass: true,
+      thresholdDefault: 80,
+      points: [
+        { month: 0, pct: 0 },
+        { month: 1, pct: 0 },
+      ],
+      eventChange: 0,
+      noise: 0,
+      gapDays: 12,
+      note: {
+        en: 'The HH series keeps declining through March rather than returning to baseline, so a recovery curve cannot be fitted. The panel plots the real per-pass backscatter instead.',
+        ar: 'تستمر سلسلة HH في الانخفاض حتى مارس بدلًا من العودة إلى خط الأساس، فلا يمكن ملاءمة منحنى تعافٍ. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
+      },
+    },
+    researcher: {
+      acquisition: {
+        en: 'NISAR L-band GCOV (HH/HV gamma-0) + GSLC, track 042 frame 165, 2026-01-12 → 2026-01-24; reference GDACS/ReliefWeb (South Africa floods, Jan 2026).',
+        ar: 'NISAR بموجة L GCOV (HH/HV غاما-0) + GSLC، المسار 042 الإطار 165، 2026-01-12 → 2026-01-24؛ مرجع GDACS/ReliefWeb (فيضانات جنوب أفريقيا، يناير 2026).',
+      },
+      interpretation: [
+        {
+          en: 'Both HH and HV drop ~1 dB (HH -7.6→-8.5, HV -14.6→-15.9) — the specular-water signature; 34.8% of the window changed.',
+          ar: 'يهبط HH وHV نحو 1 ديسيبل (HH -7.6→-8.5، HV -14.6→-15.9) — بصمة الماء المرآوي؛ 34.8% من النافذة تغيّر.',
+        },
+        {
+          en: 'Coherence mean 0.563 (5.9% low) and the mechanism shifts toward surface scattering (volume 32.7%→28.1%).',
+          ar: 'متوسط التماسك 0.563 (5.9% منخفض) وتتحوّل الآلية نحو السطح (الحجم 32.7%→28.1%).',
+        },
+        {
+          en: 'No recovery curve: the HH series keeps declining through March, so the panel reports insufficient.',
+          ar: 'لا منحنى تعافٍ: تستمر سلسلة HH في الانخفاض حتى مارس، فتُبلّغ اللوحة عن عدم كفاية.',
+        },
+      ],
+      limits: [
+        {
+          en: 'A 12-day pre/post pair on the South African side of a basin that also spans Mozambique and Zimbabwe; the changed fraction is a lower bound on the full flood extent.',
+          ar: 'زوج قبل/بعد بفارق 12 يومًا على الجانب الجنوب أفريقي من حوض يمتد أيضًا إلى موزمبيق وزمبابوي؛ والنسبة المتغيّرة حد أدنى للمدى الكامل للفيضان.',
+        },
+      ],
+      methods: [
+        {
+          en: 'Dual-pol HH/HV gamma-0 change + scattering-class fractions from GCOV.',
+          ar: 'تغيّر غاما-0 المزدوج HH/HV + نسب أصناف التشتت من GCOV.',
+        },
+        {
+          en: 'InSAR coherence from the GSLC HH pair over the same window.',
+          ar: 'تماسك InSAR من زوج GSLC HH فوق نفس النافذة.',
+        },
+      ],
+      sources: [
+        {
+          en: 'NASA NISAR GCOV/GSLC (track 042 frame 165, 2026-01-12 & 2026-01-24), via ASF DAAC.',
+          ar: 'NASA NISAR GCOV/GSLC (المسار 042 الإطار 165، 2026-01-12 و2026-01-24)، عبر ASF DAAC.',
+        },
+        {
+          en: 'GDACS / ReliefWeb — South Africa floods, Jan 2026 (national state of disaster).',
+          ar: 'GDACS / ReliefWeb — فيضانات جنوب أفريقيا، يناير 2026 (حالة طوارئ وطنية).',
+        },
+      ],
+    },
+  },
 ];
 
 // Contrast table rows. Each row holds a `values` map keyed by site id, so the

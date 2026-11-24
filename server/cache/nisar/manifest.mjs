@@ -10,6 +10,11 @@ import { greeceRgbBase64 } from './greece-rgb.mjs';
 import { greeceHhBase64 } from './greece-hh.mjs';
 import { greeceChangeBase64 } from './greece-change.mjs';
 import { lensesSnapshot as greeceLensesSnapshot } from './greece-lenses.mjs';
+import { limpopoSnapshot } from './limpopo.mjs';
+import { limpopoRgbBase64 } from './limpopo-rgb.mjs';
+import { limpopoHhBase64 } from './limpopo-hh.mjs';
+import { limpopoChangeBase64 } from './limpopo-change.mjs';
+import { lensesSnapshot as limpopoLensesSnapshot } from './limpopo-lenses.mjs';
 import { sundarbansSnapshot } from './sundarbans.mjs';
 import { sundarbansRgbBase64 } from './sundarbans-rgb.mjs';
 import { sundarbansHhBase64 } from './sundarbans-hh.mjs';
@@ -17,22 +22,25 @@ import { sundarbansChangeBase64 } from './sundarbans-change.mjs';
 import { sundarbansRecovery } from './sundarbans-recovery.mjs';
 import { lensesSnapshot as sundarbansLensesSnapshot } from './sundarbans-lenses.mjs';
 
-export const NISAR_SITES = ["bigsur", "greece", "sundarbans"];
-export const SNAPSHOTS = [bigsurSnapshot, greeceSnapshot, sundarbansSnapshot];
+export const NISAR_SITES = ["bigsur", "greece", "limpopo", "sundarbans"];
+export const SNAPSHOTS = [bigsurSnapshot, greeceSnapshot, limpopoSnapshot, sundarbansSnapshot];
 export const SNAPSHOT_RGB = {
   bigsur: bigsurRgbBase64,
   greece: greeceRgbBase64,
+  limpopo: limpopoRgbBase64,
   sundarbans: sundarbansRgbBase64,
 };
 export const SNAPSHOT_HH = {
   bigsur: bigsurHhBase64,
   greece: greeceHhBase64,
+  limpopo: limpopoHhBase64,
   sundarbans: sundarbansHhBase64,
 };
 export const SNAPSHOT_CHANGE = {
   bigsur: bigsurChangeBase64,
   greece: greeceChangeBase64,
+  limpopo: limpopoChangeBase64,
   sundarbans: sundarbansChangeBase64,
 };
 export const RECOVERY = [bigsurRecovery, sundarbansRecovery];
-export const LENSES = [bigsurLensesSnapshot, greeceLensesSnapshot, sundarbansLensesSnapshot];
+export const LENSES = [bigsurLensesSnapshot, greeceLensesSnapshot, limpopoLensesSnapshot, sundarbansLensesSnapshot];

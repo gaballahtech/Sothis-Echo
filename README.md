@@ -22,7 +22,7 @@
 
 ---
 
-**Sothis Echo** turns raw **NISAR L-band** data into a story you can see, hear and question. It follows three measured 2026 events — the **Big Sur megafire** (California), the **Attica megafire** (Greece) and the **Central Vietnam flood** — and lets you open any of them as a full-screen **case file**, then **compare two places side by side** with a single click.
+**Sothis Echo** turns raw **NISAR L-band** data into a story you can see, hear and question. It follows four measured 2026 events — the **Big Sur megafire** (California), the **Attica megafire** (Greece), the **Central Vietnam flood** and the **Limpopo floods** (Southern Africa) — and lets you open any of them as a full-screen **case file**, then **compare two places side by side** with a single click.
 
 > **Live:** <https://sothisecho.vercel.app> · Built for the **NASA Space Apps Challenge**.
 
@@ -111,7 +111,7 @@ A timed reasoning game over real change maps: choose an answer, then read the ev
 | 🔬 **Three independent lenses** | Amplitude · InSAR coherence · dual-pol scattering mechanism |
 | 📂 **Per-site case files** | A full-screen dossier for each measured site, with a dedicated sidebar |
 | ⚖️ **Strong comparison** | Pin a second site; synced sections; side-by-side or stacked; vitals diff |
-| 🌍 **Global field guide** | Change sites across six continents, three fully measured |
+| 🌍 **Global field guide** | Change sites across six continents, four fully measured (N. America, Europe, Asia, Africa) |
 | 🤖 **Sothis AI** | Grounded, context-aware chat about NISAR, radar and the data |
 | 🔊 **Sonification** | Hear the satellite-pass series as sound |
 | 🗣️ **Fully bilingual** | English + العربية with full RTL, persisted choice |
@@ -120,7 +120,7 @@ A timed reasoning game over real change maps: choose an answer, then read the ev
 
 - **NISAR 101** — the mission, the two radar bands, the 12-day repeat, and why radar sees structure and moisture instead of colour.
 - **Camera vs radar slider** — drag a divider between a cloud-blinded optical basemap and the same place in radar.
-- **Three measured study areas** — the **August 2026 Big Sur megafire**, the **July 2026 Attica megafire (Greece)** and the **September 2026 Central Vietnam flood**. Each has before/after scenes, "what happened / why radar saw it / read the polarization" boxes, and a swipe comparison.
+- **Four measured study areas** — the **August 2026 Big Sur megafire**, the **July 2026 Attica megafire (Greece)**, the **September 2026 Central Vietnam flood** and the **January 2026 Limpopo floods (Southern Africa)**. Each has before/after scenes, "what happened / why radar saw it / read the polarization" boxes, and a swipe comparison.
 - **Case files** — open any measured site as a near-fullscreen dossier: sidebar (identity + vitals + section nav) and a main pane that shows one facet at a time.
 - **Three lenses** — amplitude, InSAR coherence and dual-pol mechanism, each computed from real NISAR granules.
 - **Compare mode** — pin a second site, synced sections, side-by-side/stacked layouts, and a vitals strip (ΔHH / ΔHV / cross-pol).
@@ -157,9 +157,26 @@ Narrative, mission facts, event dates and scattering physics are real or literat
 - **NISAR GSLC coherence** — InSAR coherence from the same-track GSLC pair.
 - **WorldPop** — population exposed is an **estimate** (changed area × density), clearly labelled; if unreachable it reads **unavailable**.
 
-The **Attica (Greece)** site is a genuinely low-intensity surface fire: its co-pol amplitude barely moved, so the recovery panel honestly reports *insufficient* and plots the real per-pass backscatter — the burn is seen in the **scattering mechanism**, not brightness. That honesty is the point.
+The **Attica (Greece)** and **Limpopo** sites are genuinely low-signal for recovery: Attica's co-pol amplitude barely moved (a surface fire), and Limpopo's HH keeps declining through March rather than returning — so both recovery panels honestly report *insufficient* and plot the real per-pass backscatter. That honesty is the point.
 
 See [`BACKEND_API_SPEC.md`](./BACKEND_API_SPEC.md) for the full API contract.
+
+## Reproducibility — how it's made
+
+Every measured number is reproducible from public data with the committed scripts (Python + NumPy only):
+
+```
+ASF DAAC (NISAR GCOV + GSLC)
+   → scripts/build-nisar-snapshots.py   → server/cache/nisar/<site>.mjs + RGB/HH/change PNGs
+   → scripts/build-lenses.py            → <site>-lenses.mjs  (amplitude · coherence · mechanism)
+   → scripts/build-nisar-recovery.py    → <site>-recovery.mjs (parametric fit + CI + validation)
+   → scripts/build-nisar-manifest.py    → server/cache/nisar/manifest.mjs (auto site registry)
+```
+
+- **Same track/frame, pre/post** GCOV pair → calibrated HH/HV gamma-0 (own mask), read directly from the ASF HDF5 over HTTPS byte ranges.
+- **Coherence** from the same-track GSLC pair.
+- **Recovery** = parametric fit (exp / logistic / Gompertz) with AIC/BIC, 95% CI and internal validation.
+- The server is **data-driven**: `manifest.mjs` is regenerated by the build, so a new site is added by **data + a build run** — no renderer or registry edits.
 
 ## Architecture
 
