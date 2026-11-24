@@ -608,6 +608,7 @@ const en = {
     translate: 'Translate with Google',
     about: 'About',
     source: 'Source',
+    askAI: 'Ask AI to explain',
   },
   casefile: {
     open: 'Open case file',
@@ -1242,6 +1243,7 @@ radarCaptionSentinel:
     translate: 'ترجمة بـ Google',
     about: 'عن',
     source: 'المصدر',
+    askAI: 'اسأل الـ AI يشرح',
   },
   casefile: {
     open: 'افتح ملف الموقع',

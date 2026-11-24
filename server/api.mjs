@@ -514,59 +514,49 @@ function buildGrounding(siteId, lang) {
  * (opened via jumpTo) or an external reference. Padded with general sources so
  * there are never more than three, and never an irrelevant repeated set.
  */
-function groundingSources(siteId, lang, question) {
-  const ar = lang === 'ar';
+/**
+ * Curated, authoritative SPACE sources (real, verified URLs — never generated).
+ * A deterministic ranker picks the ≤3 most relevant for the question, so the
+ * process is fast, token-free, and cannot hallucinate links. A live web search
+ * (e.g. DuckDuckGo HTML) is intentionally avoided: it is rate-limited/blocked
+ * and can return non-space or dead links.
+ */
+const SPACE_SOURCES = [
+  { id: 'nisar', label: 'NASA NISAR', url: 'https://science.nasa.gov/mission/nisar/mission-overview/', topics: ['general', 'mission', 'coherence', 'insar', 'fire'] },
+  { id: 'earthdata', label: 'NASA Earthdata', url: 'https://www.earthdata.nasa.gov/', topics: ['flood', 'fire', 'data', 'general'] },
+  { id: 'jpl', label: 'NASA JPL Hazards', url: 'https://www.jpl.nasa.gov/go/radar-science/hazards/', topics: ['flood', 'fire', 'hazard', 'coherence'] },
+  { id: 'asf', label: 'ASF DAAC (NISAR data)', url: 'https://asf.alaska.edu/', topics: ['data', 'amplitude', 'backscatter', 'gcov', 'gslc'] },
+  { id: 'copernicus', label: 'Copernicus (Sentinel)', url: 'https://dataspace.copernicus.eu/', topics: ['flood', 'sentinel', 'data'] },
+  { id: 'esa', label: 'ESA Earth Observation', url: 'https://www.esa.int/Applications/Observing_the_Earth', topics: ['general', 'coherence', 'insar', 'data'] },
+  { id: 'isro', label: 'ISRO', url: 'https://www.isro.gov.in/', topics: ['general', 'mission'] },
+  { id: 'usgs', label: 'USGS', url: 'https://www.usgs.gov/', topics: ['general', 'hazard', 'earth'] },
+  { id: 'worldpop', label: 'WorldPop (population)', url: 'https://www.worldpop.org/', topics: ['population', 'people'] },
+];
+
+function rankSources(question) {
   const q = (question || '').toLowerCase();
-  const lenses = nisarLenses(siteId);
-  const snapshot = nisarSnapshot(siteId);
-  const amp = lenses?.amplitude;
-  const coh = lenses?.coherence;
-  const change = snapshot?.changeStats;
   const has = (re) => re.test(q);
-  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+  const topicHits = new Set();
+  if (has(/flood|فيضان/)) topicHits.add('flood');
+  if (has(/fire|burn|wildfire|حريق|حرق/)) topicHits.add('fire');
+  if (has(/coheren|insar|interfero|تماسك|إنسار/)) topicHits.add('coherence');
+  if (has(/amplitude|backscatt|\bhh\b|\bhv\b|سعة|ارتداد/)) topicHits.add('amplitude');
+  if (has(/population|people|سكان|تعداد/)) topicHits.add('population');
+  if (has(/sentinel/)) topicHits.add('sentinel');
+  if (has(/data|dataset|بيانات/)) topicHits.add('data');
+  if (has(/hazard|risk|خطر/)) topicHits.add('hazard');
+  if (has(/mission|satellite|قمر|مهمة/)) topicHits.add('mission');
+  // Score: +2 per matching topic, +1 for 'general' always (so there's a fallback).
+  const scored = SPACE_SOURCES.map((s) => {
+    let score = s.topics.includes('general') ? 1 : 0;
+    for (const t of topicHits) if (s.topics.includes(t)) score += 2;
+    return { s, score };
+  }).sort((a, b) => b.score - a.score);
+  return scored.slice(0, 3).map((x) => ({ id: x.s.id, label: x.s.label, url: x.s.url }));
+}
 
-  const cands = [];
-  const seen = new Set();
-  const push = (s) => {
-    const key = s.section || s.url;
-    if (seen.has(key)) return;
-    seen.add(key);
-    cands.push(s);
-  };
-
-  // Data topics (ordered by how specific they are).
-  if (has(/coheren|تماسك/)) {
-    const v = num(coh?.mean);
-    push({ id: 'coh', label: v != null ? (ar ? `التماسك ${v}` : `Coherence ${v}`) : (ar ? 'التماسك' : 'Coherence'), section: 'lenses' });
-  }
-  if (has(/mechanis|polariz|استقطاب|آلي/)) push({ id: 'mech', label: ar ? 'آلية التشتت' : 'Scattering mechanism', section: 'lenses' });
-  if (has(/amplitude|backscatt|\bhh\b|\bhv\b|سعة|ارتداد/)) {
-    const v = num(amp?.dHH);
-    push({ id: 'amp', label: v != null ? `ΔHH ${v} dB` : (ar ? 'السعة' : 'Amplitude'), section: 'lenses' });
-  }
-  if (has(/recover|تعاف/)) push({ id: 'rec', label: ar ? 'التعافي' : 'Recovery', section: 'recovery' });
-  if (has(/population|people|سكان|تعداد/)) push({ id: 'pop', label: 'WorldPop (estimate)', url: 'https://www.worldpop.org/' });
-  if (has(/area|extent|how much|changed|مساح|نسب|تغيّر/)) {
-    const v = num(change?.changedPct);
-    push({ id: 'chg', label: v != null ? (ar ? `تغيّر ${v}%` : `Changed ${v}%`) : (ar ? 'المساحة المتغيّرة' : 'Changed area'), section: 'respond' });
-  }
-  if (has(/time series|pass|مرور|زمن|سلسلة/)) push({ id: 'ts', label: ar ? 'السلسلة الزمنية' : 'Time series', section: 'timeseries' });
-  if (has(/flood|فيضان/)) push({ id: 'flood', label: ar ? 'الفيضان (ماء داكن)' : 'Flood (dark water)', section: 'lenses' });
-  if (has(/fire|burn|حريق|حرق/)) push({ id: 'fire', label: ar ? 'الحرق (الآلية)' : 'Burn (mechanism)', section: 'lenses' });
-
-  // General sources (always available) to pad up to three.
-  const general = [
-    { id: 'nisar', label: 'NASA NISAR', url: 'https://science.nasa.gov/mission/nisar/mission-overview/' },
-    { id: 'how', label: ar ? 'كيف تقرأ هذا' : 'How to read this', section: 'overview' },
-    { id: 'site', label: ar ? 'نظرة عامة على الموقع' : 'Site overview', section: 'overview' },
-  ];
-
-  const out = cands.slice(0, 3);
-  for (const g of general) {
-    if (out.length >= 3) break;
-    if (!out.some((o) => (o.section || o.url) === (g.section || g.url))) out.push(g);
-  }
-  return out.slice(0, 3);
+function groundingSources(siteId, lang, question) {
+  return rankSources(question);
 }
 
 /**

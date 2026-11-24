@@ -17,16 +17,29 @@ export default function Term({ id, children }) {
   const name = entry[language] || entry.en;
   const def = entry.def?.[language] || entry.def?.en || '';
 
+  const askAI = () => {
+    const question =
+      language === 'ar'
+        ? `اشرح لي مصطلح «${name}» ببساطة، ولماذا يهم؟`
+        : `Explain the term "${name}" in simple terms, and why it matters.`;
+    window.dispatchEvent(new CustomEvent('sothis:ask', { detail: { question } }));
+  };
+
   const content = (
     <div className="term-pop" dir={language === 'ar' ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
       <div className="term-pop-name">{name}</div>
       <p className="term-pop-def">{def}</p>
       {language !== 'en' ? <div className="term-pop-original">EN: {entry.en}</div> : null}
-      {entry.url ? (
-        <a className="term-pop-source" href={entry.url} target="_blank" rel="noopener noreferrer">
-          {t('glossary.source')}: {entry.label || name}
-        </a>
-      ) : null}
+      <div className="term-pop-links">
+        {entry.url ? (
+          <a className="term-pop-source" href={entry.url} target="_blank" rel="noopener noreferrer">
+            {t('glossary.source')}: {entry.label || name}
+          </a>
+        ) : null}
+        <button type="button" className="term-pop-ask" onClick={askAI}>
+          {t('glossary.askAI')}
+        </button>
+      </div>
     </div>
   );
 
