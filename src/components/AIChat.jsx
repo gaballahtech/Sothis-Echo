@@ -246,11 +246,6 @@ export default function AIChat() {
             </div>
           </div>
 
-          <div className="ai-chat-context" aria-live="polite">
-            <span className="ai-chat-context-dot" aria-hidden="true" />
-            {t('aiChat.contextLabel')} {siteName}
-          </div>
-
           <div className="ai-chat-body" role="log" aria-label={t('aiChat.title')}>
             {messages.length === 0 && (
               <div className="ai-chat-suggestions">

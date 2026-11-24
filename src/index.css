@@ -3381,20 +3381,22 @@ html[data-theme='dark'] .ai-chat-panel {
 
 .ai-chat-source {
   padding: 3px 8px;
-  background: var(--te-bg);
-  color: var(--te-ink-soft);
+  background: transparent;
+  color: var(--te-accent);
   border: 1px solid var(--te-border);
   border-radius: 0;
   font-family: var(--te-mono);
   font-size: 10px;
   letter-spacing: 0.02em;
   cursor: pointer;
+  text-decoration: none;
   transition: border-color 140ms var(--te-ease), color 140ms var(--te-ease);
 }
 
 .ai-chat-source:hover {
   border-color: var(--te-accent);
   color: var(--te-accent);
+  text-decoration: underline;
 }
 
 .ai-chat-close {

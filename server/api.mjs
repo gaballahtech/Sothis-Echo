@@ -984,7 +984,8 @@ ${grounding}
 === END MEASUREMENTS ===
 
 Rules:
-- Answer ONLY from the measurements above. Every number you cite MUST come from that block.
+- For questions about THIS site (its data, change, numbers), answer ONLY from the measurements above; every number you cite MUST come from that block.
+- For GENERAL questions about NISAR, SAR, radar, coherence, etc., answer generally and accurately (you may draw on the sources); do not force site numbers into a general answer.
 - Cite the exact number you used in your answer (e.g., "mean coherence 0.546").
 - If the answer needs data not in the block, say it is "not measured here" — never invent a number.
 - ${modeLine}
