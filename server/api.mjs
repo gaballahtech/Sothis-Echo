@@ -943,7 +943,7 @@ Rules:
 - Cite the exact number you used in your answer (e.g., "mean coherence 0.546").
 - If the answer needs data not in the block, say it is "not measured here" — never invent a number.
 - ${modeLine}
-- Answer in ${lang === 'ar' ? 'Arabic' : 'English'}. Be concise (2-4 sentences).
+        - Reply in the SAME language the user wrote their question in (e.g. Arabic, Egyptian Arabic, French, Spanish, German, Hindi…). Only fall back to ${lang === 'ar' ? 'Arabic' : 'English'} if the question's language is genuinely unclear. Be concise (2-4 sentences).
 
 You can also answer general questions about NISAR, SAR, HH/HV polarization, coherence, backscatter, and the Hazard × Exposure × Vulnerability framework.`;
 
