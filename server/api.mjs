@@ -508,26 +508,65 @@ function buildGrounding(siteId, lang) {
  * Compact source chips for the UI: the real numbers the answer is grounded in.
  * Each chip links to the relevant section when clicked.
  */
-function groundingSources(siteId, lang) {
+/**
+ * Question-aware source chips (≤3). Each chip is relevant to what the visitor
+ * asked and links to the part that explains it — an internal case-file section
+ * (opened via jumpTo) or an external reference. Padded with general sources so
+ * there are never more than three, and never an irrelevant repeated set.
+ */
+function groundingSources(siteId, lang, question) {
   const ar = lang === 'ar';
-  if (!siteId) return [];
+  const q = (question || '').toLowerCase();
   const lenses = nisarLenses(siteId);
   const snapshot = nisarSnapshot(siteId);
-  if (!lenses && !snapshot) return [];
-  const sources = [];
   const amp = lenses?.amplitude;
   const coh = lenses?.coherence;
   const change = snapshot?.changeStats;
-  if (amp && Number.isFinite(amp.dHH)) {
-    sources.push({ id: 'amp', label: ar ? `ΔHH ${amp.dHH} dB` : `ΔHH ${amp.dHH} dB`, value: `${amp.dHH} dB` });
+  const has = (re) => re.test(q);
+  const num = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+
+  const cands = [];
+  const seen = new Set();
+  const push = (s) => {
+    const key = s.section || s.url;
+    if (seen.has(key)) return;
+    seen.add(key);
+    cands.push(s);
+  };
+
+  // Data topics (ordered by how specific they are).
+  if (has(/coheren|تماسك/)) {
+    const v = num(coh?.mean);
+    push({ id: 'coh', label: v != null ? (ar ? `التماسك ${v}` : `Coherence ${v}`) : (ar ? 'التماسك' : 'Coherence'), section: 'lenses' });
   }
-  if (coh && Number.isFinite(coh.mean)) {
-    sources.push({ id: 'coh', label: ar ? `التماسك ${coh.mean}` : `Coherence ${coh.mean}`, value: `${coh.mean}` });
+  if (has(/mechanis|polariz|استقطاب|آلي/)) push({ id: 'mech', label: ar ? 'آلية التشتت' : 'Scattering mechanism', section: 'lenses' });
+  if (has(/amplitude|backscatt|\bhh\b|\bhv\b|سعة|ارتداد/)) {
+    const v = num(amp?.dHH);
+    push({ id: 'amp', label: v != null ? `ΔHH ${v} dB` : (ar ? 'السعة' : 'Amplitude'), section: 'lenses' });
   }
-  if (change && Number.isFinite(change.changedPct)) {
-    sources.push({ id: 'change', label: ar ? `تغيّر ${change.changedPct}%` : `Changed ${change.changedPct}%`, value: `${change.changedPct}%` });
+  if (has(/recover|تعاف/)) push({ id: 'rec', label: ar ? 'التعافي' : 'Recovery', section: 'recovery' });
+  if (has(/population|people|سكان|تعداد/)) push({ id: 'pop', label: 'WorldPop (estimate)', url: 'https://www.worldpop.org/' });
+  if (has(/area|extent|how much|changed|مساح|نسب|تغيّر/)) {
+    const v = num(change?.changedPct);
+    push({ id: 'chg', label: v != null ? (ar ? `تغيّر ${v}%` : `Changed ${v}%`) : (ar ? 'المساحة المتغيّرة' : 'Changed area'), section: 'respond' });
   }
-  return sources;
+  if (has(/time series|pass|مرور|زمن|سلسلة/)) push({ id: 'ts', label: ar ? 'السلسلة الزمنية' : 'Time series', section: 'timeseries' });
+  if (has(/flood|فيضان/)) push({ id: 'flood', label: ar ? 'الفيضان (ماء داكن)' : 'Flood (dark water)', section: 'lenses' });
+  if (has(/fire|burn|حريق|حرق/)) push({ id: 'fire', label: ar ? 'الحرق (الآلية)' : 'Burn (mechanism)', section: 'lenses' });
+
+  // General sources (always available) to pad up to three.
+  const general = [
+    { id: 'nisar', label: 'NASA NISAR', url: 'https://science.nasa.gov/mission/nisar/mission-overview/' },
+    { id: 'how', label: ar ? 'كيف تقرأ هذا' : 'How to read this', section: 'overview' },
+    { id: 'site', label: ar ? 'نظرة عامة على الموقع' : 'Site overview', section: 'overview' },
+  ];
+
+  const out = cands.slice(0, 3);
+  for (const g of general) {
+    if (out.length >= 3) break;
+    if (!out.some((o) => (o.section || o.url) === (g.section || g.url))) out.push(g);
+  }
+  return out.slice(0, 3);
 }
 
 /**
@@ -958,7 +997,7 @@ You can also answer general questions about NISAR, SAR, HH/HV polarization, cohe
         { role: 'user', text: question },
       ];
       const { text: answer } = await callAI({ system: systemPrompt, messages: chatMessages, maxTokens: 800, temperature: 0.5 });
-      send(res, 200, { data: { answer, question, sources: groundingSources(siteId, lang) }, success: true });
+      send(res, 200, { data: { answer, question, sources: groundingSources(siteId, lang, question) }, success: true });
       return;
     }
 

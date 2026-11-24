@@ -279,17 +279,30 @@ export default function AIChat() {
                   {isStreaming ? <span className="ai-chat-caret" aria-hidden="true" /> : null}
                   {msg.role === 'assistant' && msg.sources?.length > 0 && (
                     <div className="ai-chat-sources">
-                      {msg.sources.map((src) => (
-                        <button
-                          key={src.id}
-                          type="button"
-                          className="ai-chat-source"
-                          onClick={() => jumpTo(sourceSection(src.id))}
-                          title={t('aiChat.sourceLabel')}
-                        >
-                          {src.label}
-                        </button>
-                      ))}
+                      {msg.sources.slice(0, 3).map((src) =>
+                        src.url ? (
+                          <a
+                            key={src.id}
+                            className="ai-chat-source"
+                            href={src.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title={t('aiChat.sourceLabel')}
+                          >
+                            {src.label}
+                          </a>
+                        ) : (
+                          <button
+                            key={src.id}
+                            type="button"
+                            className="ai-chat-source"
+                            onClick={() => jumpTo(src.section || sourceSection(src.id))}
+                            title={t('aiChat.sourceLabel')}
+                          >
+                            {src.label}
+                          </button>
+                        ),
+                      )}
                     </div>
                   )}
                 </div>
