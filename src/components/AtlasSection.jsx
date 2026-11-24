@@ -7,6 +7,25 @@ import { useSiteData } from '../context/SiteDataContext';
 import { useCaseFile } from '../context/CaseFileContext';
 import GlossaryText from './GlossaryText';
 
+/**
+ * Static satellite (optical basemap) thumbnail for any site, from its bbox or
+ * coords, via the Esri World Imagery export. Used for story-only sites that have
+ * no real NISAR snapshot, so every card shows a real image instead of a colour.
+ */
+function satelliteThumb(site) {
+  let bbox;
+  const b = site.bbox;
+  if (Array.isArray(b) && b.length === 4) {
+    bbox = `${b[0]},${b[1]},${b[2]},${b[3]}`;
+  } else if (site.coords && Number.isFinite(site.coords.lng) && Number.isFinite(site.coords.lat)) {
+    const { lng, lat } = site.coords;
+    bbox = `${lng - 0.05},${lat - 0.05},${lng + 0.05},${lat + 0.05}`;
+  } else {
+    return null;
+  }
+  return `https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export?bbox=${bbox}&bboxSR=4326&imageSR=3857&size=640,420&format=jpg&f=image`;
+}
+
 // Rule-based "local impact" — what this change means for people living here.
 const LOCAL_IMPACT = {
   flood: {
@@ -108,6 +127,7 @@ export default function AtlasSection() {
             const thumb = measured
               ? sites.find((item) => item.id === site.id)?.states?.after?.imageUrl
               : null;
+            const sat = satelliteThumb(site);
             const color = swatchFor(site);
             return (
               <article
@@ -135,6 +155,7 @@ export default function AtlasSection() {
                 >
                   <div className={`atlas-card-media${measured && thumb ? '' : ' atlas-card-media--story'}`}>
                     {measured && thumb ? <img src={thumb} alt="" loading="lazy" /> : null}
+                    {!measured && sat ? <img src={sat} alt="" loading="lazy" /> : null}
                     <div className="atlas-card-media-overlay">
                       <h3>{localized(site.name, language)}</h3>
                       <span className={measured ? 'atlas-badge measured' : 'atlas-badge story'}>
