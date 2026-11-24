@@ -29,7 +29,7 @@ const GEMINI_KEYS = [
     .filter(Boolean),
 ].filter(Boolean);
 
-const GEMINI_MODELS = ['gemini-3-flash-preview', 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
+const GEMINI_MODELS = ['gemini-3.1-flash-lite', 'gemini-3-flash-preview', 'gemini-3.5-flash-lite'];
 
 const COHERE_KEY = process.env.COHERE_KEY || '';
 const COHERE_MODEL = 'command-a-03-2025';
@@ -55,7 +55,7 @@ async function tryGemini(key, model, system, messages, maxTokens, temperature) {
         contents,
         generationConfig: { maxOutputTokens: maxTokens, temperature, thinkingConfig: { thinkingBudget: 0 } },
       }),
-      signal: AbortSignal.timeout(30000),
+      signal: AbortSignal.timeout(15000),
     },
   );
   const data = await res.json().catch(() => null);
@@ -83,7 +83,7 @@ async function tryCohere(system, messages, maxTokens, temperature) {
       max_tokens: maxTokens,
       temperature,
     }),
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(15000),
   });
   const data = await res.json().catch(() => null);
   const text = data?.message?.content?.[0]?.text?.trim() || null;
@@ -106,7 +106,7 @@ async function tryOpenRouter(system, messages, maxTokens, temperature) {
       max_tokens: maxTokens,
       temperature,
     }),
-    signal: AbortSignal.timeout(30000),
+    signal: AbortSignal.timeout(15000),
   });
   const data = await res.json().catch(() => null);
   const text = data?.choices?.[0]?.message?.content?.trim() || null;
@@ -118,7 +118,7 @@ async function tryOpenRouter(system, messages, maxTokens, temperature) {
  * @param {{system:string, messages:Array<{role:string,text:string}>, maxTokens?:number, temperature?:number}} opts
  * @returns {Promise<{text:string|null, provider:string}>}
  */
-export async function callAI({ system, messages, maxTokens = 800, temperature = 0.5 }) {
+export async function callAI({ system, messages, maxTokens = 600, temperature = 0.5 }) {
   // 1) Gemini — for each model, try every key until one succeeds.
   for (const model of GEMINI_MODELS) {
     for (const key of GEMINI_KEYS) {

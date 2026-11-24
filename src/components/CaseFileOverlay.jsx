@@ -240,6 +240,8 @@ export default function CaseFileOverlay() {
       portalClassName="casefile-dialog-portal"
       canOutsideClick
       canEscapeKeyClose
+      enforceFocus={false}
+      autoFocus={false}
       aria-label={t('casefile.open')}
     >
       <Workspace />
