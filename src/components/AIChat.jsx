@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { useCaseFile } from '../context/CaseFileContext';
+import GlossaryText from './GlossaryText';
 import { useActiveSection } from '../utils/useActiveSection';
 import { localized } from '../data/localized';
 import { API_BASE } from '../services/sarApi';
@@ -19,16 +20,24 @@ function renderInline(text) {
   let lastIndex = 0;
   let match;
   while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) parts.push(text.slice(lastIndex, match.index));
+    if (match.index > lastIndex) {
+      parts.push(<GlossaryText key={`t${match.index}`} text={text.slice(lastIndex, match.index)} />);
+    }
     const token = match[0];
     if (token.startsWith('**')) {
-      parts.push(<strong key={`b${match.index}`}>{token.slice(2, -2)}</strong>);
+      parts.push(
+        <strong key={`b${match.index}`}>
+          <GlossaryText text={token.slice(2, -2)} />
+        </strong>,
+      );
     } else {
       parts.push(<code key={`c${match.index}`}>{token.slice(1, -1)}</code>);
     }
     lastIndex = regex.lastIndex;
   }
-  if (lastIndex < text.length) parts.push(text.slice(lastIndex));
+  if (lastIndex < text.length) {
+    parts.push(<GlossaryText key={`t${lastIndex}`} text={text.slice(lastIndex)} />);
+  }
   return parts.length ? parts : [text];
 }
 
@@ -274,6 +283,7 @@ export default function AIChat() {
                   {isStreaming ? <span className="ai-chat-caret" aria-hidden="true" /> : null}
                   {msg.role === 'assistant' && msg.sources?.length > 0 && (
                     <div className="ai-chat-sources">
+                      <span className="ai-chat-sources-label">{t('aiChat.sourcesLabel')}:</span>
                       {msg.sources.slice(0, 3).map((src) =>
                         src.url ? (
                           <a

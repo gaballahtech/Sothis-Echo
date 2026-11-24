@@ -45,6 +45,17 @@ const fmtDb = (value) => {
   return `${value >= 0 ? '+' : ''}${value.toFixed(1)}`;
 };
 
+/** Open the Sothis AI chat pre-filled with a question about this site+section. */
+function askAboutSite(site, section, language, t) {
+  const sectionLabel = t(`casefile.section.${section}`) || section;
+  const siteName = localized(site.name, language);
+  const question =
+    language === 'ar'
+      ? `اشرح قسم «${sectionLabel}» في موقع ${siteName} ببساطة، ولماذا يهم؟`
+      : `Explain the "${sectionLabel}" section of ${siteName} in simple terms, and why it matters.`;
+  window.dispatchEvent(new CustomEvent('sothis:ask', { detail: { question } }));
+}
+
 /** Compact vitals strip for a site: ΔHH, ΔHV and the cross-pol gap. */
 function Vitals({ site }) {
   const { t } = useTranslation();
@@ -74,13 +85,19 @@ function Vitals({ site }) {
   );
 }
 
-function Pane({ site, activeSection, language, isCompare }) {
+function Pane({ site, activeSection, language, isCompare, onAsk }) {
+  const { t } = useTranslation();
   return (
     <div className="compare-pane">
       {isCompare ? (
         <div className="compare-pane-head">
           <span className="compare-pane-name">{localized(site.name, language)}</span>
-          <Vitals site={site} />
+          <div className="compare-pane-head-right">
+            <Vitals site={site} />
+            {onAsk ? (
+              <Button small minimal icon="chat" text={t('casefile.askAI')} onClick={() => onAsk(site)} />
+            ) : null}
+          </div>
         </div>
       ) : null}
       <div className="compare-pane-body">
@@ -115,6 +132,7 @@ function Workspace() {
   );
 
   if (!primary) return null;
+  const askAbout = (site) => askAboutSite(site, activeSection, language, t);
 
   const dir = language === 'ar' ? 'rtl' : 'ltr';
 
@@ -209,14 +227,17 @@ function Workspace() {
 
         {isComparing && secondary ? (
           <div className={`compare-panes compare-panes--${layout}`}>
-            <Pane site={primary} activeSection={activeSection} language={language} isCompare />
-            <Pane site={secondary} activeSection={activeSection} language={language} isCompare />
+            <Pane site={primary} activeSection={activeSection} language={language} isCompare onAsk={askAbout} />
+            <Pane site={secondary} activeSection={activeSection} language={language} isCompare onAsk={askAbout} />
           </div>
         ) : (
           <div className="casefile-single">
             <div className="casefile-single-head">
               <span className="casefile-title-sm">{localized(primary.name, language)}</span>
-              <Vitals site={primary} />
+              <div className="compare-pane-head-right">
+                <Vitals site={primary} />
+                <Button small minimal icon="chat" text={t('casefile.askAI')} onClick={() => askAbout(primary)} />
+              </div>
             </div>
             <div className="casefile-single-body">
               <Facet section={activeSection} site={primary} />

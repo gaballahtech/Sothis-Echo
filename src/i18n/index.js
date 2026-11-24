@@ -570,6 +570,7 @@ const en = {
     contextLabel: 'Grounded in',
     generalContext: 'the NISAR mission',
     sourceLabel: 'Based on the measured data',
+    sourcesLabel: 'Sources',
     responding: 'Assistant is responding',
     complete: 'Response complete',
     skip: 'Skip',
@@ -611,6 +612,7 @@ const en = {
   casefile: {
     open: 'Open case file',
     close: 'Close',
+    askAI: 'Ask AI about this',
     compare: 'Compare',
     compareWith: 'Compare with',
     clearCompare: 'Exit compare',
@@ -1202,6 +1204,7 @@ radarCaptionSentinel:
     contextLabel: 'مؤرض في',
     generalContext: 'مهمة نيسار',
     sourceLabel: 'بناءً على البيانات المقاسة',
+    sourcesLabel: 'المصادر',
     responding: 'المساعد يرد',
     complete: 'اكتمل الرد',
     skip: 'تخطّي',
@@ -1243,6 +1246,7 @@ radarCaptionSentinel:
   casefile: {
     open: 'افتح ملف الموقع',
     close: 'إغلاق',
+    askAI: 'اسأل الـ AI عن هذا',
     compare: 'مقارنة',
     compareWith: 'قارن مع',
     clearCompare: 'إنهاء المقارنة',

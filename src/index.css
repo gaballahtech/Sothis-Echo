@@ -3378,6 +3378,7 @@ html[data-theme='dark'] .ai-chat-panel {
   gap: 6px;
   margin-top: 8px;
 }
+.ai-chat-sources-label { font-size: 10px; color: var(--te-muted, var(--bp-typography-color-muted)); font-family: var(--te-mono); text-transform: uppercase; letter-spacing: 0.04em; }
 
 .ai-chat-source {
   padding: 3px 8px;
@@ -3998,6 +3999,7 @@ button, a, .term, .bp6-button, input { touch-action: manipulation; }
   flex: 0 0 auto;
 }
 .compare-pane-name { font-weight: 700; font-size: 14px; }
+.compare-pane-head-right { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .compare-pane-body { flex: 1 1 auto; overflow-y: auto; overscroll-behavior: contain; min-height: 0; padding: 8px 12px 24px; }
 
 /* Vitals */

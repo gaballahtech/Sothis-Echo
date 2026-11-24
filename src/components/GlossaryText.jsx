@@ -25,6 +25,7 @@ const TOKEN_TO_ID = new Map(GLOSSARY_TOKENS.map(({ id, token }) => [token.toLowe
 export default function GlossaryText({ text, as: Tag = 'span' }) {
   if (!text) return null;
   const nodes = [];
+  const seen = new Set();
   let last = 0;
   let match;
   let key = 0;
@@ -32,11 +33,18 @@ export default function GlossaryText({ text, as: Tag = 'span' }) {
   while ((match = RE.exec(text)) !== null) {
     if (match.index > last) nodes.push(text.slice(last, match.index));
     const id = TOKEN_TO_ID.get(match[0].toLowerCase());
-    nodes.push(
-      <Term key={`term-${key++}`} id={id}>
-        {match[0]}
-      </Term>,
-    );
+    // Only the FIRST occurrence of a term in this string is clickable; repeats
+    // render as plain text so a sentence/paragraph doesn't look repetitive.
+    if (id && !seen.has(id)) {
+      seen.add(id);
+      nodes.push(
+        <Term key={`term-${key++}`} id={id}>
+          {match[0]}
+        </Term>,
+      );
+    } else {
+      nodes.push(match[0]);
+    }
     last = match.index + match[0].length;
     if (match[0].length === 0) RE.lastIndex += 1;
   }
