@@ -105,3 +105,21 @@ export function SectionHead({ title, subtitle, id }) {
     </header>
   );
 }
+
+/**
+ * Section wrapper that can render either as a full landing-page <section>
+ * (with the standard `.section-inner` gutter) or, when `embedded`, as a bare
+ * `.casefile-facet` block used inside the full-screen case-file / compare
+ * panes. This lets the same per-site component power both the landing page and
+ * the case file without duplicating its content.
+ */
+export function FacetShell({ embedded = false, id, className = '', labelledBy, children }) {
+  if (embedded) {
+    return <div className="casefile-facet">{children}</div>;
+  }
+  return (
+    <section id={id} className={className} aria-labelledby={labelledBy}>
+      <div className="section-inner">{children}</div>
+    </section>
+  );
+}

@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { LanguageProvider, useLanguage } from './context/LanguageContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { SiteDataProvider, useSiteData } from './context/SiteDataContext';
+import { CaseFileProvider } from './context/CaseFileContext';
 import { isApiConfigured } from './services/sarApi';
 import { TourProvider } from './context/TourContext';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -12,15 +13,8 @@ import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import DemoVideo from './components/DemoVideo';
 import Mission from './components/Mission';
-import SeeThrough from './components/SeeThrough';
-import StudyAreas from './components/StudyAreas';
 import AtlasSection from './components/AtlasSection';
-import Lenses from './components/Lenses';
-import ExplainPanel from './components/ExplainPanel';
-import RapidResponse from './components/RapidResponse';
-import Sonification from './components/Sonification';
-import TimeSeries from './components/TimeSeries';
-import Recovery from './components/Recovery';
+import CaseFileOverlay from './components/CaseFileOverlay';
 import Detective from './components/Detective';
 import Method from './components/Method';
 import Team from './components/Team';
@@ -56,15 +50,7 @@ function AppContent() {
           <Hero />
           <DemoVideo />
           <Mission />
-          <SeeThrough />
-          <StudyAreas />
           <AtlasSection />
-          <Lenses />
-          <ExplainPanel />
-          <RapidResponse />
-          <Sonification />
-          <TimeSeries />
-          <Recovery />
           <Detective />
           <Method />
           <Team />
@@ -72,6 +58,7 @@ function AppContent() {
       </div>
       <Footer />
       <GuidedTour />
+      <CaseFileOverlay />
       <AIChat />
     </div>
   );
@@ -83,11 +70,13 @@ export default function App() {
       <ThemeProvider>
         <TourProvider>
           <SiteDataProvider>
-            <OverlaysProvider>
-              <ErrorBoundary>
-                <AppContent />
-              </ErrorBoundary>
-            </OverlaysProvider>
+            <CaseFileProvider>
+              <OverlaysProvider>
+                <ErrorBoundary>
+                  <AppContent />
+                </ErrorBoundary>
+              </OverlaysProvider>
+            </CaseFileProvider>
           </SiteDataProvider>
         </TourProvider>
       </ThemeProvider>

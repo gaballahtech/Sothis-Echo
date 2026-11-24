@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { loadRapidResponse } from '../services/sarApi';
+import { FacetShell } from './ui';
 
 // Rule-based "questions to ask" and "what to do" per dominant mechanism.
 const QUESTIONS = {
@@ -159,12 +160,12 @@ function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
  * a one-page shareable PNG. Population is labelled as an estimate; if the data
  * is unavailable the report says so instead of faking a number.
  */
-export default function RapidResponse() {
+export default function RapidResponse({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
-  const activeId = selectedSiteId;
-  const setActiveId = setSelectedSiteId;
+  const activeId = siteId ?? selectedSiteId;
+  const setActiveId = embedded ? () => {} : setSelectedSiteId;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [rendering, setRendering] = useState(false);
@@ -199,12 +200,10 @@ export default function RapidResponse() {
 
   if (source !== 'api') {
     return (
-      <section id="respond" className="content-section chapter" aria-labelledby="respond-title">
-        <div className="section-inner">
-          <h2 id="respond-title" style={{ margin: 0 }}>{t('respond.title')}</h2>
-          <p className="body-copy-muted" style={{ marginTop: 8 }}>{t('respond.offline')}</p>
-        </div>
-      </section>
+      <FacetShell embedded={embedded} id="respond" className="content-section chapter" labelledBy="respond-title">
+        <h2 id="respond-title" style={{ margin: 0 }}>{t('respond.title')}</h2>
+        <p className="body-copy-muted" style={{ marginTop: 8 }}>{t('respond.offline')}</p>
+      </FacetShell>
     );
   }
 
@@ -260,15 +259,14 @@ export default function RapidResponse() {
   });
 
   return (
-    <section id="respond" className="content-section chapter" aria-labelledby="respond-title">
-      <div className="section-inner">
-        <div className="row-between" style={{ alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <h2 id="respond-title" style={{ margin: 0 }}>{t('respond.title')}</h2>
-            <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 720 }}>{t('respond.subtitle')}</p>
-          </div>
-          <Button intent="primary" onClick={makeReport} loading={rendering} icon="flame" text={t('respond.generate')} data-testid="respond-generate" />
+    <FacetShell embedded={embedded} id="respond" className="content-section chapter" labelledBy="respond-title">
+      <div className="row-between" style={{ alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <h2 id="respond-title" style={{ margin: 0 }}>{t('respond.title')}</h2>
+          <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 720 }}>{t('respond.subtitle')}</p>
         </div>
+        <Button intent="primary" onClick={makeReport} loading={rendering} icon="flame" text={t('respond.generate')} data-testid="respond-generate" />
+      </div>
 
         {loading ? (
           <div style={{ padding: '24px 0' }}><Spinner size={24} /></div>
@@ -363,7 +361,6 @@ export default function RapidResponse() {
             ) : null}
           </div>
         )}
-      </div>
-    </section>
+    </FacetShell>
   );
 }

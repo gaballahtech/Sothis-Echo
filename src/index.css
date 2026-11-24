@@ -3819,3 +3819,131 @@ html[data-theme='dark'] .ai-chat-panel {
   .demo-time { min-width: 30px; font-size: 10px; }
   .demo-btn { width: 28px; height: 28px; }
 }
+
+/* ==========================================================================
+   CASE FILE — full-screen per-site mode + compare workspace
+   ========================================================================== */
+
+/* Sit above the sticky navbar (z 40) but below the floating AI chat (z 1000),
+   so the chat stays usable while a case file is open. */
+.bp6-overlay.casefile-dialog-portal,
+.casefile-dialog-portal { z-index: 900; }
+
+.casefile-dialog.bp6-dialog {
+  width: 96vw;
+  max-width: 96vw;
+  height: 94vh;
+  max-height: 94vh;
+  margin: 3vh auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.casefile-dialog .bp6-dialog-header { flex: 0 0 auto; }
+.casefile-dialog .bp6-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+}
+
+.casefile-shell {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  background: var(--te-surface, #fbfaf7);
+  color: var(--te-ink, #1c1c1c);
+}
+.bp6-dark .casefile-shell,
+.bp6-dark.casefile-shell { background: #11141a; color: #f5f5f5; }
+
+/* Sidebar: identity + section nav */
+.casefile-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  border-inline-end: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1));
+  background: var(--te-bg, #f7f6f2);
+}
+.bp6-dark .casefile-sidebar { background: #0c0e13; }
+.casefile-identity { display: flex; flex-direction: column; gap: 4px; }
+.casefile-kind { display: flex; }
+.casefile-title { margin: 4px 0 0; font-size: 18px; font-weight: 700; line-height: 1.2; }
+.casefile-region { margin: 0; font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
+.casefile-date { margin: 0; font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); font-variant-numeric: tabular-nums; }
+.casefile-nav { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.casefile-nav-item.bp6-button { justify-content: flex-start; width: 100%; }
+
+/* Main + toolbar */
+.casefile-main { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.casefile-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1));
+  flex: 0 0 auto;
+}
+.casefile-toolbar-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.casefile-compare-label { font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
+
+/* Single-site view */
+.casefile-single { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
+.casefile-single-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap; padding: 10px 16px 0;
+}
+.casefile-title-sm { font-weight: 700; font-size: 15px; }
+.casefile-single-body { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 8px 16px 24px; }
+
+/* Compare panes (side-by-side or stacked) */
+.compare-panes { flex: 1 1 auto; min-height: 0; display: grid; }
+.compare-panes--side { grid-template-columns: 1fr 1fr; }
+.compare-panes--stacked { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+.compare-pane { display: flex; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.compare-panes--side .compare-pane + .compare-pane { border-inline-start: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1)); }
+.compare-panes--stacked .compare-pane + .compare-pane { border-top: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1)); }
+.compare-pane-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap; padding: 8px 12px;
+  border-bottom: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1));
+  flex: 0 0 auto;
+}
+.compare-pane-name { font-weight: 700; font-size: 14px; }
+.compare-pane-body { flex: 1 1 auto; overflow-y: auto; min-height: 0; padding: 8px 12px 24px; }
+
+/* Vitals */
+.casefile-vitals { display: flex; gap: 14px; align-items: center; }
+.casefile-vital { display: flex; flex-direction: column; align-items: flex-start; }
+.casefile-vital-label { font-size: 10px; color: var(--te-muted, var(--bp-typography-color-muted)); text-transform: uppercase; letter-spacing: 0.02em; }
+.casefile-vital-value { font-size: 14px; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+/* Embedded facets: neutralize the landing-page chapter chrome inside the case file */
+.casefile-facet { width: 100%; }
+.casefile-facet.content-section,
+.casefile-facet.chapter,
+.casefile-facet .section-inner { background: transparent; }
+
+/* Responsive: sidebar becomes a top bar; side-by-side compare stacks */
+@media (max-width: 1100px) {
+  .casefile-shell { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr); }
+  .casefile-sidebar {
+    border-inline-end: none;
+    border-bottom: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1));
+    flex-direction: row; flex-wrap: wrap; align-items: center;
+    overflow-x: auto;
+  }
+  .casefile-nav { flex-direction: row; flex-wrap: wrap; margin-top: 0; }
+  .compare-panes--side { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .compare-panes--side .compare-pane + .compare-pane {
+    border-inline-start: none;
+    border-top: 1px solid var(--te-rule, var(--bp-surface-border-color-default, #e1e1e1));
+  }
+}

@@ -185,6 +185,51 @@ export const detectiveRounds = [
       ar: 'النطاق L ميكروويف: الماء الأملس عاكس مرآوي يرسل النبضة بعيدًا عن القمر (شبه أسود)، بينما تشتت الأسطح الخشنة/المبنية الطاقة عائدة (لامعة). لذلك تُظهر خريطة الفيضان مسطحات ماء داكنة وجزرًا لامعة.',
     },
   },
+  {
+    // Reasoning round from the Attica megafire (Greece): a surface fire whose
+    // L-band amplitude barely moved, so the mechanism — not brightness — is the
+    // reliable burn signal. Change-only; reuses the real greece change map.
+    id: 'greece-mechanism',
+    siteId: 'greece',
+    changeOnly: true,
+    title: { en: 'Quiet brightness, changing structure', ar: 'سطوع هادئ وبنية متغيرة' },
+    brief: {
+      en: 'This real L-band change map is from the Attica megafire (July 2026) west of Athens. Unlike a canopy fire, the burn scar barely changes brightness.',
+      ar: 'خريطة التغيّر الحقيقية هذه من حريق أتيكا (يوليو 2026) غرب أثينا. وعلى غير حرائق المظلة، تكاد ندبة الحرق لا تغيّر السطوع.',
+    },
+    question: {
+      en: 'The fire consumed pine canopy, yet the L-band amplitude barely moved. Which measurement best reveals the burn scar here?',
+      ar: 'التهم الحريق مظلة الصنوبر، ومع ذلك لم تكد سعة النطاق L تتغير. فأي قياس يكشف ندبة الحرق هنا أفضل؟',
+    },
+    options: [
+      {
+        id: 'mechanism',
+        label: {
+          en: 'The dual-pol mechanism shift from volume to surface scattering',
+          ar: 'تحوّل آلية الاستقطاب الثنائي من الحجم إلى السطح',
+        },
+      },
+      {
+        id: 'amplitudeOnly',
+        label: {
+          en: 'Amplitude alone — it always drops sharply over any fire',
+          ar: 'السعة وحدها — فهي تنخفض بحدة فوق أي حريق',
+        },
+      },
+      {
+        id: 'opticalOnly',
+        label: {
+          en: 'Only an optical image can show this fire',
+          ar: 'الصورة البصرية وحدها تُظهر هذا الحريق',
+        },
+      },
+    ],
+    answer: 'mechanism',
+    explanation: {
+      en: 'A surface fire that consumes canopy but not soil can leave co-pol amplitude nearly unchanged while the volume-scattering fraction falls and surface scattering rises. The dual-pol mechanism — not brightness — is the reliable burn signal here.',
+      ar: 'الحريق السطحي الذي يستهلك المظلة دون التربة قد يترك سعة الاستقطاب المشترك شبه ثابتة بينما تنخفض نسبة التشتت الحجمي وترتفع نسبة السطح. وآلية الاستقطاب الثنائي — لا السطوع — هي الإشارة الموثوقة للحرق هنا.',
+    },
+  },
 ];
 
 function nearestPass(series, date) {

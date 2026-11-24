@@ -66,14 +66,14 @@ const SUGGESTIONS = {
     'Why did the backscatter change?',
     'What does the coherence map show?',
     'How much of the area changed?',
-    'Compare this to the other site',
+    'Compare with another site',
   ],
   ar: [
     'إيه اللي اتغيّر هنا؟',
     'ليه الارتداد اتغيّر؟',
     'الـ coherence مبيّن إيه؟',
     'إيه نسبة التغيّر؟',
-    'قارن بالموقع التاني',
+    'قارن بموقع آخر',
   ],
 };
 

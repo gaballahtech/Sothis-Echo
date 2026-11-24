@@ -379,44 +379,249 @@ export const studyAreas = [
       ],
     },
   },
+  {
+    // Third site: Attica/Viotia megafire (Greece, 2026-07-31). Real NISAR L-band
+    // GCOV/GSLC, track 158 frame 021 (2026-07-19 -> 2026-08-12). This was a
+    // low-intensity Mediterranean surface fire: the co-pol amplitude barely
+    // moved (HH -11.2 -> -10.8 dB), so no recovery curve can be fitted — the
+    // panel honestly reports "no peak pass" and plots the real per-pass series.
+    // The burn is seen in the dual-pol mechanism (volume -> surface), not brightness.
+    id: 'greece',
+    kind: 'forest',
+    seed: 202608,
+    name: { en: 'Attica megafire', ar: 'حريق أتيكا الكبير' },
+    region: {
+      en: 'West Attica · Gulf of Corinth · Greece',
+      ar: 'غرب أتيكا · خليج كورينث · اليونان',
+    },
+    coords: { lat: 38.05, lng: 23.31 },
+    wkt: 'POLYGON ((23.15 37.96, 23.42 37.96, 23.42 38.15, 23.15 38.15, 23.15 37.96))',
+    eventDate: '2026-07-31',
+    headline: {
+      en: 'A quiet burn: the canopy is gone, but the radar barely dims',
+      ar: 'حريق هادئ: اختفت المظلة لكن الرادار لم يخفت إلا قليلًا',
+    },
+    impact: {
+      users: {
+        en: 'Civil protection · forest services · insurers',
+        ar: 'الحماية المدنية · خدمات الغابات · شركات التأمين',
+      },
+      decision: {
+        en: 'Where to prioritise reforestation and erosion control after a Mediterranean surface fire',
+        ar: 'أين نعطي الأولوية لإعادة التحريج ومكافحة الانجراف بعد حريق سطحي متوسطي',
+      },
+    },
+    tags: [
+      { en: 'Wildfire', ar: 'حرائق' },
+      { en: 'Mediterranean pine', ar: 'صنوبر متوسطي' },
+      { en: 'Surface fire', ar: 'حريق سطحي' },
+    ],
+    story: [
+      {
+        en: 'A fast fire broke out on 31 July 2026 near Psatha and Porto Germeno, west of Athens, and swept through pine and olive country along the Gulf of Corinth. Driven by the dry meltemi winds, it burned roughly 30,000 hectares, destroyed homes and olive groves, and triggered a Copernicus emergency mapping activation (EMSR909). It is a wildland-urban interface fire: brush, pine canopy and farmland at the edge of towns.',
+        ar: 'اندلع حريق سريع في 31 يوليو 2026 قرب بساثا وبورتو جيرمينو غرب أثينا، واكتسح أراضي الصنوبر والزيتون على خليج كورينث. ومدفوعًا برياح الميتمي الجافة، أحرق نحو 30,000 هكتار ودمّر منازل وبساتين زيتون، وأطلق تنشيطًا لرسم الخرائط الطارئ لكوبرنيكوس (EMSR909). وهو حريق واجهة حراجية عمرانية: شجيرات ومظلة صنوبر وأراضٍ زراعية عند أطراف البلدات.',
+      },
+      {
+        en: 'NISAR L-band saw it differently from a canopy fire. Because the flame front mostly consumed surface brush and left the co-pol backscatter nearly unchanged, the HH and HV means barely move between the July and August passes. What the radar does record is the loss of canopy structure: the dual-pol mechanism shifts from volume scattering toward surface scattering across about a third of the scene. This is the honest lesson of the site — for a low-intensity surface fire, the scattering mechanism, not raw brightness, is the reliable burn signal.',
+        ar: 'رأى رادار NISAR بموجة L الحريق بشكل مختلف عن حرائق المظلة. لأن جبهة اللهب استهلكت أساسًا الشجيرات السطحية وتركت الارتداد المشترك شبه ثابت، فلا تكاد متوسطات HH وHV تتغير بين مرور يوليو وأغسطس. وما يسجله الرادار فعلًا هو فقدان بنية المظلة: تتحوّل آلية الاستقطاب الثنائي من التشتت الحجمي إلى السطحي عبر نحو ثلث المشهد. هذا هو الدرس الصادق للموقع — في حريق سطحي منخفض الشدة، تكون آلية التشتت، لا السطوع الخام، هي الإشارة الموثوقة للحرق.',
+      },
+    ],
+    states: {
+      before: {
+        date: '2026-07-19',
+        label: { en: 'Before the Attica fire', ar: 'قبل حريق أتيكا' },
+        params: { water: 0, emergent: 0.9, burn: 0.04, cloud: 0.1 },
+        caption: {
+          en: 'Dry summer pine and olive canopy south of Psatha and Porto Germeno, before the 31 July 2026 fire.',
+          ar: 'مظلة صنوبر وزيتون صيفية جافة جنوب بساثا وبورتو جيرمينو، قبل حريق 31 يوليو 2026.',
+        },
+        happened: {
+          en: 'Co-pol and cross-pol backscatter are both present (HH ≈ -11.2 dB, HV ≈ -17.9 dB); the canopy gives volume scattering.',
+          ar: 'الارتداد المشترك والمتقاطع كلاهما حاضر (HH ≈ -11.2 ديسيبل، HV ≈ -17.9 ديسيبل)؛ وتمنح المظلة تشتتًا حجميًا.',
+        },
+        why: {
+          en: 'Intact canopy and dry but unburned brush — no burn yet.',
+          ar: 'مظلة سليمة وشجيرات جافة لكن غير محترقة — لا حرق بعد.',
+        },
+        polarization: {
+          en: 'Dual-pol HH + HV, so the mechanism can be read, not just brightness.',
+          ar: 'استقطاب مزدوج HH + HV، فتُقرأ الآلية لا السطوع فقط.',
+        },
+      },
+      after: {
+        date: '2026-08-12',
+        label: { en: 'After the Attica fire', ar: 'بعد حريق أتيكا' },
+        params: { water: 0, emergent: 0.1, burn: 0.9, cloud: 0.1 },
+        caption: {
+          en: 'Twelve days after the fire: the same coastline and terrain, canopy burned, ground exposed.',
+          ar: 'بعد الحريق باثني عشر يومًا: نفس الساحل والتضاريس، والمظلة محترقة والأرض مكشوفة.',
+        },
+        happened: {
+          en: 'HH and HV means barely change (HH ≈ -10.8 dB, HV ≈ -17.9 dB), but the dual-pol mechanism shifts from volume toward surface scattering across the burn scar.',
+          ar: 'لا تكاد متوسطات HH وHV تتغير (HH ≈ -10.8 ديسيبل، HV ≈ -17.9 ديسيبل)، لكن آلية الاستقطاب الثنائي تتحوّل من الحجم إلى السطح عبر ندبة الحرق.',
+        },
+        why: {
+          en: 'L-band removes the canopy contribution to volume scattering, so the surface dominates even where the total backscatter is unchanged.',
+          ar: 'يزيل النطاق L مساهمة المظلة في التشتت الحجمي، فيسود السطح حتى حيث لم يتغير الارتداد الكلي.',
+        },
+        polarization: {
+          en: 'HH vs HV ratio (cross-pol gap) and the mechanism fractions are where the fire shows up.',
+          ar: 'نسبة HH مقابل HV (فجوة الاستقطاب المتقاطع) ونسب الآلية هي موضع ظهور الحريق.',
+        },
+      },
+    },
+    measurements: {
+      vv: { before: -11.2, after: -10.8 },
+      vh: { before: -17.9, after: -17.9 },
+      crossPol: { before: -6.6, after: -7.1 },
+      dateBefore: '2026-07-19',
+      dateAfter: '2026-08-12',
+    },
+    series: [
+      { date: '2026-06-25', vv: -11.3, vh: -17.7, change: 0.01 },
+      { date: '2026-07-07', vv: -11.2, vh: -17.8, change: 0.0 },
+      { date: '2026-07-19', vv: -11.2, vh: -17.9, change: 0.0 },
+      { date: '2026-08-12', vv: -10.8, vh: -17.9, change: 0.03 },
+      { date: '2026-08-24', vv: -10.7, vh: -17.9, change: 0.04 },
+      { date: '2026-09-05', vv: -10.8, vh: -18.0, change: 0.03 },
+      { date: '2026-09-17', vv: -10.7, vh: -17.8, change: 0.04 },
+      { date: '2026-09-29', vv: -9.8, vh: -17.5, change: 0.12 },
+      { date: '2026-10-11', vv: -10.8, vh: -18.0, change: 0.03 },
+      { date: '2026-10-23', vv: -10.5, vh: -17.7, change: 0.06 },
+      { date: '2026-11-04', vv: -9.8, vh: -17.1, change: 0.12 },
+    ],
+    pulse: [0.01, 0.003, 0.0, 0.0, 0.02, 0.033, 0.04, 0.033, 0.033, 0.04, 0.093, 0.09, 0.03, 0.05, 0.08, 0.12],
+    stablePulse: [0.01, 0.007, 0.005, 0.002, 0.0, 0.0, 0.0, 0.0, 0.004, 0.012, 0.02, 0.028, 0.032, 0.035, 0.037, 0.04],
+    // No amplitude drop was measured (HH is flat to slightly brighter after the
+    // fire), so no recovery curve can be fitted. The two points are a non-null
+    // placeholder that keeps the panel mounted; the Recovery panel detects
+    // `insufficient` and shows the real per-pass PassChart instead of a curve.
+    recovery: {
+      insufficient: true,
+      noPeakPass: true,
+      thresholdDefault: 80,
+      points: [
+        { month: 0, pct: 0 },
+        { month: 1, pct: 0 },
+      ],
+      eventChange: 0,
+      noise: 0,
+      gapDays: 24,
+      note: {
+        en: 'No co-pol amplitude drop was measured for this surface fire (HH is flat to slightly brighter after the event), so a recovery curve cannot be fitted. The panel plots the real per-pass backscatter instead.',
+        ar: 'لم يُقَس هذا الحريق السطحي أي انخفاض في سعة الاستقطاب المشترك (HH ثابت إلى أعلى قليلًا بعد الحدث)، فلا يمكن ملاءمة منحنى تعافٍ. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
+      },
+    },
+    researcher: {
+      acquisition: {
+        en: 'NISAR L-band GCOV (HH/HV gamma-0) + GSLC, track 158 frame 021, 2026-07-19 → 2026-08-12; reference Copernicus EMSR909.',
+        ar: 'NISAR بموجة L GCOV (HH/HV غاما-0) + GSLC، المسار 158 الإطار 021، 2026-07-19 → 2026-08-12؛ مرجع كوبرنيكوس EMSR909.',
+      },
+      interpretation: [
+        {
+          en: 'Co-pol amplitude is nearly unchanged (ΔHH +0.4 dB, ΔHV 0.0 dB) — a low-intensity surface fire, not a canopy burn.',
+          ar: 'سعة الاستقطاب المشترك شبه ثابتة (ΔHH +0.4 ديسيبل، ΔHV 0.0 ديسيبل) — حريق سطحي منخفض الشدة لا حرق مظلة.',
+        },
+        {
+          en: 'The dual-pol mechanism shifts from volume (40.6%) toward surface (67.1%) — the canopy loss is visible in the mechanism, not brightness.',
+          ar: 'تتحوّل الآلية ثنائية الاستقطاب من الحجم (40.6%) نحو السطح (67.1%) — فقدان المظلة يظهر في الآلية لا السطوع.',
+        },
+        {
+          en: 'Coherence mean is moderate (0.6, 11.1% low) — less collapse than a dense-canopy fire like Big Sur.',
+          ar: 'متوسط التماسك معتدل (0.6، 11.1% منخفض) — انهيار أقل من حريق مظلة كثيفة مثل بيغ سور.',
+        },
+      ],
+      limits: [
+        {
+          en: '24-day window and a surface fire make the amplitude signal quiet; the mechanism fractions are the reliable burn indicator here.',
+          ar: 'نافذة 24 يومًا وحريق سطحي يجعلان إشارة السعة هادئة؛ ونسب الآلية هي المؤشر الموثوق للحرق هنا.',
+        },
+        {
+          en: 'The study window includes coast and mixed land cover, so the changed fraction understates the true burn scar.',
+          ar: 'تتضمن نافذة الدراسة ساحلًا وغطاءً أرضيًا مختلطًا، لذا تقلل النسبة المتغيّرة من تقدير ندبة الحرق الحقيقية.',
+        },
+      ],
+      methods: [
+        {
+          en: 'Dual-pol HH/HV gamma-0 change + scattering-class fractions (low / volume / surface) from GCOV.',
+          ar: 'تغيّر غاما-0 المزدوج HH/HV + نسب أصناف التشتت (منخفض / حجمي / سطحي) من GCOV.',
+        },
+        {
+          en: 'InSAR coherence from the GSLC HH pair over the same window.',
+          ar: 'تماسك InSAR من زوج GSLC HH فوق نفس النافذة.',
+        },
+      ],
+      sources: [
+        {
+          en: 'NASA NISAR GCOV/GSLC (track 158 frame 021, 2026-07-19 & 2026-08-12), via ASF DAAC.',
+          ar: 'NASA NISAR GCOV/GSLC (المسار 158 الإطار 021، 2026-07-19 و2026-08-12)، عبر ASF DAAC.',
+        },
+        {
+          en: 'Copernicus EMSR909 (Attica fire delineation, 2026).',
+          ar: 'كوبرنيكوس EMSR909 (تحديد حريق أتيكا، 2026).',
+        },
+      ],
+    },
+  },
 ];
 
+// Contrast table rows. Each row holds a `values` map keyed by site id, so the
+// StudyAreas table renders one column per site automatically — adding a site is
+// a data change (add its key here), not a code change.
 export const contrastRows = [
   {
     id: 'terrain',
     label: { en: 'Terrain', ar: 'التضاريس' },
-    sundarbans: { en: 'Low river plain, fields and towns', ar: 'سهل نهري منخفض وحقول وبلدات' },
-    bigsur: { en: 'Steep Santa Lucia range', ar: 'سلسلة سانتا لوسيا الشديدة الانحدار' },
+    values: {
+      sundarbans: { en: 'Low river plain, fields and towns', ar: 'سهل نهري منخفض وحقول وبلدات' },
+      bigsur: { en: 'Steep Santa Lucia range', ar: 'سلسلة سانتا لوسيا الشديدة الانحدار' },
+      greece: { en: 'Coastal range and pine slopes', ar: 'سلسلة ساحلية ومنحدرات صنوبر' },
+    },
   },
   {
     id: 'moisture',
     label: { en: 'Soil moisture', ar: 'رطوبة التربة' },
-    sundarbans: { en: 'Saturated during the flood', ar: 'مشبعة أثناء الفيضان' },
-    bigsur: { en: 'Dry summer soil', ar: 'تربة صيفية جافة' },
+    values: {
+      sundarbans: { en: 'Saturated during the flood', ar: 'مشبعة أثناء الفيضان' },
+      bigsur: { en: 'Dry summer soil', ar: 'تربة صيفية جافة' },
+      greece: { en: 'Dry summer soil after heatwaves', ar: 'تربة صيفية جافة بعد موجات الحر' },
+    },
   },
   {
     id: 'canopy',
     label: { en: 'Canopy', ar: 'المظلة' },
-    sundarbans: { en: 'Rice, scrub, trees', ar: 'أرز وشجيرات وأشجار' },
-    bigsur: { en: 'Chaparral, oak and conifer', ar: 'شابارال وبلوط وصنوبريات' },
+    values: {
+      sundarbans: { en: 'Rice, scrub, trees', ar: 'أرز وشجيرات وأشجار' },
+      bigsur: { en: 'Chaparral, oak and conifer', ar: 'شابارال وبلوط وصنوبريات' },
+      greece: { en: 'Aleppo pine, shrubs, olive groves', ar: 'صنوبر حلبي وشجيرات وبساتين زيتون' },
+    },
   },
   {
     id: 'scattering',
     label: { en: 'Dominant scattering', ar: 'التشتت السائد' },
-    sundarbans: { en: 'Surface water + double bounce', ar: 'ماء سطحي + ارتداد مزدوج' },
-    bigsur: { en: 'Volume scattering', ar: 'تشتت حجمي' },
+    values: {
+      sundarbans: { en: 'Surface water + double bounce', ar: 'ماء سطحي + ارتداد مزدوج' },
+      bigsur: { en: 'Volume scattering', ar: 'تشتت حجمي' },
+      greece: { en: 'Volume scattering (canopy)', ar: 'تشتت حجمي (المظلة)' },
+    },
   },
   {
     id: 'fingerprint',
     label: { en: 'Change fingerprint', ar: 'بصمة التغير' },
-    sundarbans: { en: 'Dark water sheet; bright roofs', ar: 'طبقة ماء داكنة وأسطح لامعة' },
-    bigsur: { en: 'HV collapses over the burn scar; HH falls less', ar: 'ينهار HV فوق أثر الحريق وينخفض HH أقل' },
+    values: {
+      sundarbans: { en: 'Dark water sheet; bright roofs', ar: 'طبقة ماء داكنة وأسطح لامعة' },
+      bigsur: { en: 'HV collapses over the burn scar; HH falls less', ar: 'ينهار HV فوق أثر الحريق وينخفض HH أقل' },
+      greece: { en: 'Quiet amplitude; volume→surface mechanism shift', ar: 'سعة هادئة؛ تحوّل الآلية من الحجم إلى السطح' },
+    },
   },
   {
     id: 'recovery',
     label: { en: 'Expected recovery pattern', ar: 'نمط التعافي المتوقع' },
-    sundarbans: { en: 'Rapid once the flood water drains', ar: 'سريع بعد تصريف ماء الفيضان' },
-    bigsur: { en: 'Slow: canopy structure must regrow', ar: 'بطيء: يجب أن تنمو بنية المظلة من جديد' },
+    values: {
+      sundarbans: { en: 'Rapid once the flood water drains', ar: 'سريع بعد تصريف ماء الفيضان' },
+      bigsur: { en: 'Slow: canopy structure must regrow', ar: 'بطيء: يجب أن تنمو بنية المظلة من جديد' },
+      greece: { en: 'Slow: pine canopy must regrow', ar: 'بطيء: يجب أن تنمو مظلة الصنوبر من جديد' },
+    },
   },
 ];
 

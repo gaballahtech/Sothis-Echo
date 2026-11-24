@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { loadLenses } from '../services/sarApi';
+import { FacetShell } from './ui';
 
 /**
  * "Three Lenses" — three independent physical measurements of the same surface
@@ -54,12 +55,12 @@ function Legend() {
   );
 }
 
-export default function Lenses() {
+export default function Lenses({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
-  const activeId = selectedSiteId;
-  const setActiveId = setSelectedSiteId;
+  const activeId = siteId ?? selectedSiteId;
+  const setActiveId = embedded ? () => {} : setSelectedSiteId;
   const [tab, setTab] = useState('amplitude');
   const [lenses, setLenses] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -131,27 +132,25 @@ export default function Lenses() {
   // an honest note instead of fabricating lens imagery.
   if (source !== 'api') {
     return (
-      <section id="lenses" className="content-section chapter" aria-labelledby="lenses-title">
-        <div className="section-inner">
-          <h2 id="lenses-title" style={{ margin: 0 }}>{t('lenses.title')}</h2>
-          <p className="body-copy-muted" style={{ marginTop: 8 }}>
-            {t('lenses.offline')}
-          </p>
-        </div>
-      </section>
+      <FacetShell embedded={embedded} id="lenses" className="content-section chapter" labelledBy="lenses-title">
+        {!embedded ? <h2 id="lenses-title" style={{ margin: 0 }}>{t('lenses.title')}</h2> : null}
+        <p className="body-copy-muted" style={{ marginTop: 8 }}>
+          {t('lenses.offline')}
+        </p>
+      </FacetShell>
     );
   }
 
   return (
-    <section id="lenses" className="content-section chapter" aria-labelledby="lenses-title">
-      <div className="section-inner">
-        <div className="row-between" style={{ alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
-          <div>
-            <h2 id="lenses-title" style={{ margin: 0 }}>{t('lenses.title')}</h2>
-            <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 720 }}>
-              {t('lenses.subtitle')}
-            </p>
-          </div>
+    <FacetShell embedded={embedded} id="lenses" className="content-section chapter" labelledBy="lenses-title">
+      <div className="row-between" style={{ alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+        <div>
+          <h2 id="lenses-title" style={{ margin: 0 }}>{t('lenses.title')}</h2>
+          <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 720 }}>
+            {t('lenses.subtitle')}
+          </p>
+        </div>
+        {!embedded ? (
           <ButtonGroup className="site-tabs" role="tablist" aria-label={t('lenses.title')}>
             {sites.map((item) => {
               const selected = item.id === site.id;
@@ -170,7 +169,8 @@ export default function Lenses() {
               );
             })}
           </ButtonGroup>
-        </div>
+        ) : null}
+      </div>
 
         <div className="lens-tabs" style={{ marginTop: 14 }}>
           <ButtonGroup minimal>
@@ -324,7 +324,6 @@ export default function Lenses() {
             </p>
           </div>
         )}
-      </div>
-    </section>
+    </FacetShell>
   );
 }

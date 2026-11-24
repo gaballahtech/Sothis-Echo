@@ -59,6 +59,29 @@ export const atlasSites = [
     },
   },
   {
+    id: 'greece',
+    name: { en: 'Attica megafire', ar: 'حريق أتيكا الكبير' },
+    region: { en: 'Attica · Gulf of Corinth · Greece', ar: 'أتيكا · خليج كورينث · اليونان' },
+    changeType: 'wildfire',
+    coords: { lat: 38.05, lng: 23.31 },
+    bbox: [23.15, 37.96, 23.42, 38.15],
+    eventDate: '2026-07-31',
+    continent: 'europe',
+    maturity: 'lens',
+    summary: {
+      en: 'A wildland-urban fire west of Athens burned pine and olive groves; the L-band amplitude barely moved, but the dual-pol mechanism shifted from volume to surface scattering where the canopy was consumed.',
+      ar: 'حريق حراجي غرب أثينا التهم أشجار الصنوبر والزيتون؛ لم تكد سعة النطاق L تتغير، لكن آلية الاستقطاب الثنائي تحولت من التشتت الحجمي إلى السطحي حيث استُهلكت المظلة.',
+    },
+    radar: {
+      en: 'L-band penetrates the smoke and sees structure: fire removes the canopy that gives strong cross-pol volume scattering, so the surface dominates after the burn even where brightness is unchanged.',
+      ar: 'ينفذ النطاق L عبر الدخان ويرى البنية: تزيل النار المظلة التي تمنح تشتتًا حجميًا قويًا بالاستقطاب المتقاطع، فيسود السطح بعد الحرق حتى حيث لم يتغير السطوع.',
+    },
+    measure: {
+      en: 'Dual-pol mechanism (volume vs surface fraction) and InSAR coherence collapse mark the burn scar more reliably than amplitude alone for this surface fire.',
+      ar: 'آلية الاستقطاب الثنائي (نسبة الحجم مقابل السطح) وانهيار تماسك InSAR يعلّمان ندبة الحرق أدق من السعة وحدها لهذا الحريق السطحي.',
+    },
+  },
+  {
     id: 'sundarbans-delta',
     name: { en: 'Sundarbans delta', ar: 'دلتا سونداربانس' },
     region: { en: 'Bangladesh · India', ar: 'بنغلاديش · الهند' },

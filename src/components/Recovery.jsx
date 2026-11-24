@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { estimateRecovery, evalModel, formatMonthTick, formatMonths, recoveryFromModel } from '../services/recovery';
-import { Meter, Panel, SectionHead } from './ui';
+import { Meter, FacetShell, Panel, SectionHead } from './ui';
 
 const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 40 };
 
@@ -311,12 +311,13 @@ function RecoveryChart({ points, threshold, language, title, yLabel, xLabel, tar
   );
 }
 
-export default function Recovery() {
+export default function Recovery({ embedded = false, siteId: forcedSiteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, loading } = useSiteData();
-  const [siteId, setSiteId] = useState(() => sites[0]?.id);
-  const site = sites.find((item) => item.id === siteId) ?? sites[0];
+  const [localSiteId, setLocalSiteId] = useState(() => sites[0]?.id);
+  const activeId = forcedSiteId ?? localSiteId;
+  const site = sites.find((item) => item.id === activeId) ?? sites[0];
   const [infoOpen, setInfoOpen] = useState(false);
   const [threshold, setThreshold] = useState(() => site?.recovery?.thresholdDefault ?? 80);
 
@@ -340,10 +341,10 @@ export default function Recovery() {
   const estimateClass = estimateTone === 'warning' ? 'warning' : estimateTone === 'danger' ? 'danger' : '';
 
   return (
-    <section id="recovery" className="content-section chapter chapter--sky" aria-labelledby="recovery-title">
-      <div className="section-inner">
-        <SectionHead title={t('recovery.title')} subtitle={t('recovery.subtitle')} id="recovery-title" />
+    <FacetShell embedded={embedded} id="recovery" className="content-section chapter chapter--sky" labelledBy="recovery-title">
+      {!embedded ? <SectionHead title={t('recovery.title')} subtitle={t('recovery.subtitle')} id="recovery-title" /> : null}
 
+      {!embedded ? (
         <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
           <span className="site-choice-label">{t('common.sitePicker')}</span>
           <ButtonGroup className="site-choice">
@@ -355,13 +356,14 @@ export default function Recovery() {
                 text={L(item.name)}
                 aria-pressed={item.id === site.id}
                 onClick={() => {
-                  setSiteId(item.id);
+                  setLocalSiteId(item.id);
                   setThreshold(item.recovery?.thresholdDefault ?? 80);
                 }}
               />
             ))}
           </ButtonGroup>
         </div>
+      ) : null}
 
         <div className="recovery-grid">
           <Panel title={`${t('recovery.estimateLabel')} · ${siteName}`} bodyClassName="card-pad-lg">
@@ -520,7 +522,6 @@ export default function Recovery() {
         </div>
 
 
-      </div>
-    </section>
+    </FacetShell>
   );
 }

@@ -10,10 +10,20 @@ async function openApp(page, { language = 'en' } = {}) {
         /* storage unavailable */
       }
     },
-    { savedLanguage: language }
+    { savedLanguage: language },
   );
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
+}
+
+async function openCaseFile(page, siteId = 'bigsur') {
+  await page.locator('#atlas').scrollIntoViewIfNeeded();
+  await page.getByTestId(`atlas-item-${siteId}`).click();
+  await expect(page.locator('.casefile-dialog')).toBeVisible();
+}
+
+async function caseSection(page, name) {
+  await page.locator('.casefile-sidebar').getByRole('button', { name }).click();
 }
 
 test('Global Atlas renders the world map, pins and curated list without errors', async ({ page }) => {
@@ -25,61 +35,68 @@ test('Global Atlas renders the world map, pins and curated list without errors',
   await atlas.scrollIntoViewIfNeeded();
   await expect(page.locator('#atlas-title')).toBeVisible();
 
-  // The Leaflet/OpenStreetMap map is present with circle-marker pins.
   const map = page.locator('.atlas-map .leaflet-container');
   await expect(map).toBeVisible();
   const pins = page.locator('.atlas-map path.leaflet-interactive');
   await expect(pins.first()).toBeVisible({ timeout: 10_000 });
   expect(await pins.count()).toBeGreaterThanOrEqual(6);
 
-  // Curated list items are clickable and selectable.
   const list = page.getByTestId('atlas-list');
   await expect(list).toBeVisible();
   await expect(page.getByTestId('atlas-item-bigsur')).toBeVisible();
   await expect(page.getByTestId('atlas-item-sundarbans')).toBeVisible();
-
-  // Selecting a site updates the preview.
-  await page.getByTestId('atlas-item-bigsur').click();
-  await expect(page.getByTestId('atlas-preview')).toContainText('Big Sur');
+  await expect(page.getByTestId('atlas-item-greece')).toBeVisible();
 
   expect(errors).toEqual([]);
 });
 
-test('Lenses section renders its heading and an honest offline notice', async ({ page }) => {
+test('Clicking a measured atlas card opens that site case file', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page, 'greece');
 
-  const lenses = page.locator('#lenses');
-  await lenses.scrollIntoViewIfNeeded();
-  await expect(page.locator('#lenses-title')).toBeVisible();
-  await expect(lenses).toContainText(/live NISAR backend|backend/i);
+  // The case file identity shows the chosen site.
+  await expect(page.locator('.casefile-title')).toContainText('Attica');
+  // Its overview facet renders the site headline.
+  await expect(page.locator('.casefile-single-body')).toContainText(/quiet burn|canopy/i);
 
   expect(errors).toEqual([]);
 });
 
-test('Explain the echo renders its heading and offline notice', async ({ page }) => {
+test('Lenses render an honest offline notice inside the case file', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page);
+  await caseSection(page, /Three lenses|العدسات الثلاث/);
 
-  const explain = page.locator('#explain');
-  await explain.scrollIntoViewIfNeeded();
-  await expect(page.locator('#explain-title')).toBeVisible();
-  await expect(explain).toContainText(/backend/i);
+  const body = page.locator('.casefile-single-body');
+  await expect(body).toContainText(/live NISAR backend|backend/i);
 
   expect(errors).toEqual([]);
 });
 
-test('Rapid response renders its heading and offline notice', async ({ page }) => {
+test('Explain renders its offline notice inside the case file', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page);
+  await caseSection(page, /^Explain$|التفسير/);
 
-  const respond = page.locator('#respond');
-  await respond.scrollIntoViewIfNeeded();
-  await expect(page.locator('#respond-title')).toBeVisible();
-  await expect(respond).toContainText(/backend/i);
+  await expect(page.locator('.casefile-single-body')).toContainText(/backend/i);
+
+  expect(errors).toEqual([]);
+});
+
+test('Rapid response renders its offline notice inside the case file', async ({ page }) => {
+  const errors = [];
+  page.on('pageerror', (error) => errors.push(error.message));
+  await openApp(page);
+  await openCaseFile(page);
+  await caseSection(page, /Rapid response|الاستجابة السريعة/);
+
+  await expect(page.locator('.casefile-single-body')).toContainText(/backend/i);
 
   expect(errors).toEqual([]);
 });
@@ -94,26 +111,32 @@ test('Atlas renders in Arabic without errors', async ({ page }) => {
   await expect(page.locator('#atlas-title')).toBeVisible();
   await expect(page.locator('.atlas-map .leaflet-container')).toBeVisible();
 
+  // Arabic case file opens and its sidebar is on the inline-end (right).
+  await openCaseFile(page, 'bigsur');
+  const shellDir = await page.locator('.casefile-shell').getAttribute('dir');
+  expect(shellDir).toBe('rtl');
+
   expect(errors).toEqual([]);
 });
 
-test('Clicking an atlas place loads that study area everywhere', async ({ page }) => {
+test('Compare pins a second site with synced sections and layout toggle', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page, 'bigsur');
 
-  // Start on the first study area, then choose Big Sur from the atlas.
-  await page.locator('#sites').scrollIntoViewIfNeeded();
-  await page.locator('#atlas').scrollIntoViewIfNeeded();
-  await page.getByTestId('atlas-item-bigsur').click();
+  // Switch to a facet, then enable compare.
+  await caseSection(page, /Three lenses|العدسات الثلاث/);
+  await page.getByTestId('casefile-compare-toggle').click();
+  await expect(page.locator('.compare-pane')).toHaveCount(2);
+  await expect(page.locator('.compare-panes--side')).toHaveCount(1);
 
-  // The study-area tabs must now have Big Sur selected (shared selection).
-  const bigsurTab = page.getByTestId('site-tab-bigsur');
-  await expect(bigsurTab).toHaveAttribute('aria-selected', 'true');
+  // Stacked layout toggle.
+  await page.getByRole('button', { name: /Stacked|فوق\/تحت/ }).first().click();
+  await expect(page.locator('.compare-panes--stacked')).toHaveCount(1);
 
-  // The "Open study area" button also selects it and scrolls to the story.
-  await page.getByTestId('atlas-item-sundarbans').click();
-  await expect(page.getByTestId('site-tab-sundarbans')).toHaveAttribute('aria-selected', 'true');
+  // Both panes show the same (synced) section.
+  await expect(page.locator('.compare-pane').first()).toContainText(/lens|عدسة/i);
 
   expect(errors).toEqual([]);
 });
@@ -130,7 +153,6 @@ test('Selecting a story-only place shows a full radar story card', async ({ page
   await expect(preview).toContainText('Peru earthquake');
   await expect(preview).toContainText('Why radar sees it');
   await expect(preview).toContainText('What NISAR measures');
-  // Field-guide places explain the hazard without claiming a live measurement.
   await expect(preview).toContainText(/field-guide entry/i);
 
   expect(errors).toEqual([]);

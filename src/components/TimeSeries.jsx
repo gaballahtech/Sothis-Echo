@@ -4,18 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
-import { SectionHead } from './ui';
+import { FacetShell, SectionHead } from './ui';
 
 /**
  * Time-series view: every real NISAR pass for the selected site, in order.
  * The line is calibrated HH backscatter (dB); the bars are the change metric
  * (0–1). Press play to animate a playhead through the record.
  */
-export default function TimeSeries() {
+export default function TimeSeries({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, selectedSiteId, setSelectedSiteId } = useSiteData();
-  const site = sites.find((item) => item.id === selectedSiteId) ?? sites[0];
+  const activeId = siteId ?? selectedSiteId;
+  const site = sites.find((item) => item.id === activeId) ?? sites[0];
   const [playing, setPlaying] = useState(false);
   const [index, setIndex] = useState(-1);
   const timerRef = useRef(null);
@@ -86,10 +87,10 @@ export default function TimeSeries() {
   };
 
   return (
-    <section id="timeseries" className="content-section chapter chapter--sky" aria-labelledby="timeseries-title">
-      <div className="section-inner">
-        <SectionHead title={t('timeSeries.title')} subtitle={t('timeSeries.subtitle')} id="timeseries-title" />
+    <FacetShell embedded={embedded} id="timeseries" className="content-section chapter chapter--sky" labelledBy="timeseries-title">
+      {!embedded ? <SectionHead title={t('timeSeries.title')} subtitle={t('timeSeries.subtitle')} id="timeseries-title" /> : null}
 
+      {!embedded ? (
         <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
           <span className="site-choice-label">{t('common.sitePicker')}</span>
           <ButtonGroup className="site-choice">
@@ -105,6 +106,7 @@ export default function TimeSeries() {
             ))}
           </ButtonGroup>
         </div>
+      ) : null}
 
         <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
           <span className="micro">
@@ -178,7 +180,6 @@ export default function TimeSeries() {
         </div>
 
         <p className="micro" style={{ marginTop: 8 }}>{t('timeSeries.hint')}</p>
-      </div>
-    </section>
+    </FacetShell>
   );
 }

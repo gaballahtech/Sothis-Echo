@@ -8,7 +8,7 @@ import { contrastRows } from '../data/sites';
 import { buildSiteCsv, loadChangeStats, sceneImageUrl } from '../services/sarApi';
 import { SceneCanvas } from './SceneCanvas';
 import { SwipeCompare } from './SwipeCompare';
-import { Disclosure, Panel, SectionHead } from './ui';
+import { Disclosure, FacetShell, Panel, SectionHead } from './ui';
 import ObservationTable from './ObservationTable';
 
 const STATE_KEYS = ['before', 'after'];
@@ -43,12 +43,12 @@ function Coordinates({ site }) {
   );
 }
 
-export default function StudyAreas() {
+export default function StudyAreas({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source, loading, selectedSiteId, setSelectedSiteId } = useSiteData();
-  const activeId = selectedSiteId;
-  const setActiveId = setSelectedSiteId;
+  const activeId = siteId ?? selectedSiteId;
+  const setActiveId = embedded ? () => {} : setSelectedSiteId;
   const [cardView, setCardView] = useState('hh');
   const [swipeMode, setSwipeMode] = useState('hh');
   const [changeStats, setChangeStats] = useState(null);
@@ -168,11 +168,10 @@ export default function StudyAreas() {
     ) : null;
 
   return (
-    <section id="sites" className="content-section chapter chapter--mint" aria-labelledby="sites-title">
-      <div className="section-inner">
-        <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" />
+    <FacetShell embedded={embedded} id="sites" className="content-section chapter chapter--mint" labelledBy="sites-title">
+      {!embedded ? <SectionHead title={t('sites.title')} subtitle={t('sites.subtitle')} id="sites-title" /> : null}
 
-        {loading ? (
+      {loading ? (
           <p className="micro" role="status" style={{ marginBottom: 12 }}>
             {t('common.checkingLive')}
           </p>
@@ -188,28 +187,30 @@ export default function StudyAreas() {
           </p>
         ) : null}
 
-        <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
-          {sites.map((item) => {
-            const selected = item.id === site.id;
-            return (
-              <Button
-                key={item.id}
-                role="tab"
-                aria-selected={selected}
-                active={selected}
-                variant={selected ? 'solid' : 'outlined'}
-                alignText="start"
-                onClick={() => setActiveId(item.id)}
-                data-testid={`site-tab-${item.id}`}
-              >
-                <span className="site-tab-content">
-                  <span style={{ fontWeight: 600 }}>{L(item.name)}</span>
-                  <span className="small" style={{ opacity: 0.78 }}>{L(item.region)}</span>
-                </span>
-              </Button>
-            );
-          })}
-        </ButtonGroup>
+        {!embedded ? (
+          <ButtonGroup fill className="site-tabs" role="tablist" aria-label={t('sites.title')}>
+            {sites.map((item) => {
+              const selected = item.id === site.id;
+              return (
+                <Button
+                  key={item.id}
+                  role="tab"
+                  aria-selected={selected}
+                  active={selected}
+                  variant={selected ? 'solid' : 'outlined'}
+                  alignText="start"
+                  onClick={() => setActiveId(item.id)}
+                  data-testid={`site-tab-${item.id}`}
+                >
+                  <span className="site-tab-content">
+                    <span style={{ fontWeight: 600 }}>{L(item.name)}</span>
+                    <span className="small" style={{ opacity: 0.78 }}>{L(item.region)}</span>
+                  </span>
+                </Button>
+              );
+            })}
+          </ButtonGroup>
+        ) : null}
 
         <div role="tabpanel" aria-label={L(site.name)} className="stack" style={{ marginTop: 14 }}>
           <div className="stack" style={{ gap: 10 }}>
@@ -400,16 +401,20 @@ export default function StudyAreas() {
                           <thead>
                             <tr>
                               <th>{t('sites.comparison.label')}</th>
-                              <th>{t('sites.comparison.sundarbans')}</th>
-                              <th>{t('sites.comparison.bigsur')}</th>
+                              {sites.map((item) => (
+                                <th key={item.id}>{L(item.name)}</th>
+                              ))}
                             </tr>
                           </thead>
                           <tbody>
                             {contrastRows.map((row) => (
                               <tr key={row.id}>
                                 <th scope="row">{L(row.label)}</th>
-                                <td>{L(row.sundarbans)}</td>
-                                <td>{L(row.bigsur)}</td>
+                                {sites.map((item) => (
+                                  <td key={item.id}>
+                                    {row.values?.[item.id] ? L(row.values[item.id]) : '—'}
+                                  </td>
+                                ))}
                               </tr>
                             ))}
                           </tbody>
@@ -493,7 +498,6 @@ export default function StudyAreas() {
               </div>
           </Disclosure>
         </div>
-      </div>
-    </section>
+    </FacetShell>
   );
 }

@@ -11,9 +11,7 @@ const STORAGE_KEY = 'sothis-echo-tour-seen';
 // only ever sit on top of the very thing it is describing.
 const STEPS = [
   { id: 'mission', key: 'mission', target: '#mission .mission-details' },
-  { id: 'see-through', key: 'seeThrough', target: '#see-through .compare-frame' },
-  { id: 'sites', key: 'sites', target: '#sites .site-tabs' },
-  { id: 'sound', key: 'sound', target: '#sound .sound-actions-bar' },
+  { id: 'atlas', key: 'atlas', target: '#atlas .atlas-cards' },
   { id: 'game', key: 'game', target: '#game .app-panel' },
 ];
 

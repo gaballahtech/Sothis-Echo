@@ -8,6 +8,7 @@ const en = {
   navbar: {
     brand: 'Sothis Echo',
     mission: 'Mission',
+    atlas: 'Atlas',
     seeThrough: 'Camera vs radar',
     sites: 'Study areas',
     sound: 'Hear the dance',
@@ -186,8 +187,6 @@ const en = {
     impactUsers: 'Who reads this',
     impactDecision: 'Decision it informs',
     comparison: {
-      sundarbans: 'Vietnam flood',
-      bigsur: 'Big Sur megafire',
       label: 'Field',
     },
     metric: 'Channel',
@@ -388,17 +387,9 @@ const en = {
         title: 'One satellite, two radars',
         body: 'NISAR launched in 2025 and maps land and ice every 12 days. It sends its own radar pulse, so it works at night and through cloud. The data is free and open.',
       },
-      seeThrough: {
-        title: 'Clouds vs radar',
-        body: 'Drag the divider. The camera sees a wall of cloud; the radar still sees the flood. Smooth water is dark, and flooded trunks can glow.',
-      },
-      sites: {
-        title: 'Two places, two rhythms',
-        body: 'A river flood and a wildfire do not look alike in radar. Open the boxes beside each image for the plain-language why.',
-      },
-      sound: {
-        title: 'Hear the change',
-        body: 'The series of passes becomes a sequence of pulses. A calm surface keeps a steady beat; a flood or fire changes pitch and rhythm.',
+      atlas: {
+        title: 'Open a place',
+        body: 'The atlas is the entry point. Click a measured site’s cover card to open its full case file, then pin a second site to compare side by side or stacked.',
       },
       game: {
         title: 'Test your eye',
@@ -602,6 +593,32 @@ const en = {
     demoBanner:
       'Previewing the bundled NISAR snapshot — the live backend is not connected in this build.',
   },
+  casefile: {
+    open: 'Open case file',
+    close: 'Close',
+    compare: 'Compare',
+    compareWith: 'Compare with',
+    clearCompare: 'Exit compare',
+    layoutSide: 'Side by side',
+    layoutStacked: 'Stacked',
+    vitals: 'At a glance',
+    deltaHH: 'Δ HH',
+    deltaHV: 'Δ HV',
+    crossPol: 'HV − HH',
+    section: {
+      overview: 'Overview & scene',
+      lenses: 'Three lenses',
+      recovery: 'Recovery',
+      timeseries: 'Time series',
+      respond: 'Rapid response',
+      sound: 'Sonification',
+      see: 'Camera vs radar',
+      explain: 'Explain',
+    },
+    selectSite: 'Choose a site',
+    compareHint: 'Pick a second site to compare',
+    noCompareSite: 'Select another site to compare',
+  },
 };
 
 const ar = {
@@ -611,6 +628,7 @@ const ar = {
   navbar: {
     brand: 'صدى الأرض',
     mission: 'المهمة',
+    atlas: 'الأطلس',
     seeThrough: 'كاميرا أم رادار',
     sites: 'مناطق الدراسة',
     sound: 'اسمع الرقصة',
@@ -788,8 +806,6 @@ radarCaptionSentinel:
     impactUsers: 'من يقرأ هذا',
     impactDecision: 'القرار الذي تخدمه',
     comparison: {
-      sundarbans: 'فيضان فيتنام',
-      bigsur: 'حريق بيغ سور الكبير',
       label: 'الحقل',
     },
     metric: 'القناة',
@@ -988,17 +1004,9 @@ radarCaptionSentinel:
         title: 'قمر واحد، رادارَان',
         body: 'انطلق نيسار عام 2025 ويرسم اليابسة والجليد كل 12 يومًا. يرسل نبضته الرادارية بنفسه، فيعمل ليلًا وعبر الغيوم. والبيانات مجانية ومفتوحة.',
       },
-      seeThrough: {
-        title: 'الغيوم أم الرادار',
-        body: 'اسحب الفاصل. الكاميرا ترى جدارًا من الغيوم، والرادار يرى الفيضان. الماء الأملس داكن، والجذوع المغمورة قد تلمع.',
-      },
-      sites: {
-        title: 'مكانان، إيقاعان',
-        body: 'الفيضان النهري وحريق الغابة لا يبدوان متشابهين في الرادار. افتح الصناديق بجانب كل صورة لتعرف السبب بلغة بسيطة.',
-      },
-      sound: {
-        title: 'اسمع التغيّر',
-        body: 'سلسلة المرورات تتحول إلى نبضات. السطح الهادئ يحافظ على إيقاع ثابت، والفيضان أو الحريق يغيّر النغمة والإيقاع.',
+      atlas: {
+        title: 'افتح مكانًا',
+        body: 'الأطلس هو نقطة الدخول. اضغط بطاقة غلاف أي موقع قياسي لتفتح ملفه الكامل، ثم ثبّت موقعًا ثانيًا للمقارنة جنبًا إلى جنب أو فوق/تحت.',
       },
       game: {
         title: 'اختبر عينك',
@@ -1201,6 +1209,32 @@ radarCaptionSentinel:
     skipToContent: 'تخطَّ إلى المحتوى الرئيسي',
     demoBanner:
       'معاينة لقطة نيسار المجمّعة — الخادم الحيّ غير متصل في هذا الإصدار.',
+  },
+  casefile: {
+    open: 'افتح ملف الموقع',
+    close: 'إغلاق',
+    compare: 'مقارنة',
+    compareWith: 'قارن مع',
+    clearCompare: 'إنهاء المقارنة',
+    layoutSide: 'جنبًا إلى جنب',
+    layoutStacked: 'فوق/تحت',
+    vitals: 'لمحة سريعة',
+    deltaHH: 'Δ HH',
+    deltaHV: 'Δ HV',
+    crossPol: 'HV − HH',
+    section: {
+      overview: 'نظرة عامة والمشهد',
+      lenses: 'العدسات الثلاث',
+      recovery: 'التعافي',
+      timeseries: 'السلسلة الزمنية',
+      respond: 'الاستجابة السريعة',
+      sound: 'السونفيكيشن',
+      see: 'الكاميرا مقابل الرادار',
+      explain: 'التفسير',
+    },
+    selectSite: 'اختر موقعًا',
+    compareHint: 'اختر موقعًا ثانيًا للمقارنة',
+    noCompareSite: 'اختر موقعًا آخر للمقارنة',
   },
 };
 

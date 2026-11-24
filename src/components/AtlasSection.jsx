@@ -4,6 +4,7 @@ import { localized } from '../data/localized';
 import { atlasSites, CHANGE_TYPES } from '../data/atlas';
 import AtlasMap from './AtlasMap';
 import { useSiteData } from '../context/SiteDataContext';
+import { useCaseFile } from '../context/CaseFileContext';
 
 // Rule-based "local impact" — what this change means for people living here.
 const LOCAL_IMPACT = {
@@ -55,7 +56,8 @@ const LOCAL_IMPACT = {
 export default function AtlasSection() {
   const { t, i18n } = useTranslation();
   const language = i18n.language;
-  const { sites, setSelectedSiteId } = useSiteData();
+  const { sites } = useSiteData();
+  const { open: openCaseFile } = useCaseFile();
   const [selectedId, setSelectedId] = useState(() => atlasSites[0]?.id);
 
   const measuredIds = new Set(sites.map((site) => site.id));
@@ -66,23 +68,19 @@ export default function AtlasSection() {
     }
   }, [selectedId]);
 
-  const scrollToSites = () => {
-    const target = document.getElementById('sites');
-    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  // Selecting a measured site both highlights it here and opens its story.
+  // Selecting a story-only site just highlights it on the map and shows its
+  // narrative card. Measured sites open the full-screen case file instead.
   const choose = (site) => {
     setSelectedId(site.id);
-    if (measuredIds.has(site.id)) {
-      setSelectedSiteId(site.id);
-    }
   };
 
-  const openStory = (site) => {
-    if (!measuredIds.has(site.id)) return;
-    setSelectedSiteId(site.id);
-    scrollToSites();
+  const activate = (site) => {
+    if (measuredIds.has(site.id)) {
+      setSelectedId(site.id);
+      openCaseFile(site.id);
+    } else {
+      choose(site);
+    }
   };
 
   const changeTypeName = (ct) => {
@@ -115,13 +113,13 @@ export default function AtlasSection() {
                 key={site.id}
                 className={`atlas-card${measured ? ' is-measured' : ''}${isSelected ? ' active' : ''}`}
                 data-testid={`atlas-item-${site.id}`}
-                onClick={() => choose(site)}
+                onClick={() => activate(site)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(event) => {
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
-                    choose(site);
+                    activate(site);
                   }
                 }}
                 style={{ '--atlas-accent': color }}
@@ -178,12 +176,12 @@ export default function AtlasSection() {
                           className="atlas-open"
                           onClick={(event) => {
                             event.stopPropagation();
-                            openStory(site);
+                            activate(site);
                           }}
                           data-testid={isSelected ? 'atlas-open' : undefined}
                           title={t('atlas.clickToOpen')}
                         >
-                          {t('atlas.openStory')} →
+                          {t('casefile.open')} →
                         </button>
                       ) : (
                         <span className="atlas-pending micro">{t('atlas.storyNote')}</span>

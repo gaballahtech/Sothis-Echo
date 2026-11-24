@@ -5,7 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { CompareSlider } from './SceneCanvas';
-import { Panel, SectionHead } from './ui';
+import { Panel, FacetShell, SectionHead } from './ui';
 
 const LEGEND = [
   { key: 'legendWater', swatch: 'var(--bp-palette-gray-1)' },
@@ -68,15 +68,19 @@ function calibrationWindow(coords) {
   return [lng - dLng, lat - dLat, lng + dLng, lat + dLat];
 }
 
-export default function SeeThrough() {
+export default function SeeThrough({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
-  const { sites } = useSiteData();
+  const { sites, selectedSiteId } = useSiteData();
   const [radarView, setRadarView] = useState('browse');
-  // This comparison is always the Central Vietnam flood scene. It deliberately
-  // ignores the shared selection so switching to Big Sur (or any other site)
-  // elsewhere on the page never changes what this section shows.
-  const site = sites.find((item) => item.id === 'sundarbans') ?? sites[0];
+  // Follow the shared site selection, falling back to the first site that ships
+  // real lens data, then the first site. No site id is hardcoded here, so adding
+  // a site (e.g. Greece) needs no edit to this section.
+  const activeId = siteId ?? selectedSiteId;
+  const site =
+    sites.find((item) => item.id === activeId) ??
+    sites.find((item) => item.hasLenses === true) ??
+    sites[0];
   const state = site?.states?.after;
 
   if (!site || !state) return null;
@@ -114,11 +118,10 @@ export default function SeeThrough() {
   const opticalLabel = t('seeThrough.optical');
 
   return (
-    <section id="see-through" className="content-section chapter chapter--teal" aria-labelledby="see-through-title">
-      <div className="section-inner">
-        <SectionHead title={t('seeThrough.title')} subtitle={t('seeThrough.subtitle')} id="see-through-title" />
+    <FacetShell embedded={embedded} id="see-through" className="content-section chapter chapter--teal" labelledBy="see-through-title">
+      {!embedded ? <SectionHead title={t('seeThrough.title')} subtitle={t('seeThrough.subtitle')} id="see-through-title" /> : null}
 
-        <div className="row" style={{ marginBottom: 12 }}>
+      <div className="row" style={{ marginBottom: 12 }}>
           <ButtonGroup aria-label={t('seeThrough.radar')}>
             {hasBrowse ? (
               <>
@@ -215,7 +218,6 @@ export default function SeeThrough() {
             </Panel>
           </div>
         </div>
-      </div>
-    </section>
+    </FacetShell>
   );
 }

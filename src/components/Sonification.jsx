@@ -8,18 +8,19 @@ import { createSonifier, isAudioSupported } from '../services/sonifier';
 import { SectionHead } from './ui';
 import PulseTrace from './PulseTrace';
 
-export default function Sonification() {
+export default function Sonification({ embedded = false, siteId: forcedSiteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source, loading } = useSiteData();
-  const [siteId, setSiteId] = useState(() => sites[0]?.id);
+  const [localSiteId, setLocalSiteId] = useState(() => sites[0]?.id);
+  const activeId = forcedSiteId ?? localSiteId;
   const [playing, setPlaying] = useState(false);
   const [booting, setBooting] = useState(false);
   const [step, setStep] = useState(-1);
   const [supported, setSupported] = useState(true);
   const sonifierRef = useRef(null);
 
-  const site = sites.find((item) => item.id === siteId) ?? sites[0];
+  const site = sites.find((item) => item.id === activeId) ?? sites[0];
   const siteName = localized(site?.name, language);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ export default function Sonification() {
     sonifierRef.current?.stop();
     setPlaying(false);
     setStep(-1);
-  }, [siteId]);
+  }, [activeId]);
 
   const mapping = useMemo(
     () => [t('sound.map1'), t('sound.map2'), t('sound.map3'), t('sound.map4')],
@@ -89,25 +90,31 @@ export default function Sonification() {
   };
 
   return (
-    <section id="sound" className="content-section chapter chapter--gold" aria-labelledby="sound-title">
+    <section
+      id={embedded ? undefined : 'sound'}
+      className={`content-section chapter chapter--gold${embedded ? ' casefile-facet' : ''}`}
+      aria-labelledby={embedded ? undefined : 'sound-title'}
+    >
       <div className="section-inner">
-        <SectionHead title={t('sound.title')} subtitle={t('sound.subtitle')} id="sound-title" />
+        {!embedded ? <SectionHead title={t('sound.title')} subtitle={t('sound.subtitle')} id="sound-title" /> : null}
 
-        <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
-          <span className="site-choice-label">{t('common.sitePicker')}</span>
-          <ButtonGroup className="site-choice">
-            {sites.map((item) => (
-              <Button
-                key={item.id}
-                active={item.id === site.id}
-                variant={item.id === site.id ? 'solid' : 'outlined'}
-                text={localized(item.name, language)}
-                onClick={() => setSiteId(item.id)}
-                aria-pressed={item.id === site.id}
-              />
-            ))}
-          </ButtonGroup>
-        </div>
+        {!embedded ? (
+          <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>
+            <span className="site-choice-label">{t('common.sitePicker')}</span>
+            <ButtonGroup className="site-choice">
+              {sites.map((item) => (
+                <Button
+                  key={item.id}
+                  active={item.id === site.id}
+                  variant={item.id === site.id ? 'solid' : 'outlined'}
+                  text={localized(item.name, language)}
+                  onClick={() => setLocalSiteId(item.id)}
+                  aria-pressed={item.id === site.id}
+                />
+              ))}
+            </ButtonGroup>
+          </div>
+        ) : null}
 
         <div className="sound-actions-bar" role="group" aria-label={t('sound.title')}>
           <Button

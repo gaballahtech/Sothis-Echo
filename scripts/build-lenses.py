@@ -74,6 +74,23 @@ LENS_SITES = {
         },
         'label': 'Central Vietnam flood',
     },
+    'greece': {
+        # Attica/Viotia megafire (W of Athens). Track 158 ascending, frame 021:
+        # the only swath truly covering the burn scar; pre/post pair
+        # (2026-07-19 -> 2026-08-12), both DHDH (HH+HV).
+        'bbox': (23.15, 37.96, 23.42, 38.15),
+        'coords': (38.05, 23.31),
+        'd_lat': 0.014,
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GCOV_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001',
+        },
+        'gslc': {
+            'before': 'NISAR_L2_PR_GSLC_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GSLC_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001',
+        },
+        'label': 'Attica megafire',
+    },
 }
 
 
@@ -88,7 +105,7 @@ def token():
     raise SystemExit('EARTHDATA_TOKEN missing from .env.local')
 
 
-def search(level, wkt, start='2026-08-01T00:00:00Z', end='2026-09-30T23:59:59Z'):
+def search(level, wkt, start='2026-01-01T00:00:00Z', end='2026-12-31T23:59:59Z'):
     q = urlencode({
         'dataset': 'NISAR', 'processingLevel': level, 'intersectsWith': wkt,
         'start': start, 'end': end, 'output': 'json', 'maxResults': 100,
@@ -123,11 +140,10 @@ def lonlat_to_xy(proj, lng, lat):
     return Transformer.from_crs(4326, proj, always_xy=True).transform(lng, lat)
 
 
-def calibration_bbox(coords):
-    """The same ~5.5 km window the gray HH snapshots use (build-nisar-snapshots.py)."""
+def calibration_bbox(coords, d_lat=0.025):
+    """The same window the gray HH snapshots use (build-nisar-snapshots.py)."""
     lat, lng = coords
-    d_lat = 0.025
-    d_lng = 0.025 / max(0.2, math.cos(math.radians(lat)))
+    d_lng = d_lat / max(0.2, math.cos(math.radians(lat)))
     return (lng - d_lng, lat - d_lat, lng + d_lng, lat + d_lat)
 
 
@@ -255,7 +271,7 @@ def main():
     site = LENS_SITES[site_id]
     # Match the gray HH window (calibration_bbox) so the lenses align with the
     # site image; fall back to the full site bbox when no coords are given.
-    bbox = calibration_bbox(site['coords']) if site.get('coords') else site['bbox']
+    bbox = calibration_bbox(site['coords'], site.get('d_lat', 0.025)) if site.get('coords') else site['bbox']
     started = time.time()
     log('site', site_id, site.get('label', ''))
 

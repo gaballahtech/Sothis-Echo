@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
 
-async function openApp(page, { tourSeen = true, mode = 'public', language = 'en' } = {}) {
+async function openApp(page, { tourSeen = true, language = 'en' } = {}) {
   await page.addInitScript(
-    ({ seen, savedMode, savedLanguage }) => {
+    ({ seen, savedLanguage }) => {
       try {
         localStorage.setItem('sothis-echo-tour-seen', seen ? '1' : '0');
         localStorage.setItem('sothis-echo-language', savedLanguage);
@@ -10,23 +10,34 @@ async function openApp(page, { tourSeen = true, mode = 'public', language = 'en'
         /* storage unavailable */
       }
     },
-    { seen: tourSeen, savedMode: mode, savedLanguage: language }
+    { seen: tourSeen, savedLanguage: language },
   );
   await page.goto('/');
   await expect(page.locator('h1')).toBeVisible();
+}
+
+// Open a measured site's full-screen case file from the atlas.
+async function openCaseFile(page, siteId = 'bigsur') {
+  await page.locator('#atlas').scrollIntoViewIfNeeded();
+  await page.getByTestId(`atlas-item-${siteId}`).click();
+  await expect(page.locator('.casefile-dialog')).toBeVisible();
+}
+
+async function caseSection(page, name) {
+  await page.locator('.casefile-sidebar').getByRole('button', { name }).click();
 }
 
 test('comparison slider responds to keyboard and pointer', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page);
+  await caseSection(page, /Camera vs radar|الكاميرا مقابل الرادار/);
 
   const slider = page.getByTestId('compare-slider');
-  await slider.scrollIntoViewIfNeeded();
   await expect(slider).toHaveAttribute('aria-valuenow', '50');
   await expect(slider.getByText('OPTICAL · BASEMAP')).toBeVisible();
   await expect(slider.getByText('RADAR · L-BAND')).toBeVisible();
-  await expect(slider.getByText('CLOUDED')).toHaveCount(0);
 
   await slider.focus();
   await page.keyboard.press('End');
@@ -52,8 +63,9 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   const errors = [];
   page.on('pageerror', (error) => errors.push(error.message));
   await openApp(page);
+  await openCaseFile(page);
+  await caseSection(page, /Sonification|السونفيكيشن/);
 
-  await page.locator('#sound').scrollIntoViewIfNeeded();
   const play = page.getByTestId('sound-play-change');
   await expect(play).toBeVisible();
   await play.click();
@@ -69,12 +81,12 @@ test('sonification starts, reports passes, and stops', async ({ page }) => {
   expect(errors).toEqual([]);
 });
 
-test('detective game scores five rounds and resets', async ({ page }) => {
+test('detective game scores six rounds and resets', async ({ page }) => {
   await openApp(page);
   await page.locator('#game').scrollIntoViewIfNeeded();
   await page.getByTestId('detective-start').click();
 
-  const answers = ['flood', 'fire', 'context', 'coherence', 'specular'];
+  const answers = ['flood', 'fire', 'context', 'coherence', 'specular', 'mechanism'];
   for (let index = 0; index < answers.length; index += 1) {
     await page.getByTestId(`detective-option-${answers[index]}`).click();
     const feedback = page.getByTestId('detective-feedback');
@@ -86,7 +98,6 @@ test('detective game scores five rounds and resets', async ({ page }) => {
       await expect(feedback).not.toContainText(/VV/);
       await expect(feedback).not.toContainText(/VH/);
     }
-    // Evidence chips only exist for the two evidence-based (non-changeOnly) rounds.
     if (answers[index] === 'flood' || answers[index] === 'fire') {
       await expect(feedback).toContainText(/Evidence/i);
     }
@@ -95,7 +106,7 @@ test('detective game scores five rounds and resets', async ({ page }) => {
 
   const result = page.getByTestId('detective-result');
   await expect(result).toBeVisible();
-  await expect(result).toContainText('5 / 5');
+  await expect(result).toContainText('6 / 6');
   await result.getByRole('button', { name: /Play again/i }).click();
   await expect(page.getByTestId('detective-option-flood')).toBeVisible();
 });
@@ -115,13 +126,9 @@ test('guided tour prompts a first-time visitor, walks the page, and remembers', 
   await expect(card).toContainText('One satellite, two radars');
 
   await page.getByTestId('tour-next').click();
-  await expect(card).toContainText('Clouds vs radar');
-  await expect(page.locator('#see-through')).toBeInViewport({ timeout: 6_000 });
+  await expect(card).toContainText('Open a place');
+  await expect(page.locator('#atlas')).toBeInViewport({ timeout: 6_000 });
 
-  await page.getByTestId('tour-next').click();
-  await expect(card).toContainText('Two places, two rhythms');
-  await page.getByTestId('tour-next').click();
-  await expect(card).toContainText('Hear the change');
   await page.getByTestId('tour-next').click();
   await expect(card).toContainText('Test your eye');
 
@@ -151,12 +158,13 @@ test('advanced documentation stays collapsed until opened', async ({ page }) => 
   await expect(docs.getByText('/study-areas', { exact: false }).first()).toBeVisible();
   await expect(docs.getByText(/Known limits/i)).toBeVisible();
 
-  await page.locator('#recovery').scrollIntoViewIfNeeded();
+  // Recovery + researcher notes now live inside the case file.
+  await openCaseFile(page);
+  await caseSection(page, /Recovery|التعافي/);
   await page.getByTestId('recovery-info').click();
   await expect(page.getByText(/How this estimate is made/i)).toBeVisible();
-  await expect(page.getByText(/share of the study window that has returned/i)).toBeVisible();
 
-  await page.locator('#sites').scrollIntoViewIfNeeded();
+  await caseSection(page, /Overview|نظرة عامة/);
   const researcher = page.getByTestId('for-researchers');
   await expect(researcher).toBeVisible();
   await expect(page.getByText(/Acquisition & products/i)).toHaveCount(0);
@@ -166,7 +174,8 @@ test('advanced documentation stays collapsed until opened', async ({ page }) => 
 
 test('offline fallback hides calibrated-only controls and never claims calibration', async ({ page }) => {
   await openApp(page);
-  await page.locator('#sites').scrollIntoViewIfNeeded();
+  await openCaseFile(page);
+  await caseSection(page, /Overview|نظرة عامة/);
 
   await expect(page.getByTestId('card-view-toggle')).toHaveCount(0);
   await expect(page.getByTestId('change-stats')).toHaveCount(0);
@@ -179,8 +188,9 @@ test('offline fallback hides calibrated-only controls and never claims calibrati
 
 test('SeeThrough explains the full browse vs site window', async ({ page }) => {
   await openApp(page);
-  const seeThrough = page.locator('#see-through');
-  await seeThrough.scrollIntoViewIfNeeded();
+  await openCaseFile(page);
+  await caseSection(page, /Camera vs radar|الكاميرا مقابل الرادار/);
+  const seeThrough = page.locator('.casefile-single-body');
   await expect(seeThrough.getByText('Full browse vs site window')).toBeVisible();
   await expect(seeThrough.getByText(/full NISAR L-band browse/i)).toBeVisible();
 });

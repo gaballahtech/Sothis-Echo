@@ -48,8 +48,11 @@ SPECKLE_WINDOW = 3
 
 SITES = {
     'sundarbans': {
+        'kind': 'wetland',
+        'label': 'Central Vietnam flood',
         'coords': (16.55, 107.575),
         'bbox': (107.45, 16.45, 107.70, 16.65),
+        'window': 'calibration',
         'eventDate': '2026-09-13',
         'before': 'NISAR_L2_PR_GCOV_030_054_A_010_4005_DHDH_A_20260909T222101_20260909T222140_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_031_054_A_010_4005_DHDH_A_20260921T222101_20260921T222140_P05023_N_F_J_001',
@@ -58,11 +61,30 @@ SITES = {
         # Timber + Plaskett fire scar on the Santa Lucia Range, Big Sur.
         # Track 42 descending, frame 070: 12-day same-track pair ending on the
         # event pass (2026-08-28) so the cards, change map and recovery agree.
+        'kind': 'forest',
+        'label': 'Big Sur megafire',
         'coords': (36.02, -121.52),
         'bbox': (-121.58, 35.97, -121.46, 36.07),
+        'window': 'bbox',
         'eventDate': '2026-08-25',
         'before': 'NISAR_L2_PR_GCOV_028_042_D_070_4005_DHDH_A_20260816T025639_20260816T025713_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_029_042_D_070_4005_DHDH_A_20260828T025638_20260828T025713_P05023_N_F_J_001',
+    },
+    'greece': {
+        # Attica/Viotia megafire (Psatha / Porto Germeno, W of Athens, Gulf of
+        # Corinth). Track 158 ascending, frame 021: the only swath that truly
+        # covers the burn scar, same-track pre/post pair bracketing the
+        # 2026-07-31 ignition (2026-07-19 -> 2026-08-12). Both granules are
+        # DHDH (full HH+HV), so the dual-pol lenses are complete.
+        'kind': 'forest',
+        'label': 'Attica megafire',
+        'coords': (38.05, 23.31),
+        'bbox': (23.15, 37.96, 23.42, 38.15),
+        'window': 'calibration',
+        'd_lat': 0.014,
+        'eventDate': '2026-07-31',
+        'before': 'NISAR_L2_PR_GCOV_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001',
     },
 }
 
@@ -79,8 +101,16 @@ def token():
 
 
 def granule_date(name):
-    """Calendar date (YYYY-MM-DD) encoded in a NISAR granule name."""
-    dt = name.split('_A_', 1)[1][:8]
+    """Calendar date (YYYY-MM-DD) encoded in a NISAR granule name.
+
+    Uses the acquisition datetime token (`_YYYYMMDDThhmmss_`) rather than the
+    first `_A_` split: ascending granules carry an extra `_A_<frame>_` segment
+    (e.g. `..._158_A_021_2005_DHDH_A_20260719T...`) that breaks a naive split.
+    """
+    match = re.search(r'_(\d{8})T\d{6}_', name)
+    if not match:
+        return ''
+    dt = match.group(1)
     return f'{dt[0:4]}-{dt[4:6]}-{dt[6:8]}'
 
 
@@ -390,9 +420,22 @@ def measurements(window):
 
 def calibration_bbox(site):
     lat, lng = site['coords']
-    d_lat = 0.025
-    d_lng = 0.025 / max(0.2, math.cos(math.radians(lat)))
+    d_lat = site.get('d_lat', 0.025)
+    d_lng = d_lat / max(0.2, math.cos(math.radians(lat)))
     return (lng - d_lng, lat - d_lat, lng + d_lng, lat + d_lat)
+
+
+def site_window(site):
+    """Measurement window shared by both passes of a site.
+
+    'bbox' uses the site's own bbox (Big Sur), 'calibration' uses the ~5.5 km
+    window around the site coords (Sundarbans, Greece). Either way the SAME
+    window is used for the before pass, the after pass, the change map and the
+    recovery, so every panel reads the same ground.
+    """
+    if site.get('window') == 'bbox':
+        return site['bbox']
+    return calibration_bbox(site)
 
 
 def write_png(name, data):
@@ -436,134 +479,110 @@ def main():
         catalog[site_id] = asf_granules(wkt)
         log(site_id, 'granules', len(catalog[site_id]))
 
-    # Both Sundarbans sides must be rendered from the same calibration window:
-    # the old after PNG came from a different crop and showed a different part
-    # of the coast, so the two cards could not be compared.
-    sundarbans_windows = {}
-    bigsur_windows = {}
+    # Each site's before/after must share the same measurement window so the cards,
+    # change map and recovery all read the same ground.
+    windows = {site_id: {} for site_id in site_ids}
 
-    def do_sundarbans(side):
-        grid = open_granule(granule_url(catalog['sundarbans'], SITES['sundarbans'][side]))
-        return ('sundarbans', side, read_window(grid, calibration_bbox(SITES['sundarbans']), want_hv=True))
-
-    def do_bigsur(side):
-        grid = open_granule(granule_url(catalog['bigsur'], SITES['bigsur'][side]))
-        return ('bigsur', side, read_window(grid, SITES['bigsur']['bbox'], want_hv=True))
+    def read_side(site_id, side):
+        site = SITES[site_id]
+        grid = open_granule(granule_url(catalog[site_id], site[side]))
+        return site_id, side, read_window(grid, site_window(site), want_hv=True)
 
     with ThreadPoolExecutor(max_workers=4) as pool:
-        futures = []
-        if 'sundarbans' in site_ids:
-            futures += [pool.submit(do_sundarbans, 'before'), pool.submit(do_sundarbans, 'after')]
-        if 'bigsur' in site_ids:
-            futures += [pool.submit(do_bigsur, 'before'), pool.submit(do_bigsur, 'after')]
+        futures = [pool.submit(read_side, site_id, side) for site_id in site_ids for side in ('before', 'after')]
         for future in futures:
-            family, side, window = future.result()
-            if family == 'sundarbans':
-                sundarbans_windows[side] = window
-            else:
-                bigsur_windows[side] = window
+            site_id, side, window = future.result()
+            windows[site_id][side] = window
 
-    # RGB and HH must share the window, so the HH view cannot jump relative to
-    # the dual-pol composite when the user toggles between them.
-    families = [('sundarbans', sundarbans_windows), ('bigsur', bigsur_windows)]
-    families = [(name, windows) for name, windows in families if windows]
-    for family, windows in families:
-        # Wildfire: anchor the stretch to the before pass and weight the HV
-        # canopy drop, so the burn scar reads as a contiguous bright anomaly.
-        wildfire = family == 'bigsur'
-        limits = composite_limits([windows['before'], windows['after']], anchor_first=wildfire)
+    for site_id in site_ids:
+        site = SITES[site_id]
+        wildfire = site['kind'] != 'wetland'
+        pair = windows[site_id]
+        limits = composite_limits([pair['before'], pair['after']], anchor_first=wildfire)
         for side in ('before', 'after'):
-            write_png(f'{family}-{side}-rgb.png', composite(windows[side], limits))
-            write_png(f'{family}-{side}-hh.png', composite_hh(windows[side], limits))
+            write_png(f'{site_id}-{side}-rgb.png', composite(pair[side], limits))
+            write_png(f'{site_id}-{side}-hh.png', composite_hh(pair[side], limits))
         write_png(
-            f'{family}-change.png',
-            change_map(windows['before'], windows['after'], hv_weight=0.6 if wildfire else 0.0, exclude_water=wildfire),
+            f'{site_id}-change.png',
+            change_map(pair['before'], pair['after'], hv_weight=0.6 if wildfire else 0.0, exclude_water=wildfire),
         )
+        write_rgb_module(f'{site_id}-rgb.mjs', f'{site_id}RgbBase64', {
+            side: open(os.path.join(CACHE, f'{site_id}-{side}-rgb.png'), 'rb').read() for side in ('before', 'after')
+        })
+        write_rgb_module(f'{site_id}-hh.mjs', f'{site_id}HhBase64', {
+            side: open(os.path.join(CACHE, f'{site_id}-{side}-hh.png'), 'rb').read() for side in ('before', 'after')
+        })
+        write_rgb_module(f'{site_id}-change.mjs', f'{site_id}ChangeBase64', {
+            'change': open(os.path.join(CACHE, f'{site_id}-change.png'), 'rb').read()
+        })
 
-    # Persist every rendered side: RGB composite and calibrated HH.
-    for family, export in (('sundarbans', 'sundarbansRgbBase64'), ('bigsur', 'bigsurRgbBase64')):
-        pngs = {
-            side: open(os.path.join(CACHE, f'{family}-{side}-rgb.png'), 'rb').read()
-            for side in ('before', 'after')
-        }
-        write_rgb_module(f'{family}-rgb.mjs', export, pngs)
-    for family, export in (('sundarbans', 'sundarbansHhBase64'), ('bigsur', 'bigsurHhBase64')):
-        pngs = {
-            side: open(os.path.join(CACHE, f'{family}-{side}-hh.png'), 'rb').read()
-            for side in ('before', 'after')
-        }
-        write_rgb_module(f'{family}-hh.mjs', export, pngs)
-    for family, export in (('sundarbans', 'sundarbansChangeBase64'), ('bigsur', 'bigsurChangeBase64')):
-        png = open(os.path.join(CACHE, f'{family}-change.png'), 'rb').read()
-        write_rgb_module(f'{family}-change.mjs', export, {'change': png})
+        stats = change_stats(pair['before'], pair['after'], exclude_water=wildfire)
+        measure_bbox = site_window(site)
+        area = bbox_area_km2(measure_bbox) / stats['totalPixels']
+        changed_area = stats['changedPixels'] * area
+        before_m = measurements(pair['before'])
+        after_m = measurements(pair['after'])
+        before_granule = site['before']
+        after_granule = site['after']
 
-    stats = change_stats(bigsur_windows['before'], bigsur_windows['after'], exclude_water=True)
-    bbox = SITES['bigsur']['bbox']
-    area = bbox_area_km2(bbox) / stats['totalPixels']
-    changed_area = stats['changedPixels'] * area
-    before_m = measurements(bigsur_windows['before'])
-    after_m = measurements(bigsur_windows['after'])
-
-    module = {
-        'site': 'bigsur',
-        'computedAt': time.strftime('%Y-%m-%d', time.gmtime()),
-        'source': 'nisar-gcov-asf-h5',
-        'calibrated': True,
-        'thresholdDb': THRESHOLD_DB,
-        'changeStats': {
-            'site': 'bigsur',
+        module = {
+            'site': site_id,
+            'computedAt': time.strftime('%Y-%m-%d', time.gmtime()),
             'source': 'nisar-gcov-asf-h5',
             'calibrated': True,
             'thresholdDb': THRESHOLD_DB,
-            'changedPct': stats['changedPct'],
-            'meanDeltaDb': stats['meanDeltaDb'],
-            'meanAbsDeltaDb': stats['meanAbsDeltaDb'],
-            'changedAreaKm2': round(changed_area, 2),
-            'validPixels': stats['validPixels'],
-            'validPct': stats['validPct'],
-            'grid': {'width': stats['width'], 'height': stats['height'], 'aligned': True},
-            'before': {'date': granule_date(SITES['bigsur']['before']), 'granule': SITES['bigsur']['before']},
-            'after': {'date': granule_date(SITES['bigsur']['after']), 'granule': SITES['bigsur']['after']},
-            'note': (
-                f'Signed HH change, {int(THRESHOLD_DB)} dB absolute threshold, same track/frame, '
-                'NISAR L-band gamma-0, read directly from the calibrated ASF GCOV HDF5 granules.'
-            ),
-        },
-        'measurements': {
-            'hhDb': {'before': before_m['hhDb'], 'after': after_m['hhDb']},
-            'hvDb': {'before': before_m['hvDb'], 'after': after_m['hvDb']},
-            'crossDb': {'before': before_m['crossDb'], 'after': after_m['crossDb']},
-            'validPct': after_m['validPct'],
-        },
-        'rgb': {
-            'before': {
-                'date': granule_date(SITES['bigsur']['before']),
-                'granule': SITES['bigsur']['before'],
-                'width': OUT_W,
-                'height': OUT_H,
+            'changeStats': {
+                'site': site_id,
+                'source': 'nisar-gcov-asf-h5',
+                'calibrated': True,
+                'thresholdDb': THRESHOLD_DB,
+                'changedPct': stats['changedPct'],
+                'meanDeltaDb': stats['meanDeltaDb'],
+                'meanAbsDeltaDb': stats['meanAbsDeltaDb'],
+                'changedAreaKm2': round(changed_area, 2),
+                'validPixels': stats['validPixels'],
+                'validPct': stats['validPct'],
+                'grid': {'width': stats['width'], 'height': stats['height'], 'aligned': True},
+                'before': {'date': granule_date(before_granule), 'granule': before_granule},
+                'after': {'date': granule_date(after_granule), 'granule': after_granule},
+                'note': (
+                    f'Signed HH change, {int(THRESHOLD_DB)} dB absolute threshold, same track/frame, '
+                    'NISAR L-band gamma-0, read directly from the calibrated ASF GCOV HDF5 granules.'
+                ),
             },
-            'after': {
-                'date': granule_date(SITES['bigsur']['after']),
-                'granule': SITES['bigsur']['after'],
-                'width': OUT_W,
-                'height': OUT_H,
+            'measurements': {
+                'hhDb': {'before': before_m['hhDb'], 'after': after_m['hhDb']},
+                'hvDb': {'before': before_m['hvDb'], 'after': after_m['hvDb']},
+                'crossDb': {'before': before_m['crossDb'], 'after': after_m['crossDb']},
+                'validPct': after_m['validPct'],
             },
-        },
-    }
-    header = (
-        '/**\n'
-        ' * Verified NISAR GCOV telemetry for the Big Sur (Timber + Plaskett) fires.\n'
-        ' *\n'
-        ' * Generated by scripts/build-nisar-snapshots.py directly from the ASF DAAC\n'
-        ' * GCOV HDF5 granules (HHHH/HVHV gamma-0, own mask). The Harmony subsetter\n'
-        ' * returned no bytes at build time, so the same calibrated rasters were read\n'
-        ' * over HTTPS byte ranges. Do not edit by hand.\n'
-        ' */\n'
-    )
-    with open(os.path.join(CACHE, 'bigsur.mjs'), 'w', encoding='utf-8') as handle:
-        handle.write(header + 'export const bigsurSnapshot = ' + json.dumps(module, indent=2) + ';\n')
-    log('wrote bigsur.mjs')
-    log('bigsur stats', stats, 'area km2', round(changed_area, 2))
+            'rgb': {
+                'before': {
+                    'date': granule_date(before_granule),
+                    'granule': before_granule,
+                    'width': OUT_W,
+                    'height': OUT_H,
+                },
+                'after': {
+                    'date': granule_date(after_granule),
+                    'granule': after_granule,
+                    'width': OUT_W,
+                    'height': OUT_H,
+                },
+            },
+        }
+        header = (
+            '/**\n'
+            f' * Verified NISAR GCOV telemetry for the {site.get("label", site_id)} site.\n'
+            ' *\n'
+            ' * Generated by scripts/build-nisar-snapshots.py directly from the ASF DAAC\n'
+            ' * GCOV HDF5 granules (HHHH/HVHV gamma-0, own mask). Do not edit by hand.\n'
+            ' */\n'
+        )
+        out_path = os.path.join(CACHE, f'{site_id}.mjs')
+        with open(out_path, 'w', encoding='utf-8') as handle:
+            handle.write(header + f'export const {site_id}Snapshot = ' + json.dumps(module, indent=2) + ';\n')
+        log('wrote', os.path.relpath(out_path, ROOT), '| changedPct', stats['changedPct'], '| area km2', round(changed_area, 2))
     log('done in', round(time.time() - started, 1), 's')
 
 

@@ -50,21 +50,25 @@ test.describe('live calibrated NISAR contract', () => {
     test.setTimeout(300_000);
     await page.goto('/');
     await page.getByRole('button', { name: /Not now/i }).click().catch(() => {});
-    await page.locator('#sites').scrollIntoViewIfNeeded();
+    // Per-site provenance now lives inside the full-screen case file.
+    await page.locator('#atlas').scrollIntoViewIfNeeded();
+    await page.getByTestId('atlas-item-bigsur').click();
+    const dialog = page.locator('.casefile-dialog');
+    await expect(dialog).toBeVisible();
 
-    await expect(page.locator('#sites .panel-status').first()).toContainText('NISAR', { timeout: 240_000 });
-    await expect(page.getByTestId('series-source-note')).toBeVisible();
-    await expect(page.getByTestId('degraded-note')).toHaveCount(0);
-    await expect(page.getByTestId('change-stats')).toBeVisible({ timeout: 240_000 });
-    await expect(page.getByTestId('change-stats')).toContainText(/%/);
+    await expect(dialog.locator('.panel-status').first()).toContainText('NISAR', { timeout: 240_000 });
+    await expect(dialog.getByTestId('series-source-note')).toBeVisible();
+    await expect(dialog.getByTestId('degraded-note')).toHaveCount(0);
+    await expect(dialog.getByTestId('change-stats')).toBeVisible({ timeout: 240_000 });
+    await expect(dialog.getByTestId('change-stats')).toContainText(/%/);
 
-    await page.getByTestId('card-view-rgb').click();
-    await expect(page.getByTestId('rgb-note')).toBeVisible();
+    await dialog.getByTestId('card-view-rgb').click();
+    await expect(dialog.getByTestId('rgb-note')).toBeVisible();
     await expect
       .poll(
         () =>
-          page
-            .locator('#sites .scene-grid img')
+          dialog
+            .locator('.scene-grid img')
             .nth(1)
             .evaluate((img) => img.complete && img.naturalWidth > 0),
         { timeout: 30_000 },

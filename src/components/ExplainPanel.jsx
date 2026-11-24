@@ -4,18 +4,19 @@ import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { loadExplanation } from '../services/sarApi';
+import { FacetShell } from './ui';
 
 /**
  * "Explain the Echo" — a grounded, numbers-first physical hypothesis for the
  * selected site. The "Ask" box is now a shortcut into Sothis AI, which answers
  * from the same real measurements (never invented).
  */
-export default function ExplainPanel() {
+export default function ExplainPanel({ embedded = false, siteId }) {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { sites, source, selectedSiteId, setSelectedSiteId } = useSiteData();
-  const activeId = selectedSiteId;
-  const setActiveId = setSelectedSiteId;
+  const activeId = siteId ?? selectedSiteId;
+  const setActiveId = embedded ? () => {} : setSelectedSiteId;
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
 
@@ -53,20 +54,17 @@ export default function ExplainPanel() {
 
   if (source !== 'api') {
     return (
-      <section id="explain" className="content-section chapter" aria-labelledby="explain-title">
-        <div className="section-inner">
-          <h2 id="explain-title" style={{ margin: 0 }}>{t('explain.title')}</h2>
-          <p className="body-copy-muted" style={{ marginTop: 8 }}>{t('explain.offline')}</p>
-        </div>
-      </section>
+      <FacetShell embedded={embedded} id="explain" className="content-section chapter" labelledBy="explain-title">
+        {!embedded ? <h2 id="explain-title" style={{ margin: 0 }}>{t('explain.title')}</h2> : null}
+        <p className="body-copy-muted" style={{ marginTop: 8 }}>{t('explain.offline')}</p>
+      </FacetShell>
     );
   }
 
   return (
-    <section id="explain" className="content-section chapter" aria-labelledby="explain-title">
-      <div className="section-inner">
-        <h2 id="explain-title" style={{ margin: 0 }}>{t('explain.title')}</h2>
-        <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 760 }}>{t('explain.subtitle')}</p>
+    <FacetShell embedded={embedded} id="explain" className="content-section chapter" labelledBy="explain-title">
+      <h2 id="explain-title" style={{ margin: 0 }}>{t('explain.title')}</h2>
+      <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 760 }}>{t('explain.subtitle')}</p>
 
         {loading ? (
           <div style={{ padding: '24px 0' }}><Spinner size={24} /></div>
@@ -113,7 +111,6 @@ export default function ExplainPanel() {
             ) : null}
           </div>
         )}
-      </div>
-    </section>
+    </FacetShell>
   );
 }
