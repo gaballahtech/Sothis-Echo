@@ -242,3 +242,20 @@ Released under the [MIT License](./LICENSE).
 **NISAR facts:** Launched 30 July 2025 on GSLV-F16 · 747 km sun-synchronous orbit · 12-day exact repeat · L-band 24 cm (NASA) + S-band 9.4 cm (ISRO) · >240 km swath · 3–10 m resolution · free and open data.
 
 </div>
+
+## Evidence-Based UX & Science Communication
+
+Every interface and content decision in Sothis Echo is grounded in published NASA mission facts and university science-communication research — not guesswork. The table below maps each design choice to its source.
+
+| Design decision | Evidence |
+|---|---|
+| **Hero leads with the “So what?”** (why it matters + 3 learn points) | COMPASS *Message Box* — the “So what?” is the crux; structure = Issue / Problem / So‑What / Solution / Benefit. https://www.compassscicomm.org/leadership-development/the-message-box/ |
+| **Plain “shared language”, every technical term defined on first use** (inline glossary) | Michigan State University, *Writing Clear Messages* — jargon‑free shared language; define technical terms; use comparisons. https://comms.msu.edu/academic-toolkit/telling-your-story/writing-clear-messages |
+| **Progressive disclosure — ~3–5 top-level items; detail in the case file** | UCSB / COMPASS (NCEAS) — cognitive research: the brain absorbs ~3–5 pieces of information at a time. https://learning.nceas.ucsb.edu/2024-03-ucsb-faculty/session_09.html |
+| **Message = What we know / What’s new / Why it matters; no information dump** | CIRES, University of Colorado — *Constructing your message*. https://cires.colorado.edu/api/files/sites/default/files/2025-02/how%20to%20construct%20your%20message%20for%20media.pdf |
+| **Floods shown as dark water; burn scars as a volume→surface mechanism change (not brightness)** | NASA JPL *Hazards* — SAR detects surface water (specular = dark) and delineates burn scars via a change in scattering mechanism. https://www.jpl.nasa.gov/go/radar-science/hazards/ |
+| **Coherence / mechanism are the reliable burn indicator (used for the subtle Greece fire)** | NASA/JPL *NISAR Applications: Fire Management* — InSAR/coherence from pre/post pairs map burn severity where optical can’t. https://assets.science.nasa.gov/content/dam/science/missions/nisar/nisar-jpl/pdf/NISAR_Applications_Fire_Management1.pdf |
+| **Mission facts, “free & open”, and data via ASF** | NASA *NISAR Quick Facts* — 12‑day repeat, L/S‑band, 240 km swath, free & open, L‑band via ASF. https://science.nasa.gov/mission/nisar/mission-overview/ |
+| **Honest “unavailable / insufficient” states (no fabricated numbers)** | NASA data‑honesty practice + the project’s own contract: where a lens or recovery curve is not measured, the UI says so. |
+
+> The design is intentionally evidence-led: clarity, honesty, and cognitive load are treated as requirements with sources, not stylistic preferences.
