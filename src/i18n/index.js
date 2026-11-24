@@ -29,6 +29,13 @@ const en = {
     title: 'Radar sees what a camera can\'t.',
     subtitle:
       'Radar sees through cloud, smoke and darkness. Meet NISAR and learn to read what it finds.',
+    why: 'Floods and fires are increasing. Radar is the only sensor that sees them through cloud, smoke and darkness — day or night.',
+    learn: [
+      'See what a camera misses',
+      'Read the change in real NISAR data',
+      'Compare two places side by side',
+    ],
+    provenance: 'Real NISAR L-band data · free & open · via NASA ASF',
     ctaSee: 'See what the camera misses',
     ctaListen: 'Hear the surface',
     liveData: 'NISAR L-band record',
@@ -657,6 +664,13 @@ const ar = {
     title: 'الرادار يرى ما لا تراه الكاميرا.',
     subtitle:
       'الرادار يرى عبر الغيوم والدخان والظلام. تعرّف على نيسار وتعلّم قراءة ما يجده.',
+    why: 'الفيضانات والحرائق تتزايد. الرادار هو المستشعر الوحيد الذي يراها عبر السحاب والدخان والظلام — ليلًا ونهارًا.',
+    learn: [
+      'شاهد ما تفوته الكاميرا',
+      'اقرأ التغيّر في بيانات نيسار الحقيقية',
+      'قارن مكانين جنبًا إلى جنب',
+    ],
+    provenance: 'بيانات نيسار الحقيقية (نطاق L) · مجانية ومفتوحة · عبر ASF',
     ctaSee: 'شاهد ما تفوته الكاميرا',
     ctaListen: 'اسمع سطح الأرض',
     liveData: 'سجل نيسار نطاق L',

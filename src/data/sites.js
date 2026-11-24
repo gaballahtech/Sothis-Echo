@@ -401,6 +401,10 @@ export const studyAreas = [
       en: 'A quiet burn: the canopy is gone, but the radar barely dims',
       ar: 'حريق هادئ: اختفت المظلة لكن الرادار لم يخفت إلا قليلًا',
     },
+    signalNote: {
+      en: 'Subtle signal: a surface fire — amplitude barely moves; the dual-pol mechanism (volume→surface) is the reliable burn indicator.',
+      ar: 'إشارة خفيفة: حريق سطحي — السعة تكاد لا تتغير؛ وآلية الاستقطاب الثنائي (الحجم→السطح) هي المؤشر الموثوق للحرق.',
+    },
     impact: {
       users: {
         en: 'Civil protection · forest services · insurers',
@@ -583,6 +587,10 @@ export const studyAreas = [
     headline: {
       en: 'A river in flood: the water goes dark, the ground disappears',
       ar: 'نهر في فيضان: الماء يصبح داكنًا والأرض تختفي',
+    },
+    signalNote: {
+      en: 'Subtle signal: an evolving flood — the HH series keeps changing through the season, so no clean recovery curve can be fitted.',
+      ar: 'إشارة خفيفة: فيضان متطور — تستمر سلسلة HH في التغير عبر الموسم، فلا يمكن ملاءمة منحنى تعافٍ نظيف.',
     },
     impact: {
       users: {

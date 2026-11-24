@@ -76,6 +76,18 @@ export default function Hero() {
             <GlossaryText text={t('hero.subtitle')} />
           </p>
 
+          <p className="hero-why">{t('hero.why')}</p>
+
+          <ul className="hero-learn">
+            {(t('hero.learn', { returnObjects: true }) || []).map((item, index) => (
+              <li key={index}>
+                <GlossaryText text={item} />
+              </li>
+            ))}
+          </ul>
+
+          <p className="hero-prov">{t('hero.provenance')}</p>
+
           <div className="hero-actions">
             <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />
             <Button variant="outlined" icon="volume-up" text={t('hero.ctaListen')} onClick={() => go('sound')} />
