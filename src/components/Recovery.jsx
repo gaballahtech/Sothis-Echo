@@ -6,6 +6,7 @@ import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { estimateRecovery, evalModel, formatMonthTick, formatMonths, recoveryFromModel } from '../services/recovery';
 import { Meter, FacetShell, Panel, SectionHead } from './ui';
+import GlossaryText from './GlossaryText';
 
 const CHART = { width: 680, height: 280, left: 46, right: 18, top: 20, bottom: 40 };
 
@@ -342,7 +343,7 @@ export default function Recovery({ embedded = false, siteId: forcedSiteId }) {
 
   return (
     <FacetShell embedded={embedded} id="recovery" className="content-section chapter chapter--sky" labelledBy="recovery-title">
-      {!embedded ? <SectionHead title={t('recovery.title')} subtitle={t('recovery.subtitle')} id="recovery-title" /> : null}
+      {!embedded ? <SectionHead title={t('recovery.title')} subtitle={<GlossaryText text={t('recovery.subtitle')} />} id="recovery-title" /> : null}
 
       {!embedded ? (
         <div className="row site-choice-row" role="group" aria-label={t('common.sitePicker')}>

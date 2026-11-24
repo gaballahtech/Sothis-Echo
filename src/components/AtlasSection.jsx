@@ -114,10 +114,14 @@ export default function AtlasSection() {
                 key={site.id}
                 className={`atlas-card${measured ? ' is-measured' : ''}${isSelected ? ' active' : ''}`}
                 data-testid={`atlas-item-${site.id}`}
-                onClick={() => activate(site)}
+                onClick={(event) => {
+                  if (event.target.closest('.term')) return;
+                  activate(site);
+                }}
                 role="button"
                 tabIndex={0}
                 onKeyDown={(event) => {
+                  if (event.target.closest('.term')) return;
                   if (event.key === 'Enter' || event.key === ' ') {
                     event.preventDefault();
                     activate(site);

@@ -599,6 +599,7 @@ const en = {
   glossary: {
     translate: 'Translate with Google',
     about: 'About',
+    source: 'Source',
   },
   casefile: {
     open: 'Open case file',
@@ -1223,6 +1224,7 @@ radarCaptionSentinel:
   glossary: {
     translate: 'ترجمة بـ Google',
     about: 'عن',
+    source: 'المصدر',
   },
   casefile: {
     open: 'افتح ملف الموقع',

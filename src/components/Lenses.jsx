@@ -6,6 +6,7 @@ import { useSiteData } from '../context/SiteDataContext';
 import { localized } from '../data/localized';
 import { loadLenses } from '../services/sarApi';
 import { FacetShell } from './ui';
+import GlossaryText from './GlossaryText';
 
 /**
  * "Three Lenses" — three independent physical measurements of the same surface
@@ -147,7 +148,7 @@ export default function Lenses({ embedded = false, siteId }) {
         <div>
           <h2 id="lenses-title" style={{ margin: 0 }}>{t('lenses.title')}</h2>
           <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 720 }}>
-            {t('lenses.subtitle')}
+            <GlossaryText text={t('lenses.subtitle')} />
           </p>
         </div>
         {!embedded ? (

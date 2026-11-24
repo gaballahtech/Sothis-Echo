@@ -5,6 +5,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useSiteData } from '../context/SiteDataContext';
 import { loadExplanation } from '../services/sarApi';
 import { FacetShell } from './ui';
+import GlossaryText from './GlossaryText';
 
 /**
  * "Explain the Echo" — a grounded, numbers-first physical hypothesis for the
@@ -64,7 +65,7 @@ export default function ExplainPanel({ embedded = false, siteId }) {
   return (
     <FacetShell embedded={embedded} id="explain" className="content-section chapter" labelledBy="explain-title">
       <h2 id="explain-title" style={{ margin: 0 }}>{t('explain.title')}</h2>
-      <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 760 }}>{t('explain.subtitle')}</p>
+      <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 760 }}><GlossaryText text={t('explain.subtitle')} /></p>
 
         {loading ? (
           <div style={{ padding: '24px 0' }}><Spinner size={24} /></div>
