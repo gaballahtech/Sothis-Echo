@@ -236,7 +236,6 @@ export default function CaseFileOverlay() {
       isOpen={isOpen}
       onClose={close}
       title={title}
-      icon="folder-open"
       className="casefile-dialog"
       portalClassName="casefile-dialog-portal"
       canOutsideClick

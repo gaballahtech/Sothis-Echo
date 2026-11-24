@@ -356,6 +356,17 @@ export async function loadSite(id) {
   }
 }
 
+/** In-memory promise cache so reopening a case file / compare doesn't refetch. */
+const _memo = new Map();
+function memo(key, fn) {
+  if (_memo.has(key)) return _memo.get(key);
+  const promise = Promise.resolve()
+    .then(fn)
+    .catch(() => null);
+  _memo.set(key, promise);
+  return promise;
+}
+
 /** Backscatter time series for one site. */
 export async function loadSeries(id, { start, end } = {}) {
   if (!isApiConfigured()) return null;
@@ -375,38 +386,44 @@ export async function loadSeries(id, { start, end } = {}) {
 export async function loadChangeStats(id, threshold = 3) {
   if (!studyAreas.some((item) => item.id === id)) return null;
   if (!isApiConfigured()) return null;
-  try {
-    const payload = await request(
-      `/nisar/change-stats?site=${encodeURIComponent(id)}&threshold=${encodeURIComponent(threshold)}`,
-    );
-    return payload && typeof payload === 'object' ? payload : null;
-  } catch {
-    return null;
-  }
+  return memo(`cs:${id}:${threshold}`, async () => {
+    try {
+      const payload = await request(
+        `/nisar/change-stats?site=${encodeURIComponent(id)}&threshold=${encodeURIComponent(threshold)}`,
+      );
+      return payload && typeof payload === 'object' ? payload : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 /** "Three Lenses" block: amplitude + InSAR coherence + dual-pol mechanism. */
 export async function loadLenses(id) {
   if (!studyAreas.some((item) => item.id === id)) return null;
   if (!isApiConfigured()) return null;
-  try {
-    const payload = await request(`/nisar/lenses?site=${encodeURIComponent(id)}`);
-    return payload && typeof payload === 'object' ? payload : null;
-  } catch {
-    return null;
-  }
+  return memo(`lenses:${id}`, async () => {
+    try {
+      const payload = await request(`/nisar/lenses?site=${encodeURIComponent(id)}`);
+      return payload && typeof payload === 'object' ? payload : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 /** Grounded physical explanation (headline + numbers + citations). */
 export async function loadExplanation(id, language = 'en') {
   if (!studyAreas.some((item) => item.id === id)) return null;
   if (!isApiConfigured()) return null;
-  try {
-    const payload = await request(`/explain?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(language)}`);
-    return payload && typeof payload === 'object' ? payload : null;
-  } catch {
-    return null;
-  }
+  return memo(`explain:${id}:${language}`, async () => {
+    try {
+      const payload = await request(`/explain?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(language)}`);
+      return payload && typeof payload === 'object' ? payload : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 /** Ask the Radar — grounded Q&A over the site's real metrics. */
@@ -429,13 +446,15 @@ export async function askExplain(id, question, language = 'en') {
 export async function loadRapidResponse(id, { report = false, lang = 'en' } = {}) {
   if (!studyAreas.some((item) => item.id === id)) return null;
   if (!isApiConfigured()) return null;
-  try {
-    const qs = report ? '&report=1' : '';
-    const payload = await request(`/rapid-response?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}${qs}`);
-    return payload && typeof payload === 'object' ? payload : null;
-  } catch {
-    return null;
-  }
+  return memo(`rapid:${id}:${lang}:${report ? 1 : 0}`, async () => {
+    try {
+      const qs = report ? '&report=1' : '';
+      const payload = await request(`/rapid-response?site=${encodeURIComponent(id)}&lang=${encodeURIComponent(lang)}${qs}`);
+      return payload && typeof payload === 'object' ? payload : null;
+    } catch {
+      return null;
+    }
+  });
 }
 
 /** Recovery curve + fit for one site. */

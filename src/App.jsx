@@ -13,6 +13,7 @@ import Sidebar from './components/Sidebar';
 import Hero from './components/Hero';
 import DemoVideo from './components/DemoVideo';
 import Mission from './components/Mission';
+import SeeThrough from './components/SeeThrough';
 import AtlasSection from './components/AtlasSection';
 import CaseFileOverlay from './components/CaseFileOverlay';
 import Detective from './components/Detective';
@@ -50,6 +51,7 @@ function AppContent() {
           <Hero />
           <DemoVideo />
           <Mission />
+          <SeeThrough />
           <AtlasSection />
           <Detective />
           <Method />

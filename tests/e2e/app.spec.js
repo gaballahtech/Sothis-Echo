@@ -34,7 +34,7 @@ test('comparison slider responds to keyboard and pointer', async ({ page }) => {
   await openCaseFile(page);
   await caseSection(page, /Camera vs radar|الكاميرا مقابل الرادار/);
 
-  const slider = page.getByTestId('compare-slider');
+  const slider = page.locator('.casefile-dialog').getByTestId('compare-slider');
   await expect(slider).toHaveAttribute('aria-valuenow', '50');
   await expect(slider.getByText('OPTICAL · BASEMAP')).toBeVisible();
   await expect(slider.getByText('RADAR · L-BAND')).toBeVisible();
