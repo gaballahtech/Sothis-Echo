@@ -3940,6 +3940,12 @@ html[data-theme='dark'] .ai-chat-panel {
 .term-pop-links { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
 .term-pop-source { font-size: 12px; text-decoration: none; color: var(--te-muted, #666); white-space: nowrap; }
 .term-pop-source:hover { text-decoration: underline; }
+.term-pop-original { font-size: 11px; color: var(--te-muted, #666); margin: 0 0 6px; }
+/* Keep the term popover above the case-file dialog (z 900) but below the AI chat (z 1000). */
+.term-pop-portal.bp6-popover,
+.term-pop-portal { z-index: 950; }
+/* Lock the page behind an open case-file dialog so the background cannot scroll. */
+body.casefile-lock { overflow: hidden; }
 
 /* Single-site view */
 .casefile-single { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }

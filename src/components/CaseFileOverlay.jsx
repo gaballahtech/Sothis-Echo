@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Button, ButtonGroup, Dialog, Tag } from '@blueprintjs/core';
 import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../context/LanguageContext';
@@ -234,6 +234,12 @@ export default function CaseFileOverlay() {
   const { sites, openSiteId, isOpen, close } = useCaseFile();
   const site = sites.find((item) => item.id === openSiteId) ?? sites[0];
   const title = site ? localized(site.name, language) : '';
+
+  // Lock the page behind the dialog so the background cannot scroll.
+  useEffect(() => {
+    document.body.classList.toggle('casefile-lock', isOpen);
+    return () => document.body.classList.remove('casefile-lock');
+  }, [isOpen]);
 
   return (
     <Dialog

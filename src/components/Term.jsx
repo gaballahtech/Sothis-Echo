@@ -16,28 +16,28 @@ export default function Term({ id, children }) {
 
   const name = entry[language] || entry.en;
   const def = entry.def?.[language] || entry.def?.en || '';
-  const target = language === 'ar' ? 'ar' : 'en';
-  const googleUrl = `https://translate.google.com/?sl=auto&tl=${target}&text=${encodeURIComponent(`${name} — ${def}`)}&op=translate`;
 
   const content = (
     <div className="term-pop" dir={language === 'ar' ? 'rtl' : 'ltr'} onClick={(e) => e.stopPropagation()}>
       <div className="term-pop-name">{name}</div>
       <p className="term-pop-def">{def}</p>
-      <div className="term-pop-links">
-        {entry.url ? (
-          <a className="term-pop-source" href={entry.url} target="_blank" rel="noopener noreferrer">
-            {t('glossary.source')}: {entry.label || name}
-          </a>
-        ) : null}
-        <a className="term-pop-google" href={googleUrl} target="_blank" rel="noopener noreferrer">
-          <span aria-hidden="true">🌐</span> {t('glossary.translate')}
+      {language !== 'en' ? <div className="term-pop-original">EN: {entry.en}</div> : null}
+      {entry.url ? (
+        <a className="term-pop-source" href={entry.url} target="_blank" rel="noopener noreferrer">
+          {t('glossary.source')}: {entry.label || name}
         </a>
-      </div>
+      ) : null}
     </div>
   );
 
   return (
-    <Popover interactionKind="click" position={Position.BOTTOM} boundary="viewport" content={content}>
+    <Popover
+      interactionKind="click"
+      position={Position.BOTTOM}
+      boundary="viewport"
+      portalClassName="term-pop-portal"
+      content={content}
+    >
       <button
         type="button"
         className="term"
