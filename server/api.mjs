@@ -915,6 +915,7 @@ export async function handleRequest(req, res) {
       const question = typeof body?.question === 'string' ? body.question.trim() : '';
       const lang = body?.lang === 'ar' ? 'ar' : 'en';
       const mode = body?.mode === 'researcher' ? 'researcher' : 'learner';
+      const section = typeof body?.section === 'string' ? body.section : null;
       const siteId = typeof body?.site === 'string' ? body.site : null;
       const history = Array.isArray(body?.history) ? body.history.slice(-6) : [];
       if (!question) {
@@ -926,6 +927,10 @@ export async function handleRequest(req, res) {
       const siteContext = site
         ? `Current site: ${site.name?.[lang] || site.name?.en || site.id} (${site.id}), bbox: ${JSON.stringify(site.bbox)}, event: ${site.eventName?.[lang] || site.eventName?.en || 'N/A'}.`
         : '';
+      const SECTION_LABELS = { overview: 'overview and scene', lenses: 'the three lenses (amplitude, coherence, mechanism)', recovery: 'recovery', timeseries: 'the time series', respond: 'rapid response', sound: 'sonification', see: 'the camera-vs-radar comparison', explain: 'the explanation' };
+      const sectionLine = section && SECTION_LABELS[section]
+        ? `The visitor is currently viewing the "${SECTION_LABELS[section]}" section of this site's case file — answer about THAT.`
+        : '';
       const modeLine =
         mode === 'researcher'
           ? 'The visitor is a researcher: use technical terms, units (dB), thresholds, and exact values. Be precise.'
@@ -933,6 +938,7 @@ export async function handleRequest(req, res) {
       const systemPrompt = `You are Sothis AI, the grounded data guide for Sothis Echo, an interactive website about the NISAR (NASA-ISRO SAR) mission and Synthetic Aperture Radar (SAR). Your job is to explain THE DATA on the current page, grounded in the real measurements below.
 
 ${siteContext}
+${sectionLine}
 
 === REAL MEASUREMENTS FOR THIS SITE (authoritative — answer ONLY from these) ===
 ${grounding}

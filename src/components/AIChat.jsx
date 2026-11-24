@@ -83,7 +83,7 @@ export default function AIChat() {
   const { t } = useTranslation();
   const { language } = useLanguage();
   const { selectedSiteId, sites } = useSiteData();
-  const { open: openCaseFile, setActiveSection } = useCaseFile();
+  const { open: openCaseFile, setActiveSection, openSiteId, activeSection: caseSection } = useCaseFile();
   const activeSection = useActiveSection(SECTION_IDS);
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([]);
@@ -99,9 +99,13 @@ export default function AIChat() {
   const inputRef = useRef(null);
   const lastRef = useRef(null);
 
+  // Ground the assistant in the site the user is actually looking at: the open
+  // case-file site (or the active compare pane) takes priority over the global
+  // landing-page selection, so the answer always matches the visible scene.
+  const activeSiteId = openSiteId ?? selectedSiteId;
   const site = useMemo(
-    () => sites.find((item) => item.id === selectedSiteId) || null,
-    [sites, selectedSiteId],
+    () => sites.find((item) => item.id === activeSiteId) || null,
+    [sites, activeSiteId],
   );
 
   useEffect(() => {
@@ -149,7 +153,12 @@ export default function AIChat() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          question, lang, site: selectedSiteId, mode, history,
+          question,
+          lang,
+          site: activeSiteId,
+          section: caseSection,
+          mode,
+          history,
         }),
         signal: AbortSignal.timeout(60000),
       });
@@ -174,8 +183,8 @@ export default function AIChat() {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
-    if (selectedSiteId) {
-      openCaseFile(selectedSiteId);
+    if (activeSiteId) {
+      openCaseFile(activeSiteId);
       setActiveSection(sectionId === 'recovery' || sectionId === 'timeseries' || sectionId === 'sound' ? sectionId : 'lenses');
     }
   };
