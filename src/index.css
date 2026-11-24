@@ -3894,6 +3894,31 @@ html[data-theme='dark'] .ai-chat-panel {
 .casefile-compare-label { font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
 .casefile-compare-hint { font-size: 12px; color: var(--te-muted, var(--bp-typography-color-muted)); }
 
+/* AI chat typewriter caret + skip */
+.ai-chat-caret {
+  display: inline-block;
+  width: 7px;
+  height: 1em;
+  margin-inline-start: 2px;
+  vertical-align: text-bottom;
+  background: currentColor;
+  animation: ai-chat-blink 1s steps(1) infinite;
+}
+@keyframes ai-chat-blink { 50% { opacity: 0; } }
+.ai-chat-skip {
+  border: 1px solid var(--te-rule, #ccc);
+  background: transparent;
+  color: inherit;
+  border-radius: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ai-chat-caret { animation: none; opacity: 1; }
+}
+
 /* Single-site view */
 .casefile-single { display: flex; flex-direction: column; min-height: 0; flex: 1 1 auto; }
 .casefile-single-head {

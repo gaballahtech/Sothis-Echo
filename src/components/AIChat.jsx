@@ -6,6 +6,7 @@ import { useCaseFile } from '../context/CaseFileContext';
 import { useActiveSection } from '../utils/useActiveSection';
 import { localized } from '../data/localized';
 import { API_BASE } from '../services/sarApi';
+import { useTypewriter } from '../utils/useTypewriter';
 
 /**
  * Lightweight, dependency-free markdown renderer for chat messages.
@@ -89,6 +90,11 @@ export default function AIChat() {
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState('learner');
+  const [streamingId, setStreamingId] = useState(null);
+  const [reducedMotion] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+  );
+  const nextId = useRef(1);
   const panelRef = useRef(null);
   const inputRef = useRef(null);
   const lastRef = useRef(null);
@@ -133,7 +139,9 @@ export default function AIChat() {
     if (!question || loading) return;
     const lang = language;
     const history = messages.slice(-6).map((m) => ({ role: m.role, text: m.text }));
-    setMessages((m) => [...m, { role: 'user', text: question }]);
+    const userId = nextId.current++;
+    const assistantId = nextId.current++;
+    setMessages((m) => [...m, { id: userId, role: 'user', text: question }]);
     setInput('');
     setLoading(true);
     try {
@@ -148,13 +156,12 @@ export default function AIChat() {
       const data = await res.json();
       const answer = data?.data?.answer;
       const sources = Array.isArray(data?.data?.sources) ? data.data.sources : [];
-      if (answer) {
-        setMessages((m) => [...m, { role: 'assistant', text: answer, sources }]);
-      } else {
-        setMessages((m) => [...m, { role: 'assistant', text: t('aiChat.fallback') }]);
-      }
+      const text = answer || t('aiChat.fallback');
+      setMessages((m) => [...m, { id: assistantId, role: 'assistant', text, sources: answer ? sources : [] }]);
+      setStreamingId(assistantId);
     } catch {
-      setMessages((m) => [...m, { role: 'assistant', text: t('aiChat.error') }]);
+      setMessages((m) => [...m, { id: assistantId, role: 'assistant', text: t('aiChat.error'), sources: [] }]);
+      setStreamingId(assistantId);
     } finally {
       setLoading(false);
     }
@@ -181,6 +188,14 @@ export default function AIChat() {
 
   const suggestions = SUGGESTIONS[language] || SUGGESTIONS.en;
   const siteName = site ? localized(site.name, language) : t('aiChat.generalContext');
+
+  // Progressively reveal the newest assistant answer (typewriter). The full text
+  // is already in `streamingMsg.text`; we only animate how fast it is shown.
+  const streamingMsg = streamingId != null ? messages.find((m) => m.id === streamingId) : null;
+  const { displayed, isTyping, skip } = useTypewriter(streamingMsg?.text ?? '', {
+    speed: 15,
+    enabled: !reducedMotion && Boolean(streamingMsg),
+  });
 
   return (
     <div className="ai-chat-root">
@@ -227,7 +242,7 @@ export default function AIChat() {
             {t('aiChat.contextLabel')} {siteName}
           </div>
 
-          <div className="ai-chat-body">
+          <div className="ai-chat-body" role="log" aria-label={t('aiChat.title')}>
             {messages.length === 0 && (
               <div className="ai-chat-suggestions">
                 <p className="ai-chat-hint">{t('aiChat.hint')}</p>
@@ -242,29 +257,35 @@ export default function AIChat() {
                 ))}
               </div>
             )}
-            {messages.map((msg, i) => (
-              <div
-                key={i}
-                className={`ai-chat-msg ai-chat-msg-${msg.role}`}
-              >
-                {msg.role === 'assistant' ? <MarkdownText text={msg.text} /> : msg.text}
-                {msg.role === 'assistant' && msg.sources?.length > 0 && (
-                  <div className="ai-chat-sources">
-                    {msg.sources.map((src) => (
-                      <button
-                        key={src.id}
-                        type="button"
-                        className="ai-chat-source"
-                        onClick={() => jumpTo(sourceSection(src.id))}
-                        title={t('aiChat.sourceLabel')}
-                      >
-                        {src.label}
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+            {messages.map((msg, i) => {
+              const isStreaming = msg.id === streamingId && isTyping;
+              const body = msg.id === streamingId ? displayed : msg.text;
+              return (
+                <div
+                  key={msg.id ?? i}
+                  className={`ai-chat-msg ai-chat-msg-${msg.role}`}
+                  aria-busy={isStreaming || undefined}
+                >
+                  {msg.role === 'assistant' ? <MarkdownText text={body} /> : body}
+                  {isStreaming ? <span className="ai-chat-caret" aria-hidden="true" /> : null}
+                  {msg.role === 'assistant' && msg.sources?.length > 0 && (
+                    <div className="ai-chat-sources">
+                      {msg.sources.map((src) => (
+                        <button
+                          key={src.id}
+                          type="button"
+                          className="ai-chat-source"
+                          onClick={() => jumpTo(sourceSection(src.id))}
+                          title={t('aiChat.sourceLabel')}
+                        >
+                          {src.label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
             {loading && (
               <div className="ai-chat-msg ai-chat-msg-assistant ai-chat-loading">
                 <span className="ai-chat-dot" />
@@ -289,6 +310,11 @@ export default function AIChat() {
               placeholder={t('aiChat.placeholder')}
               aria-label={t('aiChat.inputLabel')}
             />
+            {isTyping ? (
+              <button type="button" className="ai-chat-skip" onClick={skip} aria-label={t('aiChat.skip')}>
+                {t('aiChat.skip')}
+              </button>
+            ) : null}
             <button
               className="ai-chat-send"
               onClick={() => send()}
@@ -301,6 +327,9 @@ export default function AIChat() {
                 <polygon points="22 2 15 22 11 13 2 9 22 2" />
               </svg>
             </button>
+          </div>
+          <div className="sr-only" role="status" aria-live="polite">
+            {isTyping ? t('aiChat.responding') : ''}
           </div>
         </div>
       )}

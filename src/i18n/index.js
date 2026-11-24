@@ -563,6 +563,9 @@ const en = {
     contextLabel: 'Grounded in',
     generalContext: 'the NISAR mission',
     sourceLabel: 'Based on the measured data',
+    responding: 'Assistant is responding',
+    complete: 'Response complete',
+    skip: 'Skip',
   },
   atlas: {
     title: 'Global atlas',
@@ -1180,6 +1183,9 @@ radarCaptionSentinel:
     contextLabel: 'مؤرض في',
     generalContext: 'مهمة نيسار',
     sourceLabel: 'بناءً على البيانات المقاسة',
+    responding: 'المساعد يرد',
+    complete: 'اكتمل الرد',
+    skip: 'تخطّي',
   },
   atlas: {
     title: 'الأطلس العالمي',
