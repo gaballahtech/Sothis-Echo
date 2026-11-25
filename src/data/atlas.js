@@ -306,9 +306,32 @@ export const atlasSites = [
       en: 'Co-seismic motion changes the phase but barely the amplitude; InSAR fringes count the displacement across the fault.',
       ar: 'الحركة الزلزالية تغيّر الطور لكنها تكاد لا تغيّر السعة؛ وأهداب InSAR تحسب الإزاحة عبر الصدع.',
     },
+measure: {
+      en: 'Amplitude change maps bright→dark flooding; the changed-area fraction and extent quantify how much ground the water took.',
+      ar: 'خريطة تغيّر السعة تُظهر الفيضان من لامع إلى داكن؛ ونسبة المساحة المتغيّرة والمدى تحدد كم أرضًا غمرها الماء.',
+    },
+  },
+  {
+    id: 'kilauea',
+    name: { en: 'Kilauea volcano', ar: 'بركان كيلويا' },
+    region: { en: 'Hawaii · United States', ar: 'هاواي · الولايات المتحدة' },
+    changeType: 'volcano',
+    coords: { lat: 19.42, lng: -155.29 },
+    bbox: [-155.42, 19.33, -155.18, 19.52],
+    eventDate: '2026-01-15',
+    continent: 'oceania',
+    maturity: 'lens',
+    summary: {
+      en: 'Kilauea erupted in January 2026; lava and broken ground changed the summit. Radar brightness barely moved, but the structure did.',
+      ar: 'ثار كيلويا في يناير 2026؛ غيّرت الحمم والأرض المكسورة القمة. لم يكد سطوع الرادار يتغير، لكن البنية تغيّرت.',
+    },
+    radar: {
+      en: 'L-band sees the new, rough lava and disrupted ground as a change in structure and coherence, even where brightness is unchanged.',
+      ar: 'يرى النطاق L الحمم الجديدة الخشنة والأرض المضطربة كتغيّر في البنية والتماسك، حتى حيث لم يتغير السطوع.',
+    },
     measure: {
-      en: 'Co-seismic interferogram fringes map the rupture and the centimetre-scale offset; amplitude flags collapsed structures.',
-      ar: 'أهداب المقابلة الزلزالية ترسم التمزق والإزاحة السنتيمترية؛ وتعلّم السعة الأبنية المنهارة.',
+      en: 'Coherence drop and the volume→surface mechanism shift mark the new lava/ground more reliably than amplitude.',
+      ar: 'انخفاض التماسك وتحوّل الآلية من الحجم إلى السطح يعلّمان الحمم/الأرض الجديدة أدق من السعة.',
     },
   },
 ];

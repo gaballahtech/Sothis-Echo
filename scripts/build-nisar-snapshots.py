@@ -100,6 +100,18 @@ SITES = {
         'before': 'NISAR_L2_PR_GCOV_010_042_A_165_2005_DHDH_A_20260112T035042_20260112T035113_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_011_042_A_165_2005_DHDH_A_20260124T035042_20260124T035114_P05023_N_F_J_001',
     },
+    'kilauea': {
+        # Kilauea volcano (Hawaii, 2026 eruption). Track 072 descending, frame 079,
+        # same-track pre/post pair (2026-01-14 -> 2026-01-26), both DHDH (HH+HV).
+        'kind': 'volcano',
+        'label': 'Kilauea volcano',
+        'coords': (19.42, -155.29),
+        'bbox': (-155.42, 19.33, -155.18, 19.52),
+        'window': 'calibration',
+        'eventDate': '2026-01-15',
+        'before': 'NISAR_L2_PR_GCOV_010_072_D_079_4005_DHDH_A_20260114T045817_20260114T045837_P05023_N_P_J_001',
+        'after': 'NISAR_L2_PR_GCOV_011_072_D_079_4005_DHDH_A_20260126T045818_20260126T045838_P05023_N_P_J_001',
+    },
 }
 
 

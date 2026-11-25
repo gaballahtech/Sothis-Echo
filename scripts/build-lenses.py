@@ -106,6 +106,21 @@ LENS_SITES = {
         },
         'label': 'Limpopo floods',
     },
+    'kilauea': {
+        # Kilauea volcano (Hawaii, 2026). Track 072 descending, frame 079;
+        # pre/post pair (2026-01-14 -> 2026-01-26), DHDH (HH+HV).
+        'bbox': (-155.42, 19.33, -155.18, 19.52),
+        'coords': (19.42, -155.29),
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_010_072_D_079_4005_DHDH_A_20260114T045817_20260114T045837_P05023_N_P_J_001',
+            'after': 'NISAR_L2_PR_GCOV_011_072_D_079_4005_DHDH_A_20260126T045818_20260126T045838_P05023_N_P_J_001',
+        },
+        'gslc': {
+            'before': 'NISAR_L2_PR_GSLC_010_072_D_079_4005_DHDH_A_20260114T045817_20260114T045837_P05023_N_P_J_001',
+            'after': 'NISAR_L2_PR_GSLC_011_072_D_079_4005_DHDH_A_20260126T045818_20260126T045838_P05023_N_P_J_001',
+        },
+        'label': 'Kilauea volcano',
+    },
 }
 
 

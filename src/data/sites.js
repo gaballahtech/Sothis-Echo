@@ -745,6 +745,111 @@ export const studyAreas = [
       ],
     },
   },
+  {
+    // Fifth site: Kilauea volcano (Hawaii, 2026). Real NISAR L-band GCOV/GSLC,
+    // track 072 frame 079 (2026-01-14 -> 2026-01-26), both DHDH. A surface
+    // (lava/ground) change: amplitude is quiet, coherence drops (20.7% low) and
+    // the mechanism shifts. No recovery curve (a volcano does not "recover").
+    id: 'kilauea',
+    kind: 'volcano',
+    seed: 202615,
+    name: { en: 'Kilauea volcano', ar: 'بركان كيلويا' },
+    region: { en: 'Hawaii · United States', ar: 'هاواي · الولايات المتحدة' },
+    coords: { lat: 19.42, lng: -155.29 },
+    wkt: 'POLYGON ((-155.42 19.33, -155.18 19.33, -155.18 19.52, -155.42 19.52, -155.42 19.33))',
+    eventDate: '2026-01-15',
+    headline: {
+      en: 'The ground changes where the lava flows',
+      ar: 'الأرض تتغير حيث يتدفق الحمم',
+    },
+    impact: {
+      users: { en: 'Volcano observatories · civil protection · insurers', ar: 'مراصد البراكين · الحماية المدنية · شركات التأمين' },
+      decision: { en: 'Where new lava and ground disruption appeared after the eruption', ar: 'أين ظهرت الحمم الجديدة واضطراب الأرض بعد الثوران' },
+    },
+    tags: [
+      { en: 'Volcano', ar: 'بركان' },
+      { en: 'Lava flow', ar: 'تدفق الحمم' },
+      { en: 'Hawaii', ar: 'هاواي' },
+    ],
+    story: [
+      {
+        en: 'Kilauea is one of the world\'s most active volcanoes. In January 2026 lava and ground disruption changed the surface near the summit. Radar sees the new, rough lava and the broken ground as a change in the signal.',
+        ar: 'كيلويا من أنشط براكين العالم. في يناير 2026 غيّرت الحمم واضطراب الأرض السطح قرب القمة. يرى الرادار الحمم الجديدة الخشنة والأرض المكسورة كتغيّر في الإشارة.',
+      },
+      {
+        en: 'The radar brightness barely moves, but the ground is no longer the same: coherence drops and the scattering becomes rougher. This is the lesson — for a surface change, the radar sees the change in structure, not just brightness.',
+        ar: 'سطوع الرادار لا يكاد يتغير، لكن الأرض لم تعد كما هي: ينخفض التماسك ويصبح التشتت أخشن. هذا هو الدرس — في تغيّر سطحي، يرى الرادار التغيّر في البنية لا السطوع فقط.',
+      },
+    ],
+    states: {
+      before: {
+        date: '2026-01-14',
+        label: { en: 'Before the eruption', ar: 'قبل الثوران' },
+        params: { water: 0, emergent: 0.85, burn: 0.05, cloud: 0.1 },
+        caption: { en: 'Kilauea summit before the January 2026 lava flow.', ar: 'قمة كيلويا قبل تدفق الحمم في يناير 2026.' },
+        happened: { en: 'HH ≈ -9.6 dB, HV ≈ -16.6 dB.', ar: 'HH ≈ -9.6 ديسيبل، HV ≈ -16.6 ديسيبل.' },
+        why: { en: 'Old, stable ground.', ar: 'أرض قديمة مستقرة.' },
+        polarization: { en: 'Dual-pol HH + HV.', ar: 'استقطاب مزدوج HH + HV.' },
+      },
+      after: {
+        date: '2026-01-26',
+        label: { en: 'After the eruption', ar: 'بعد الثوران' },
+        params: { water: 0, emergent: 0.2, burn: 0.7, cloud: 0.1 },
+        caption: { en: 'New lava and broken ground near the summit.', ar: 'حمم جديدة وأرض مكسورة قرب القمة.' },
+        happened: { en: 'HH ≈ -9.3 dB, HV ≈ -16.4 dB; 26.4% of the window changed; coherence drops (20.7% low).', ar: 'HH ≈ -9.3 ديسيبل، HV ≈ -16.4 ديسيبل؛ 26.4% من النافذة تغيّر؛ والتماسك ينخفض (20.7% منخفض).' },
+        why: { en: 'New lava and disrupted ground change the structure the radar sees.', ar: 'الحمم الجديدة والأرض المضطربة تغيّر البنية التي يراها الرادار.' },
+        polarization: { en: 'HH vs HV and coherence reveal the surface change.', ar: 'HH مقابل HV والتماسك يكشفان التغيّر السطحي.' },
+      },
+    },
+    measurements: {
+      vv: { before: -9.6, after: -9.3 },
+      vh: { before: -16.6, after: -16.4 },
+      crossPol: { before: -7.0, after: -7.1 },
+      dateBefore: '2026-01-14',
+      dateAfter: '2026-01-26',
+    },
+    series: [
+      { date: '2026-01-14', vv: -9.6, vh: -16.6, change: 0.0 },
+      { date: '2026-01-26', vv: -9.3, vh: -16.4, change: 0.03 },
+    ],
+    pulse: [0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.02, 0.02, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03],
+    stablePulse: [0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
+    recovery: {
+      insufficient: true,
+      noPeakPass: true,
+      thresholdDefault: 80,
+      points: [{ month: 0, pct: 0 }, { month: 1, pct: 0 }],
+      eventChange: 0,
+      noise: 0,
+      gapDays: 12,
+      note: {
+        en: 'A volcano does not "recover" to a pre-eruption baseline — the ground is permanently changed by lava. A recovery curve does not apply; the panel shows the real per-pass backscatter.',
+        ar: 'البركان لا «يتعافى» إلى خط أساس ما قبل الثوران — الأرض تتغير دائمًا بالحمم. لا ينطبق منحنى تعافٍ؛ تعرض اللوحة الارتداد الحقيقي لكل مرور.',
+      },
+    },
+    researcher: {
+      acquisition: {
+        en: 'NISAR L-band GCOV (HH/HV gamma-0) + GSLC, track 072 frame 079, 2026-01-14 → 2026-01-26.',
+        ar: 'NISAR بموجة L GCOV (HH/HV غاما-0) + GSLC، المسار 072 الإطار 079، 2026-01-14 → 2026-01-26.',
+      },
+      interpretation: [
+        { en: 'Amplitude is quiet (ΔHH +0.3 dB); the change is in structure.', ar: 'السعة هادئة (ΔHH +0.3 ديسيبل)؛ التغيّر في البنية.' },
+        { en: 'Coherence drops (mean 0.619, 20.7% low) over the new lava/ground.', ar: 'التماسك ينخفض (متوسط 0.619، 20.7% منخفض) فوق الحمم/الأرض الجديدة.' },
+        { en: 'Mechanism changed ~30% (volume→surface) where the surface was disrupted.', ar: 'تغيّرت الآلية ~30% (حجم→سطح) حيث اضطرب السطح.' },
+      ],
+      limits: [
+        { en: 'A single 12-day pair; a volcano surface change is subtle in amplitude.', ar: 'زوج واحد بفارق 12 يومًا؛ التغيّر البركاني خفيف في السعة.' },
+      ],
+      methods: [
+        { en: 'Dual-pol HH/HV gamma-0 change + mechanism fractions from GCOV.', ar: 'تغيّر غاما-0 المزدوج + نسب الآلية من GCOV.' },
+        { en: 'InSAR coherence from the GSLC HH pair.', ar: 'تماسك InSAR من زوج GSLC HH.' },
+      ],
+      sources: [
+        { en: 'NASA NISAR GCOV/GSLC (track 072 frame 079, 2026-01-14 & 2026-01-26), via ASF DAAC.', ar: 'NASA NISAR GCOV/GSLC (المسار 072 الإطار 079، 2026-01-14 و2026-01-26)، عبر ASF DAAC.' },
+        { en: 'USGS Hawaiian Volcano Observatory (Kilauea, 2026).', ar: 'مرصد البراكين الهاوائي USGS (كيلويا، 2026).' },
+      ],
+    },
+  },
 ];
 
 // Contrast table rows. Each row holds a `values` map keyed by site id, so the
