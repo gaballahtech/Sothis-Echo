@@ -111,34 +111,27 @@ test('detective game scores six rounds and resets', async ({ page }) => {
   await expect(page.getByTestId('detective-option-flood')).toBeVisible();
 });
 
-test('guided tour prompts a first-time visitor, walks the page, and remembers', async ({ page }) => {
+test('contextual coachmarks appear on reaching a section, dismiss, and replay', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => localStorage.clear());
   await page.reload();
   await expect(page.locator('h1')).toBeVisible();
 
-  const prompt = page.getByTestId('tour-prompt');
-  await expect(prompt).toBeVisible({ timeout: 6_000 });
-  await page.getByTestId('tour-start').click();
+  // Opt-in beacon is always available.
+  await expect(page.getByTestId('tour-beacon')).toBeVisible();
 
-  const card = page.getByTestId('tour-card');
-  await expect(card).toBeVisible();
-  await expect(card).toContainText('One satellite, two radars');
+  // Reaching the atlas surfaces its contextual tip (non-blocking).
+  await page.locator('#atlas').scrollIntoViewIfNeeded();
+  const mark = page.locator('.coachmark');
+  await expect(mark).toBeVisible({ timeout: 8_000 });
 
-  await page.getByTestId('tour-next').click();
-  await expect(card).toContainText('Open a place');
-  await expect(page.locator('#atlas')).toBeInViewport({ timeout: 6_000 });
+  // Dismiss (Got it) -> gone and remembered.
+  await mark.getByRole('button', { name: /Got it|فهمت/ }).click();
+  await expect(mark).toHaveCount(0);
 
-  await page.getByTestId('tour-next').click();
-  await expect(card).toContainText('Test your eye');
-
-  await page.getByTestId('tour-next').click();
-  await expect(card).toBeHidden();
-
-  await page.reload();
-  await expect(page.getByTestId('tour-help')).toBeVisible();
-  await page.waitForTimeout(2_000);
-  await expect(page.getByTestId('tour-prompt')).toHaveCount(0);
+  // Replay via the beacon brings guidance back.
+  await page.getByTestId('tour-beacon').click();
+  await expect(mark).toBeVisible({ timeout: 4_000 });
 });
 
 test('advanced documentation stays collapsed until opened', async ({ page }) => {

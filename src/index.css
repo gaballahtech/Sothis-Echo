@@ -3960,6 +3960,43 @@ html[data-theme='dark'] .ai-chat-panel {
   padding: 6px 10px;
 }
 .atlas-card.is-measured .atlas-open:hover { filter: brightness(1.08); }
+
+/* Contextual coachmarks (opt-in, non-blocking) */
+.coachmark-ring {
+  position: fixed;
+  border: 2px solid var(--te-accent, #2b6cb0);
+  border-radius: 6px;
+  pointer-events: none;
+  z-index: 950;
+}
+.coachmark {
+  position: fixed;
+  width: 300px;
+  max-width: calc(100vw - 24px);
+  z-index: 960;
+  padding: 12px;
+}
+.coachmark-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.coachmark-body { margin: 0 0 10px; font-size: 12.5px; line-height: 1.45; }
+.coachmark-actions { display: flex; gap: 8px; justify-content: flex-end; }
+.tour-beacon {
+  position: fixed;
+  inset-block-end: 16px;
+  inset-inline-start: 16px;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--te-accent, #2b6cb0);
+  background: var(--te-accent, #2b6cb0);
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  z-index: 800;
+}
+@media (prefers-reduced-motion: reduce) {
+  .coachmark, .coachmark-ring, .tour-beacon { transition: none; }
+}
 /* Keep the term popover above the case-file dialog (z 900) AND the AI chat (z 1000). */
 .term-pop-portal.bp6-popover,
 .term-pop-portal { z-index: 1100; }

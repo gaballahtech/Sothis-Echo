@@ -618,6 +618,18 @@ subtitle:
       'We compare the NISAR L-band signal with Sentinel-1 C-band on overlapping dates. Broad agreement is expected, not identical values, because the sensors differ in wavelength, resolution and timing. This tests consistency, not equality.',
     sources: 'Data sources',
   },
+  guide: {
+    tour: 'Take a quick tour',
+    gotIt: 'Got it',
+    skip: 'Skip',
+    replay: 'Replay tour',
+    atlasTitle: 'Open a place',
+    atlasBody: 'Click a cover card to open a site’s full case file — then compare two places side by side.',
+    seeTitle: 'Clouds vs radar',
+    seeBody: 'Drag the divider: the camera stops at cloud, the radar still sees the flood.',
+    gameTitle: 'Test your eye',
+    gameBody: 'Play the radar detective: pick an answer, then read the evidence.',
+  },
   glossary: {
     translate: 'Translate with Google',
     about: 'About',
@@ -1266,6 +1278,18 @@ radarCaptionSentinel:
     crossBody:
       ' نقارن إشارة نيسار (نطاق L) بـ Sentinel-1 (نطاق C) في التواريخ المتداخلة. نتوقع اتفاقًا عامًا لا قيمًا متطابقة، لأن المستشعرين يختلفان في الطول الموجي والدقة والتوقيت. هذا يختبر الاتساق لا التساوي.',
     sources: 'مصادر البيانات',
+  },
+  guide: {
+    tour: 'جولة سريعة',
+    gotIt: 'فهمت',
+    skip: 'تخطّي',
+    replay: 'إعادة الجولة',
+    atlasTitle: 'افتح مكانًا',
+    atlasBody: 'اضغط بطاقة غلاف لتفتح ملف الموقع الكامل — ثم قارن مكانين جنبًا إلى جنب.',
+    seeTitle: 'الغيوم أم الرادار',
+    seeBody: 'اسحب الفاصل: الكاميرا تقف عند الغيوم، والرادار يرى الفيضان.',
+    gameTitle: 'اختبر عينك',
+    gameBody: 'العب لعبة المحقق الراداري: اختر إجابة ثم اقرأ الأدلة.',
   },
   glossary: {
     translate: 'ترجمة بـ Google',

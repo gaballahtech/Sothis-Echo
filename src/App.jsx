@@ -21,6 +21,7 @@ import Method from './components/Method';
 import Team from './components/Team';
 import Footer from './components/Footer';
 import GuidedTour from './components/GuidedTour';
+import { CoachmarksProvider, Coachmark, CoachmarkTriggers, TourBeacon } from './components/Coachmarks';
 import AIChat from './components/AIChat';
 import './index.css';
 
@@ -59,7 +60,9 @@ function AppContent() {
         </main>
       </div>
       <Footer />
-      <GuidedTour />
+      <CoachmarkTriggers />
+      <Coachmark />
+      <TourBeacon />
       <CaseFileOverlay />
       <AIChat />
     </div>
@@ -73,11 +76,13 @@ export default function App() {
         <TourProvider>
           <SiteDataProvider>
             <CaseFileProvider>
-              <OverlaysProvider>
-                <ErrorBoundary>
-                  <AppContent />
-                </ErrorBoundary>
-              </OverlaysProvider>
+              <CoachmarksProvider>
+                <OverlaysProvider>
+                  <ErrorBoundary>
+                    <AppContent />
+                  </ErrorBoundary>
+                </OverlaysProvider>
+              </CoachmarksProvider>
             </CaseFileProvider>
           </SiteDataProvider>
         </TourProvider>
