@@ -392,15 +392,15 @@ const en = {
     steps: {
       mission: {
         title: 'One satellite, two radars',
-        body: 'NISAR launched in 2025 and maps land and ice every 12 days. It sends its own radar pulse, so it works at night and through cloud. The data is free and open.',
+        body: 'NISAR is a satellite that takes pictures of Earth using radar. Radar is like a flashlight that works in the dark and through clouds. It passes over the same place every 12 days, and the pictures are free for everyone.',
       },
       atlas: {
         title: 'Open a place',
-        body: 'The atlas is the entry point. Click a measured site’s cover card to open its full case file, then pin a second site to compare side by side or stacked.',
+        body: 'Click a place’s picture to open it. You can put a second place next to it to compare them side by side.',
       },
       game: {
         title: 'Test your eye',
-        body: 'Two real NISAR L-band pairs from 2026: a Vietnam flood and the Big Sur megafire. Choose an answer, then read the evidence.',
+        body: 'Two real radar pictures from 2026: a flood in Vietnam and a big fire in California. Pick an answer, then see why.',
       },
     },
   },
@@ -1027,15 +1027,15 @@ radarCaptionSentinel:
     steps: {
       mission: {
         title: 'قمر واحد، رادارَان',
-        body: 'انطلق نيسار عام 2025 ويرسم اليابسة والجليد كل 12 يومًا. يرسل نبضته الرادارية بنفسه، فيعمل ليلًا وعبر الغيوم. والبيانات مجانية ومفتوحة.',
+        body: 'نيسار قمر صناعي يصوّر الأرض بالرادار. والرادار كالكشّاف الذي يرى في الظلام وعبر السحاب. يمرّ على المكان نفسه كل 12 يومًا، والصور مجانية للجميع.',
       },
       atlas: {
         title: 'افتح مكانًا',
-        body: 'الأطلس هو نقطة الدخول. اضغط بطاقة غلاف أي موقع قياسي لتفتح ملفه الكامل، ثم ثبّت موقعًا ثانيًا للمقارنة جنبًا إلى جنب أو فوق/تحت.',
+        body: 'اضغط على صورة أي مكان لتفتحه. ويمكنك وضع مكان ثانٍ بجانبه لمقارنتهما.',
       },
       game: {
         title: 'اختبر عينك',
-        body: 'زوجان حقيقيان من نيسار (نطاق L) عام 2026: فيضان فيتنام وحريق بيغ سور الكبير. اختر ثم اقرأ الأدلة.',
+        body: 'صورتان راداريتان حقيقيتان من 2026: فيضان في فيتنام وحريق كبير في كاليفورنيا. اختر إجابة ثم اعرف السبب.',
       },
     },
   },

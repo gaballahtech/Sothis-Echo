@@ -111,11 +111,11 @@ export const studyAreas = [
     // NOTE: despite the legacy key names `vv`/`vh`, these hold calibrated NISAR L-band
     // HH/HV gamma-0 values (see sarApi NISAR merge). `crossPol` is HV − HH.
     measurements: {
-      vv: { before: -14.2, after: -10.8 },
-      vh: { before: -21.0, after: -25.0 },
-      crossPol: { before: -6.8, after: -14.2 },
-      dateBefore: '2026-09-07',
-      dateAfter: '2026-09-15',
+      vv: { before: -11.1, after: -11.5 },
+      vh: { before: -18.4, after: -19.0 },
+      crossPol: { before: -7.3, after: -7.6 },
+      dateBefore: '2026-09-09',
+      dateAfter: '2026-09-21',
     },
     series: [
       { date: '2026-08-10', vv: -14.0, vh: -20.8, water: 0.18, change: 0.06 },
@@ -287,11 +287,11 @@ export const studyAreas = [
       },
     },
     measurements: {
-      vv: { before: -8.9, after: -12.4 },
-      vh: { before: -15.4, after: -19.6 },
-      crossPol: { before: -6.5, after: -7.2 },
+      vv: { before: -11.6, after: -11.9 },
+      vh: { before: -17.2, after: -17.1 },
+      crossPol: { before: -5.6, after: -5.2 },
       dateBefore: '2026-08-16',
-      dateAfter: '2026-09-09',
+      dateAfter: '2026-08-28',
     },
     series: [
       { date: '2026-06-18', vv: -8.8, vh: -15.2, burn: 0.02, change: 0.09 },
