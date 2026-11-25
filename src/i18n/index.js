@@ -271,9 +271,9 @@ const en = {
     fallbackNotice:
       'Illustrative curve: the live record does not hold enough post-event passes to fit one, so these points are not measurements. The real passes are in the observation ledger.',
     insufficientNotice:
-      'Finding, not a gap: the event pass changed {{change}}% of this ~2.5 km window by at least 5 dB, while the same window moves by {{noise}}% between two pre-event passes. That is not enough separation to fit a recovery curve, and plotting one would be noise wearing a trend line.',
+      'This site’s radar signal did not show a clear drop-and-return, so a recovery curve cannot be measured — and drawing one would be misleading. The chart shows the real per-pass backscatter instead.',
     noPeakPassNotice:
-      'No NISAR pass sampled the flood peak: the first post-event pass came {{gap}} days after the event, and it changed {{change}}% of the window against {{noise}}% pre-event noise. With no peak observation, a recovery curve would be an extrapolation, so it is not drawn.',
+      'No radar pass caught the event at its peak, so a recovery curve would be a guess. The chart shows the real measured passes instead.',
     signalToday: 'Signal at the end of the record',
     ciLabel: '± {{n}} days (95% CI)',
     modelBadge: '{{model}} fit · R² {{r2}}',
@@ -908,9 +908,9 @@ radarCaptionSentinel:
     fallbackNotice:
       'منحنى توضيحي: السجل الحيّ لا يحتوي بعد على مرورات كافية بعد الحدث لبناء منحنى، فهذه النقاط ليست قياسات. المرورات الحقيقية في سجل الملاحظات.',
     insufficientNotice:
-      'نتيجة، وليست فجوة: غيّر مرور الحدث {{change}}% من نافذة 2.5 كم تقريبًا بمقدار 5 ديسيبل على الأقل، بينما تتحرك النافذة نفسها بنسبة {{noise}}% بين مرورين قبل الحدث. الفصل غير كافٍ لبناء منحنى تعافٍ، ورسمه سيكون تشويشًا بثوب خط اتجاه.',
+      'لم تُظهر إشارة الرادار في هذا الموقع انخفاضًا وعودة واضحين، لذا لا يمكن قياس منحنى تعافٍ — ورسمه سيكون مضلّلًا. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
     noPeakPassNotice:
-      'لم يرصد أي مرور نيسار ذروة الفيضان: جاء أول مرور بعد الحدث بعد {{gap}} أيام، وغيّر {{change}}% من النافذة مقابل ضوضاء قبل الحدث {{noise}}%. بدون رصد الذروة سيكون منحنى التعافي استقراءً، لذلك لا يُرسم.',
+      'لم يرصد أي مرور راداري الحدث عند ذروته، لذا سيكون منحنى التعافي تخمينًا. تعرض اللوحة المرورات الحقيقية المقاسة بدلًا من ذلك.',
     signalToday: 'الإشارة عند نهاية السجل',
     ciLabel: '± {{n}} يوم (فاصل ثقة 95%)',
     modelBadge: 'ملاءمة {{model}} · R² {{r2}}',

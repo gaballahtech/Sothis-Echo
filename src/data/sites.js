@@ -512,8 +512,8 @@ export const studyAreas = [
       noise: 0,
       gapDays: 24,
       note: {
-        en: 'No co-pol amplitude drop was measured for this surface fire (HH is flat to slightly brighter after the event), so a recovery curve cannot be fitted. The panel plots the real per-pass backscatter instead.',
-        ar: 'لم يُقَس هذا الحريق السطحي أي انخفاض في سعة الاستقطاب المشترك (HH ثابت إلى أعلى قليلًا بعد الحدث)، فلا يمكن ملاءمة منحنى تعافٍ. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
+        en: 'This was a low-intensity surface fire: the co-pol amplitude barely moved (HH is flat to slightly brighter after the event), so a recovery curve cannot be measured — and drawing one would be misleading. The chart shows the real per-pass backscatter instead.',
+        ar: 'كان حريقًا سطحيًا منخفض الشدة: لم تكد سعة الاستقطاب المشترك تتغير (HH ثابت إلى أعلى قليلًا بعد الحدث)، لذا لا يمكن قياس منحنى تعافٍ — ورسمه سيكون مضلّلًا. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
       },
     },
     researcher: {
@@ -696,8 +696,8 @@ export const studyAreas = [
       noise: 0,
       gapDays: 12,
       note: {
-        en: 'The HH series keeps declining through March rather than returning to baseline, so a recovery curve cannot be fitted. The panel plots the real per-pass backscatter instead.',
-        ar: 'تستمر سلسلة HH في الانخفاض حتى مارس بدلًا من العودة إلى خط الأساس، فلا يمكن ملاءمة منحنى تعافٍ. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
+        en: 'The flood lowered the radar signal, but the series keeps declining through March rather than returning to baseline, so no recovery is observed — and drawing one would be misleading. The chart shows the real per-pass backscatter instead.',
+        ar: 'خفض الفيضان إشارة الرادار، لكن السلسلة تستمر في الانخفاض حتى مارس بدلًا من العودة إلى خط الأساس، فلا يُلاحظ تعافٍ — ورسمه سيكون مضلّلًا. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
       },
     },
     researcher: {

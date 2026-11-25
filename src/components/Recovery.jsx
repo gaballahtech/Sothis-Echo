@@ -444,16 +444,18 @@ export default function Recovery({ embedded = false, siteId: forcedSiteId }) {
                 data-testid="recovery-insufficient"
                 style={{ marginBottom: 10 }}
               >
-                {t(
-                  site.recovery.noPeakPass
-                    ? 'recovery.noPeakPassNotice'
-                    : 'recovery.insufficientNotice',
-                  {
-                    change: Math.round(Number(site.recovery.eventChange ?? 0)),
-                    noise: Math.round(Number(site.recovery.noise ?? 0)),
-                    gap: Math.round(Number(site.recovery.gapDays ?? 0)),
-                  }
-                )}
+                {site.recovery.note && L(site.recovery.note)
+                  ? L(site.recovery.note)
+                  : t(
+                      site.recovery.noPeakPass
+                        ? 'recovery.noPeakPassNotice'
+                        : 'recovery.insufficientNotice',
+                      {
+                        change: Math.round(Number(site.recovery.eventChange ?? 0)),
+                        noise: Math.round(Number(site.recovery.noise ?? 0)),
+                        gap: Math.round(Number(site.recovery.gapDays ?? 0)),
+                      }
+                    )}
               </Callout>
             ) : site.recovery.fromApi !== true ? (
               <Callout
