@@ -12,6 +12,7 @@ import RapidResponse from './RapidResponse';
 import Sonification from './Sonification';
 import SeeThrough from './SeeThrough';
 import ExplainPanel from './ExplainPanel';
+import ValidationFacet from './ValidationFacet';
 
 /** Render the facet for a given section id, scoped to one site. */
 function Facet({ section, site }) {
@@ -30,6 +31,8 @@ function Facet({ section, site }) {
       return <SeeThrough embedded siteId={site.id} />;
     case 'explain':
       return <ExplainPanel embedded siteId={site.id} />;
+    case 'validation':
+      return <ValidationFacet site={site} />;
     case 'overview':
     default:
       return <StudyAreas embedded siteId={site.id} />;

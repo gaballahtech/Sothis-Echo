@@ -605,6 +605,17 @@ subtitle:
     demoBanner:
       'Previewing the bundled NISAR snapshot — the live backend is not connected in this build.',
   },
+  validation: {
+    title: 'How we checked this',
+    subtitle: 'The study window, the cross-check against another radar, and the exact data sources.',
+    window: 'Study window',
+    windowBody:
+      'The {{site}} measurements come from a small, fixed ground window (shown below) so the before and after passes cover exactly the same area.',
+    cross: 'Cross-validation (NISAR L-band vs Sentinel-1 C-band)',
+    crossBody:
+      'We compare the NISAR L-band signal with Sentinel-1 C-band on overlapping dates. Broad agreement is expected, not identical values, because the sensors differ in wavelength, resolution and timing. This tests consistency, not equality.',
+    sources: 'Data sources',
+  },
   glossary: {
     translate: 'Translate with Google',
     about: 'About',
@@ -633,6 +644,7 @@ subtitle:
       sound: 'Sonification',
       see: 'Camera vs radar',
       explain: 'Explain',
+      validation: 'Validation',
     },
     selectSite: 'Choose a site',
     compareHint: 'Pick a second site to compare',
@@ -1240,6 +1252,17 @@ radarCaptionSentinel:
     demoBanner:
       'معاينة لقطة نيسار المجمّعة — الخادم الحيّ غير متصل في هذا الإصدار.',
   },
+  validation: {
+    title: 'كيف تحققنا من هذا',
+    subtitle: 'نافذة الدراسة، والمقارنة مع رادار آخر، ومصادر البيانات الدقيقة.',
+    window: 'نافذة الدراسة',
+    windowBody:
+      'قياسات {{site}} تأتي من نافذة أرضية صغيرة ثابتة (موضحة أدناه) حتى يغطي المرور قبل وبعد نفس المنطقة بالضبط.',
+    cross: 'التحقق المتقاطع (نيسار نطاق L مقابل Sentinel-1 نطاق C)',
+    crossBody:
+      ' نقارن إشارة نيسار (نطاق L) بـ Sentinel-1 (نطاق C) في التواريخ المتداخلة. نتوقع اتفاقًا عامًا لا قيمًا متطابقة، لأن المستشعرين يختلفان في الطول الموجي والدقة والتوقيت. هذا يختبر الاتساق لا التساوي.',
+    sources: 'مصادر البيانات',
+  },
   glossary: {
     translate: 'ترجمة بـ Google',
     about: 'عن',
@@ -1268,6 +1291,7 @@ radarCaptionSentinel:
       sound: 'السونفيكيشن',
       see: 'الكاميرا مقابل الرادار',
       explain: 'التفسير',
+      validation: 'التحقق',
     },
     selectSite: 'اختر موقعًا',
     compareHint: 'اختر موقعًا ثانيًا للمقارنة',

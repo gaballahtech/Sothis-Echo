@@ -22,6 +22,7 @@ export const CASE_SECTIONS = [
   { id: 'sound', key: 'casefile.section.sound' },
   { id: 'see', key: 'casefile.section.see' },
   { id: 'explain', key: 'casefile.section.explain' },
+  { id: 'validation', key: 'casefile.section.validation' },
 ];
 
 const SECTION_IDS = new Set(CASE_SECTIONS.map((section) => section.id));
