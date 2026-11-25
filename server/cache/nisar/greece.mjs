@@ -6,7 +6,7 @@
  */
 export const greeceSnapshot = {
   "site": "greece",
-  "computedAt": "2026-11-24",
+  "computedAt": "2026-11-25",
   "source": "nisar-gcov-asf-h5",
   "calibrated": true,
   "thresholdDb": 2.0,
@@ -55,14 +55,14 @@ export const greeceSnapshot = {
     "before": {
       "date": "2026-07-19",
       "granule": "NISAR_L2_PR_GCOV_025_158_A_021_2005_DHDH_A_20260719T033512_20260719T033547_P05023_N_F_J_001",
-      "width": 560,
-      "height": 370
+      "width": 900,
+      "height": 600
     },
     "after": {
       "date": "2026-08-12",
       "granule": "NISAR_L2_PR_GCOV_027_158_A_021_2005_DHDH_A_20260812T033511_20260812T033546_P05023_N_F_J_001",
-      "width": 560,
-      "height": 370
+      "width": 900,
+      "height": 600
     }
   }
 };

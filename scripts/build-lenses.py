@@ -37,7 +37,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE = os.path.join(ROOT, 'server', 'cache', 'nisar')
 ASF = 'https://api.daac.asf.alaska.edu/services/search/param'
 FETCH_TIMEOUT = 40
-OUT_W, OUT_H = 560, 370
+OUT_W, OUT_H = 900, 600
 GSLC_STRIDE = 2
 ENABLE_GSLC = os.environ.get('LENS_GSLC', '1') == '1'
 

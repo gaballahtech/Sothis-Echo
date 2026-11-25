@@ -6,7 +6,7 @@
  */
 export const limpopoSnapshot = {
   "site": "limpopo",
-  "computedAt": "2026-11-24",
+  "computedAt": "2026-11-25",
   "source": "nisar-gcov-asf-h5",
   "calibrated": true,
   "thresholdDb": 2.0,
@@ -55,14 +55,14 @@ export const limpopoSnapshot = {
     "before": {
       "date": "2026-01-12",
       "granule": "NISAR_L2_PR_GCOV_010_042_A_165_2005_DHDH_A_20260112T035042_20260112T035113_P05023_N_F_J_001",
-      "width": 560,
-      "height": 370
+      "width": 900,
+      "height": 600
     },
     "after": {
       "date": "2026-01-24",
       "granule": "NISAR_L2_PR_GCOV_011_042_A_165_2005_DHDH_A_20260124T035042_20260124T035114_P05023_N_F_J_001",
-      "width": 560,
-      "height": 370
+      "width": 900,
+      "height": 600
     }
   }
 };
