@@ -69,8 +69,8 @@ export const atlasSites = [
     continent: 'europe',
     maturity: 'lens',
     summary: {
-      en: 'A wildland-urban fire west of Athens burned pine and olive groves; the L-band amplitude barely moved, but the dual-pol mechanism shifted from volume to surface scattering where the canopy was consumed.',
-      ar: 'حريق حراجي غرب أثينا التهم أشجار الصنوبر والزيتون؛ لم تكد سعة النطاق L تتغير، لكن آلية الاستقطاب الثنائي تحولت من التشتت الحجمي إلى السطحي حيث استُهلكت المظلة.',
+      en: 'A fire west of Athens burned pine and olive trees. The radar brightness barely changed, but the way the ground bounces radar shifted where the trees burned.',
+      ar: 'حريق غرب أثينا أحرق أشجار الصنوبر والزيتون. لم يكد سطوع الرادار يتغير، لكن طريقة ارتداد الأرض للرادار تغيّرت حيث احترقت الأشجار.',
     },
     radar: {
       en: 'L-band penetrates the smoke and sees structure: fire removes the canopy that gives strong cross-pol volume scattering, so the surface dominates after the burn even where brightness is unchanged.',
@@ -92,8 +92,8 @@ export const atlasSites = [
     continent: 'africa',
     maturity: 'lens',
     summary: {
-      en: 'January 2026 torrential rains swelled the Limpopo basin across Mozambique, South Africa and Zimbabwe; a national disaster was declared in South Africa. Radar shows the swollen river and flooded low ground as a dark, smooth sheet.',
-      ar: 'أمطار غزيرة في يناير 2026 فجّرت حوض نهر ليمبوبو عبر موزمبيق وجنوب أفريقيا وزمبابوي؛ وأُعلنت حالة طوارئ وطنية في جنوب أفريقيا. يُظهر الرادار النهر المنتفخ والأراضي المنخفضة الغارقة كطبقة داكنة أملس.',
+      en: 'Heavy January 2026 rains flooded the Limpopo river across Mozambique, South Africa and Zimbabwe. Radar shows the swollen river and flooded ground as a dark, smooth sheet.',
+      ar: 'أمطار غزيرة في يناير 2026 أغرقت نهر ليمبوبو عبر موزمبيق وجنوب أفريقيا وزمبابوي. يُظهر الرادار النهر المنتفخ والأرض الغارقة كطبقة داكنة أملس.',
     },
     radar: {
       en: 'L-band is a microwave: smooth floodwater is a specular reflector that sends the pulse away from the satellite, so inundated ground goes dark while rough vegetated/built surfaces stay bright.',
