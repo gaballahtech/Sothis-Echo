@@ -249,7 +249,7 @@ const en = {
   recovery: {
     title: 'When does it come back?',
     subtitle:
-      'How long does the radar signal take to return to its pre-event level? Move the target and watch the estimate change.',
+      'How long does the radar signal take to come back after the event? Move the target and watch the estimate.',
     target: 'Target recovery',
     targetHint: 'Share of the pre-event radar signal',
     estimateLabel: 'Estimated time to target',
@@ -288,7 +288,8 @@ const en = {
   },
   timeSeries: {
     title: 'The change over time',
-    subtitle: 'Every real NISAR pass, in order. Press play to watch the backscatter and the change metric move through the record.',
+subtitle:
+      'Every real radar pass, in order. Press play to watch the signal change over time.',
     play: 'Play',
     pause: 'Pause',
     backscatter: 'HH backscatter (dB)',
@@ -886,7 +887,7 @@ radarCaptionSentinel:
   recovery: {
     title: 'متى يعود؟',
     subtitle:
-      'كم تستغرق إشارة الرادار لتعود إلى مستواها قبل الحدث؟ حرّك الهدف وراقب تغيّر التقدير.',
+      'كم تستغرق إشارة الرادار لتعود بعد الحدث؟ حرّك الهدف وراقب التقدير.',
     target: 'هدف التعافي',
     targetHint: 'نسبة من إشارة الرادار قبل الحدث',
     estimateLabel: 'الزمن المقدر للوصول إلى الهدف',
@@ -925,7 +926,7 @@ radarCaptionSentinel:
   },
   timeSeries: {
     title: 'التغيّر عبر الزمن',
-    subtitle: 'كل مرور نيسار حقيقي، بالترتيب. اضغط تشغيل لمشاهدة الارتداد الخلفي ومقياس التغيّر يتحركان عبر السجل.',
+    subtitle: 'كل مرور راداري حقيقي، بالترتيب. اضغط تشغيل لمشاهدة الإشارة تتغيّر عبر الزمن.',
     play: 'تشغيل',
     pause: 'إيقاف',
     backscatter: 'الارتداد الخلفي HH (ديسيبل)',
