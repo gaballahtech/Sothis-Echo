@@ -16,6 +16,11 @@ export const limpopoSnapshot = {
     "calibrated": true,
     "thresholdDb": 2.0,
     "changedPct": 34.8,
+    "changedPctByThreshold": {
+      "2": 34.8,
+      "3": 16.0,
+      "4": 6.1
+    },
     "meanDeltaDb": -0.95,
     "meanAbsDeltaDb": 1.7,
     "changedAreaKm2": 10.71,

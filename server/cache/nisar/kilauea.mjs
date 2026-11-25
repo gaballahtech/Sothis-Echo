@@ -16,6 +16,11 @@ export const kilaueaSnapshot = {
     "calibrated": true,
     "thresholdDb": 2.0,
     "changedPct": 26.4,
+    "changedPctByThreshold": {
+      "2": 26.4,
+      "3": 11.6,
+      "4": 5.2
+    },
     "meanDeltaDb": -0.36,
     "meanAbsDeltaDb": 1.51,
     "changedAreaKm2": 4.58,

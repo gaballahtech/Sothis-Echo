@@ -16,6 +16,11 @@ export const greeceSnapshot = {
     "calibrated": true,
     "thresholdDb": 2.0,
     "changedPct": 21.4,
+    "changedPctByThreshold": {
+      "2": 21.4,
+      "3": 8.0,
+      "4": 3.1
+    },
     "meanDeltaDb": -0.16,
     "meanAbsDeltaDb": 1.33,
     "changedAreaKm2": 0.64,

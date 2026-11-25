@@ -412,8 +412,15 @@ def change_stats(before, after, exclude_water=False):
     delta = db(hh1[valid]) - db(hh0[valid])
     changed = int(np.sum(np.abs(delta) >= THRESHOLD_DB))
     valid_count = int(valid.sum())
+    # Threshold sensitivity: the changed fraction at 2/3/4 dB, so the UI can
+    # show an honest range instead of a single threshold-dependent number.
+    by_threshold = {
+        str(t): round(float(np.sum(np.abs(delta) >= t)) / valid_count * 100.0, 1)
+        for t in (2, 3, 4)
+    }
     return {
         'changedPct': round(changed / valid_count * 100.0, 1),
+        'changedPctByThreshold': by_threshold,
         'meanDeltaDb': round(float(delta.mean()), 2),
         'meanAbsDeltaDb': round(float(np.abs(delta).mean()), 2),
         'validPixels': valid_count,
@@ -563,6 +570,7 @@ def main():
                 'calibrated': True,
                 'thresholdDb': THRESHOLD_DB,
                 'changedPct': stats['changedPct'],
+                'changedPctByThreshold': stats.get('changedPctByThreshold'),
                 'meanDeltaDb': stats['meanDeltaDb'],
                 'meanAbsDeltaDb': stats['meanAbsDeltaDb'],
                 'changedAreaKm2': round(changed_area, 2),

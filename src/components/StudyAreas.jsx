@@ -158,6 +158,15 @@ export default function StudyAreas({ embedded = false, siteId }) {
                 valid: changeStats.validPct,
               })}
             </p>
+            {changeStats.changedPctByThreshold ? (
+              <p className="micro" style={{ margin: '2px 0 0' }}>
+                {t('sites.changeRange', {
+                  t2: changeStats.changedPctByThreshold['2'],
+                  t3: changeStats.changedPctByThreshold['3'],
+                  t4: changeStats.changedPctByThreshold['4'],
+                })}
+              </p>
+            ) : null}
             {changeStats.snapshot ? (
               <p className="micro" style={{ margin: '2px 0 0' }}>
                 {t('sites.changeStatsSnapshot', { date: changeStats.computedAt })}

@@ -16,6 +16,11 @@ export const sundarbansSnapshot = {
     "calibrated": true,
     "thresholdDb": 2.0,
     "changedPct": 56.8,
+    "changedPctByThreshold": {
+      "2": 56.8,
+      "3": 39.6,
+      "4": 26.5
+    },
     "meanDeltaDb": -0.34,
     "meanAbsDeltaDb": 2.91,
     "changedAreaKm2": 17.48,

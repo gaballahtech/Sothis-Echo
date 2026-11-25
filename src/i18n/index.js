@@ -191,6 +191,8 @@ const en = {
     contrastTitle: 'Same physics, different fingerprint',
     contrastSubtitle: 'Why a river flood and a wildfire do not look alike in the same radar channel.',
     downloadCsv: 'Download series (CSV)',
+    changeRange:
+      'Threshold sensitivity: ≥2 dB {{t2}}% · ≥3 dB {{t3}}% · ≥4 dB {{t4}}% (a higher threshold counts fewer, stronger changes).',
     impactUsers: 'Who reads this',
     impactDecision: 'Decision it informs',
     comparison: {
@@ -841,6 +843,8 @@ radarCaptionSentinel:
     contrastTitle: 'الفيزياء نفسها، البصمة مختلفة',
     contrastSubtitle: 'لماذا لا يبدو فيضان نهري وحريق غابة بالشكل نفسه في القناة الرادارية ذاتها.',
     downloadCsv: 'تنزيل السلسلة (CSV)',
+    changeRange:
+      'حساسية العتبة: ≥2 ديسيبل {{t2}}% · ≥3 ديسيبل {{t3}}% · ≥4 ديسيبل {{t4}}% (العتبة الأعلى تُحصي تغيّرات أقل وأقوى).',
     impactUsers: 'من يقرأ هذا',
     impactDecision: 'القرار الذي تخدمه',
     comparison: {

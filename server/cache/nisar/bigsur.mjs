@@ -16,6 +16,11 @@ export const bigsurSnapshot = {
     "calibrated": true,
     "thresholdDb": 2.0,
     "changedPct": 23.7,
+    "changedPctByThreshold": {
+      "2": 23.7,
+      "3": 8.9,
+      "4": 3.1
+    },
     "meanDeltaDb": -0.2,
     "meanAbsDeltaDb": 1.38,
     "changedAreaKm2": 12.5,
