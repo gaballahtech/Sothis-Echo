@@ -943,7 +943,10 @@ export async function handleRequest(req, res) {
       const body = await readJson(req).catch(() => ({}));
       const question = typeof body?.question === 'string' ? body.question.trim() : '';
       const lang = body?.lang === 'ar' ? 'ar' : 'en';
-      const mode = body?.mode === 'researcher' ? 'researcher' : 'learner';
+      const q0 = String(body?.question || '');
+      const mode = /(coherence|backscatter|amplitude|mechanis|gamma|insar|\bdb\b|regression|confidence|\bci\b|تماسك|ارتداد|سعة|آلي|انحدار|نموذج|ثقة)/i.test(q0)
+        ? 'researcher'
+        : 'learner';
       const section = typeof body?.section === 'string' ? body.section : null;
       const siteId = typeof body?.site === 'string' ? body.site : null;
       const history = Array.isArray(body?.history) ? body.history.slice(-6) : [];
@@ -978,6 +981,7 @@ Rules:
 - For GENERAL questions about NISAR, SAR, radar, coherence, etc., answer generally and accurately (you may draw on the sources); do not force site numbers into a general answer.
 - Cite the exact number you used in your answer (e.g., "mean coherence 0.546").
 - If the answer needs data not in the block, say it is "not measured here" — never invent a number.
+- Use cautious, scientific language ("indicates", "suggests", "likely", "may"): radar measures the signal and change; the cause is interpreted with environmental context — never over-claim.
 - ${modeLine}
         - Reply in the SAME language the user wrote their question in (e.g. Arabic, Egyptian Arabic, French, Spanish, German, Hindi…). Only fall back to ${lang === 'ar' ? 'Arabic' : 'English'} if the question's language is genuinely unclear. Be concise (2-4 sentences).
 
@@ -987,7 +991,7 @@ You can also answer general questions about NISAR, SAR, HH/HV polarization, cohe
         ...history.map((turn) => ({ role: turn.role, text: turn.text })),
         { role: 'user', text: question },
       ];
-      const { text: answer } = await callAI({ system: systemPrompt, messages: chatMessages, maxTokens: 800, temperature: 0.5 });
+      const { text: answer } = await callAI({ system: systemPrompt, messages: chatMessages, maxTokens: 500, temperature: 0.4 });
       send(res, 200, { data: { answer, question, sources: groundingSources(siteId, lang, question) }, success: true });
       return;
     }

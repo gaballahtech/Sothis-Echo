@@ -98,7 +98,6 @@ export default function AIChat() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [mode, setMode] = useState('learner');
   const [streamingId, setStreamingId] = useState(null);
   const [reducedMotion] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches,
@@ -166,7 +165,6 @@ export default function AIChat() {
           lang,
           site: activeSiteId,
           section: caseSection,
-          mode,
           history,
         }),
         signal: AbortSignal.timeout(60000),
@@ -231,24 +229,6 @@ export default function AIChat() {
           <div className="ai-chat-head">
             <span className="ai-chat-head-title">{t('aiChat.title')}</span>
             <div className="ai-chat-head-actions">
-              <div className="ai-chat-mode" role="group" aria-label={t('aiChat.modeLabel')}>
-                <button
-                  type="button"
-                  className={`ai-chat-mode-btn${mode === 'learner' ? ' is-active' : ''}`}
-                  onClick={() => setMode('learner')}
-                  aria-pressed={mode === 'learner'}
-                >
-                  {t('aiChat.modeLearner')}
-                </button>
-                <button
-                  type="button"
-                  className={`ai-chat-mode-btn${mode === 'researcher' ? ' is-active' : ''}`}
-                  onClick={() => setMode('researcher')}
-                  aria-pressed={mode === 'researcher'}
-                >
-                  {t('aiChat.modeResearcher')}
-                </button>
-              </div>
               <button className="ai-chat-close" onClick={() => setOpen(false)} aria-label={t('common.close')}>
                 &times;
               </button>
