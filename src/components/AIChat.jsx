@@ -303,11 +303,17 @@ export default function AIChat() {
             <div ref={lastRef} />
           </div>
           <div className="ai-chat-input-row">
-            <input
+            <textarea
               ref={inputRef}
               className="ai-chat-input"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              rows={1}
+              onChange={(e) => {
+                setInput(e.target.value);
+                const el = e.target;
+                el.style.height = 'auto';
+                el.style.height = `${Math.min(el.scrollHeight, 72)}px`;
+              }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();

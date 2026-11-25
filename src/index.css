@@ -3568,6 +3568,10 @@ html[data-theme='dark'] .ai-chat-panel {
   font-family: var(--te-body);
   font-size: 13.5px;
   outline: none;
+  resize: none;
+  max-height: 72px;
+  overflow-y: auto;
+  line-height: 1.4;
 }
 
 .ai-chat-input::placeholder {
@@ -3946,6 +3950,16 @@ html[data-theme='dark'] .ai-chat-panel {
 .term-pop-original { font-size: 11px; color: var(--te-muted, #666); margin: 0 0 6px; }
 .term-pop-ask { font-size: 12px; color: var(--te-accent, #2b6cb0); cursor: pointer; border: 1px solid var(--te-border); background: transparent; padding: 3px 8px; font-family: var(--te-mono); }
 .term-pop-ask:hover { text-decoration: underline; border-color: var(--te-accent); }
+
+/* Measured atlas cards: make it obvious they open a case file */
+.atlas-card.is-measured { cursor: pointer; box-shadow: 0 0 0 1px var(--te-accent, #2b6cb0); }
+.atlas-card.is-measured .atlas-open {
+  background: var(--te-accent, #2b6cb0);
+  color: #fff;
+  font-weight: 700;
+  padding: 6px 10px;
+}
+.atlas-card.is-measured .atlas-open:hover { filter: brightness(1.08); }
 /* Keep the term popover above the case-file dialog (z 900) AND the AI chat (z 1000). */
 .term-pop-portal.bp6-popover,
 .term-pop-portal { z-index: 1100; }
