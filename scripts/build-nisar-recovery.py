@@ -32,7 +32,7 @@ import numpy as np  # noqa: E402  (available after bns import pulls its deps)
 if 'bigsur' in bns.SITES:
     bns.SITES['bigsur']['coords'] = (35.9774, -121.4994)
 
-KIND = {'sundarbans': 'wetland', 'bigsur': 'wildfire', 'greece': 'wildfire', 'limpopo': 'wetland', 'kilauea': 'volcano', 'cantzama': 'landslide'}
+KIND = {'sundarbans': 'wetland', 'bigsur': 'wildfire', 'greece': 'wildfire', 'limpopo': 'wetland', 'kilauea': 'volcano', 'cantzama': 'landslide', 'mexico': 'subsidence'}
 START = '2026-05-01'
 END = '2026-12-31'
 

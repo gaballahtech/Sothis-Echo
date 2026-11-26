@@ -136,6 +136,20 @@ LENS_SITES = {
         },
         'label': 'Cantzama landslide',
     },
+    'mexico': {
+        # Mexico City subsidence, Jan 2026. Track 019 asc, frame 011; DHDH pre/post.
+        'bbox': (-99.20, 19.35, -99.00, 19.50),
+        'coords': (19.43, -99.13),
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_010_019_A_011_4005_DHDH_A_20260110T120542_20260110T120616_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GCOV_011_019_A_011_4005_DHDH_A_20260122T120542_20260122T120617_P05023_N_F_J_001',
+        },
+        'gslc': {
+            'before': 'NISAR_L2_PR_GSLC_010_019_A_011_4005_DHDH_A_20260110T120542_20260110T120616_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GSLC_011_019_A_011_4005_DHDH_A_20260122T120542_20260122T120617_P05023_N_F_J_001',
+        },
+        'label': 'Mexico City subsidence',
+    },
 }
 
 

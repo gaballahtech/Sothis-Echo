@@ -973,6 +973,110 @@ recovery: {
       ],
     },
   },
+  {
+    // Fifth hazard type: Mexico City land subsidence (NASA-documented, Jan 2026).
+    // Real NISAR L-band GCOV/GSLC, track 019 frame 011 (2026-01-10 -> 2026-01-22),
+    // DHDH. HV drops as the ground compacts; 32.7% changed. No recovery (subsidence
+    // is monotonic) — honest insufficient.
+    id: 'mexico',
+    kind: 'subsidence',
+    seed: 202601,
+    name: { en: 'Mexico City subsidence', ar: 'هبوط مكسيكو سيتي' },
+    region: { en: 'Mexico City · Mexico', ar: 'مكسيكو سيتي · المكسيك' },
+    coords: { lat: 19.43, lng: -99.13 },
+    wkt: 'POLYGON ((-99.20 19.35, -99.00 19.35, -99.00 19.50, -99.20 19.50, -99.20 19.35))',
+    eventDate: '2026-01-17',
+    headline: {
+      en: 'The ground is slowly sinking under the city',
+      ar: 'الأرض تغرق ببطء تحت المدينة',
+    },
+    impact: {
+      users: { en: 'Civil protection · urban planners · insurers', ar: 'الحماية المدنية · مخططو المدن · شركات التأمين' },
+      decision: { en: 'Where the ground is subsiding fastest and infrastructure is at risk', ar: 'أين تغرق الأرض أسرع ما تكون البنية التحتية معرّضة للخطر' },
+    },
+    tags: [
+      { en: 'Subsidence', ar: 'هبوط' },
+      { en: 'Mexico City', ar: 'مكسيكو سيتي' },
+      { en: 'Groundwater', ar: 'مياه جوفية' },
+    ],
+    story: [
+      {
+        en: 'Mexico City is built on an ancient lakebed. Pumping groundwater and the weight of the city compact the ground, so parts of the city sink by centimetres each month (NASA, 2026). Radar sees the surface slowly dropping.',
+        ar: 'مبنية على قاع بحيرة قديمة. ضخ المياه الجوفية وثقل المدينة يضغطان الأرض، فتغرق أجزاء من المدينة سنتيمترات كل شهر (ناسا، 2026). يرى الرادار السطح يهبط ببطء.',
+      },
+      {
+        en: 'The radar backscatter changes as the surface compacts and the water table drops; the dual-pol mechanism and coherence track the change. There is no "recovery" — subsidence is permanent.',
+        ar: 'يتغير ارتداد الرادار مع انضغاط السطح وانخفاض منسوب المياه؛ وتتتبع الآلية والتماسك التغيّر. لا «تعافي» — الهبوط دائم.',
+      },
+    ],
+    states: {
+      before: {
+        date: '2026-01-10',
+        label: { en: 'Before', ar: 'قبل' },
+        params: { water: 0.1, emergent: 0.8, burn: 0.05, cloud: 0.1 },
+        caption: { en: 'Mexico City before the January 2026 analysis window.', ar: 'مكسيكو سيتي قبل نافذة تحليل يناير 2026.' },
+        happened: { en: 'HH ≈ -4.0 dB, HV ≈ -8.1 dB.', ar: 'HH ≈ -4.0 ديسيبل، HV ≈ -8.1 ديسيبل.' },
+        why: { en: 'Ground at its earlier level.', ar: 'الأرض عند مستواها الأسبق.' },
+        polarization: { en: 'Dual-pol HH + HV.', ar: 'استقطاب مزدوج HH + HV.' },
+      },
+      after: {
+        date: '2026-01-22',
+        label: { en: 'After', ar: 'بعد' },
+        params: { water: 0.1, emergent: 0.7, burn: 0.1, cloud: 0.1 },
+        caption: { en: 'Twelve days later: the ground has subsided further.', ar: 'بعد 12 يومًا: هبطت الأرض أكثر.' },
+        happened: { en: 'HV drops to ≈ -10.7 dB; 32.7% changed; coherence stays high (0.733) but the mechanism shifts (38.7%).', ar: 'يهبط HV إلى ≈ -10.7 ديسيبل؛ 32.7% تغيّر؛ والتماسك مرتفع (0.733) لكن الآلية تتحوّل (38.7%).' },
+        why: { en: 'Compaction and groundwater loss change the surface.', ar: 'الانضغاط وفقدان المياه الجوفية يغيّران السطح.' },
+        polarization: { en: 'HV and the mechanism reveal the change.', ar: 'HV والآلية يكشفان التغيّر.' },
+      },
+    },
+    measurements: {
+      vv: { before: -4.0, after: -4.1 },
+      vh: { before: -8.1, after: -10.7 },
+      crossPol: { before: -4.1, after: -6.7 },
+      dateBefore: '2026-01-10',
+      dateAfter: '2026-01-22',
+    },
+    series: [
+      { date: '2026-01-10', vv: -4.0, vh: -8.1, change: 0.0 },
+      { date: '2026-01-22', vv: -4.1, vh: -10.7, change: 0.22 },
+    ],
+    pulse: [0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.02, 0.03, 0.05, 0.08, 0.12, 0.16, 0.2, 0.22, 0.22, 0.22],
+    stablePulse: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.02, 0.03, 0.05, 0.08, 0.11, 0.14, 0.17, 0.2],
+    recovery: {
+      insufficient: true,
+      noPeakPass: true,
+      thresholdDefault: 80,
+      points: [{ month: 0, pct: 0 }, { month: 1, pct: 0 }],
+      eventChange: 0,
+      noise: 0,
+      gapDays: 12,
+      note: {
+        en: 'Subsidence is permanent — the ground does not return to its pre-event level, so a recovery curve does not apply. The panel shows the real per-pass series.',
+        ar: 'الهبوط دائم — لا تعود الأرض إلى مستواها السابق، فلا ينطبق منحنى تعافٍ. تعرض اللوحة السلسلة الحقيقية لكل مرور.',
+      },
+    },
+    researcher: {
+      acquisition: {
+        en: 'NISAR L-band GCOV (HH/HV gamma-0) + GSLC, track 019 frame 011, 2026-01-10 → 2026-01-22.',
+        ar: 'NISAR بموجة L GCOV (HH/HV غاما-0) + GSLC، المسار 019 الإطار 011، 2026-01-10 → 2026-01-22.',
+      },
+      interpretation: [
+        { en: 'HV drops ~2.6 dB as the surface compacts; 32.7% changed.', ar: 'يهبط HV ~2.6 ديسيبل مع انضغاط السطح؛ 32.7% تغيّر.' },
+        { en: 'Coherence stays high (0.733) but the mechanism shifts (38.7%).', ar: 'التماسك مرتفع (0.733) لكن الآلية تتحوّل (38.7%).' },
+      ],
+      limits: [
+        { en: 'A single 12-day pair; subsidence is gradual and permanent.', ar: 'زوج واحد بفارق 12 يومًا؛ الهبوط تدريجي ودائم.' },
+      ],
+      methods: [
+        { en: 'Dual-pol HH/HV gamma-0 change from GCOV.', ar: 'تغيّر غاما-0 المزدوج HH/HV من GCOV.' },
+        { en: 'InSAR coherence from the GSLC HH pair.', ar: 'تماسك InSAR من زوج GSLC HH.' },
+      ],
+      sources: [
+        { en: 'NASA NISAR GCOV/GSLC (track 019 frame 011, 2026-01-10 & 2026-01-22), via ASF DAAC.', ar: 'NASA NISAR GCOV/GSLC (المسار 019 الإطار 011، 2026-01-10 و2026-01-22)، عبر ASF DAAC.' },
+        { en: 'NASA/JPL — NISAR maps Mexico City subsidence (2026).', ar: 'ناسا/JPL — نيسار يرسم هبوط مكسيكو سيتي (2026).' },
+      ],
+    },
+  },
 ];
 
 // Contrast table rows. Each row holds a `values` map keyed by site id, so the

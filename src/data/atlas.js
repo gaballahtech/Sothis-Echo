@@ -288,6 +288,29 @@ measure: {
       ar: 'انهيار التماسك (متوسط 0.37، 56% منخفض) يعلّم الانهيار أدق من السعة.',
     },
   },
+  {
+    id: 'mexico',
+    name: { en: 'Mexico City subsidence', ar: 'هبوط مكسيكو سيتي' },
+    region: { en: 'Mexico City · Mexico', ar: 'مكسيكو سيتي · المكسيك' },
+    changeType: 'subsidence',
+    coords: { lat: 19.43, lng: -99.13 },
+    bbox: [-99.20, 19.35, -99.00, 19.50],
+    eventDate: '2026-01-17',
+    continent: 'north-america',
+    maturity: 'lens',
+    summary: {
+      en: 'Mexico City sinks as groundwater is pumped and the ancient lakebed compacts. Radar sees the ground slowly dropping (NASA, 2026).',
+      ar: 'تغرق مكسيكو سيتي مع ضخ المياه الجوفية وانضغاط قاع البحيرة القديم. يرى الرادار الأرض تهبط ببطء (ناسا، 2026).',
+    },
+    radar: {
+      en: 'The surface drops and the water table falls, changing the radar backscatter and mechanism — the ground is not coming back.',
+      ar: 'يهبط السطح وينخفض منسوب المياه، فيتغير ارتداد الرادار والآلية — والأرض لا تعود.',
+    },
+    measure: {
+      en: 'HV drop and the mechanism shift track the compaction; coherence stays high because the change is slow and uniform.',
+      ar: 'هبوط HV وتحوّل الآلية يتتبعان الانضغاط؛ والتماسك مرتفع لأن التغيّر بطيء ومنتظم.',
+    },
+  },
 ];
 
 export const CONTINENTS = [

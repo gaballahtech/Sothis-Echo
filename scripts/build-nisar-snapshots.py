@@ -125,6 +125,18 @@ SITES = {
         'before': 'NISAR_L2_PR_GCOV_024_112_D_090_4005_DHDH_A_20260703T233946_20260703T234021_P05023_N_F_J_001',
         'after': 'NISAR_L2_PR_GCOV_025_112_D_090_4005_DHDH_A_20260715T233946_20260715T234020_P05023_N_F_J_001',
     },
+    'mexico': {
+        # Mexico City land subsidence (NASA-documented, 2026). Track 019 ascending,
+        # frame 011: DHDH pre/post pair (2026-01-10 -> 2026-01-22). Both DHDH.
+        'kind': 'subsidence',
+        'label': 'Mexico City subsidence',
+        'coords': (19.43, -99.13),
+        'bbox': (-99.20, 19.35, -99.00, 19.50),
+        'window': 'calibration',
+        'eventDate': '2026-01-17',
+        'before': 'NISAR_L2_PR_GCOV_010_019_A_011_4005_DHDH_A_20260110T120542_20260110T120616_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_011_019_A_011_4005_DHDH_A_20260122T120542_20260122T120617_P05023_N_F_J_001',
+    },
 }
 
 
