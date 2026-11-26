@@ -307,8 +307,8 @@ export const atlasSites = [
       ar: 'الحركة الزلزالية تغيّر الطور لكنها تكاد لا تغيّر السعة؛ وأهداب InSAR تحسب الإزاحة عبر الصدع.',
     },
 measure: {
-      en: 'Amplitude change maps bright→dark flooding; the changed-area fraction and extent quantify how much ground the water took.',
-      ar: 'خريطة تغيّر السعة تُظهر الفيضان من لامع إلى داكن؛ ونسبة المساحة المتغيّرة والمدى تحدد كم أرضًا غمرها الماء.',
+      en: 'InSAR phase displacement / fringes across the fault: the phase difference between two passes maps the co-seismic movement (centimetres) even where the amplitude is unchanged.',
+      ar: 'إزاحة الطور / أهداب InSAR عبر الصدع: فرق الطور بين مرورين يرسم الحركة الزلزالية (سنتيمترات) حتى حيث لم تتغير السعة.',
     },
   },
   {
@@ -378,4 +378,5 @@ export const CHANGE_TYPES = [
   { id: 'oil-spill', color: '#9a6ae8', name: { en: 'Oil spill', ar: 'تسرب نفط' } },
   { id: 'crop', color: '#e8a13a', name: { en: 'Crop', ar: 'محصول' } },
   { id: 'earthquake', color: '#e85a3a', name: { en: 'Earthquake', ar: 'زلزال' } },
+  { id: 'landslide', color: '#a0e83a', name: { en: 'Landslide', ar: 'انهيار' } },
 ];

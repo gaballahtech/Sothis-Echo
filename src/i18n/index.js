@@ -36,7 +36,8 @@ const en = {
       'Compare two places side by side',
     ],
     provenance: 'Real NISAR L-band data · free & open · via NASA ASF',
-    impact: 'Built for civil protection, forest services and researchers — change mapped across 4 continents and 3 hazard types.',
+    lastPass: 'Last real NISAR pass: 8 Nov 2026',
+    impact: 'Built for civil protection, forest services and researchers — 6 measured sites across 5 continents and 4 hazard types.',
     honesty: 'The only site that says “insufficient” when the data doesn’t support a number — honesty enforced in code, not a slogan.',
     ctaSee: 'See what the camera misses',
     ctaListen: 'Hear the surface',
@@ -583,7 +584,7 @@ subtitle:
   atlas: {
     title: 'Global atlas',
     subtitle:
-      'A curated field guide to NISAR-detectable change across six continents — two fully-measured case studies plus explainers for the hazard types NISAR watches worldwide.',
+      'A curated field guide to NISAR-detectable change across six continents — six fully-measured case studies (Big Sur, Vietnam, Attica, Limpopo, Kilauea, Cantzama) plus explainers for the hazard types NISAR watches worldwide.',
     mapLabel: 'World map of change sites',
     lensMark: 'Measured (real lens)',
     measured: 'Measured',
@@ -703,7 +704,8 @@ const ar = {
       'قارن مكانين جنبًا إلى جنب',
     ],
     provenance: 'بيانات نيسار الحقيقية (نطاق L) · مجانية ومفتوحة · عبر ASF',
-    impact: 'مبني للحماية المدنية وخدمات الغابات والباحثين — تغيّر مرسوم عبر 4 قارات و3 أنواع كوارث.',
+    lastPass: 'آخر مرور NISAR حقيقي: 8 نوفمبر 2026',
+    impact: 'مبني للحماية المدنية وخدمات الغابات والباحثين — 6 مواقع مقاسة عبر 5 قارات و4 أنواع كوارث.',
     honesty: 'الموقع الوحيد الذي يقول «غير كافٍ» عندما لا تدعم البيانات رقمًا — الأمانة مفعّلة في الكود لا شعارًا.',
     ctaSee: 'شاهد ما تفوته الكاميرا',
     ctaListen: 'اسمع سطح الأرض',
@@ -1246,7 +1248,7 @@ radarCaptionSentinel:
   atlas: {
     title: 'الأطلس العالمي',
     subtitle:
-      'دليل ميداني منتقى لأنواع التغيّر التي يرصدها نيسار عبر ست قارات — دراستان مقاستان بالكامل إضافة إلى شروحات تعليمية لأنواع المخاطر التي يراقبها نيسار عالميًا.',
+      'دليل ميداني منتقى لأنواع التغيّر التي يرصدها نيسار عبر ست قارات — ست دراسات مقاسة بالكامل (بيغ سور، فيتنام، أتيكا، ليمبوبو، كيلويا، كانتازاما) إضافة إلى شروحات تعليمية لأنواع المخاطر التي يراقبها نيسار عالميًا.',
     mapLabel: 'خريطة عالمية لمواقع التغيّر',
     lensMark: 'مقيس (عدسة حقيقية)',
     measured: 'مقيس',

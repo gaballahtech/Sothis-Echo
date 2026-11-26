@@ -36,6 +36,10 @@ const LOCAL_IMPACT = {
     en: 'For residents here, this means fire risk. Create defensible space, prepare a go-bag, and follow evacuation orders.',
     ar: 'للسكان هنا، هذا يعني خطر الحريق. أنشئ مساحة دفاعية، جهّز حقيبة طوارئ، واتبع أوامر الإخلاء.',
   },
+  wildfire: {
+    en: 'For residents here, this means wildfire risk: smoke and air-quality hazards, and mudslide risk on the burned slopes after the fire.',
+    ar: 'للسكان هنا، هذا يعني خطر حرائق الغابات: الدخان وجودة الهواء، وخطر الانزلاق الطيني على المنحدرات المحترقة بعد الحريق.',
+  },
   landslide: {
     en: 'For residents here, this means landslide risk. Avoid steep slopes, watch for cracks, and follow evacuation orders.',
     ar: 'للسكان هنا، هذا يعني خطر الانهيار. تجنّب المنحدرات الشديدة، راقب الشقوق، واتبع أوامر الإخلاء.',
