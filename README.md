@@ -22,7 +22,7 @@
 
 ---
 
-**Sothis Echo** turns raw **NISAR L-band** data into a story you can see, hear and question. It follows four measured 2026 events — the **Big Sur megafire** (California), the **Attica megafire** (Greece), the **Central Vietnam flood** and the **Limpopo floods** (Southern Africa) — and lets you open any of them as a full-screen **case file**, then **compare two places side by side** with a single click.
+**Sothis Echo** turns raw **NISAR L-band** data into a story you can see, hear and question. It follows six measured 2026 events on six continents — the **Big Sur megafire** (California), the **Attica megafire** (Greece), the **Central Vietnam flood**, the **Limpopo floods** (Southern Africa), the **Kilauea volcano** (Hawaii) and the **Cantzama landslide** (Ecuador) — across four hazard types (fire, flood, volcano, landslide), and lets you open any of them as a full-screen **case file**, then **compare two places side by side** with a single click.
 
 > **Live:** <https://sothisecho.vercel.app> · Built for the **NASA Space Apps Challenge**.
 
@@ -111,7 +111,7 @@ A timed reasoning game over real change maps: choose an answer, then read the ev
 | 🔬 **Three independent lenses** | Amplitude · InSAR coherence · dual-pol scattering mechanism |
 | 📂 **Per-site case files** | A full-screen dossier for each measured site, with a dedicated sidebar |
 | ⚖️ **Strong comparison** | Pin a second site; synced sections; side-by-side or stacked; vitals diff |
-| 🌍 **Global field guide** | Change sites across six continents, four fully measured (N. America, Europe, Asia, Africa) |
+| 🌍 **Global field guide** | Change sites across six continents, six fully measured (all six continents, 4 hazard types) |
 | 🤖 **Sothis AI** | Grounded, context-aware chat about NISAR, radar and the data |
 | 🔊 **Sonification** | Hear the satellite-pass series as sound |
 | 🗣️ **Fully bilingual** | English + العربية with full RTL, persisted choice |
@@ -120,7 +120,7 @@ A timed reasoning game over real change maps: choose an answer, then read the ev
 
 - **NISAR 101** — the mission, the two radar bands, the 12-day repeat, and why radar sees structure and moisture instead of colour.
 - **Camera vs radar slider** — drag a divider between a cloud-blinded optical basemap and the same place in radar.
-- **Four measured study areas** — the **August 2026 Big Sur megafire**, the **July 2026 Attica megafire (Greece)**, the **September 2026 Central Vietnam flood** and the **January 2026 Limpopo floods (Southern Africa)**. Each has before/after scenes, "what happened / why radar saw it / read the polarization" boxes, and a swipe comparison.
+- **Six measured study areas** — the **August 2026 Big Sur megafire**, the **July 2026 Attica megafire (Greece)**, the **September 2026 Central Vietnam flood**, the **January 2026 Limpopo floods (Southern Africa)**, the **2026 Kilauea volcano (Hawaii)** and the **July 2026 Cantzama landslide (Ecuador)** — four hazard types across six continents. Each has before/after scenes, "what happened / why radar saw it / read the polarization" boxes, and a swipe comparison.
 - **Case files** — open any measured site as a near-fullscreen dossier: sidebar (identity + vitals + section nav) and a main pane that shows one facet at a time.
 - **Three lenses** — amplitude, InSAR coherence and dual-pol mechanism, each computed from real NISAR granules.
 - **Compare mode** — pin a second site, synced sections, side-by-side/stacked layouts, and a vitals strip (ΔHH / ΔHV / cross-pol).
