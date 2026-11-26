@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Button } from '@blueprintjs/core';
 import { localized } from '../data/localized';
 import { atlasSites, CHANGE_TYPES } from '../data/atlas';
 import AtlasMap from './AtlasMap';
