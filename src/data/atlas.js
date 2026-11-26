@@ -220,52 +220,6 @@ export const atlasSites = [
     },
   },
   {
-    id: 'japan-subside',
-    name: { en: 'Tokyo subsidence', ar: 'هبوط طوكيو' },
-    region: { en: 'Tokyo, Japan', ar: 'طوكيو، اليابان' },
-    changeType: 'subsidence',
-    coords: { lat: 35.68, lng: 139.69 },
-    bbox: [139.5, 35.6, 139.85, 35.78],
-    eventDate: '2026-02-01',
-    continent: 'asia',
-    maturity: 'story',
-    summary: {
-      en: 'Groundwater extraction slowly sinks reclaimed land and dense urban fill by a few millimetres each year.',
-      ar: 'يُغرق استخراج المياه الجوفية الأرض المستصلحة والردم الحضري الكثيف ببطء ببضعة مليمترات كل عام.',
-    },
-    radar: {
-      en: 'The buildings barely change, so amplitude stays put — the story is in the phase, which accumulates tiny vertical shifts over a 12-day repeat.',
-      ar: 'تكاد المباني لا تتغيّر فتبقى السعة ثابتة — والقصة في الطور الذي يراكم إزاحات رأسية صغيرة عبر دورة 12 يومًا.',
-    },
-    measure: {
-      en: 'InSAR time-series (stacked interferograms) measure the subsidence bowl to millimetre-per-year precision.',
-      ar: 'سلاسل زمنية لـ InSAR (مقابلات متراكمة) تقيس حوض الهبوط بدقة المليمتر سنويًا.',
-    },
-  },
-  {
-    id: 'australia-crop',
-    name: { en: 'Murray crop failure', ar: 'فشل محصول موراي' },
-    region: { en: 'Murray-Darling, Australia', ar: 'موراي-دارلينغ، أستراليا' },
-    changeType: 'crop',
-    coords: { lat: -34.2, lng: 143.8 },
-    bbox: [143.6, -34.4, 144.0, -34.0],
-    eventDate: '2026-05-01',
-    continent: 'oceania',
-    maturity: 'story',
-    summary: {
-      en: 'A dry season withers the crop canopy and dries the soil, thinning the vegetation over whole paddocks.',
-      ar: 'يجفف موسم جاف مظلة المحصول والتربة، فيترقق الغطاء النباتي على كامل الحقول.',
-    },
-    radar: {
-      en: 'Healthy canopy gives strong volume (HV) scattering; as it dries, HV falls and the HH–HV gap narrows — visible in amplitude alone.',
-      ar: 'المظلة الصحية تعطي تشتت حجم قويًا (HV)؛ ومع الجفاف يهبط HV وتضيق الفجوة HH–HV — ظاهرة في السعة وحدها.',
-    },
-    measure: {
-      en: 'Amplitude change and the dual-pol volume fraction track how much canopy was lost.',
-      ar: 'تغيّر السعة ونسبة الحجم ثنائية الاستقطاب تتبعان مقدار المظلة المفقودة.',
-    },
-  },
-  {
     id: 'peru-earthquake',
     name: { en: 'Peru earthquake', ar: 'زلزال بيرو' },
     region: { en: 'Lima, Peru', ar: 'ليما، بيرو' },
