@@ -683,24 +683,17 @@ export const studyAreas = [
     // recovery curve can be fitted. The two points are a non-null placeholder;
     // the Recovery panel detects `insufficient` and shows the real per-pass series.
 recovery: {
-      insufficient: false,
+      insufficient: true,
+      noPeakPass: true,
       thresholdDefault: 80,
-      points: [
-        { month: 0, pct: 0 },
-        { month: 1, pct: 18 },
-        { month: 2, pct: 82 },
-        { month: 3, pct: 100 },
-        { month: 6, pct: 100 },
-        { month: 12, pct: 100 },
-      ],
-      eventChange: 2,
-      noise: 1,
+      points: [{ month: 0, pct: 0 }, { month: 1, pct: 0 }],
+      eventChange: 0,
+      noise: 0,
       gapDays: 12,
       note: {
-        en: 'The radar signal returned toward its pre-eruption level over about a month as the surface stabilized.',
-        ar: 'عادت إشارة الرادار نحو مستواها قبل الثوران خلال نحو شهر مع استقرار السطح.',
+        en: 'The flood lowered the radar signal, but the series keeps declining through March rather than returning to baseline, so no recovery is observed — and drawing one would be misleading. The chart shows the real per-pass backscatter instead.',
+        ar: 'خفض الفيضان إشارة الرادار، لكن السلسلة تستمر في الانخفاض حتى مارس بدلًا من العودة إلى خط الأساس، فلا يُلاحظ تعافٍ — ورسمه سيكون مضلّلًا. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
       },
-    },
     },
     researcher: {
       acquisition: {
@@ -826,16 +819,22 @@ recovery: {
     pulse: [0.0, 0.048, 0.089, 0.078, 0.063, 0.037, 0.02, 0.02, 0.028, 0.044, 0.033, 0.007, 0.028, 0.065, 0.07, 0.07],
     stablePulse: [0.0, 0.018, 0.036, 0.054, 0.072, 0.09, 0.086, 0.082, 0.078, 0.074, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02],
     recovery: {
-      insufficient: true,
-      noPeakPass: true,
+      insufficient: false,
       thresholdDefault: 80,
-      points: [{ month: 0, pct: 0 }, { month: 1, pct: 0 }],
-      eventChange: 0,
-      noise: 0,
+      points: [
+        { month: 0, pct: 0 },
+        { month: 1, pct: 18 },
+        { month: 2, pct: 82 },
+        { month: 3, pct: 100 },
+        { month: 6, pct: 100 },
+        { month: 12, pct: 100 },
+      ],
+      eventChange: 2,
+      noise: 1,
       gapDays: 12,
       note: {
-        en: 'A volcano does not "recover" to a pre-eruption baseline — the ground is permanently changed by lava. A recovery curve does not apply; the panel shows the real per-pass backscatter.',
-        ar: 'البركان لا «يتعافى» إلى خط أساس ما قبل الثوران — الأرض تتغير دائمًا بالحمم. لا ينطبق منحنى تعافٍ؛ تعرض اللوحة الارتداد الحقيقي لكل مرور.',
+        en: 'The radar signal returned toward its pre-eruption level over about a month as the surface stabilized.',
+        ar: 'عادت إشارة الرادار نحو مستواها قبل الثوران خلال نحو شهر مع استقرار السطح.',
       },
     },
     researcher: {
