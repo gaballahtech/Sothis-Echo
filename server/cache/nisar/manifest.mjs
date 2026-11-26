@@ -14,11 +14,13 @@ import { kilaueaSnapshot } from './kilauea.mjs';
 import { kilaueaRgbBase64 } from './kilauea-rgb.mjs';
 import { kilaueaHhBase64 } from './kilauea-hh.mjs';
 import { kilaueaChangeBase64 } from './kilauea-change.mjs';
+import { kilaueaRecovery } from './kilauea-recovery.mjs';
 import { lensesSnapshot as kilaueaLensesSnapshot } from './kilauea-lenses.mjs';
 import { limpopoSnapshot } from './limpopo.mjs';
 import { limpopoRgbBase64 } from './limpopo-rgb.mjs';
 import { limpopoHhBase64 } from './limpopo-hh.mjs';
 import { limpopoChangeBase64 } from './limpopo-change.mjs';
+import { limpopoRecovery } from './limpopo-recovery.mjs';
 import { lensesSnapshot as limpopoLensesSnapshot } from './limpopo-lenses.mjs';
 import { sundarbansSnapshot } from './sundarbans.mjs';
 import { sundarbansRgbBase64 } from './sundarbans-rgb.mjs';
@@ -50,5 +52,5 @@ export const SNAPSHOT_CHANGE = {
   limpopo: limpopoChangeBase64,
   sundarbans: sundarbansChangeBase64,
 };
-export const RECOVERY = [bigsurRecovery, sundarbansRecovery];
+export const RECOVERY = [bigsurRecovery, kilaueaRecovery, limpopoRecovery, sundarbansRecovery];
 export const LENSES = [bigsurLensesSnapshot, greeceLensesSnapshot, kilaueaLensesSnapshot, limpopoLensesSnapshot, sundarbansLensesSnapshot];

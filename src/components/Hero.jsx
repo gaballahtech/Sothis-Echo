@@ -87,6 +87,8 @@ export default function Hero() {
           </ul>
 
           <p className="hero-prov">{t('hero.provenance')}</p>
+          <p className="hero-impact">{t('hero.impact')}</p>
+          <p className="hero-honesty">{t('hero.honesty')}</p>
 
           <div className="hero-actions">
             <Button intent="primary" icon="layers" text={t('hero.ctaSee')} onClick={() => go('see-through')} />

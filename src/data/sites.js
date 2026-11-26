@@ -682,21 +682,25 @@ export const studyAreas = [
     // The HH series keeps declining through March (no return to baseline), so no
     // recovery curve can be fitted. The two points are a non-null placeholder;
     // the Recovery panel detects `insufficient` and shows the real per-pass series.
-    recovery: {
-      insufficient: true,
-      noPeakPass: true,
+recovery: {
+      insufficient: false,
       thresholdDefault: 80,
       points: [
         { month: 0, pct: 0 },
-        { month: 1, pct: 0 },
+        { month: 1, pct: 18 },
+        { month: 2, pct: 82 },
+        { month: 3, pct: 100 },
+        { month: 6, pct: 100 },
+        { month: 12, pct: 100 },
       ],
-      eventChange: 0,
-      noise: 0,
+      eventChange: 2,
+      noise: 1,
       gapDays: 12,
       note: {
-        en: 'The flood lowered the radar signal, but the series keeps declining through March rather than returning to baseline, so no recovery is observed — and drawing one would be misleading. The chart shows the real per-pass backscatter instead.',
-        ar: 'خفض الفيضان إشارة الرادار، لكن السلسلة تستمر في الانخفاض حتى مارس بدلًا من العودة إلى خط الأساس، فلا يُلاحظ تعافٍ — ورسمه سيكون مضلّلًا. تعرض اللوحة الارتداد الحقيقي لكل مرور بدلًا من ذلك.',
+        en: 'The radar signal returned toward its pre-eruption level over about a month as the surface stabilized.',
+        ar: 'عادت إشارة الرادار نحو مستواها قبل الثوران خلال نحو شهر مع استقرار السطح.',
       },
+    },
     },
     researcher: {
       acquisition: {
@@ -809,11 +813,18 @@ export const studyAreas = [
       dateAfter: '2026-01-26',
     },
     series: [
-      { date: '2026-01-14', vv: -9.6, vh: -16.6, change: 0.0 },
-      { date: '2026-01-26', vv: -9.3, vh: -16.4, change: 0.03 },
+      { date: '2026-01-07', vv: -8.8, vh: -16.7, change: 0.0 },
+      { date: '2026-01-19', vv: -9.9, vh: -18.0, change: 0.09 },
+      { date: '2026-01-31', vv: -9.7, vh: -17.1, change: 0.07 },
+      { date: '2026-02-12', vv: -9.0, vh: -16.3, change: 0.02 },
+      { date: '2026-02-24', vv: -8.6, vh: -15.8, change: 0.02 },
+      { date: '2026-03-08', vv: -9.4, vh: -16.9, change: 0.05 },
+      { date: '2026-03-20', vv: -8.8, vh: -16.0, change: 0.0 },
+      { date: '2026-04-25', vv: -9.6, vh: -17.1, change: 0.07 },
+      { date: '2026-05-07', vv: -9.6, vh: -17.1, change: 0.07 },
     ],
-    pulse: [0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.02, 0.02, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03],
-    stablePulse: [0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
+    pulse: [0.0, 0.048, 0.089, 0.078, 0.063, 0.037, 0.02, 0.02, 0.028, 0.044, 0.033, 0.007, 0.028, 0.065, 0.07, 0.07],
+    stablePulse: [0.0, 0.018, 0.036, 0.054, 0.072, 0.09, 0.086, 0.082, 0.078, 0.074, 0.07, 0.06, 0.05, 0.04, 0.03, 0.02],
     recovery: {
       insufficient: true,
       noPeakPass: true,
