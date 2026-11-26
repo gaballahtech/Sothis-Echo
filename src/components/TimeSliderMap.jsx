@@ -48,7 +48,9 @@ export default function TimeSliderMap({ site, language }) {
   const point = series[Math.min(idx, series.length - 1)];
   const unavailable = point.vv == null || point.vh == null;
   const changePct = Math.round((point.change ?? 0) * 100);
-  const changeImg = sceneImageUrl(site.id, 'change', 'nisar');
+  // Switch the image with the slider: before the event date -> "before", after -> "after".
+  const side = site.eventDate && point.date >= site.eventDate ? 'after' : 'before';
+  const img = sceneImageUrl(site.id, side, 'nisar');
   const dir = language === 'ar' ? 'rtl' : 'ltr';
   const dateLabel = point.date;
 
@@ -91,7 +93,7 @@ export default function TimeSliderMap({ site, language }) {
       </div>
 
       <div className="time-slider-image">
-        <img src={changeImg} alt={t('timeSlider.change')} loading="lazy" />
+        <img src={img} alt={side} loading="lazy" />
       </div>
     </div>
   );
