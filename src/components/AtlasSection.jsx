@@ -126,6 +126,11 @@ export default function AtlasSection() {
     sites.find((s) => measuredIds.has(s.id)) ||
     null;
 
+  // Measured (lens) sites first, then story-only — a clean 3×N grid.
+  const orderedSites = [...atlasSites].sort(
+    (a, b) => (b.maturity === 'lens' ? 1 : 0) - (a.maturity === 'lens' ? 1 : 0)
+  );
+
   return (
     <section id="atlas" className="content-section chapter" aria-labelledby="atlas-title">
       <div className="section-inner">
@@ -154,7 +159,7 @@ export default function AtlasSection() {
         </div>
 
         <div className="atlas-cards" data-testid="atlas-list">
-          {atlasSites.map((site) => {
+          {orderedSites.map((site) => {
             const measured = measuredIds.has(site.id);
             const isSelected = site.id === selectedId;
             const thumb = measured

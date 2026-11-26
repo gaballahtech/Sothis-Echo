@@ -1502,9 +1502,15 @@ li,
    sites use the change-type colour as a quiet visual key. */
 .atlas-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin-top: 16px;
+}
+@media (max-width: 900px) {
+  .atlas-cards { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 560px) {
+  .atlas-cards { grid-template-columns: 1fr; }
 }
 
 .atlas-card {

@@ -243,29 +243,6 @@ export const atlasSites = [
     },
   },
   {
-    id: 'nigeria-oil',
-    name: { en: 'Niger delta spill', ar: 'تسرب نفط دلتا النيجر' },
-    region: { en: 'Niger delta, Nigeria', ar: 'دلتا النيجر، نيجيريا' },
-    changeType: 'oil-spill',
-    coords: { lat: 4.75, lng: 7.35 },
-    bbox: [7.2, 4.6, 7.5, 4.9],
-    eventDate: '2026-03-01',
-    continent: 'africa',
-    maturity: 'story',
-    summary: {
-      en: 'An oil slick spreads across creeks and wetlands, smoothing the water surface over a wide area.',
-      ar: 'تنتشر بقعة نفط عبر الجداول والأراضي الرطبة، فتلطّف سطح الماء على مساحة واسعة.',
-    },
-    radar: {
-      en: 'A thin oil film damps capillary waves and drops L-band backscatter to near-black — the slick edge is sharp in a single HH pass.',
-      ar: 'الغشاء النفطي الرقيق يخمد الأمواج الشعرية ويخفض عائد النطاق L إلى شبه أسود — وحافة البقعة حادة في مرور HH واحد.',
-    },
-    measure: {
-      en: 'Amplitude change on the water surface isolates the slick extent; the edge is visible within one granule.',
-      ar: 'تغيّر السعة على سطح الماء يعزل مدى البقعة؛ وتظهر الحافة داخل جرين واحد.',
-    },
-  },
-  {
     id: 'australia-crop',
     name: { en: 'Murray crop failure', ar: 'فشل محصول موراي' },
     region: { en: 'Murray-Darling, Australia', ar: 'موراي-دارلينغ، أستراليا' },
