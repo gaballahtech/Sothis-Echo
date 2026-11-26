@@ -26,6 +26,8 @@
 
 > **Live:** <https://sothisecho.vercel.app> · Built for the **NASA Space Apps Challenge**.
 
+> **Reproducible & honest:** every number is computed from public NISAR granules (committed scripts + `manifest.mjs`); where data is missing the site says *unavailable* — never a fabricated value.
+
 <details open>
 <summary><strong>Table of contents</strong></summary>
 
