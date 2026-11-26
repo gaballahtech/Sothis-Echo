@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { localized } from '../data/localized';
 import { atlasSites, CHANGE_TYPES } from '../data/atlas';
 import AtlasMap from './AtlasMap';
+import TimeSliderMap from './TimeSliderMap';
 import { useSiteData } from '../context/SiteDataContext';
 import { useCaseFile } from '../context/CaseFileContext';
 import GlossaryText from './GlossaryText';
@@ -87,6 +88,7 @@ export default function AtlasSection() {
   const { sites } = useSiteData();
   const { open: openCaseFile } = useCaseFile();
   const [selectedId, setSelectedId] = useState(() => atlasSites[0]?.id);
+  const [timeMode, setTimeMode] = useState(false);
 
   const measuredIds = new Set(sites.map((site) => site.id));
 
@@ -118,6 +120,11 @@ export default function AtlasSection() {
 
   const swatchFor = (site) => (CHANGE_TYPES.find((c) => c.id === site.changeType) || {}).color || '#888';
 
+  const selectedMeasured =
+    sites.find((s) => s.id === selectedId && measuredIds.has(s.id)) ||
+    sites.find((s) => measuredIds.has(s.id)) ||
+    null;
+
   return (
     <section id="atlas" className="content-section chapter" aria-labelledby="atlas-title">
       <div className="section-inner">
@@ -125,7 +132,24 @@ export default function AtlasSection() {
         <p className="body-copy-muted" style={{ margin: '6px 0 0', maxWidth: 760 }}>{t('atlas.subtitle')}</p>
 
         <div style={{ marginTop: 16 }}>
-          <AtlasMap selectedId={selectedId} onSelect={choose} />
+          <div className="row" style={{ justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, gap: 8 }}>
+            <span className="micro">{t('atlas.mapLabel')}</span>
+            {selectedMeasured ? (
+              <Button
+                small
+                variant={timeMode ? 'solid' : 'outlined'}
+                active={timeMode}
+                text={t('timeSlider.toggle')}
+                onClick={() => setTimeMode((v) => !v)}
+                data-testid="time-slider-toggle"
+              />
+            ) : null}
+          </div>
+          {timeMode && selectedMeasured ? (
+            <TimeSliderMap site={selectedMeasured} language={language} />
+          ) : (
+            <AtlasMap selectedId={selectedId} onSelect={choose} />
+          )}
         </div>
 
         <div className="atlas-cards" data-testid="atlas-list">

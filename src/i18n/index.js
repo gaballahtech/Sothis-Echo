@@ -633,6 +633,16 @@ subtitle:
     gameTitle: 'Test your eye',
     gameBody: 'Play the radar detective: pick an answer, then read the evidence.',
   },
+  timeSlider: {
+    toggle: 'Time slider',
+    play: 'Play',
+    pause: 'Pause',
+    prev: 'Previous pass',
+    next: 'Next pass',
+    date: 'Date',
+    change: 'Change',
+    unavailable: 'unavailable',
+  },
   glossary: {
     translate: 'Translate with Google',
     about: 'About',
@@ -1296,6 +1306,16 @@ radarCaptionSentinel:
     seeBody: 'اسحب الفاصل: الكاميرا تقف عند الغيوم، والرادار يرى الفيضان.',
     gameTitle: 'اختبر عينك',
     gameBody: 'العب لعبة المحقق الراداري: اختر إجابة ثم اقرأ الأدلة.',
+  },
+  timeSlider: {
+    toggle: 'شريط الزمن',
+    play: 'تشغيل',
+    pause: 'إيقاف',
+    prev: 'المرور السابق',
+    next: 'المرور التالي',
+    date: 'التاريخ',
+    change: 'التغيّر',
+    unavailable: 'غير متاح',
   },
   glossary: {
     translate: 'ترجمة بـ Google',
