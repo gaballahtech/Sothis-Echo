@@ -211,7 +211,10 @@ def read_window(grid, bbox, want_hv=True):
     if i1 <= i0 or j1 <= j0:
         raise RuntimeError(f'empty window {bbox} -> {(i0, i1, j0, j1)}')
     hh = grid['HHHH'][j0:j1, i0:i1]
-    hv = grid['HVHV'][j0:j1, i0:i1] if want_hv else None
+    try:
+        hv = grid['HVHV'][j0:j1, i0:i1] if want_hv else None
+    except KeyError:
+        hv = None  # SHSH granule (HH-only): cross-pol is genuinely unavailable
     mask = grid['mask'][j0:j1, i0:i1]
     return {
         'hh': hh.astype(np.float64),

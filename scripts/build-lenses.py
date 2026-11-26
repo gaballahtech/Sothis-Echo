@@ -213,9 +213,13 @@ def read_gcov_window(file_url, bbox):
     proj = int(g['projection'][()])
     xs, ys = g['xCoordinates'][:], g['yCoordinates'][:]
     i0, i1, j0, j1 = window_indices(xs, ys, proj, bbox)
+    try:
+        hv = g['HVHV'][j0:j1, i0:i1].astype(np.float64)
+    except KeyError:
+        hv = np.ma.masked_all((j1 - j0, i1 - i0))  # SHSH: cross-pol unavailable
     return {
         'hh': g['HHHH'][j0:j1, i0:i1].astype(np.float64),
-        'hv': g['HVHV'][j0:j1, i0:i1].astype(np.float64),
+        'hv': hv,
         'mask': g['mask'][j0:j1, i0:i1].astype(bool),
     }
 
