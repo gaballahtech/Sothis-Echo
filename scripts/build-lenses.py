@@ -121,6 +121,21 @@ LENS_SITES = {
         },
         'label': 'Kilauea volcano',
     },
+    'cantzama': {
+        # Cantzama landslide (Ecuador, 2026). Track 112 descending, frame 090;
+        # pre/post pair (2026-07-03 -> 2026-07-15), DHDH (HH+HV).
+        'bbox': (-79.10, -3.95, -78.85, -3.78),
+        'coords': (-3.885, -79.003),
+        'gcov': {
+            'before': 'NISAR_L2_PR_GCOV_024_112_D_090_4005_DHDH_A_20260703T233946_20260703T234021_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GCOV_025_112_D_090_4005_DHDH_A_20260715T233946_20260715T234020_P05023_N_F_J_001',
+        },
+        'gslc': {
+            'before': 'NISAR_L2_PR_GSLC_024_112_D_090_4005_DHDH_A_20260703T233946_20260703T234021_P05023_N_F_J_001',
+            'after': 'NISAR_L2_PR_GSLC_025_112_D_090_4005_DHDH_A_20260715T233946_20260715T234020_P05023_N_F_J_001',
+        },
+        'label': 'Cantzama landslide',
+    },
 }
 
 

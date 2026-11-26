@@ -334,6 +334,29 @@ measure: {
       ar: 'انخفاض التماسك وتحوّل الآلية من الحجم إلى السطح يعلّمان الحمم/الأرض الجديدة أدق من السعة.',
     },
   },
+  {
+    id: 'cantzama',
+    name: { en: 'Cantzama landslide', ar: 'انهيار كانتازاما' },
+    region: { en: 'Zamora Chinchipe · Ecuador', ar: 'زامورا تشينشيبي · الإكوادور' },
+    changeType: 'landslide',
+    coords: { lat: -3.885, lng: -79.003 },
+    bbox: [-79.10, -3.95, -78.85, -3.78],
+    eventDate: '2026-07-04',
+    continent: 'south-america',
+    maturity: 'lens',
+    summary: {
+      en: 'A July 2026 landslide above Cantzama (Ecuador) became a debris flow that destroyed the village. Radar amplitude barely moved, but the ground lost coherence.',
+      ar: 'انهيار يوليو 2026 فوق كانتازاما (الإكوادور) تحول إلى تدفق أنقاض دمّر القرية. لم تكد سعة الرادار تتغير، لكن الأرض فقدت التماسك.',
+    },
+    radar: {
+      en: 'L-band coherence collapses where the slope failed and the ground broke up — the structure is gone even where brightness is unchanged.',
+      ar: 'ينهار تماسك النطاق L حيث انهار المنحدر وتفككت الأرض — البنية اختفت حتى حيث لم يتغير السطوع.',
+    },
+    measure: {
+      en: 'Coherence collapse (mean 0.37, 56% low) marks the landslide more reliably than amplitude.',
+      ar: 'انهيار التماسك (متوسط 0.37، 56% منخفض) يعلّم الانهيار أدق من السعة.',
+    },
+  },
 ];
 
 export const CONTINENTS = [

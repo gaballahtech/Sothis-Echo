@@ -5,6 +5,11 @@ import { bigsurHhBase64 } from './bigsur-hh.mjs';
 import { bigsurChangeBase64 } from './bigsur-change.mjs';
 import { bigsurRecovery } from './bigsur-recovery.mjs';
 import { lensesSnapshot as bigsurLensesSnapshot } from './bigsur-lenses.mjs';
+import { cantzamaSnapshot } from './cantzama.mjs';
+import { cantzamaRgbBase64 } from './cantzama-rgb.mjs';
+import { cantzamaHhBase64 } from './cantzama-hh.mjs';
+import { cantzamaChangeBase64 } from './cantzama-change.mjs';
+import { lensesSnapshot as cantzamaLensesSnapshot } from './cantzama-lenses.mjs';
 import { greeceSnapshot } from './greece.mjs';
 import { greeceRgbBase64 } from './greece-rgb.mjs';
 import { greeceHhBase64 } from './greece-hh.mjs';
@@ -29,10 +34,11 @@ import { sundarbansChangeBase64 } from './sundarbans-change.mjs';
 import { sundarbansRecovery } from './sundarbans-recovery.mjs';
 import { lensesSnapshot as sundarbansLensesSnapshot } from './sundarbans-lenses.mjs';
 
-export const NISAR_SITES = ["bigsur", "greece", "kilauea", "limpopo", "sundarbans"];
-export const SNAPSHOTS = [bigsurSnapshot, greeceSnapshot, kilaueaSnapshot, limpopoSnapshot, sundarbansSnapshot];
+export const NISAR_SITES = ["bigsur", "cantzama", "greece", "kilauea", "limpopo", "sundarbans"];
+export const SNAPSHOTS = [bigsurSnapshot, cantzamaSnapshot, greeceSnapshot, kilaueaSnapshot, limpopoSnapshot, sundarbansSnapshot];
 export const SNAPSHOT_RGB = {
   bigsur: bigsurRgbBase64,
+  cantzama: cantzamaRgbBase64,
   greece: greeceRgbBase64,
   kilauea: kilaueaRgbBase64,
   limpopo: limpopoRgbBase64,
@@ -40,6 +46,7 @@ export const SNAPSHOT_RGB = {
 };
 export const SNAPSHOT_HH = {
   bigsur: bigsurHhBase64,
+  cantzama: cantzamaHhBase64,
   greece: greeceHhBase64,
   kilauea: kilaueaHhBase64,
   limpopo: limpopoHhBase64,
@@ -47,10 +54,11 @@ export const SNAPSHOT_HH = {
 };
 export const SNAPSHOT_CHANGE = {
   bigsur: bigsurChangeBase64,
+  cantzama: cantzamaChangeBase64,
   greece: greeceChangeBase64,
   kilauea: kilaueaChangeBase64,
   limpopo: limpopoChangeBase64,
   sundarbans: sundarbansChangeBase64,
 };
 export const RECOVERY = [bigsurRecovery, kilaueaRecovery, limpopoRecovery, sundarbansRecovery];
-export const LENSES = [bigsurLensesSnapshot, greeceLensesSnapshot, kilaueaLensesSnapshot, limpopoLensesSnapshot, sundarbansLensesSnapshot];
+export const LENSES = [bigsurLensesSnapshot, cantzamaLensesSnapshot, greeceLensesSnapshot, kilaueaLensesSnapshot, limpopoLensesSnapshot, sundarbansLensesSnapshot];

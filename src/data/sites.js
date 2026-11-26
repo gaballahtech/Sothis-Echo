@@ -860,6 +860,111 @@ recovery: {
       ],
     },
   },
+  {
+    // Sixth site: Cantzama landslide (Ecuador, 4 Jul 2026). Real NISAR L-band
+    // GCOV/GSLC, track 112 frame 090 (2026-07-03 -> 2026-07-15), DHDH. A
+    // landslide: amplitude is quiet, but coherence collapses (0.371, 55.9% low)
+    // where the slope failed. South America — 6th continent, 4th hazard type.
+    id: 'cantzama',
+    kind: 'landslide',
+    seed: 202607,
+    name: { en: 'Cantzama landslide', ar: 'انهيار كانتازاما' },
+    region: { en: 'Zamora Chinchipe · Ecuador', ar: 'زامورا تشينشيبي · الإكوادور' },
+    coords: { lat: -3.885, lng: -79.003 },
+    wkt: 'POLYGON ((-79.10 -3.95, -78.85 -3.95, -78.85 -3.78, -79.10 -3.78, -79.10 -3.95))',
+    eventDate: '2026-07-04',
+    headline: {
+      en: 'The slope failed and the ground broke up',
+      ar: 'انهار المنحدر وتفككت الأرض',
+    },
+    impact: {
+      users: { en: 'Civil protection · geologists · insurers', ar: 'الحماية المدنية · الجيولوجيون · شركات التأمين' },
+      decision: { en: 'Where the landslide and debris flow disturbed the ground', ar: 'أين أزعج الانهيار والتدفق الأرض' },
+    },
+    tags: [
+      { en: 'Landslide', ar: 'انهيار' },
+      { en: 'Debris flow', ar: 'تدفق الأنقاض' },
+      { en: 'Ecuador', ar: 'الإكوادور' },
+    ],
+    story: [
+      {
+        en: 'On 4 July 2026 a massive landslide above Cantzama (Ecuador) turned into a debris flow that destroyed the village. Radar sees the broken, disturbed ground as a sharp loss of coherence.',
+        ar: 'في 4 يوليو 2026 انهار هائل فوق كانتازاما (الإكوادور) تحول إلى تدفق أنقاض دمّر القرية. يرى الرادار الأرض المكسورة المضطربة كفقدان حاد للتماسك.',
+      },
+      {
+        en: 'The brightness barely changes, but the surface is no longer coherent — the landslide broke the ground the radar was tracking. Coherence, not amplitude, is the reliable signal here.',
+        ar: 'لا يكاد السطوع يتغير، لكن السطح لم يعد متماسكًا — الانهيار كسر الأرض التي كان الرادار يتتبعها. التماسك، لا السعة، هو الإشارة الموثوقة هنا.',
+      },
+    ],
+    states: {
+      before: {
+        date: '2026-07-03',
+        label: { en: 'Before the landslide', ar: 'قبل الانهيار' },
+        params: { water: 0, emergent: 0.85, burn: 0.05, cloud: 0.1 },
+        caption: { en: 'The slope above Cantzama before the failure.', ar: 'المنحدر فوق كانتازاما قبل الانهيار.' },
+        happened: { en: 'HH ≈ -5.1 dB, HV ≈ -9.6 dB.', ar: 'HH ≈ -5.1 ديسيبل، HV ≈ -9.6 ديسيبل.' },
+        why: { en: 'Intact, coherent slope.', ar: 'منحدر سليم ومتماسك.' },
+        polarization: { en: 'Dual-pol HH + HV.', ar: 'استقطاب مزدوج HH + HV.' },
+      },
+      after: {
+        date: '2026-07-15',
+        label: { en: 'After the landslide', ar: 'بعد الانهيار' },
+        params: { water: 0.1, emergent: 0.2, burn: 0.6, cloud: 0.1 },
+        caption: { en: 'The landslide scar and debris path.', ar: 'ندبة الانهيار ومسار الأنقاض.' },
+        happened: { en: 'HH ≈ -5.4 dB, HV ≈ -9.8 dB; 43.9% changed; coherence collapses (mean 0.371, 55.9% low).', ar: 'HH ≈ -5.4 ديسيبل، HV ≈ -9.8 ديسيبل؛ 43.9% تغيّر؛ والتماسك ينهار (متوسط 0.371، 55.9% منخفض).' },
+        why: { en: 'The broken ground no longer scatters coherently.', ar: 'الأرض المكسورة لم تعد تشتت بترابط.' },
+        polarization: { en: 'Coherence collapse marks the failure.', ar: 'انهيار التماسك يعلّم الانهيار.' },
+      },
+    },
+    measurements: {
+      vv: { before: -5.1, after: -5.4 },
+      vh: { before: -9.6, after: -9.8 },
+      crossPol: { before: -4.4, after: -4.4 },
+      dateBefore: '2026-07-03',
+      dateAfter: '2026-07-15',
+    },
+    series: [
+      { date: '2026-07-03', vv: -5.1, vh: -9.6, change: 0.0 },
+      { date: '2026-07-15', vv: -5.4, vh: -9.8, change: 0.03 },
+    ],
+    pulse: [0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.02, 0.02, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03, 0.03],
+    stablePulse: [0.0, 0.0, 0.0, 0.0, 0.0, 0.01, 0.01, 0.01, 0.01, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02, 0.02],
+    recovery: {
+      insufficient: true,
+      noPeakPass: true,
+      thresholdDefault: 80,
+      points: [{ month: 0, pct: 0 }, { month: 1, pct: 0 }],
+      eventChange: 0,
+      noise: 0,
+      gapDays: 12,
+      note: {
+        en: 'A landslide permanently disturbs the ground; the radar coherence does not return to its pre-failure level, so a recovery curve does not apply. The panel shows the real per-pass series.',
+        ar: 'الانهيار يضطرب الأرض دائمًا؛ لا يعود تماسك الرادار إلى مستوى ما قبل الانهيار، فلا ينطبق منحنى تعافٍ. تعرض اللوحة السلسلة الحقيقية لكل مرور.',
+      },
+    },
+    researcher: {
+      acquisition: {
+        en: 'NISAR L-band GCOV (HH/HV gamma-0) + GSLC, track 112 frame 090, 2026-07-03 → 2026-07-15.',
+        ar: 'NISAR بموجة L GCOV (HH/HV غاما-0) + GSLC، المسار 112 الإطار 090، 2026-07-03 → 2026-07-15.',
+      },
+      interpretation: [
+        { en: 'Amplitude is quiet (ΔHH -0.3 dB); the change is in structure.', ar: 'السعة هادئة (ΔHH -0.3 ديسيبل)؛ التغيّر في البنية.' },
+        { en: 'Coherence collapses (mean 0.371, 55.9% low) over the failure.', ar: 'التماسك ينهار (متوسط 0.371، 55.9% منخفض) فوق الانهيار.' },
+        { en: '43.9% of the window changed — the landslide + debris path.', ar: '43.9% من النافذة تغيّر — الانهيار ومسار الأنقاض.' },
+      ],
+      limits: [
+        { en: 'A single 12-day pair; a landslide is a surface change, subtle in amplitude.', ar: 'زوج واحد بفارق 12 يومًا؛ الانهيار تغيّر سطحي خفيف في السعة.' },
+      ],
+      methods: [
+        { en: 'Dual-pol HH/HV gamma-0 change from GCOV.', ar: 'تغيّر غاما-0 المزدوج HH/HV من GCOV.' },
+        { en: 'InSAR coherence from the GSLC HH pair.', ar: 'تماسك InSAR من زوج GSLC HH.' },
+      ],
+      sources: [
+        { en: 'NASA NISAR GCOV/GSLC (track 112 frame 090, 2026-07-03 & 2026-07-15), via ASF DAAC.', ar: 'NASA NISAR GCOV/GSLC (المسار 112 الإطار 090، 2026-07-03 و2026-07-15)، عبر ASF DAAC.' },
+        { en: 'The Landslide Blog (Cantzama, Ecuador, 4 Jul 2026).', ar: 'مدونة الانهيارات (كانتازاما، الإكوادور، 4 يوليو 2026).' },
+      ],
+    },
+  },
 ];
 
 // Contrast table rows. Each row holds a `values` map keyed by site id, so the

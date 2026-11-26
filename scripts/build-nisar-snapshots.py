@@ -112,6 +112,19 @@ SITES = {
         'before': 'NISAR_L2_PR_GCOV_010_072_D_079_4005_DHDH_A_20260114T045817_20260114T045837_P05023_N_P_J_001',
         'after': 'NISAR_L2_PR_GCOV_011_072_D_079_4005_DHDH_A_20260126T045818_20260126T045838_P05023_N_P_J_001',
     },
+    'cantzama': {
+        # Cantzama landslide + debris flow (Zamora Chinchipe, Ecuador), 4 Jul 2026
+        # (19 killed). Track 112 descending, frame 090: pre/post pair bracketing
+        # the event (2026-07-03 -> 2026-07-15), both DHDH (HH+HV). South America.
+        'kind': 'landslide',
+        'label': 'Cantzama landslide',
+        'coords': (-3.885, -79.003),
+        'bbox': (-79.10, -3.95, -78.85, -3.78),
+        'window': 'calibration',
+        'eventDate': '2026-07-04',
+        'before': 'NISAR_L2_PR_GCOV_024_112_D_090_4005_DHDH_A_20260703T233946_20260703T234021_P05023_N_F_J_001',
+        'after': 'NISAR_L2_PR_GCOV_025_112_D_090_4005_DHDH_A_20260715T233946_20260715T234020_P05023_N_F_J_001',
+    },
 }
 
 
